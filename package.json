@@ -2,7 +2,7 @@
   "name": "@wirecard/shopware-ee",
   "version": "0.1.0",
   "scripts": {
-    "lint": "node_modules/.bin/eslint -c ../../../themes/.eslintrc.js **/*.js"
+    "lint": "node_modules/.bin/eslint -c ../../../themes/.eslintrc.js WirecardShopwareElasticEngine/**/*.js"
   },
   "private": true,
   "license": "GPL-3.0",
