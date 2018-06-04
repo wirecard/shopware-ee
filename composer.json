@@ -18,7 +18,7 @@
   "type": "shopware-plugin",
   "scripts": {
     "upload-coverage": "coveralls -v",
-    "cs-check": "phpcs --standard=phpcs.xml",
+    "cs-check": "phpcs --standard=phpcs.xml --ignore=*/vendor/*,*/Tests/*,*/node_modules/*",
     "cs-fix": "phpcbf --standard=phpcs.xml",
     "test-coverage": "phpunit --colors=always --coverage-clover clover.xml"
   }
