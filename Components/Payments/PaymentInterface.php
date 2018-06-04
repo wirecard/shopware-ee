@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardElasticEngine\Components\Payments;
+namespace WirecardShopwareElasticEngine\Components\Payments;
 
 interface PaymentInterface
 {

@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardElasticEngine;
+namespace WirecardShopwareElasticEngine;
 
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\ActivateContext;
@@ -37,7 +37,7 @@ use Shopware\Components\Plugin\Context\DeactivateContext;
 use Shopware\Components\Plugin\Context\InstallContext;
 use Shopware\Components\Plugin\Context\UninstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
-use WirecardElasticEngine\Components\Payments\PaymentInterface;
+use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 
 class WirecardShopwareElasticEngine extends Plugin
 {
