@@ -70,7 +70,7 @@ class WirecardShopwareElasticEngine extends Plugin
     {
         $installer = $this->container->get('shopware.plugin_payment_installer');
 
-        foreach($this->getSupportedPayments() as $payment) {
+        foreach ($this->getSupportedPayments() as $payment) {
             $installer->createOrUpdate($payment->getName(), $payment->getPaymentOptions());
         }
     }
