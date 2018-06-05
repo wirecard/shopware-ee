@@ -29,4 +29,38 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-require_once __DIR__ . '/../vendor/autoload.php';
+namespace WirecardShopwareElasticEngine\Components\Payments;
+
+abstract class Payment implements PaymentInterface
+{
+    /**
+     * @inheritdoc
+     */
+    public function getLabel()
+    {
+        return 'Wirecard EE ' . preg_replace('/Payment$/', '', get_class($this));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getName()
+    {
+        return str_replace(' ', '_', strtolower($this->getLabel()));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getPaymentOptions()
+    {
+        return [
+            'name'                  => $this->getName(),
+            'description'           => $this->getLabel(),
+            'action'                => 'WirecardEEPayment',
+            'active'                => 0,
+            'position'              => 0,
+            'additionalDescription' => '',
+        ];
+    }
+}
