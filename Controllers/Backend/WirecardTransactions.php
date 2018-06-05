@@ -29,28 +29,40 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Payments;
+use Shopware\Components\CSRFWhitelistAware;
 
-interface PaymentInterface
+use Wirecard\PaymentSdk\Config\Config;
+use Wirecard\PaymentSdk\TransactionService;
+
+class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Controllers_Backend_ExtJs implements CSRFWhitelistAware
 {
-    /**
-     * @return string
-     */
-    public function getLabel();
 
-    /**
-     * @return string
-     */
-    public function getName();
+    public function testSettingsAction()
+    {
+        $config = $this->Request()->getParams();
 
-    /**
-     * @return array
-     */
-    public function getPaymentOptions();
+        $data['config'] = $config;
+        $wirecardUrl = $config['wirecardElasticEngineServer'];
+        $httpUser = $config['wirecardElasticEnginePaypalHttpUser'];
+        $httpPassword = $config['wirecardElasticEnginePaypalHttpPassword'];
 
-    /**
-     * Start Transaction
-     */
-    public function pay(array $paymentData);
+        $testConfig = new Config( $wirecardUrl, $httpUser, $httpPassword );
+        $transactionService = new TransactionService( $testConfig, Shopware()->PluginLogger());
+        
+        $data['$wirecardUrl'] = $wirecardUrl;
+        $data['$httpUser'] = $httpUser;
+        $data['$httpPassword'] = $httpPassword;
+        if ( $transactionService->checkCredentials() ) {
+            $data['status'] = 'success';
+        } else {
+            $data['status'] = 'failed';
+        }
+      
+        $this->View()->assign($data);
+    }
 
+    public function getWhitelistedCSRFActions()
+    {
+        return array("testSettings");
+    }
 }

@@ -63,4 +63,19 @@ abstract class Payment implements PaymentInterface
             'additionalDescription' => '',
         ];
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function pay(array $paymentData)
+    {
+    }
+
+    /**
+     * @return array
+     */
+    protected function getConfigData()
+    {
+        return [];
+    }
 }

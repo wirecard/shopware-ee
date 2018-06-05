@@ -31,6 +31,10 @@
 
 namespace WirecardShopwareElasticEngine;
 
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once(__DIR__ . '/vendor/autoload.php');
+}
+
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\ActivateContext;
 use Shopware\Components\Plugin\Context\DeactivateContext;
@@ -38,6 +42,8 @@ use Shopware\Components\Plugin\Context\InstallContext;
 use Shopware\Components\Plugin\Context\UninstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
+use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
+
 
 class WirecardShopwareElasticEngine extends Plugin
 {
@@ -80,6 +86,8 @@ class WirecardShopwareElasticEngine extends Plugin
      */
     protected function getSupportedPayments()
     {
-        return [];
+        return [
+            new PaypalPayment()
+        ];
     }
 }
