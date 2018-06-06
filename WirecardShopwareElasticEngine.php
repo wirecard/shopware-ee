@@ -44,7 +44,6 @@ use Shopware\Components\Plugin\Context\UpdateContext;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 
-
 class WirecardShopwareElasticEngine extends Plugin
 {
     public function install(InstallContext $context)

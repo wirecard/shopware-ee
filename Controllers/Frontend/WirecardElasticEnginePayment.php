@@ -22,6 +22,8 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
+use Shopware\Components\CSRFWhitelistAware;
+
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Entity\Amount;
@@ -31,10 +33,9 @@ use Wirecard\PaymentSdk\TransactionService;
 
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 
-class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopware_Controllers_Frontend_Payment
+class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopware_Controllers_Frontend_Payment implements CSRFWhitelistAware
 {
-
-    function getUrl($path)
+    public function getUrl($path)
     {
         $protocol = 'http';
 
@@ -61,10 +62,9 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         $paypal = new PaypalPayment();
 
-        $redirectUrl = $paypal->pay($paymentData);
+        $redirectUrl = $paypal->processPayment($paymentData);
 
         return $this->redirect($redirectUrl);
-
     }
 
     public function returnAction()
@@ -73,21 +73,29 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     
     public function cancleAction()
     {
+        //        $service = $this->container->get('swag_payment_example.example_payment_service');
+        $test = $this->Request()->getParams();
+
+        var_dump($_POST);
+        exit();
     }
 
     public function notifyAction()
     {
+        exit();
     }
     
     protected function getPaymentData()
     {
         $user = $this->getUser();
+        $basket = $this->getBasket();
         $amount = $this->getAmount();
         $currency = $this->getCurrencyShortName();
         $router = $this->Front()->Router();
 
         $paymentData = array(
                              'user' => $user,
+                             'basket' => $basket,
                              'amount' => $amount,
                              'currency' => $currency,
                              'returnUrl' => $router->assemble(['action' => 'return', 'forceSecure' => true]),
@@ -97,5 +105,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         
         return $paymentData;
     }
-
+   
+    /**
+     * Whitelist notifyAction
+     */
+    public function getWhitelistedCSRFActions()
+    {
+        return ['notify'];
+    }
 }

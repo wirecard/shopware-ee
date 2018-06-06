@@ -31,6 +31,10 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
+use Wirecard\PaymentSdk\Entity\Amount;
+use Wirecard\PaymentSdk\Entity\Basket;
+use Wirecard\PaymentSdk\Entity\Item;
+
 abstract class Payment implements PaymentInterface
 {
     /**
@@ -67,7 +71,7 @@ abstract class Payment implements PaymentInterface
     /**
      * @inheritdoc
      */
-    public function pay(array $paymentData)
+    public function processPayment(array $paymentData)
     {
     }
 
@@ -77,5 +81,48 @@ abstract class Payment implements PaymentInterface
     protected function getConfigData()
     {
         return [];
+    }
+
+    /**
+     * creates paymentSDK basket object
+     * @return object
+     */
+    protected function createBasket($transaction, $cart, $currency)
+    {
+        $basket = new Basket();
+        $basket->setVersion($transaction);
+
+
+        foreach ($cart['content'] as $item) {
+            $name = $item['articlename'];
+            $sku = $item['ordernumber'];
+            $description = $item['additional_details']['description'];
+            $tax_rate = floatval($item['tax_rate']);
+            $quantity = $item['quantity'];
+
+            $amountStr = $item['price']; // price as float ?
+            $amountStr = str_replace('.', '', $amountStr);
+            $amountStr = str_replace(',', '.', $amountStr);
+            
+            $amount = new Amount($amountStr, $currency);
+
+            $taxStr = $item['tax'];
+            $taxStr = str_replace('.', '', $taxStr);
+            $taxStr = str_replace(',', '.', $taxStr);
+            $tax = new Amount(floatval($taxStr), $currency);
+
+            $basketItem = new Item($name, $amount, $quantity);
+            
+            $basketItem->setDescription($description);
+            $basketItem->setArticleNumber($sku);
+            $basketItem->setTaxRate($tax_rate);
+            $basketItem->setTaxAmount($tax);
+
+            $basket->add($basketItem);
+        }
+
+        // TODO add Shipping as item
+
+        return $basket;
     }
 }

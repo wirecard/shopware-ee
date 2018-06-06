@@ -36,7 +36,6 @@ use Wirecard\PaymentSdk\TransactionService;
 
 class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Controllers_Backend_ExtJs implements CSRFWhitelistAware
 {
-
     public function testSettingsAction()
     {
         $config = $this->Request()->getParams();
@@ -46,13 +45,13 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         $httpUser = $config['wirecardElasticEnginePaypalHttpUser'];
         $httpPassword = $config['wirecardElasticEnginePaypalHttpPassword'];
 
-        $testConfig = new Config( $wirecardUrl, $httpUser, $httpPassword );
-        $transactionService = new TransactionService( $testConfig, Shopware()->PluginLogger());
+        $testConfig = new Config($wirecardUrl, $httpUser, $httpPassword);
+        $transactionService = new TransactionService($testConfig, Shopware()->PluginLogger());
         
         $data['$wirecardUrl'] = $wirecardUrl;
         $data['$httpUser'] = $httpUser;
         $data['$httpPassword'] = $httpPassword;
-        if ( $transactionService->checkCredentials() ) {
+        if ($transactionService->checkCredentials()) {
             $data['status'] = 'success';
         } else {
             $data['status'] = 'failed';

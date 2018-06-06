@@ -51,6 +51,5 @@ interface PaymentInterface
     /**
      * Start Transaction
      */
-    public function pay(array $paymentData);
-
+    public function processPayment(array $paymentData);
 }

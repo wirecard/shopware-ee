@@ -32,7 +32,6 @@ use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 
-
 class PaypalPayment extends Payment
 {
     /**
@@ -66,7 +65,7 @@ class PaypalPayment extends Payment
         ];
     }
 
-    public function pay(array $paymentData)
+    public function processPayment(array $paymentData)
     {
         $configData = $this->getConfigData();
         $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
@@ -74,6 +73,7 @@ class PaypalPayment extends Payment
         $config->add($paypalConfig);
 
         $amount = new Amount($paymentData['amount'], $paymentData['currency']);
+
         $redirectUrls = new Redirect($paymentData['returnUrl'], $paymentData['cancleUrl']);
         $notificationUrl = $paymentData['notifyUrl'];
 
@@ -81,9 +81,20 @@ class PaypalPayment extends Payment
         $transaction->setNotificationUrl($notificationUrl);
         $transaction->setRedirect($redirectUrls);
         $transaction->setAmount($amount);
-        
+ 
+        $basket = $this->createBasket($transaction, $paymentData['basket'], $paymentData['currency']);
+        $transaction->setBasket($basket);
+
         $transactionService = new TransactionService($config);
-        $response = $transactionService->pay($transaction);
+        
+        $response = null;
+        if ($configData['transactionType'] == 'authorization') {
+            $response = $transactionService->reserve($transaction);
+        } elseif ($configData['transactionType'] == 'purchase') {
+            $response = $transactionService->pay($transaction);
+        } else {
+            // TODO error handling
+        }
 
         if ($response instanceof InteractionResponse) {
             return $response->getRedirectUrl();
@@ -101,13 +112,15 @@ class PaypalPayment extends Payment
 
         $paypalMAID = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine', 'wirecardElasticEnginePaypalMerchandId');
         $paypalKey = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine', 'wirecardElasticEngineSecret');
+        $transactionType = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine', 'wirecardElasticEngineTransactionType');
 
         return [
-            'baseUrl'    => $baseUrl,
-            'httpUser'   => $httpUser,
-            'httpPass'   => $httpPass,
-            'paypalMAID' => $paypalMAID,
-            'paypalKey'  => $paypalKey
+            'baseUrl'         => $baseUrl,
+            'httpUser'        => $httpUser,
+            'httpPass'        => $httpPass,
+            'paypalMAID'      => $paypalMAID,
+            'paypalKey'       => $paypalKey,
+            'transactionType' => $transactionType
         ];
     }
 }
