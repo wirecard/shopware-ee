@@ -30,21 +30,22 @@
 
 /* eslint-env mocha */
 
-const {Builder} = require('selenium-webdriver');
-const {expect} = require('chai');
+const {Builder, By, until} = require('selenium-webdriver');
 
 describe('default test', () => {
     const driver = new Builder()
         .forBrowser('chrome')
         .build();
 
-    before(async () => {
-        await driver.get('https://www.wirecard.at');
-    });
+    it('should check if the login worked', async () => {
+        await driver.get('http://shopware-ee.localhost/backend/');
 
-    it('should check if title of wirecard.at contains "Wirecard"', async () => {
-        const title = await driver.getTitle();
-        expect(title).to.include('Wirecard');
+        await driver.wait(until.elementLocated(By.name('username')));
+        await driver.findElement(By.name('username')).sendKeys('admin');
+        await driver.findElement(By.name('password')).sendKeys('admin');
+        await driver.findElement(By.className('x-btn-center')).click();
+
+        await driver.wait(until.elementLocated(By.className('shopware-menu')));
     });
 
     after(async () => {
