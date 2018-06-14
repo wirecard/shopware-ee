@@ -30,6 +30,7 @@
 
 /* eslint-env mocha */
 
+const {expect} = require('chai');
 const {Builder, By, until} = require('selenium-webdriver');
 
 describe('default test', () => {
@@ -37,18 +38,19 @@ describe('default test', () => {
         .forBrowser('chrome')
         .build();
 
-    it('should check if the login worked', async () => {
-        await driver.get('http://shopware-ee.localhost/backend/');
+    it('should check if frontend login works', async () => {
+        await driver.get(`http://localhost:8000/account`);
 
-        await driver.wait(until.elementLocated(By.name('username')));
-        await driver.findElement(By.name('username')).sendKeys('admin');
-        await driver.findElement(By.name('password')).sendKeys('admin');
-        await driver.findElement(By.className('x-btn-center')).click();
+        await driver.wait(until.elementLocated(By.name('email')));
+        await driver.findElement(By.name('email')).sendKeys('test@example.com');
+        await driver.findElement(By.name('password')).sendKeys('shopware');
+        await driver.findElement(By.className('register--login-btn')).click();
 
-        await driver.wait(until.elementLocated(By.className('shopware-menu')));
+        await driver.wait(until.elementLocated(By.className('account--welcome')));
+
+        const title = await driver.getTitle();
+        expect(title).to.include('Kundenkonto');
     });
 
-    after(async () => {
-        await driver.quit();
-    });
+    after(async () => driver.quit());
 });
