@@ -64,63 +64,53 @@ class PaypalPayment extends Payment
             'additionalDescription' => '',
         ];
     }
-
-    public function processPayment(array $paymentData)
+    
+    /**
+     * @inheritdoc
+     */
+    protected function getConfig(array $configData)
     {
-        $configData = $this->getConfigData();
         $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
-        $paypalConfig = new PaymentMethodConfig(PayPalTransaction::NAME, $configData['paypalMAID'], $configData['paypalKey']);
+        $paypalConfig = new PaymentMethodConfig(PayPalTransaction::NAME, $configData['transactionMAID'], $configData['transactionKey']);
         $config->add($paypalConfig);
 
-        $amount = new Amount($paymentData['amount'], $paymentData['currency']);
-
-        $redirectUrls = new Redirect($paymentData['returnUrl'], $paymentData['cancleUrl']);
-        $notificationUrl = $paymentData['notifyUrl'];
-
-        $transaction = new PayPalTransaction();
-        $transaction->setNotificationUrl($notificationUrl);
-        $transaction->setRedirect($redirectUrls);
-        $transaction->setAmount($amount);
- 
-        $basket = $this->createBasket($transaction, $paymentData['basket'], $paymentData['currency']);
-        $transaction->setBasket($basket);
-
-        $transactionService = new TransactionService($config);
-        
-        $response = null;
-        if ($configData['transactionType'] == 'authorization') {
-            $response = $transactionService->reserve($transaction);
-        } elseif ($configData['transactionType'] == 'purchase') {
-            $response = $transactionService->pay($transaction);
-        } else {
-            // TODO error handling
-        }
-
-        if ($response instanceof InteractionResponse) {
-            return $response->getRedirectUrl();
-        }
-
-        var_dump($response);
-        exit();
+        return $config;
     }
 
-    protected function getConfigData()
+
+    /**
+     * @inheritdoc
+     */
+    protected function getTransaction()
     {
-        $baseUrl = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine', 'wirecardElasticEngineServer');
+        return new PayPalTransaction();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getConfigData()
+    {
+        $baseUrl = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine', 'wirecardElasticEnginePaypalServer');
         $httpUser = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine', 'wirecardElasticEnginePaypalHttpUser');
         $httpPass = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine', 'wirecardElasticEnginePaypalHttpPassword');
 
         $paypalMAID = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine', 'wirecardElasticEnginePaypalMerchandId');
-        $paypalKey = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine', 'wirecardElasticEngineSecret');
-        $transactionType = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine', 'wirecardElasticEngineTransactionType');
+        $paypalKey = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine', 'wirecardElasticEnginePaypalSecret');
+        $transactionType = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine', 'wirecardElasticEnginePaypalTransactionType');
 
+        $sendBasket = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine', 'wirecardElasticEnginePaypalSendBasket');
+        $fraudPrevention = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine', 'wirecardElasticEnginePaypalFraudPrevention');
+        
         return [
             'baseUrl'         => $baseUrl,
             'httpUser'        => $httpUser,
             'httpPass'        => $httpPass,
-            'paypalMAID'      => $paypalMAID,
-            'paypalKey'       => $paypalKey,
-            'transactionType' => $transactionType
+            'transactionMAID' => $paypalMAID,
+            'transactionKey'  => $paypalKey,
+            'transactionType' => $transactionType,
+            'sendBasket'      => $sendBasket,
+            'fraudPrevention' => $fraudPrevention
         ];
     }
 }

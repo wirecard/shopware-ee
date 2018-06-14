@@ -3,7 +3,7 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/config.xsd">
     <elements>
         <element type="text" scope="shop">
-            <name>wirecardElasticEngineServer</name>
+            <name>wirecardElasticEnginePaypalServer</name>
             <label lang="de">Wirecard Server Url</label>
             <label lang="en">Wirecard Server Url</label>
             <value>https://api-test.wirecard.com</value>
@@ -35,7 +35,7 @@
             <description lang="en">Unique merachand account id to Wirecard</description>
         </element>
         <element type="text" scope="shop">
-            <name>wirecardElasticEngineSecret</name>
+            <name>wirecardElasticEnginePaypalSecret</name>
             <label lang="de">PayPal Geheimschlüssel</label>
             <label lang="en">PayPal Secret Key</label>
             <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
@@ -61,6 +61,8 @@ function (button) {
         values[el.elementName] = val;
     });
 
+    console.log(btn);
+    window.BTN = btn;
     Ext.Ajax.request({
         url: url,
         params: values,
@@ -68,10 +70,16 @@ function (button) {
             var data = Ext.decode(response.responseText);
 
             if( data.status == 'success' ) {
-            console.log(btn);
-            window.BTN = btn;
-            //    btn.setStyle('background-color', '#33ff66');
+                text = '<span style=\"color: green;font-weight: bold;\">Test successfull</span>';
+            } else {
+                text = '<span style=\"color: red;font-weight: bold;\">Test failed</span>';
             }
+            Shopware.Notification.createStickyGrowlMessage({
+                title: "Wirecard PayPal test",
+                text: text,
+                width: 440,
+                log: false,
+            });
         }
     })
 }
@@ -80,10 +88,10 @@ function (button) {
             </options>
         </element>
         <element type="select" scope="shop">
-            <name>wirecardElasticEngineTransactionType</name>
+            <name>wirecardElasticEnginePaypalTransactionType</name>
             <label lang="de">Transaktionsart</label>
             <label lang="en">Transaction Type</label>
-            <value>authorization</value>
+            <value>purchase</value>
             <store>
                 <option>
                     <value>authorization</value>
@@ -96,6 +104,22 @@ function (button) {
                     <label lang="en">purchase</label>
                 </option>
             </store>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEnginePaypalSendBasket</name>
+            <label lang="de">Warenkorb senden</label>
+            <label lang="en">Send basket</label>
+            <value>true</value>
+            <description lang="de">Sende den Warenkorb an PayPal</description>
+            <description lang="en">Send basket to PayPal</description>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEnginePaypalFraudPrevention</name>
+            <label lang="de">Zusätzliche Kundendaten</label>
+            <label lang="en">Additional Consumer Data</label>
+            <value>true</value>
+            <description lang="de">Sende Kundendaten an Wirecard zur Betrugsprevention</description>
+            <description lang="en">Send consumer data to Wirecard for fraud prevention</description>
         </element>
     </elements>
 </config>

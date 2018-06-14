@@ -6,5 +6,11 @@
         <service id="wirecard_elastic_engine.paypal_payment_service"
                  class="WirecardElasticEngine\Component\Payments\PaypalPayment">
         </service>
+        <service id="wirecard_elastic_engine.subscriber.frontend" 
+                 class="WirecardShopwareElasticEngine\Subscriber\FrontendSubscriber">
+            <argument>%wirecard_shopware_elastic_engine.plugin_dir%</argument>
+            <argument type="service" id="template"/>
+            <tag name="shopware.event_subscriber"/>
+        </service>
     </services>
 </container>

@@ -33,22 +33,13 @@ use Wirecard\PaymentSdk\TransactionService;
 
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 
+use Wirecard\PaymentSdk\Response\FailureResponse;
+use Wirecard\PaymentSdk\Response\SuccessResponse;
+
+use Shopware\Models\Order\Status;
+
 class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopware_Controllers_Frontend_Payment implements CSRFWhitelistAware
 {
-    public function getUrl($path)
-    {
-        $protocol = 'http';
-
-        if ($_SERVER['SERVER_PORT'] === 443 || (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) === 'on')) {
-            $protocol .= 's';
-        }
-
-        $host = $_SERVER['HTTP_HOST'];
-        $request = $_SERVER['PHP_SELF'];
-        return dirname(sprintf('%s://%s%s', $protocol, $host, $request)) . '/' . $path;
-    }
-
-    
     public function indexAction()
     {
         if ($this->getPaymentShortName() == 'wirecard_elastic_engine_paypal') {
@@ -58,34 +49,173 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
     public function paypalAction()
     {
-        $paymentData = $this->getPaymentData();
+        if (!$this->validateBasket()) {
+            return $this->redirect([
+                'controller'                        => 'checkout',
+                'action'                            => 'cart',
+                'wirecard_elast_engine_update_cart' => 'true'
+            ]);
+        }
+        
+        $paymentData = $this->getPaymentData('paypal');
 
         $paypal = new PaypalPayment();
 
-        $redirectUrl = $paypal->processPayment($paymentData);
+        $paymentProcess = $paypal->processPayment($paymentData);
 
-        return $this->redirect($redirectUrl);
+        if ($paymentProcess['status'] === 'success') {
+            return $this->redirect($paymentProcess['redirect']);
+        } else {
+            $this->errorHandling(-1);
+        }
     }
 
     public function returnAction()
     {
+        $request = $this->Request()->getParams();
+
+        if (!isset($request['method'])) {
+            return $this->errorHandling(2); // FIXXXME
+        }
+
+        $response = null;
+        if ($request['method'] === 'paypal') {
+            $paypal = new PaypalPayment();
+            $response = $paypal->getPaymentResponse($request);
+        }
+        
+        if (!$response) {
+            return $this->errorHandling(2); // FIXXXME
+        }
+
+        if ($response instanceof SuccessResponse) {
+            $xmlResponse = new SimpleXMLElement($response->getRawData());
+
+            $transactionType = $response->getTransactionType();
+            $customFields = $response->getCustomFields();
+            
+
+            $transactionId = $response->getTransactionId();
+            $paymentUniqueId = $response->getProviderTransactionId();
+            $signature = $customFields->get('signature');
+
+            $sql = '
+                SELECT id FROM s_order
+                WHERE transactionID=? AND temporaryID=?
+                AND status!=-1
+            ';
+
+            $orderId = Shopware()->Db()->fetchOne($sql, [
+                $transactionId,
+                $paymentUniqueId,
+            ]);
+
+            if ($orderId) {
+                return $this->redirect([
+                    'module' => 'frontend',
+                    'controller' => 'checkout',
+                    'action' => 'finish',
+                    'sUniqueID' => $paymentUniqueId
+                ]);
+            }
+            try {
+                $basket = $this->loadBasketFromSignature($signature);
+                $this->saveOrder($transactionId, $paymentUniqueId);
+
+                return $this->redirect([
+                    'module' => 'frontend',
+                    'controller' => 'checkout',
+                    'action' => 'finish',
+                ]);
+            } catch (RuntimeException $e) {
+                var_dump($e->getMessage());
+                exit();
+                $this->errorHandling(4); // FIXXME
+            }
+        } elseif ($response instanceof FailureResponse) {
+            Shopware()->PluginLogger()->error('Response validation status: %s', $response->isValidSignature() ? 'true' : 'false');
+
+            foreach ($response->getStatusCollection() as $status) {
+                $severity = ucfirst($status->getSeverity());
+                $code = $status->getCode();
+                $description = $status->getDescription();
+                $errorMessage = sprintf('%s with code %s and message "%s" occurred.', $severity, $code, $description);
+                Shopware()->PluginLogger()->error($errorMessage);
+            }
+        }
+
+        var_dump("ERROR");
+        exit();
     }
     
-    public function cancleAction()
+    public function cancelAction()
     {
-        //        $service = $this->container->get('swag_payment_example.example_payment_service');
-        $test = $this->Request()->getParams();
+        $this->errorHandling(1);
+    }
 
-        var_dump($_POST);
-        exit();
+    /**
+     *
+     */
+    protected function errorHandling($code)
+    {
+        $this->redirect([
+            'controller'                       => 'checkout',
+            'action'                           => 'shippingPayment',
+            'wirecard_elast_engine_error_code' => $code
+        ]);
     }
 
     public function notifyAction()
     {
+        $request = $this->Request()->getParams();
+        $transactionId = "c20d83a6-980b-4544-890e-3dace1505e15";
+        $paymentUniqueId = "49922105MJ308353J";
+
+        $paymentStatusId = Status::PAYMENT_STATE_RESERVED; //PAYMENT_STATE_COMPLETELY_PAID
+        
+        $sql = '
+            SELECT id FROM s_order
+            WHERE transactionID=? AND temporaryID=?
+            AND status!=-1
+        ';
+
+        $orderId = Shopware()->Db()->fetchOne($sql, [
+                $transactionId,
+                $paymentUniqueId,
+            ]);
+        
+        if ($orderId) {
+            $order = Shopware()->Modules()->Order()->getOrderById($orderId);
+
+            if (intval($order['cleared']) === Status::PAYMENT_STATE_OPEN) {
+                $this->savePaymentStatus($transactionId, $paymentUniqueId, $paymentStatusId, false);
+            } else {
+                // payment state alreade set
+            }
+        } else {
+        }
+        
+        var_dump($order);
+        exit();
+        $signature = "606251ce4a098ded5716ba032a436bc4045de0202630f0f35a57139f28f0d51e";
+        try {
+            $basket = $this->loadBasketFromSignature($signature);
+        } catch (RuntimeException $e) {
+            var_dump($e->getMessage());
+        }
+
+        if ($basket) {
+            var_dump($this->getBasket());
+        } else {
+        }
+        
+        exit();
+        
+        Shopware()->PluginLogger()->info($request);
         exit();
     }
     
-    protected function getPaymentData()
+    protected function getPaymentData($method)
     {
         $user = $this->getUser();
         $basket = $this->getBasket();
@@ -94,23 +224,42 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $router = $this->Front()->Router();
 
         $paymentData = array(
-                             'user' => $user,
-                             'basket' => $basket,
-                             'amount' => $amount,
-                             'currency' => $currency,
-                             'returnUrl' => $router->assemble(['action' => 'return', 'forceSecure' => true]),
-                             'cancleUrl' => $router->assemble(['action' => 'cancle', 'forceSecure' => true]),
-                             'notifyUrl' => $router->assemble(['action' => 'notify', 'forceSecure' => true])
-                             );
-        
+            'user'      => $user,
+            'ipAddr'    => $this->Request()->getClientIp(),
+            'basket'    => $basket,
+            'amount'    => $amount,
+            'currency'  => $currency,
+            'returnUrl' => $router->assemble(['action' => 'return', 'method' => $method, 'forceSecure' => true]),
+            'cancelUrl' => $router->assemble(['action' => 'cancel', 'forceSecure' => true]),
+            'notifyUrl' => $router->assemble(['action' => 'notify', 'method' => $method, 'forceSecure' => true]),
+            'signature' => $this->persistBasket()
+        );
+
         return $paymentData;
     }
-   
+
+    /**
+     *
+     */
+    protected function validateBasket()
+    {
+        $basket = $this->getBasket();
+
+        foreach ($basket['content'] as $item) {
+            $article = Shopware()->Modules()->Articles()->sGetProductByOrdernumber($item['ordernumber']);
+            if (!$article['isAvailable'] || ($article['laststock'] && intval($item['quantity']) > $article['instock'])) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
     /**
      * Whitelist notifyAction
      */
     public function getWhitelistedCSRFActions()
     {
-        return ['notify'];
+        return ['return', 'notify'];
     }
 }

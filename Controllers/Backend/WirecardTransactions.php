@@ -29,19 +29,35 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
+use Doctrine\DBAL\Connection;
+
 use Shopware\Components\CSRFWhitelistAware;
+
+use Shopware\Components\Model\QueryBuilder;
+use Shopware\Models\Order\Order;
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\TransactionService;
 
-class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Controllers_Backend_ExtJs implements CSRFWhitelistAware
+class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Controllers_Backend_Application implements CSRFWhitelistAware
 {
+    /**
+     * @var string
+     */
+    protected $model = Order::class;
+
+    /**
+     * @var string
+     */
+    protected $alias = 'sOrder';
+    
     public function testSettingsAction()
     {
+        $data['status'] = 'temp';
         $config = $this->Request()->getParams();
 
         $data['config'] = $config;
-        $wirecardUrl = $config['wirecardElasticEngineServer'];
+        $wirecardUrl = $config['wirecardElasticEnginePaypalServer'];
         $httpUser = $config['wirecardElasticEnginePaypalHttpUser'];
         $httpPassword = $config['wirecardElasticEnginePaypalHttpPassword'];
 
@@ -60,8 +76,54 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         $this->View()->assign($data);
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    protected function getListQuery()
+    {
+        return $this->prepareOrderQueryBuilder(parent::getListQuery());
+    }
+
+    private function prepareOrderQueryBuilder(QueryBuilder $builder)
+    {
+        $paymentIds = [
+            5
+        ];
+
+        //        $paymentIds = array_merge($paymentIds, $legacyPaymentIds);
+
+        // $builder->innerJoin(
+        //     'sOrder.payment',
+        //     'payment',
+        //     \Doctrine\ORM\Query\Expr\Join::WITH,
+        //     //            'payment.id IN (:paymentIds)'
+        //     //            'number != 0'
+        // )
+
+        //->setParameter('paymentIds', $paymentIds, Connection::PARAM_INT_ARRAY);
+
+        $builder->leftJoin('sOrder.languageSubShop', 'languageSubShop')
+                ->leftJoin('sOrder.customer', 'customer')
+                ->leftJoin('sOrder.orderStatus', 'orderStatus')
+                ->leftJoin('sOrder.paymentStatus', 'paymentStatus')
+                ->leftJoin('sOrder.attribute', 'attribute')
+            ->leftJoin('sOrder.payment', 'payment')
+
+                ->addSelect('languageSubShop')
+                            ->addSelect('payment')
+                ->addSelect('customer')
+                ->addSelect('orderStatus')
+                ->addSelect('paymentStatus')
+                ->addSelect('attribute')
+            ->where('sOrder.number != 0');
+
+        return $builder;
+    }
+
+
+    
     public function getWhitelistedCSRFActions()
     {
-        return array("testSettings");
+        return array('testSettings');
     }
 }
