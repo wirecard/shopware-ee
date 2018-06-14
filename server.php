@@ -40,7 +40,7 @@ if (isset($_SERVER['HTTP_CLIENT_IP'])
 $filePath = __DIR__ . '/../../../' . ltrim(explode('?', $_SERVER['REQUEST_URI'])[0], '/');
 
 if (preg_match('/\.(?:png|jpg|jpeg|gif|css|js|woff|tff)$/', $filePath)) {
-    if(is_file($filePath)) {
+    if (is_file($filePath)) {
         // Workaround for `mime_content_type` returning `text/plain` for CSS files.
         $mimeType = substr($filePath, -4) === '.css' ? 'text/css' : mime_content_type($filePath);
         header('Content-Type: ' . $mimeType);
