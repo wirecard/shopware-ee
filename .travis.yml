@@ -18,6 +18,8 @@ php:
   - 5.6
 
 addons:
+  sonarcloud:
+    organization: "wirecard"
   chrome: stable
 
 services:
