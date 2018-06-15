@@ -23,30 +23,38 @@
  */
 
 use Shopware\Components\CSRFWhitelistAware;
+use Shopware\Models\Order\Status;
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
+use Wirecard\PaymentSdk\Response\FailureResponse;
+use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 
+use WirecardShopwareElasticEngine\Components\StatusCodes;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
-
-use Wirecard\PaymentSdk\Response\FailureResponse;
-use Wirecard\PaymentSdk\Response\SuccessResponse;
-
-use Shopware\Models\Order\Status;
 
 class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopware_Controllers_Frontend_Payment implements CSRFWhitelistAware
 {
+    /**
+     * Index Action starting payment - redirect to method
+     */
     public function indexAction()
     {
         if ($this->getPaymentShortName() == 'wirecard_elastic_engine_paypal') {
             return $this->redirect(['action' => 'paypal', 'forceSecure' => true]);
         }
+
+        return $this->errorHandling(StatusCodes::ERROR_NOT_A_VALID_METHOD);
     }
 
+    /**
+     * Starts transaction with PayPal.
+     * User gets redirected to Paypal payment page.
+     */
     public function paypalAction()
     {
         if (!$this->validateBasket()) {
@@ -66,16 +74,23 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         if ($paymentProcess['status'] === 'success') {
             return $this->redirect($paymentProcess['redirect']);
         } else {
-            $this->errorHandling(-1);
+            $this->errorHandling(StatusCodes::ERROR_STARTING_PROCESS_FAILED);
         }
     }
 
+    /**
+     * After paying user gets redirected to this action.
+     * The order gets saved (if not already existing through notification). 
+     * Required parameter:
+     *  (string) method
+     *  Wirecard\PaymentSdk\Response
+     */
     public function returnAction()
     {
         $request = $this->Request()->getParams();
 
         if (!isset($request['method'])) {
-            return $this->errorHandling(2); // FIXXXME
+            return $this->errorHandling(StatusCodes::ERROR_NOT_A_VALID_METHOD);
         }
 
         $response = null;
@@ -85,7 +100,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         }
         
         if (!$response) {
-            return $this->errorHandling(2); // FIXXXME
+            return $this->errorHandling(StatusCodes::ERROR_NOT_A_VALID_METHOD);
         }
 
         if ($response instanceof SuccessResponse) {
@@ -128,9 +143,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     'action' => 'finish',
                 ]);
             } catch (RuntimeException $e) {
-                var_dump($e->getMessage());
-                exit();
-                $this->errorHandling(4); // FIXXME
+                Shopware()->PluginLogger()->error($e->getMessage());
+                $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER);
             }
         } elseif ($response instanceof FailureResponse) {
             Shopware()->PluginLogger()->error('Response validation status: %s', $response->isValidSignature() ? 'true' : 'false');
@@ -143,18 +157,22 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 Shopware()->PluginLogger()->error($errorMessage);
             }
         }
-
-        var_dump("ERROR");
-        exit();
-    }
-    
-    public function cancelAction()
-    {
-        $this->errorHandling(1);
+        $this->errorHandling(StatusCodes::ERROR_FAILURE_RESPONSE);
     }
 
     /**
+     * User gets redirected to this action after canceling payment. 
+     */
+    public function cancelAction()
+    {
+        $this->errorHandling(StatusCodes::CANCLED_BY_USER);
+    }
+
+    /**
+     * This method handles errors.
+     * @see StatusCodes
      *
+     * @param int $code
      */
     protected function errorHandling($code)
     {
@@ -165,6 +183,11 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         ]);
     }
 
+    /**
+     * The action gets called by Server after payment.
+     * If not already existing the order gets saved here.
+     * order gets its finale state.
+     */
     public function notifyAction()
     {
         $request = $this->Request()->getParams();
@@ -214,7 +237,13 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         Shopware()->PluginLogger()->info($request);
         exit();
     }
-    
+
+    /**
+     * Important data of order for further processing in transaction get collected-
+     * 
+     * @param string $method
+     * @return array $paymentData
+     */
     protected function getPaymentData($method)
     {
         $user = $this->getUser();
@@ -239,7 +268,9 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     }
 
     /**
+     * Validate basket for availability of products.
      *
+     * @return boolean
      */
     protected function validateBasket()
     {
@@ -261,7 +292,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     }
     
     /**
-     * Whitelist notifyAction
+     * Whitelist notifyAction and returnAction
      */
     public function getWhitelistedCSRFActions()
     {
