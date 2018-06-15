@@ -247,6 +247,11 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         foreach ($basket['content'] as $item) {
             $article = Shopware()->Modules()->Articles()->sGetProductByOrdernumber($item['ordernumber']);
+
+            if (!$article) {
+                continue;
+            }
+            
             if (!$article['isAvailable'] || ($article['laststock'] && intval($item['quantity']) > $article['instock'])) {
                 return false;
             }
