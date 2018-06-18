@@ -32,6 +32,7 @@
 namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Payments;
 
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
+use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 
 class AbstractPaymentTest extends \PHPUnit_Framework_TestCase
 {
@@ -45,7 +46,7 @@ class AbstractPaymentTest extends \PHPUnit_Framework_TestCase
 
     public function testInstanceOfPaymentInterface()
     {
-        $this->assertInstanceOf('WirecardShopwareElasticEngine\Components\Payments\PaymentInterface', $this->stub);
+        $this->assertInstanceOf(PaymentInterface::class, $this->stub);
     }
 
     public function testGetName()
