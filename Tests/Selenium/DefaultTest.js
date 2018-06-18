@@ -38,18 +38,39 @@ describe('default test', () => {
         .forBrowser('chrome')
         .build();
 
-    it('should check if frontend login works', async () => {
-        await driver.get(`http://localhost:8000/account`);
+    const url = 'http://localhost:8000';
+    const mail = 'test@example.com';
+    const password = 'shopware';
 
+    it('should check the default checkout', async () => {
+        // Log in with example account
+        await driver.get(`${url}/account`);
         await driver.wait(until.elementLocated(By.name('email')));
-        await driver.findElement(By.name('email')).sendKeys('test@example.com');
-        await driver.findElement(By.name('password')).sendKeys('shopware');
+        await driver.findElement(By.name('email')).sendKeys(mail);
+        await driver.findElement(By.name('password')).sendKeys(password);
         await driver.findElement(By.className('register--login-btn')).click();
 
+        // Check if login has succeeded
         await driver.wait(until.elementLocated(By.className('account--welcome')));
 
-        const title = await driver.getTitle();
-        expect(title).to.include('Kundenkonto');
+        // Go to a product and buy it
+        await driver.get(`${url}/genusswelten/tees-und-zubeh/tee-zubehoer/24/glas-teekaennchen`);
+        await driver.findElement(By.className('buybox--button')).click();
+
+        // Wait for the cart to be shown
+        await driver.wait(until.elementLocated(By.className('button--checkout')));
+
+        // Checkout
+        await driver.findElement(By.className('button--checkout')).click();
+        await driver.findElement(By.id('sAGB')).click();
+        await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
+
+        // Done, check for success.
+        await driver.wait(until.elementLocated(By.className('teaser--btn-print')));
+
+        const panelTitle = await driver.findElement(By.className('panel--title')).getText();
+
+        expect(panelTitle).to.include('Vielen Dank');
     });
 
     after(async () => driver.quit());
