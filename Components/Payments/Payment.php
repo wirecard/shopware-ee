@@ -45,6 +45,8 @@ use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\TransactionService;
 
+use WirecardShopwareElasticEngine\Models\Transaction;
+
 abstract class Payment implements PaymentInterface
 {
     /**
@@ -119,6 +121,15 @@ abstract class Payment implements PaymentInterface
             $transaction->setLocale($locale);
         }
 
+        $elasticEngineTranscation = $this->getElasticEngineTransaction();
+        $orderNumber = $elasticEngineTranscation->getId();
+        $transaction->setOrderNumber($orderNumber);
+        
+        if ($configData['descriptor']) {
+            $descriptor = $configData['shopName'] . ' ' . $orderNumber;
+            $transaction->setDescriptor($descriptor);
+        }
+
         $transactionService = new TransactionService($config, Shopware()->PluginLogger());
         
         $response = null;
@@ -129,6 +140,10 @@ abstract class Payment implements PaymentInterface
         }
 
         if ($response instanceof InteractionResponse) {
+            $elasticEngineTranscation->setTransactionId($response->getTransactionId());
+            Shopware()->Models()->persist($elasticEngineTranscation);
+            Shopware()->Models()->flush();
+
             return [
                 'status'   => 'success',
                 'redirect' => $response->getRedirectUrl()
@@ -274,12 +289,16 @@ abstract class Payment implements PaymentInterface
             $name = $item['articlename'];
             $sku = $item['ordernumber'];
             $description = $item['additional_details']['description'];
-            $tax_rate = floatval($item['tax_rate']);
+            $taxRate = floatval($item['tax_rate']);
             $quantity = $item['quantity'];
             $price = 0;
             
             if (isset($item['additional_details'])) {
-                $price = $item['additional_details']['price_numeric'];
+                if (isset($item['additional_details']['prices']) && count($item['additional_details']['prices']) == 1) {
+                    $price = $item['additional_details']['prices'][0]['price_numeric'];
+                } else {
+                    $price = $item['additional_details']['price_numeric'];
+                }
             } else {
                 $amountStr = $item['price'];
                 $price = floatval(str_replace(',', '.', $amountStr));
@@ -287,7 +306,6 @@ abstract class Payment implements PaymentInterface
             $amount = new Amount($price, $currency);
 
             $taxStr = $item['tax'];
-
             $taxStr = str_replace(',', '.', $taxStr);
             $tax = new Amount(floatval($taxStr) / $quantity, $currency);
 
@@ -295,7 +313,7 @@ abstract class Payment implements PaymentInterface
             
             $basketItem->setDescription($description);
             $basketItem->setArticleNumber($sku);
-            $basketItem->setTaxRate($tax_rate);
+            $basketItem->setTaxRate($taxRate);
             $basketItem->setTaxAmount($tax);
 
             $basket->add($basketItem);
@@ -316,11 +334,26 @@ abstract class Payment implements PaymentInterface
             $basketItem->setTaxRate($cart["sShippingcostsTax"]);
             $basket->add($basketItem);
         }
+        
         return $basket;
     }
 
     /**
-     *
+     * Creates Transaction entry and returns it
+     * @return Transaction
+     */
+    public function getElasticEngineTransaction()
+    {
+        $transactionModel = new Transaction();
+        Shopware()->Models()->persist($transactionModel);
+        Shopware()->Models()->flush();
+
+        return $transactionModel;
+    }
+
+    /**
+     * @param array $request
+     * @return Response
      */
     public function getPaymentResponse($request)
     {
@@ -330,5 +363,19 @@ abstract class Payment implements PaymentInterface
         $response = $service->handleResponse($request);
 
         return $response;
+    }
+
+    /**
+     * @param string $request
+     * @return Response
+     */
+    public function getPaymentNotification($request)
+    {
+        $configData = $this->getConfigData();
+        $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
+        $service = new TransactionService($config);
+        $notification = $service->handleNotification($request);
+
+        return $notification;
     }
 }

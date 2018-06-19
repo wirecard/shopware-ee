@@ -53,7 +53,6 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
     
     public function testSettingsAction()
     {
-        $data['status'] = 'temp';
         $config = $this->Request()->getParams();
 
         $data['config'] = $config;

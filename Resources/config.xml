@@ -4,48 +4,48 @@
     <elements>
         <element type="text" scope="shop">
             <name>wirecardElasticEnginePaypalServer</name>
-            <label lang="de">Wirecard Server Url</label>
-            <label lang="en">Wirecard Server Url</label>
+            <label lang="de">[PayPal] Wirecard Server Url</label>
+            <label lang="en">[PayPal] Wirecard Server Url</label>
             <value>https://api-test.wirecard.com</value>
             <description lang="de">Wirecard Basis Url (z.B. http://api-test.wirecard.com)</description>
             <description lang="en">Wirecard Base Url (e.g. http://api-test.wirecard.com)</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEnginePaypalHttpUser</name>
-            <label lang="de">PayPal HTTP Benutzer</label>
-            <label lang="en">PayPalHTTP User</label>
+            <label lang="de">[PayPal] HTTP Benutzer</label>
+            <label lang="en">[PayPal] HTTP User</label>
             <value>70000-APITEST-AP</value>
             <description lang="de">HTTP Benutzer</description>
             <description lang="en">HTTP User</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEnginePaypalHttpPassword</name>
-            <label lang="de">PayPal HTTP Passwort</label>
-            <label lang="en">PayPal HTTP Password</label>
+            <label lang="de">[PayPal] HTTP Passwort</label>
+            <label lang="en">[PayPal] HTTP Password</label>
             <value>qD2wzQ_hrc!8</value>
             <description lang="de">HTTP Passwort</description>
             <description lang="en">HTTP Password</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEnginePaypalMerchandId</name>
-            <label lang="de">PayPal Händler ID</label>
-            <label lang="en">PayPal Merchand ID</label>
+            <label lang="de">[PayPal] Händler ID</label>
+            <label lang="en">[PayPal] Merchand ID</label>
             <value>2a0e9351-24ed-4110-9a1b-fd0fee6bec26</value>
             <description lang="de">Eindeutige Händler-ID Ihres Wirecard Konto</description>
             <description lang="en">Unique merachand account id to Wirecard</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEnginePaypalSecret</name>
-            <label lang="de">PayPal Geheimschlüssel</label>
-            <label lang="en">PayPal Secret Key</label>
+            <label lang="de">[PayPal] Geheimschlüssel</label>
+            <label lang="en">[PayPal] Secret Key</label>
             <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
             <description lang="de">Geheimschlüssel für die digitale Signatur</description>
             <description lang="en">Secret key for digital signature</description>
         </element>
         <element type="button" scope="shop">
             <name>wirecardElasticEngineTestApi</name>
-            <label lang="de">Konfiguration testen</label>
-            <label lang="en">Test settings</label>
+            <label lang="de">[PayPal] Konfiguration testen</label>
+            <label lang="en">[PayPal] Test settings</label>
             <options>
                 <handler>
                     <![CDATA[
@@ -89,8 +89,8 @@ function (button) {
         </element>
         <element type="select" scope="shop">
             <name>wirecardElasticEnginePaypalTransactionType</name>
-            <label lang="de">Transaktionsart</label>
-            <label lang="en">Transaction Type</label>
+            <label lang="de">[PayPal] Transaktionsart</label>
+            <label lang="en">[PayPal] Transaction Type</label>
             <value>purchase</value>
             <store>
                 <option>
@@ -107,19 +107,39 @@ function (button) {
         </element>
         <element type="boolean" scope="shop">
             <name>wirecardElasticEnginePaypalSendBasket</name>
-            <label lang="de">Warenkorb senden</label>
-            <label lang="en">Send basket</label>
+            <label lang="de">[PayPal] Warenkorb senden</label>
+            <label lang="en">[PayPal] Send basket</label>
             <value>true</value>
             <description lang="de">Sende den Warenkorb an PayPal</description>
             <description lang="en">Send basket to PayPal</description>
         </element>
         <element type="boolean" scope="shop">
             <name>wirecardElasticEnginePaypalFraudPrevention</name>
-            <label lang="de">Zusätzliche Kundendaten</label>
-            <label lang="en">Additional Consumer Data</label>
+            <label lang="de">[PayPal] Zusätzliche Kundendaten</label>
+            <label lang="en">[PayPal] Additional Consumer Data</label>
             <value>true</value>
             <description lang="de">Sende Kundendaten an Wirecard zur Betrugsprevention</description>
             <description lang="en">Send consumer data to Wirecard for fraud prevention</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEnginePaypalShop</name>
+            <label lang="de">[PayPal] Shopname</label>
+            <label lang="en">[PayPal] Shop name</label>
+            <value>Web Shop</value>
+            <description lang="de">Max. 9 Zeichen</description>
+            <description lang="en">max. 9 characters</description>
+            <options>
+                <maxLength>9</maxLength>
+                <enforceMaxLength>true</enforceMaxLength>
+            </options>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEnginePaypalDescriptor</name>
+            <label lang="de">[PayPal] Beschreibung senden</label>
+            <label lang="en">[PayPal] Send descriptor</label>
+            <value>true</value>
+            <description lang="de">Sende Beschreibung</description>
+            <description lang="en">Send descriptor</description>
         </element>
     </elements>
 </config>

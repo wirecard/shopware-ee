@@ -26,9 +26,9 @@ namespace WirecardShopwareElasticEngine\Components;
 
 class StatusCodes
 {
-    const CANCLED_BY_USER = 0;
-    const ERROR_STARTING_PROCESS_FAILED = 1;
-    const ERROR_NOT_A_VALID_METHOD = 2;
-    const ERROR_FAILURE_RESPONSE = 3;
-    const ERROR_CRITICAL_NO_ORDER = 4;
+    const CANCLED_BY_USER = 1;
+    const ERROR_STARTING_PROCESS_FAILED = 2;
+    const ERROR_NOT_A_VALID_METHOD = 3;
+    const ERROR_FAILURE_RESPONSE = 4;
+    const ERROR_CRITICAL_NO_ORDER = 5;
 }

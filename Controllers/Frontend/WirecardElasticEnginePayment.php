@@ -37,6 +37,8 @@ use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\StatusCodes;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 
+use WirecardShopwareElasticEngine\Models\Transaction;
+
 class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopware_Controllers_Frontend_Payment implements CSRFWhitelistAware
 {
     /**
@@ -80,7 +82,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
     /**
      * After paying user gets redirected to this action.
-     * The order gets saved (if not already existing through notification). 
+     * The order gets saved (if not already existing through notification).
      * Required parameter:
      *  (string) method
      *  Wirecard\PaymentSdk\Response
@@ -104,15 +106,20 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         }
 
         if ($response instanceof SuccessResponse) {
-            $xmlResponse = new SimpleXMLElement($response->getRawData());
-
             $transactionType = $response->getTransactionType();
             $customFields = $response->getCustomFields();
-            
 
             $transactionId = $response->getTransactionId();
             $paymentUniqueId = $response->getProviderTransactionId();
             $signature = $customFields->get('signature');
+
+            $wirecardOrderNumber = $response->findElement('order-number');
+            
+            $elasticEngineTransaction = Shopware()->Models()->getRepository(Transaction::class)->findOneBy(['id' => $wirecardOrderNumber]);
+            $elasticEngineTransaction->setTransactionId($transactionId);
+            $elasticEngineTransaction->setProviderTransactionId($paymentUniqueId);
+            $elasticEngineTransaction->setReturnResponse(serialize($response->getData()));
+            $paymentStatus = intval($elasticEngineTransaction->getPaymentStatus());
 
             $sql = '
                 SELECT id FROM s_order
@@ -126,6 +133,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             ]);
 
             if ($orderId) {
+                Shopware()->Models()->persist($elasticEngineTransaction);
+                Shopware()->Models()->flush();
                 return $this->redirect([
                     'module' => 'frontend',
                     'controller' => 'checkout',
@@ -135,7 +144,15 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             }
             try {
                 $basket = $this->loadBasketFromSignature($signature);
-                $this->saveOrder($transactionId, $paymentUniqueId);
+                if ($paymentStatus) {
+                    $orderNumber = $this->saveOrder($transactionId, $paymentUniqueId, $paymentStatus);
+                } else {
+                    $orderNumber = $this->saveOrder($transactionId, $paymentUniqueId);
+                }
+
+                $elasticEngineTransaction->setOrderNumber($orderNumber);
+                Shopware()->Models()->persist($elasticEngineTransaction);
+                Shopware()->Models()->flush();
 
                 return $this->redirect([
                     'module' => 'frontend',
@@ -161,7 +178,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     }
 
     /**
-     * User gets redirected to this action after canceling payment. 
+     * User gets redirected to this action after canceling payment.
      */
     public function cancelAction()
     {
@@ -191,56 +208,73 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     public function notifyAction()
     {
         $request = $this->Request()->getParams();
-        $transactionId = "c20d83a6-980b-4544-890e-3dace1505e15";
-        $paymentUniqueId = "49922105MJ308353J";
+        $notification = file_get_contents("php://input");
 
-        $paymentStatusId = Status::PAYMENT_STATE_RESERVED; //PAYMENT_STATE_COMPLETELY_PAID
+        Shopware()->PluginLogger()->info("Notifiation: " . $notification);
         
-        $sql = '
-            SELECT id FROM s_order
-            WHERE transactionID=? AND temporaryID=?
-            AND status!=-1
-        ';
+        $response = null;
+        
+        if ($request['method'] === 'paypal') {
+            $paypal = new PaypalPayment();
+            $response = $paypal->getPaymentNotification($notification);
+        }
 
-        $orderId = Shopware()->Db()->fetchOne($sql, [
+        if (!$response) {
+            echo "no response";
+            Shopware()->PluginLogger()->error("no response");
+            //return $this->errorHandling(StatusCodes::ERROR_NOT_A_VALID_METHOD);
+        }
+
+        if ($response instanceof SuccessResponse) {
+            $transactionId = $response->getTransactionId();
+            $paymentUniqueId = $response->getProviderTransactionId();
+            $transactionType = $response-> getTransactionType();
+
+            $wirecardOrderNumber = $response->findElement('order-number');
+            
+            if ($transactionType === 'authorization') {
+                $paymentStatusId = Status::PAYMENT_STATE_RESERVED;
+            } else {
+                $paymentStatusId = Status::PAYMENT_STATE_COMPLETELY_PAID;
+            }
+        
+            $elasticEngineTransaction = Shopware()->Models()->getRepository(Transaction::class)->findOneBy(['id' => $wirecardOrderNumber]);
+            $elasticEngineTransaction->setTransactionId($transactionId);
+            $elasticEngineTransaction->setProviderTransactionId($paymentUniqueId);
+            $elasticEngineTransaction->setNotificationResponse(serialize($response->getData()));
+            $elasticEngineTransaction->setPaymentStatus($paymentStatusId);
+            Shopware()->Models()->persist($elasticEngineTransaction);
+            Shopware()->Models()->flush();
+
+            $sql = '
+                SELECT id FROM s_order
+                WHERE transactionID=? AND temporaryID=?
+                AND status!=-1
+            ';
+
+            $orderId = Shopware()->Db()->fetchOne($sql, [
                 $transactionId,
                 $paymentUniqueId,
             ]);
-        
-        if ($orderId) {
-            $order = Shopware()->Modules()->Order()->getOrderById($orderId);
 
-            if (intval($order['cleared']) === Status::PAYMENT_STATE_OPEN) {
-                $this->savePaymentStatus($transactionId, $paymentUniqueId, $paymentStatusId, false);
-            } else {
-                // payment state alreade set
+            if ($orderId) {
+                $order = Shopware()->Modules()->Order()->getOrderById($orderId);
+
+                if (intval($order['cleared']) === Status::PAYMENT_STATE_OPEN) {
+                    Shopware()->PluginLogger()->info("set PaymentStatus for Order " . $orderId);
+                    $this->savePaymentStatus($transactionId, $paymentUniqueId, $paymentStatusId, false);
+                } else {
+                    Shopware()->PluginLogger()->error("Order with ID " . $orderId .  " already set");
+                    // payment state already set
+                }
             }
-        } else {
         }
-        
-        var_dump($order);
-        exit();
-        $signature = "606251ce4a098ded5716ba032a436bc4045de0202630f0f35a57139f28f0d51e";
-        try {
-            $basket = $this->loadBasketFromSignature($signature);
-        } catch (RuntimeException $e) {
-            var_dump($e->getMessage());
-        }
-
-        if ($basket) {
-            var_dump($this->getBasket());
-        } else {
-        }
-        
-        exit();
-        
-        Shopware()->PluginLogger()->info($request);
         exit();
     }
 
     /**
      * Important data of order for further processing in transaction get collected-
-     * 
+     *
      * @param string $method
      * @return array $paymentData
      */

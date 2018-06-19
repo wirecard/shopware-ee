@@ -44,16 +44,37 @@ use Shopware\Components\Plugin\Context\UpdateContext;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 
+use WirecardShopwareElasticEngine\Models\Transaction;
+
+use Doctrine\ORM\Tools\SchemaTool;
+
 class WirecardShopwareElasticEngine extends Plugin
 {
     public function install(InstallContext $context)
     {
-        $this->registerPayments();
+        $entityManager = $this->container->get('models');
+        $schemaTool = new SchemaTool($entityManager);
+
+        $schemaTool->updateSchema(
+            [ $entityManager->getClassMetadata(Transaction::class) ],
+            true
+        );
     }
 
     public function uninstall(UninstallContext $context)
     {
         parent::uninstall($context);
+
+        if ($context->keepUserData()) {
+            return;
+        }
+
+        $entityManager = $this->container->get('models');
+        $schemaTool = new SchemaTool($entityManager);
+
+        $schemaTool->dropSchema(
+            [ $entityManager->getClassMetadata(Transaction::class) ]
+        );
     }
 
     public function update(UpdateContext $context)
