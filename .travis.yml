@@ -62,5 +62,5 @@ script:
   - npm run lint
   - npm run test
 
-after script:
+after_script:
   - travis_retry composer upload-coverage
