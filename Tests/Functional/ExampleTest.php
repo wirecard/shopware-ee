@@ -29,12 +29,27 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit;
+namespace WirecardShopwareElasticEngine\Tests\Functional;
 
-class DefaultTest extends \PHPUnit_Framework_TestCase
+use Shopware\Components\Test\Plugin\TestCase;
+use Wirecard\PaymentSdk\Config\Config;
+use Wirecard\PaymentSdk\TransactionService;
+
+class ExampleTest extends TestCase
 {
-    public function testDefault()
+    const API_TEST_URL = 'https://api-test.wirecard.com';
+    const HTTP_USER = '70000-APITEST-AP';
+    const HTTP_PASSWORD = 'qD2wzQ_hrc!8';
+
+    protected static $ensureLoadedPlugins = [
+        'WirecardShopwareElasticEngine',
+    ];
+
+    public function testCredentials()
     {
-        $this->assertEquals(3, 3);
+        $testConfig         = new Config(self::API_TEST_URL, self::HTTP_USER, self::HTTP_PASSWORD);
+        $transactionService = new TransactionService($testConfig);
+
+        $this->assertTrue($transactionService->checkCredentials());
     }
 }
