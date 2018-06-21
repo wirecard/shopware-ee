@@ -1,10 +1,12 @@
-sudo: false
+sudo: true
 dist: trusty
 language: php
 
 cache:
   directories:
     - $HOME/.sonar/cache
+    - $HOME/.composer/cache/files
+    - node_modules
 
 addons:
   sonarcloud:
@@ -15,23 +17,50 @@ php:
   - 7.0
   - 5.6
 
+addons:
+  sonarcloud:
+    organization: "wirecard"
+  chrome: stable
+
+services:
+  - mysql
+
 env:
   global:
     - secure: ${SONAR_TOKEN}
     - COMPOSER_ARGS="--no-interaction"
+    - PLUGIN_NAME=WirecardShopwareElasticEngine
+    - SHOPWARE_DIRECTORY=${HOME}/shopware
+    - WEBSERVER_PORT=8000
     - github_token:
         secure: "gH+IJRS0uQe2G/gg4nL0UgQxh4Tog16vQIBzWgQiFUjmQM/jMvUtw6kW4ixcusOPGR4rqKuLFCd8gbDg/I848VNDb7a+xg+wGm7KvognnbcxbnB0TcxNcPTGZUWXbSqGi3z8YhAaaa1LfrROM3qS4LeU3Bz+B7ZpdbA7xqzkmBRPgEdsv7OLmCwow2e6jreeGcCAqM34q84JavZkWcoHCQbLoknwyNCzilMKUN8fe+Ih46o1O0iuVOv9lAWIOLlAJJNcrX+kamv4RhrtDQwyVWsnDB2OO2Me4Lr4Bkqy9pN+diszgX8OzhOnkFl+ZXYTIUI5NxK3kAkd4lKOO3QgHIoveSmeoaS/mrC5kflNs6vN399Jm8X4gSmxUhkl01hEAfEqL+BiW2o22/Pq8WeMVVaQy3ONUwlSGGBkk/IkckbG/LzpJv5Jjztfi8Xfl9JF1jO/0BABsqodx/pEbDzIKKb3S/U/EHmCXV8zqmD67E/PIii3Y9kxeVaDNdWT5u4O69Pt9sR7csA8OL8YS8th/d825v4BTPswIFxn1vXB1sTKJZGwyO+fu53CE7qcZEMc/+NJnfLZBhIbV9SE1zVRsDPX1AiruPd/sXjYy01AR4SYdCO+RrdyVWoIE65hV/MOGgvu327jI13ZIpFE2PwE1fPj6JqTtrW5YugLCOQUGd0="
 
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - git clone https://github.com/shopware/shopware.git ${SHOPWARE_DIRECTORY} --branch 5.4
+  - ant -f ${SHOPWARE_DIRECTORY}/build/build.xml -Dapp.host=localhost:8000 -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-unit
+  - mv ${TRAVIS_BUILD_DIR} ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
+  - php ${HOME}/shopware/bin/console sw:plugin:refresh
+  - php ${HOME}/shopware/bin/console sw:plugin:install ${PLUGIN_NAME}
+  - php ${HOME}/shopware/bin/console sw:plugin:activate ${PLUGIN_NAME}
+  - cd ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
+  - SHOPWARE_ENV=development php -S localhost:${WEBSERVER_PORT} server.php &
+  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost:${WEBSERVER_PORT} &
 
 install:
   - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
   - travis_retry composer install $COMPOSER_ARGS
+  - travis_retry npm install
+  - npm list --depth=0
   - composer show
 
 script:
   - composer test-coverage
   - sonar-scanner
   - composer cs-check
+  - npm run lint
+  - npm run test
 
-after script:
+after_script:
   - travis_retry composer upload-coverage

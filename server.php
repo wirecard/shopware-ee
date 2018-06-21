@@ -29,12 +29,29 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit;
+if (isset($_SERVER['HTTP_CLIENT_IP'])
+    || isset($_SERVER['HTTP_X_FORWARDED_FOR'])
+    || ! (in_array(@$_SERVER['REMOTE_ADDR'], ['127.0.0.1', '::1']) || php_sapi_name() === 'cli-server')
+) {
+    http_response_code(403);
+    exit('Forbidden');
+}
 
-class DefaultTest extends \PHPUnit_Framework_TestCase
-{
-    public function testDefault()
-    {
-        $this->assertEquals(3, 3);
+$filePath = __DIR__ . '/../../../' . ltrim(explode('?', $_SERVER['REQUEST_URI'])[0], '/');
+
+if (preg_match('/\.(?:png|jpg|jpeg|gif|css|js|woff|tff)$/', $filePath)) {
+    if (is_file($filePath)) {
+        // Workaround for `mime_content_type` returning `text/plain` for CSS files.
+        $mimeType = substr($filePath, -4) === '.css' ? 'text/css' : mime_content_type($filePath);
+        header('Content-Type: ' . $mimeType);
+
+        readfile($filePath);
+
+        exit(0);
+    } else {
+        http_response_code(404);
+        exit('File not found: ' . $filePath);
     }
 }
+
+require_once __DIR__ . '/../../../shopware.php';
