@@ -6,3 +6,5 @@ vendor
 composer.lock
 package-lock.json
 npm-debug.log
+
+clover.xml

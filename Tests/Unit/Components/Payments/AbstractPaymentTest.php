@@ -29,12 +29,44 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit;
+namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Payments;
 
-class DefaultTest extends \PHPUnit_Framework_TestCase
+use WirecardShopwareElasticEngine\Components\Payments\Payment;
+use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
+
+class AbstractPaymentTest extends \PHPUnit_Framework_TestCase
 {
-    public function testDefault()
+    /** @var Payment */
+    protected $stub;
+
+    public function setUp()
     {
-        $this->assertEquals(3, 3);
+        $this->stub = $this->getMockForAbstractClass(Payment::class, [], 'FooPayment');
+    }
+
+    public function testInstanceOfPaymentInterface()
+    {
+        $this->assertInstanceOf(PaymentInterface::class, $this->stub);
+    }
+
+    public function testGetName()
+    {
+        $this->assertEquals('wirecard_ee_foo', $this->stub->getName());
+    }
+
+    public function testGetLabel()
+    {
+        $this->assertEquals('Wirecard EE Foo', $this->stub->getLabel());
+    }
+
+    public function testGetPaymentOptions()
+    {
+        $this->assertTrue(is_array($this->stub->getPaymentOptions()));
+        $this->assertTrue(array_key_exists('name', $this->stub->getPaymentOptions()));
+        $this->assertTrue(array_key_exists('description', $this->stub->getPaymentOptions()));
+        $this->assertTrue(array_key_exists('action', $this->stub->getPaymentOptions()));
+        $this->assertTrue(array_key_exists('active', $this->stub->getPaymentOptions()));
+        $this->assertTrue(array_key_exists('position', $this->stub->getPaymentOptions()));
+        $this->assertTrue(array_key_exists('additionalDescription', $this->stub->getPaymentOptions()));
     }
 }
