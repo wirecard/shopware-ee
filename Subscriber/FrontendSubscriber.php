@@ -34,6 +34,8 @@ namespace WirecardShopwareElasticEngine\Subscriber;
 use Enlight\Event\SubscriberInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Shopware\Components\Theme\LessDefinition;
+use Shopware\Models\Order\Order;
+use Shopware\Models\Order\Status;
 
 class FrontendSubscriber implements SubscriberInterface
 {
@@ -93,6 +95,37 @@ class FrontendSubscriber implements SubscriberInterface
         $updateCart = $request->getParam('wirecard_elast_engine_update_cart');
         
         $view = $controller->View();
+        $actionName = $request->getActionName();
+
+        if ($actionName === 'finish') {
+            $payment = $view->getAssign('sPayment');
+            if (strpos($payment['name'], 'wirecard_elastic_engine') !== null) {
+                $sOrderNumber = $view->getAssign('sOrderNumber');
+                if ($sOrderNumber) {
+                    $order = Shopware()->Models()->getRepository(Order::class)
+                           ->findOneBy(['number' => $sOrderNumber]);
+
+                    $paymentStatusStr = '';
+                    if ($order) {
+                        $view->assign('wirecardElasticEnginePayment', true);
+
+                        switch ($order->getPaymentStatus()->getId()) {
+                            case Status::PAYMENT_STATE_OPEN:
+                                $paymentStatusStr = 'pending';
+                                break;
+                            case Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED:
+                                $paymentStatusStr = 'canceled';
+                                break;
+                            default:
+                                $paymentStatusStr = 'success';
+                        }
+                        $paymentStatus = $order->getPaymentStatus()->getId();
+
+                        $view->assign('wirecardElasticEnginePaymentStatus', $paymentStatusStr);
+                    }
+                }
+            }
+        }
 
         if ($errorCode) {
             $view->assign('wirecardElasticEngineErrorCode', $errorCode);
