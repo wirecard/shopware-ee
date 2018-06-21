@@ -11,8 +11,7 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
         transactionId: '{s name="TransactionId" namespace="backend/wirecard_elastic_engine/order_window"}{/s}',
         providerTransactionId: '{s name="ProviderTransactionId" namespace="backend/wirecard_elastic_engine/order_window"}{/s}',
         amount: '{s name="Amount" namespace="backend/wirecard_elastic_engine/order_window"}{/s}',
-        orderTime: '{s name="OrderTime" namespace="backend/wirecard_elastic_engine/order_window"}{/s}',
-        
+        orderTime: '{s name="OrderTime" namespace="backend/wirecard_elastic_engine/order_window"}{/s}'
     },
 
     configure: function() {

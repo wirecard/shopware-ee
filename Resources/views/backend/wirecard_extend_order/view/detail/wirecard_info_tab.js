@@ -10,9 +10,9 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
         infoTitle: '{s name="InfoTitle" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}',
         wirecardOrderNumber: '{s name="WirecardOrderNumber" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}',
         transactionId: '{s name="TransactionId" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}',
-        providerTransactionId: '{s name="ProviderTransactionId" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}',
+        providerTransactionId: '{s name="ProviderTransactionId" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}'
     },
-    
+
     initComponent: function() {
         var me = this;
 
@@ -31,7 +31,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
         detailsStore.getProxy().extraParams = {
             orderNumber: data.number
         };
-        
+
         detailsStore.load({
             callback: function(records, operation) {
                 var data = records[0].getData();
@@ -42,14 +42,12 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                     renderData: data
                 });
             }
-            
         });
-
     },
 
     createInfoContainer: function(data) {
         var me = this;
-        
+
         return Ext.create('Ext.panel.Panel', {
             title: me.snippets.infoTitle,
             alias: 'wirecard-info-panel',
@@ -57,7 +55,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
             flex: 1,
             paddingRight: 5,
             items: [
-             ]
+            ]
         });
     },
 
@@ -67,7 +65,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
         return new Ext.XTemplate(
             '{literal}<tpl for=".">',
             '<div class="wirecard-info-pnl">',
-            '<p>' + me.snippets.wirecardOrderNumber+ ': {id}</p>',
+            '<p>' + me.snippets.wirecardOrderNumber + ': {id}</p>',
             '<p>' + me.snippets.transactionId + ': {transactionId}</p>',
             '<p>' + me.snippets.providerTransactionId + ': {providerTransactionId}</p>',
             '</div>',

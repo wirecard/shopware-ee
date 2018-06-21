@@ -1,4 +1,4 @@
-//{block name="backend/order/view/detail/window"}
+// {block name="backend/order/view/detail/window"}
 // {$smarty.block.parent}
 Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.Window', {
     /**
@@ -20,15 +20,15 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.Window', {
             result = me.callParent(),
             payment = me.record.getPayment().first();
 
-        if (payment.get('name').substr(0,23) == 'wirecard_elastic_engine') {
-            result.add(Ext.create('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab',{
+        if (payment.get('name').substr(0, 23) == 'wirecard_elastic_engine') {
+            result.add(Ext.create('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                 record: me.record,
                 orderStatusStore: me.orderStatusStore,
-                paymentStatusStore:  me.paymentStatusStore
+                paymentStatusStore: me.paymentStatusStore
             }));
         }
-        
+
         return result;
     }
 });
-//{/block}
+// {/block}

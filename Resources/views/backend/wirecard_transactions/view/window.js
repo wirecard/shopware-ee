@@ -8,6 +8,6 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Window', {
         return {
             listingGrid: 'Shopware.apps.WirecardTransactions.view.Grid',
             listingStore: 'Shopware.apps.WirecardTransactions.store.Order'
-        }
+        };
     }
 });

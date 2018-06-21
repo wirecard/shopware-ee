@@ -1,4 +1,4 @@
-//{block name="backend/wirecard_extend_order/model/wirecard_order_details"}
+// {block name="backend/wirecard_extend_order/model/wirecard_order_details"}
 Ext.define('Shopware.apps.WirecardExtendOrder.model.WirecardOrderDetails', {
     extend: 'Ext.data.Model',
 
@@ -11,4 +11,4 @@ Ext.define('Shopware.apps.WirecardExtendOrder.model.WirecardOrderDetails', {
     ]
 
 });
-//{/block}
+// {/block}
