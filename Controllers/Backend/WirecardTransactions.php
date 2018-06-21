@@ -39,7 +39,9 @@ use Shopware\Models\Order\Order;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\TransactionService;
 
-class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Controllers_Backend_Application implements CSRFWhitelistAware
+class Shopware_Controllers_Backend_WirecardTransactions // phpcs:ignore
+    extends Shopware_Controllers_Backend_Application
+    implements CSRFWhitelistAware
 {
     /**
      * @var string
@@ -50,12 +52,14 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
      * @var string
      */
     protected $alias = 'sOrder';
-    
+
+    /**
+     * Checks credential to wirecard
+     */
     public function testSettingsAction()
     {
         $config = $this->Request()->getParams();
 
-        $data['config'] = $config;
         $wirecardUrl = $config['wirecardElasticEnginePaypalServer'];
         $httpUser = $config['wirecardElasticEnginePaypalHttpUser'];
         $httpPassword = $config['wirecardElasticEnginePaypalHttpPassword'];
@@ -63,9 +67,6 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         $testConfig = new Config($wirecardUrl, $httpUser, $httpPassword);
         $transactionService = new TransactionService($testConfig, Shopware()->PluginLogger());
         
-        $data['$wirecardUrl'] = $wirecardUrl;
-        $data['$httpUser'] = $httpUser;
-        $data['$httpPassword'] = $httpPassword;
         if ($transactionService->checkCredentials()) {
             $data['status'] = 'success';
         } else {
@@ -76,6 +77,35 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
     }
 
     /**
+     * Loads transaction details for order given with orderNumber
+     */
+    public function detailsAction()
+    {
+        $params = $this->Request()->getParams();
+
+        $orderNumber = $params['orderNumber'];
+
+        if (!$orderNumber) {
+            return $this->View()->assign([ 'success' => false]);
+        }
+
+        $builder = $this->getManager()->createQueryBuilder();
+        $builder->select('transaction')
+            ->from('WirecardShopwareElasticEngine\Models\Transaction', 'transaction')
+            ->where('transaction.orderNumber = ' . $orderNumber);
+            
+
+        $query = $builder->getQuery();
+        $result = $query->getArrayResult();
+
+        if(!$result || empty($result)) {
+            return $this->View()->assign([ 'success' => false]);
+        }
+
+        $this->View()->assign([ 'success' => true, 'params' => $params, 'data' => $result ]);
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function getListQuery()
@@ -83,44 +113,28 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         return $this->prepareOrderQueryBuilder(parent::getListQuery());
     }
 
+    /**
+     * ignores empty orders in query for Order View
+     */
     private function prepareOrderQueryBuilder(QueryBuilder $builder)
     {
-        $paymentIds = [
-            5
-        ];
-
-        //        $paymentIds = array_merge($paymentIds, $legacyPaymentIds);
-
-        // $builder->innerJoin(
-        //     'sOrder.payment',
-        //     'payment',
-        //     \Doctrine\ORM\Query\Expr\Join::WITH,
-        //     //            'payment.id IN (:paymentIds)'
-        //     //            'number != 0'
-        // )
-
-        //->setParameter('paymentIds', $paymentIds, Connection::PARAM_INT_ARRAY);
-
         $builder->leftJoin('sOrder.languageSubShop', 'languageSubShop')
-                ->leftJoin('sOrder.customer', 'customer')
-                ->leftJoin('sOrder.orderStatus', 'orderStatus')
-                ->leftJoin('sOrder.paymentStatus', 'paymentStatus')
-                ->leftJoin('sOrder.attribute', 'attribute')
+            ->leftJoin('sOrder.orderStatus', 'orderStatus')
+            ->leftJoin('sOrder.paymentStatus', 'paymentStatus')
             ->leftJoin('sOrder.payment', 'payment')
 
-                ->addSelect('languageSubShop')
-                            ->addSelect('payment')
-                ->addSelect('customer')
-                ->addSelect('orderStatus')
-                ->addSelect('paymentStatus')
-                ->addSelect('attribute')
+            ->addSelect('payment')
+            ->addSelect('orderStatus')
+            ->addSelect('paymentStatus')
             ->where('sOrder.number != 0');
-
+        $query=$builder->getQuery();
+        Shopware()->PluginLogger()->notice($query->getSQL());
         return $builder;
     }
 
-
-    
+    /**
+     * {@inheritdoc}
+     */
     public function getWhitelistedCSRFActions()
     {
         return array('testSettings');

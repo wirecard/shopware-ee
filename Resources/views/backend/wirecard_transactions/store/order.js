@@ -1,5 +1,5 @@
 Ext.define('Shopware.apps.WirecardTransactions.store.Order', {
-    extend:'Shopware.store.Listing',
+    extend: 'Shopware.store.Listing',
 
     configure: function() {
         return {
