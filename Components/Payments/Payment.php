@@ -357,7 +357,7 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
-     * creates text representing basket 
+     * creates text representing basket
      *
      * @param array $cart
      * @param string $currency

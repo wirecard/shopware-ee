@@ -39,9 +39,8 @@ use Shopware\Models\Order\Order;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\TransactionService;
 
-class Shopware_Controllers_Backend_WirecardTransactions // phpcs:ignore
-    extends Shopware_Controllers_Backend_Application
-    implements CSRFWhitelistAware
+class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Controllers_Backend_Application implements
+    CSRFWhitelistAware
 {
     /**
      * @var string
@@ -98,7 +97,7 @@ class Shopware_Controllers_Backend_WirecardTransactions // phpcs:ignore
         $query = $builder->getQuery();
         $result = $query->getArrayResult();
 
-        if(!$result || empty($result)) {
+        if (!$result || empty($result)) {
             return $this->View()->assign([ 'success' => false]);
         }
 

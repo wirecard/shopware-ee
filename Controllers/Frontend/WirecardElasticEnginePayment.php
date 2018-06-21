@@ -39,9 +39,7 @@ use WirecardShopwareElasticEngine\Components\StatusCodes;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
-class Shopware_Controllers_Frontend_WirecardElasticEnginePayment // phpcs:ignore
-    extends Shopware_Controllers_Frontend_Payment
-    implements CSRFWhitelistAware
+class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopware_Controllers_Frontend_Payment implements CSRFWhitelistAware
 {
     /**
      * Index Action starting payment - redirect to method

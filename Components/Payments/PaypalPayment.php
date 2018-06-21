@@ -61,9 +61,11 @@ class PaypalPayment extends Payment
     protected function getConfig(array $configData)
     {
         $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
-        $paypalConfig = new PaymentMethodConfig(PayPalTransaction::NAME,
-                                                $configData['transactionMAID'],
-                                                $configData['transactionKey']);
+        $paypalConfig = new PaymentMethodConfig(
+            PayPalTransaction::NAME,
+            $configData['transactionMAID'],
+            $configData['transactionKey']
+        );
         $config->add($paypalConfig);
 
         return $config;
@@ -83,29 +85,50 @@ class PaypalPayment extends Payment
      */
     public function getConfigData()
     {
-        $baseUrl = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine',
-                                                        'wirecardElasticEnginePaypalServer');
-        $httpUser = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine',
-                                                         'wirecardElasticEnginePaypalHttpUser');
-        $httpPass = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine',
-                                                         'wirecardElasticEnginePaypalHttpPassword');
+        $baseUrl = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEnginePaypalServer'
+        );
+        $httpUser = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEnginePaypalHttpUser'
+        );
+        $httpPass = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEnginePaypalHttpPassword'
+        );
 
-        $paypalMAID = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine',
-                                                           'wirecardElasticEnginePaypalMerchandId');
-        $paypalKey = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine',
-                                                          'wirecardElasticEnginePaypalSecret');
-        $transactionType = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine',
-                                                                'wirecardElasticEnginePaypalTransactionType');
+        $paypalMAID = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEnginePaypalMerchandId'
+        );
+        $paypalKey = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEnginePaypalSecret'
+        );
+        $transactionType = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEnginePaypalTransactionType'
+        );
 
-        $sendBasket = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine',
-                                                           'wirecardElasticEnginePaypalSendBasket');
-        $fraudPrevention = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine',
-                                                                'wirecardElasticEnginePaypalFraudPrevention');
+        $sendBasket = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEnginePaypalSendBasket'
+        );
+        $fraudPrevention = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEnginePaypalFraudPrevention'
+        );
 
-        $shopName = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine',
-                                                         'wirecardElasticEnginePaypalShop');
-        $descriptor = Shopware()->Config()->getByNamespace('WirecardShopwareElasticEngine',
-                                                           'wirecardElasticEnginePaypalDescriptor');
+        $shopName = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEnginePaypalShop'
+        );
+        
+        $descriptor = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEnginePaypalDescriptor'
+        );
 
         return array_merge(parent::getConfigData(), [
             'baseUrl'         => $baseUrl,
