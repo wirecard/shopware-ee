@@ -61,8 +61,6 @@ function (button) {
         values[el.elementName] = val;
     });
 
-    console.log(btn);
-    window.BTN = btn;
     Ext.Ajax.request({
         url: url,
         params: values,

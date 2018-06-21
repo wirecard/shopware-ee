@@ -50,6 +50,28 @@ interface PaymentInterface
 
     /**
      * Start Transaction
+     *
+     * @param array $paymentData
+     * @return array
      */
     public function processPayment(array $paymentData);
+
+    /**
+     * Creates Transaction entry and returns it
+     *
+     * @return Transaction
+     */
+    public function createElasticEngineTransaction();
+
+    /**
+     * @param array $request
+     * @return Response
+     */
+    public function getPaymentResponse(array $request);
+        
+    /**
+     * @param string $request
+     * @return Response
+     */
+    public function getPaymentNotification($request);
 }

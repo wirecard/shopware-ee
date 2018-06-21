@@ -32,7 +32,6 @@
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
 use Wirecard\PaymentSdk\Config\Config;
-use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Basket;
 use Wirecard\PaymentSdk\Entity\CustomField;
@@ -43,6 +42,7 @@ use Wirecard\PaymentSdk\Entity\Address;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\FailureResponse;
+use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 
 use WirecardShopwareElasticEngine\Models\Transaction;
@@ -73,7 +73,7 @@ abstract class Payment implements PaymentInterface
         return [
             'name'                  => $this->getName(),
             'description'           => $this->getLabel(),
-            'action'                => 'WirecardEEPayment',
+            'action'                => 'WirecardElasticEnginePayment',
             'active'                => 0,
             'position'              => 0,
             'additionalDescription' => '',
@@ -121,15 +121,17 @@ abstract class Payment implements PaymentInterface
             $transaction->setLocale($locale);
         }
 
-        $elasticEngineTranscation = $this->getElasticEngineTransaction();
+        $elasticEngineTranscation = $this->createElasticEngineTransaction();
         $orderNumber = $elasticEngineTranscation->getId();
         $transaction->setOrderNumber($orderNumber);
-        
+
         if ($configData['descriptor']) {
             $descriptor = $configData['shopName'] . ' ' . $orderNumber;
             $transaction->setDescriptor($descriptor);
         }
 
+        $this->addPaymentSpecificData($transaction, $paymentData, $configData);
+        
         $transactionService = new TransactionService($config, Shopware()->PluginLogger());
         
         $response = null;
@@ -152,27 +154,40 @@ abstract class Payment implements PaymentInterface
 
         if ($response instanceof FailureResponse) {
             $errors = '';
+
             foreach ($response->getStatusCollection()->getIterator() as $item) {
                 $errors .= $item->getDescription() . "\n";
             }
 
             Shopware()->PluginLogger()->error($errors);
         }
-
         return ['status' => 'error'];
     }
 
     /**
      * get payment settings
+     *
      * @return array
      */
     protected function getConfigData()
     {
-        return [];
+        return [
+            'baseUrl'         => '',
+            'httpUser'        => '',
+            'httpPass'        => '',
+            'transactionMAID' => '',
+            'transactionKey'  => '',
+            'transactionType' => '',
+            'sendBasket'      => false,
+            'fraudPrevention' => false,
+            'shopName'        => 'Web Shop',
+            'descriptor'      => ''
+        ];
     }
 
     /**
      * Creates PaymentSDK config object
+     *
      * @param array $configData
      * @return Config
      */
@@ -183,6 +198,7 @@ abstract class Payment implements PaymentInterface
 
     /**
      * Creates payment spectific transaction
+     *
      * @return Transaction
      */
     protected function getTransaction()
@@ -193,10 +209,11 @@ abstract class Payment implements PaymentInterface
     /**
      * Adds consumer personal information, billing and shipping address to Transaction
      *
-     * @param Transaction $transaction
+     * @param WirecardTransaction $transaction
      * @param array $userData
+     * @return WirecardTransaction
      */
-    protected function addConsumer($transaction, $userData)
+    protected function addConsumer(WirecardTransaction $transaction, array $userData)
     {
         $user = $userData['additional']['user'];
         $transaction->setConsumerId($user['userID']);
@@ -270,21 +287,23 @@ abstract class Payment implements PaymentInterface
         
         $transaction->setAccountHolder($accountHolder);
         $transaction->setShipping($shippingUser);
+
+        return $transaction;
     }
     
     /**
      * creates paymentSDK basket object
-     * @param Transaction $transaction
+     *
+     * @param WirecardTransaction $transaction
      * @param array $cart
      * @param string $currency
      * @return Basket
      */
-    protected function createBasket($transaction, $cart, $currency)
+    protected function createBasket(WirecardTransaction $transaction, array $cart, $currency)
     {
         $basket = new Basket();
         $basket->setVersion($transaction);
 
-        $tmp = 0;
         foreach ($cart['content'] as $item) {
             $name = $item['articlename'];
             $sku = $item['ordernumber'];
@@ -319,7 +338,6 @@ abstract class Payment implements PaymentInterface
             $basket->add($basketItem);
         }
 
-        // TODO Shipping name and description
         if (isset($cart["sShippingcostsWithTax"]) &&
             $cart["sShippingcostsWithTax"]) {
             $shippingAmount = new Amount($cart["sShippingcostsWithTax"], $currency);
@@ -339,10 +357,55 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
-     * Creates Transaction entry and returns it
-     * @return Transaction
+     * creates text representing basket 
+     *
+     * @param array $cart
+     * @param string $currency
+     * @return string
      */
-    public function getElasticEngineTransaction()
+    protected function createBasketText(array $cart, $currency)
+    {
+        $basketString = '';
+
+        foreach ($cart['content'] as $item) {
+            $itemLine = '';
+            
+            $name = $item['articlename'];
+            $sku = $item['ordernumber'];
+            $taxRate = floatval($item['tax_rate']);
+            $quantity = $item['quantity'];
+            $price = 0;
+            
+            if (isset($item['additional_details'])) {
+                if (isset($item['additional_details']['prices']) && count($item['additional_details']['prices']) == 1) {
+                    $price = $item['additional_details']['prices'][0]['price_numeric'];
+                } else {
+                    $price = $item['additional_details']['price_numeric'];
+                }
+            } else {
+                $amountStr = $item['price'];
+                $price = floatval(str_replace(',', '.', $amountStr));
+            }
+
+            $itemLine = $name . ' - ' . $sku . ' - ' . $price . ' ' . $currency . ' - ' .
+                      $quantity . ' - ' . $taxRate . '%';
+            $basketString .= $itemLine . "\n";
+        }
+
+        if (isset($cart["sShippingcostsWithTax"]) &&
+            $cart["sShippingcostsWithTax"]) {
+            $shippingLine = 'Shipping - shipping - ' . $cart["sShippingcostsWithTax"] . ' ' .
+                          $currency . ' - ' . $cart["sShippingcostsTax"] . '%';
+            $basketString .= $shippingLine;
+        }
+        
+        return $basketString;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function createElasticEngineTransaction()
     {
         $transactionModel = new Transaction();
         Shopware()->Models()->persist($transactionModel);
@@ -352,10 +415,22 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
-     * @param array $request
-     * @return Response
+     * Extra Options for payments are added here
+     *
+     * @params WirecardTransaction $transaction
+     * @params array $paymentData
+     * @params array $configData
+     * @return WirecardTransaction
      */
-    public function getPaymentResponse($request)
+    protected function addPaymentSpecificData(WirecardTransaction $transaction, array $paymentData, array $configData)
+    {
+        return $transaction;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getPaymentResponse(array $request)
     {
         $configData = $this->getConfigData();
         $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
@@ -366,8 +441,7 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
-     * @param string $request
-     * @return Response
+     * @inheritdoc
      */
     public function getPaymentNotification($request)
     {

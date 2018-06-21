@@ -1,23 +1,30 @@
 <?php
 /**
  * Shop System Plugins - Terms of Use
+ *
  * The plugins offered are provided free of charge by Wirecard AG and are explicitly not part
  * of the Wirecard AG range of products and services.
+ *
  * They have been tested and approved for full functionality in the standard configuration
  * (status on delivery) of the corresponding shop system. They are under General Public
  * License version 3 (GPLv3) and can be used, developed and passed on to third parties under
  * the same terms.
+ *
  * However, Wirecard AG does not provide any guarantee or accept any liability for any errors
  * occurring when used in an enhanced, customized shop system configuration.
+ *
  * Operation in an enhanced, customized configuration is at your own risk and requires a
  * comprehensive test phase by the user of the plugin.
+ *
  * Customers use the plugins at their own risk. Wirecard AG does not guarantee their full
  * functionality neither does Wirecard AG assume liability for any disadvantages related to
  * the use of the plugins. Additionally, Wirecard AG does not guarantee the full functionality
  * for customized shop systems or installed plugins of other vendors of plugins within the same
  * shop system.
+ *
  * Customers are responsible for testing the plugin's functionality before starting productive
  * operation.
+ *
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
  */
@@ -25,28 +32,23 @@
 use Shopware\Components\CSRFWhitelistAware;
 use Shopware\Models\Order\Status;
 
-use Wirecard\PaymentSdk\Config\Config;
-use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
-use Wirecard\PaymentSdk\Entity\Amount;
-use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
-use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
-use Wirecard\PaymentSdk\TransactionService;
 
 use WirecardShopwareElasticEngine\Components\StatusCodes;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
-
 use WirecardShopwareElasticEngine\Models\Transaction;
 
-class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopware_Controllers_Frontend_Payment implements CSRFWhitelistAware
+class Shopware_Controllers_Frontend_WirecardElasticEnginePayment // phpcs:ignore
+    extends Shopware_Controllers_Frontend_Payment
+    implements CSRFWhitelistAware
 {
     /**
      * Index Action starting payment - redirect to method
      */
     public function indexAction()
     {
-        if ($this->getPaymentShortName() == 'wirecard_elastic_engine_paypal') {
+        if ($this->getPaymentShortName() === PaypalPayment::PAYMETHOD_IDENTIFIER) {
             return $this->redirect(['action' => 'paypal', 'forceSecure' => true]);
         }
 
@@ -66,8 +68,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 'wirecard_elast_engine_update_cart' => 'true'
             ]);
         }
-        
-        $paymentData = $this->getPaymentData('paypal');
+
+        $paymentData = $this->getPaymentData(PaypalPayment::PAYMETHOD_IDENTIFIER);
 
         $paypal = new PaypalPayment();
 
@@ -75,9 +77,9 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         if ($paymentProcess['status'] === 'success') {
             return $this->redirect($paymentProcess['redirect']);
-        } else {
-            $this->errorHandling(StatusCodes::ERROR_STARTING_PROCESS_FAILED);
         }
+
+        $this->errorHandling(StatusCodes::ERROR_STARTING_PROCESS_FAILED);
     }
 
     /**
@@ -96,7 +98,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         }
 
         $response = null;
-        if ($request['method'] === 'paypal') {
+        if ($request['method'] === PaypalPayment::PAYMETHOD_IDENTIFIER) {
             $paypal = new PaypalPayment();
             $response = $paypal->getPaymentResponse($request);
         }
@@ -115,7 +117,13 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
             $wirecardOrderNumber = $response->findElement('order-number');
             
-            $elasticEngineTransaction = Shopware()->Models()->getRepository(Transaction::class)->findOneBy(['id' => $wirecardOrderNumber]);
+            $elasticEngineTransaction = Shopware()->Models()->getRepository(Transaction::class)
+                                      ->findOneBy(['id' => $wirecardOrderNumber]);
+
+            if (!$elasticEngineTransaction) {
+                return $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER);
+            }
+
             $elasticEngineTransaction->setTransactionId($transactionId);
             $elasticEngineTransaction->setProviderTransactionId($paymentUniqueId);
             $elasticEngineTransaction->setReturnResponse(serialize($response->getData()));
@@ -164,7 +172,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER);
             }
         } elseif ($response instanceof FailureResponse) {
-            Shopware()->PluginLogger()->error('Response validation status: %s', $response->isValidSignature() ? 'true' : 'false');
+            Shopware()->PluginLogger()->error(
+                'Response validation status: %s',
+                $response->isValidSignature() ? 'true' : 'false'
+            );
 
             foreach ($response->getStatusCollection() as $status) {
                 $severity = ucfirst($status->getSeverity());
@@ -182,7 +193,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function cancelAction()
     {
-        $this->errorHandling(StatusCodes::CANCLED_BY_USER);
+        $this->errorHandling(StatusCodes::CANCELED_BY_USER);
     }
 
     /**
@@ -214,15 +225,13 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         
         $response = null;
         
-        if ($request['method'] === 'paypal') {
+        if ($request['method'] === PaypalPayment::PAYMETHOD_IDENTIFIER) {
             $paypal = new PaypalPayment();
             $response = $paypal->getPaymentNotification($notification);
         }
 
         if (!$response) {
-            echo "no response";
-            Shopware()->PluginLogger()->error("no response");
-            //return $this->errorHandling(StatusCodes::ERROR_NOT_A_VALID_METHOD);
+            Shopware()->PluginLogger()->error("notification called without response");
         }
 
         if ($response instanceof SuccessResponse) {
@@ -238,7 +247,13 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $paymentStatusId = Status::PAYMENT_STATE_COMPLETELY_PAID;
             }
         
-            $elasticEngineTransaction = Shopware()->Models()->getRepository(Transaction::class)->findOneBy(['id' => $wirecardOrderNumber]);
+            $elasticEngineTransaction = Shopware()->Models()->getRepository(Transaction::class)
+                                      ->findOneBy(['id' => $wirecardOrderNumber]);
+            if (!$elasticEngineTransaction) {
+                Shopware()->PluginLogger()->error("no Wirecard Transaction found for order");
+                exit();
+            }
+
             $elasticEngineTransaction->setTransactionId($transactionId);
             $elasticEngineTransaction->setProviderTransactionId($paymentUniqueId);
             $elasticEngineTransaction->setNotificationResponse(serialize($response->getData()));
@@ -317,11 +332,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 continue;
             }
             
-            if (!$article['isAvailable'] || ($article['laststock'] && intval($item['quantity']) > $article['instock'])) {
+            if (!$article['isAvailable'] ||
+                ($article['laststock'] && intval($item['quantity']) > $article['instock'])) {
                 return false;
             }
         }
-        
+
         return true;
     }
     

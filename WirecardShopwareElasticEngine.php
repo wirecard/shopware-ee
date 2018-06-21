@@ -52,6 +52,8 @@ class WirecardShopwareElasticEngine extends Plugin
 {
     public function install(InstallContext $context)
     {
+        $this->registerPayments();
+        
         $entityManager = $this->container->get('models');
         $schemaTool = new SchemaTool($entityManager);
 
@@ -68,13 +70,6 @@ class WirecardShopwareElasticEngine extends Plugin
         if ($context->keepUserData()) {
             return;
         }
-
-        $entityManager = $this->container->get('models');
-        $schemaTool = new SchemaTool($entityManager);
-
-        $schemaTool->dropSchema(
-            [ $entityManager->getClassMetadata(Transaction::class) ]
-        );
     }
 
     public function update(UpdateContext $context)

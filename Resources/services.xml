@@ -12,5 +12,9 @@
             <argument type="service" id="template"/>
             <tag name="shopware.event_subscriber"/>
         </service>
+        <service id="wirecard_elast_engine_order.subscriber.templates" class="WirecardShopwareElasticEngine\Subscriber\ExtendOrder">
+            <argument>%wirecard_shopware_elastic_engine.plugin_dir%</argument>
+            <tag name="shopware.event_subscriber"/>
+        </service>
     </services>
 </container>
