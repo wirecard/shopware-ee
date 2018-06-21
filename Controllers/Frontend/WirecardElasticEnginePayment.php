@@ -167,7 +167,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 ]);
             } catch (RuntimeException $e) {
                 Shopware()->PluginLogger()->error($e->getMessage());
-                $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER);
+                return $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER, $e->getMessage());
             }
         } elseif ($response instanceof FailureResponse) {
             Shopware()->PluginLogger()->error(
@@ -175,13 +175,17 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $response->isValidSignature() ? 'true' : 'false'
             );
 
+            $errorMessages = "";
+
             foreach ($response->getStatusCollection() as $status) {
                 $severity = ucfirst($status->getSeverity());
                 $code = $status->getCode();
                 $description = $status->getDescription();
                 $errorMessage = sprintf('%s with code %s and message "%s" occurred.', $severity, $code, $description);
+                $errorMessages .= $errorMessage . '<br>';
                 Shopware()->PluginLogger()->error($errorMessage);
             }
+            $this->errorHandling(StatusCodes::ERROR_FAILURE_RESPONSE, $errorMessage);
         }
         $this->errorHandling(StatusCodes::ERROR_FAILURE_RESPONSE);
     }
@@ -199,13 +203,15 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * @see StatusCodes
      *
      * @param int $code
+     * @param string $message
      */
-    protected function errorHandling($code)
+    protected function errorHandling($code, $message = "")
     {
         $this->redirect([
             'controller'                       => 'checkout',
             'action'                           => 'shippingPayment',
-            'wirecard_elast_engine_error_code' => $code
+            'wirecard_elast_engine_error_code' => $code,
+            'wirecard_elast_engine_error_msg'  => $message
         ]);
     }
 

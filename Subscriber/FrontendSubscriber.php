@@ -89,12 +89,14 @@ class FrontendSubscriber implements SubscriberInterface
         $request = $controller->Request();
 
         $errorCode = $request->getParam('wirecard_elast_engine_error_code');
+        $errorMsg = $request->getParam('wirecard_elast_engine_error_msg');
         $updateCart = $request->getParam('wirecard_elast_engine_update_cart');
         
         $view = $controller->View();
 
         if ($errorCode) {
             $view->assign('wirecardElasticEngineErrorCode', $errorCode);
+            $view->assign('wirecardElasticEngineErrorMessage', $errorMsg);
         }
 
         if ($updateCart) {
