@@ -31,6 +31,7 @@
 
 namespace WirecardShopwareElasticEngine;
 
+// PSR1.Files.SideEffects is disabled for this file, see `phpcs.xml`
 if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once(__DIR__ . '/vendor/autoload.php');
 }
@@ -53,7 +54,7 @@ class WirecardShopwareElasticEngine extends Plugin
     public function install(InstallContext $context)
     {
         $this->registerPayments();
-        
+
         $entityManager = $this->container->get('models');
         $schemaTool = new SchemaTool($entityManager);
 
