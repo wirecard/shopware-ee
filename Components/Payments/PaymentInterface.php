@@ -31,6 +31,9 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
+use Wirecard\PaymentSdk\Response\Response;
+use WirecardShopwareElasticEngine\Models\Transaction;
+
 interface PaymentInterface
 {
     /**
@@ -68,7 +71,7 @@ interface PaymentInterface
      * @return Response
      */
     public function getPaymentResponse(array $request);
-        
+
     /**
      * @param string $request
      * @return Response
