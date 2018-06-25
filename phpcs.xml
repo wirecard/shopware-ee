@@ -8,4 +8,8 @@
     <file>.</file>
     <exclude-pattern>./vendor/*</exclude-pattern>
     <exclude-pattern>./test/*</exclude-pattern>
+
+    <rule ref="PSR1.Files.SideEffects">
+        <exclude-pattern>WirecardShopwareElasticEngine.php</exclude-pattern>
+    </rule>
 </ruleset>
