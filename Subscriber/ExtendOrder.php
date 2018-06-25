@@ -18,7 +18,7 @@ class ExtendOrder implements SubscriberInterface
     {
         $this->pluginDirectory = $pluginDirectory;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -33,7 +33,7 @@ class ExtendOrder implements SubscriberInterface
     {
         $controller = $args->getSubject();
 
-        $view = $controller->View();
+        $view    = $controller->View();
         $request = $controller->Request();
 
         $view->addTemplateDir($this->pluginDirectory . '/Resources/views');
@@ -41,7 +41,7 @@ class ExtendOrder implements SubscriberInterface
         if ($request->getActionName() == 'index') {
             $view->extendsTemplate('backend/wirecard_extend_order/app.js');
         }
- 
+
         if ($request->getActionName() == 'load') {
             $view->extendsTemplate('backend/wirecard_extend_order/view/detail/window.js');
         }

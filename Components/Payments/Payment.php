@@ -40,8 +40,10 @@ use Wirecard\PaymentSdk\Entity\Item;
 use Wirecard\PaymentSdk\Entity\AccountHolder;
 use Wirecard\PaymentSdk\Entity\Address;
 use Wirecard\PaymentSdk\Entity\Redirect;
+use Wirecard\PaymentSdk\Entity\Status;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\FailureResponse;
+use Wirecard\PaymentSdk\Transaction\Reservable;
 use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 
@@ -49,6 +51,9 @@ use WirecardShopwareElasticEngine\Models\Transaction;
 
 abstract class Payment implements PaymentInterface
 {
+    const TRANSACTION_TYPE_AUTHORIZATION = 'authorization';
+    const TRANSACTION_TYPE_PURCHASE = 'purchase';
+
     /**
      * @inheritdoc
      */
@@ -108,9 +113,9 @@ abstract class Payment implements PaymentInterface
             $basket = $this->createBasket($transaction, $paymentData['basket'], $paymentData['currency']);
             $transaction->setBasket($basket);
         }
-        
+
         if ($configData['fraudPrevention']) {
-            $consumer = $this->addConsumer($transaction, $paymentData['user']);
+            $this->addConsumer($transaction, $paymentData['user']);
             $transaction->setIpAddress($paymentData['ipAddr']);
 
             $locale = \Locale::getDefault();
@@ -121,8 +126,8 @@ abstract class Payment implements PaymentInterface
             $transaction->setLocale($locale);
         }
 
-        $elasticEngineTranscation = $this->createElasticEngineTransaction();
-        $orderNumber = $elasticEngineTranscation->getId();
+        $elasticEngineTransaction = $this->createElasticEngineTransaction();
+        $orderNumber              = $elasticEngineTransaction->getId();
         $transaction->setOrderNumber($orderNumber);
 
         if ($configData['descriptor']) {
@@ -131,19 +136,20 @@ abstract class Payment implements PaymentInterface
         }
 
         $this->addPaymentSpecificData($transaction, $paymentData, $configData);
-        
+
         $transactionService = new TransactionService($config, Shopware()->PluginLogger());
-        
+
         $response = null;
-        if ($configData['transactionType'] == 'authorization') {
+        if ($configData['transactionType'] === self::TRANSACTION_TYPE_AUTHORIZATION
+            && $transaction instanceof Reservable) {
             $response = $transactionService->reserve($transaction);
-        } elseif ($configData['transactionType'] == 'purchase') {
+        } elseif ($configData['transactionType'] === self::TRANSACTION_TYPE_PURCHASE) {
             $response = $transactionService->pay($transaction);
         }
 
         if ($response instanceof InteractionResponse) {
-            $elasticEngineTranscation->setTransactionId($response->getTransactionId());
-            Shopware()->Models()->persist($elasticEngineTranscation);
+            $elasticEngineTransaction->setTransactionId($response->getTransactionId());
+            Shopware()->Models()->persist($elasticEngineTransaction);
             Shopware()->Models()->flush();
 
             return [
@@ -156,11 +162,13 @@ abstract class Payment implements PaymentInterface
             $errors = '';
 
             foreach ($response->getStatusCollection()->getIterator() as $item) {
+                /** @var $item Status */
                 $errors .= $item->getDescription() . "\n";
             }
 
             Shopware()->PluginLogger()->error($errors);
         }
+
         return ['status' => 'error'];
     }
 
@@ -169,7 +177,7 @@ abstract class Payment implements PaymentInterface
      *
      * @return array
      */
-    protected function getConfigData()
+    public function getConfigData()
     {
         return [
             'baseUrl'         => '',
@@ -186,22 +194,17 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
-     * Creates PaymentSDK config object
-     *
-     * @param array $configData
-     * @return Config
+     * @inheritdoc
      */
-    protected function getConfig(array $configData)
+    public function getConfig(array $configData)
     {
         return null;
     }
 
     /**
-     * Creates payment spectific transaction
-     *
-     * @return Transaction
+     * @inheritdoc
      */
-    protected function getTransaction()
+    public function getTransaction()
     {
         return null;
     }
@@ -228,8 +231,8 @@ abstract class Payment implements PaymentInterface
         $accountHolder->setEmail($email);
 
         if (isset($user['birthday']) && $user['birthday']) {
-            $birthdate = new \DateTime($user['birthday']);
-            $accountHolder->setDateOfBirth($birthdate);
+            $birthDate = new \DateTime($user['birthday']);
+            $accountHolder->setDateOfBirth($birthDate);
         }
 
         $billingData = $userData['billingaddress'];
@@ -237,15 +240,17 @@ abstract class Payment implements PaymentInterface
         if ($billingData['phone']) {
             $accountHolder->setPhone($billingData['phone']);
         }
-        
+
         $country = $userData['additional']['country']['countryiso'];
 
-        if (isset($userData['additional']['state']) &&
-            isset($userData['additional']['state']['shortcode']) &&
-            $userData['additional']['state']['shortcode']) {
-            // $country .= '-' .  $userData['additional']['state']['shortcode'];
-        }
-        
+        // SDK doesn't support state yet
+        //
+        // if (isset($userData['additional']['state']) &&
+        //    isset($userData['additional']['state']['shortcode']) &&
+        //    $userData['additional']['state']['shortcode']) {
+        //    $country .= '-' .  $userData['additional']['state']['shortcode'];
+        // }
+
         $city = $billingData['city'];
         $street = $billingData['street'];
         $zip = $billingData['zipcode'];
@@ -255,7 +260,7 @@ abstract class Payment implements PaymentInterface
         if ($billingData['additionalAddressLine1']) {
             $billingAddress->setStreet2($billingData['additionalAddressLine1']);
         }
-        
+
         $accountHolder->setAddress($billingAddress);
 
         $shippingData = $userData['shippingaddress'];
@@ -270,27 +275,29 @@ abstract class Payment implements PaymentInterface
         $shippingStreet = $shippingData['street'];
         $shippingZip = $shippingData['zipcode'];
 
-        if (isset($userData['additional']['stateShipping']) &&
-            isset($userData['additional']['stateShipping']['shortcode']) &&
-            $userData['additional']['stateShipping']['shortcode']) {
-            // $shippingCountry .= '-' . $userData['additional']['stateShipping']['shortcode'];
-        }
+        // SDK doesn't support state yet
+        //
+        //if (isset($userData['additional']['stateShipping']) &&
+        //    isset($userData['additional']['stateShipping']['shortcode']) &&
+        //    $userData['additional']['stateShipping']['shortcode']) {
+        //    $shippingCountry .= '-' . $userData['additional']['stateShipping']['shortcode'];
+        //}
 
         $shippingAddress = new Address($shippingCountry, $shippingCity, $shippingStreet);
         $shippingAddress->setPostalCode($shippingZip);
-        
+
         if ($shippingData['additionalAddressLine1']) {
             $shippingAddress->setStreet2($shippingData['additionalAddressLine1']);
         }
 
         $shippingUser->setAddress($shippingAddress);
-        
+
         $transaction->setAccountHolder($accountHolder);
         $transaction->setShipping($shippingUser);
 
         return $transaction;
     }
-    
+
     /**
      * creates paymentSDK basket object
      *
@@ -304,45 +311,46 @@ abstract class Payment implements PaymentInterface
         $basket = new Basket();
         $basket->setVersion($transaction);
 
-        foreach ($cart['content'] as $item) {
-            $name = $item['articlename'];
-            $sku = $item['ordernumber'];
-            $description = $item['additional_details']['description'];
-            $taxRate = floatval($item['tax_rate']);
-            $quantity = $item['quantity'];
-            $price = 0;
-            
-            if (isset($item['additional_details'])) {
-                if (isset($item['additional_details']['prices']) && count($item['additional_details']['prices']) == 1) {
-                    $price = $item['additional_details']['prices'][0]['price_numeric'];
+        if (isset($cart['content'])) {
+            foreach ($cart['content'] as $item) {
+                $name        = $item['articlename'];
+                $sku         = $item['ordernumber'];
+                $description = $item['additional_details']['description'];
+                $taxRate     = floatval($item['tax_rate']);
+                $quantity    = $item['quantity'];
+
+                if (isset($item['additional_details'])) {
+                    if (isset($item['additional_details']['prices'])
+                        && count($item['additional_details']['prices']) === 1) {
+                        $price = $item['additional_details']['prices'][0]['price_numeric'];
+                    } else {
+                        $price = $item['additional_details']['price_numeric'];
+                    }
                 } else {
-                    $price = $item['additional_details']['price_numeric'];
+                    $amountStr = $item['price'];
+                    $price     = floatval(str_replace(',', '.', $amountStr));
                 }
-            } else {
-                $amountStr = $item['price'];
-                $price = floatval(str_replace(',', '.', $amountStr));
+                $amount = new Amount($price, $currency);
+
+                $taxStr = $item['tax'];
+                $taxStr = str_replace(',', '.', $taxStr);
+                $tax    = new Amount(floatval($taxStr) / $quantity, $currency);
+
+                $basketItem = new Item($name, $amount, $quantity);
+
+                $basketItem->setDescription($description);
+                $basketItem->setArticleNumber($sku);
+                $basketItem->setTaxRate($taxRate);
+                $basketItem->setTaxAmount($tax);
+
+                $basket->add($basketItem);
             }
-            $amount = new Amount($price, $currency);
-
-            $taxStr = $item['tax'];
-            $taxStr = str_replace(',', '.', $taxStr);
-            $tax = new Amount(floatval($taxStr) / $quantity, $currency);
-
-            $basketItem = new Item($name, $amount, $quantity);
-            
-            $basketItem->setDescription($description);
-            $basketItem->setArticleNumber($sku);
-            $basketItem->setTaxRate($taxRate);
-            $basketItem->setTaxAmount($tax);
-
-            $basket->add($basketItem);
         }
 
-        if (isset($cart["sShippingcostsWithTax"]) &&
-            $cart["sShippingcostsWithTax"]) {
+        if (isset($cart["sShippingcostsWithTax"]) && $cart["sShippingcostsWithTax"]) {
             $shippingAmount = new Amount($cart["sShippingcostsWithTax"], $currency);
             $basketItem = new Item('Shipping', $shippingAmount, 1);
-            
+
             $basketItem->setDescription('Shipping');
             $basketItem->setArticleNumber('shipping');
 
@@ -352,7 +360,7 @@ abstract class Payment implements PaymentInterface
             $basketItem->setTaxRate($cart["sShippingcostsTax"]);
             $basket->add($basketItem);
         }
-        
+
         return $basket;
     }
 
@@ -368,16 +376,14 @@ abstract class Payment implements PaymentInterface
         $basketString = '';
 
         foreach ($cart['content'] as $item) {
-            $itemLine = '';
-            
             $name = $item['articlename'];
             $sku = $item['ordernumber'];
             $taxRate = floatval($item['tax_rate']);
             $quantity = $item['quantity'];
-            $price = 0;
-            
+
             if (isset($item['additional_details'])) {
-                if (isset($item['additional_details']['prices']) && count($item['additional_details']['prices']) == 1) {
+                if (isset($item['additional_details']['prices'])
+                    && count($item['additional_details']['prices']) === 1) {
                     $price = $item['additional_details']['prices'][0]['price_numeric'];
                 } else {
                     $price = $item['additional_details']['price_numeric'];
@@ -392,13 +398,12 @@ abstract class Payment implements PaymentInterface
             $basketString .= $itemLine . "\n";
         }
 
-        if (isset($cart["sShippingcostsWithTax"]) &&
-            $cart["sShippingcostsWithTax"]) {
-            $shippingLine = 'Shipping - shipping - ' . $cart["sShippingcostsWithTax"] . ' ' .
-                          $currency . ' - ' . $cart["sShippingcostsTax"] . '%';
+        if (isset($cart["sShippingcostsWithTax"]) && $cart["sShippingcostsWithTax"]) {
+            $shippingLine = 'Shipping - shipping - ' . $cart["sShippingcostsWithTax"] . ' ' . $currency . ' - '
+                            . $cart["sShippingcostsTax"] . '%';
             $basketString .= $shippingLine;
         }
-        
+
         return $basketString;
     }
 
@@ -417,9 +422,9 @@ abstract class Payment implements PaymentInterface
     /**
      * Extra Options for payments are added here
      *
-     * @params WirecardTransaction $transaction
-     * @params array $paymentData
-     * @params array $configData
+     * @param WirecardTransaction $transaction
+     * @param array               $paymentData
+     * @param array               $configData
      * @return WirecardTransaction
      */
     protected function addPaymentSpecificData(WirecardTransaction $transaction, array $paymentData, array $configData)

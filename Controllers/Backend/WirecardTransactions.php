@@ -29,8 +29,6 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-use Doctrine\DBAL\Connection;
-
 use Shopware\Components\CSRFWhitelistAware;
 
 use Shopware\Components\Model\QueryBuilder;
@@ -38,10 +36,13 @@ use Shopware\Models\Order\Order;
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Models\Transaction;
 
-class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Controllers_Backend_Application implements
-    CSRFWhitelistAware
+// @codingStandardsIgnoreStart
+class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Controllers_Backend_Application implements CSRFWhitelistAware
 {
+    // @codingStandardsIgnoreEnd
+
     /**
      * @var string
      */
@@ -59,20 +60,22 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
     {
         $config = $this->Request()->getParams();
 
+        if (empty($config['wirecardElasticEnginePaypalServer'])
+            || empty($config['wirecardElasticEnginePaypalHttpUser'])
+            || empty($config['wirecardElasticEnginePaypalHttpPassword'])) {
+            return $this->View()->assign(['status' => 'failed']);
+        }
+
         $wirecardUrl = $config['wirecardElasticEnginePaypalServer'];
         $httpUser = $config['wirecardElasticEnginePaypalHttpUser'];
         $httpPassword = $config['wirecardElasticEnginePaypalHttpPassword'];
 
         $testConfig = new Config($wirecardUrl, $httpUser, $httpPassword);
         $transactionService = new TransactionService($testConfig, Shopware()->PluginLogger());
-        
-        if ($transactionService->checkCredentials()) {
-            $data['status'] = 'success';
-        } else {
-            $data['status'] = 'failed';
-        }
-      
-        $this->View()->assign($data);
+
+        $data['status'] = $transactionService->checkCredentials() ? 'success' : 'failed';
+
+        return $this->View()->assign($data);
     }
 
     /**
@@ -85,23 +88,22 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         $orderNumber = $params['orderNumber'];
 
         if (!$orderNumber) {
-            return $this->View()->assign([ 'success' => false]);
+            return $this->View()->assign(['success' => false]);
         }
 
         $builder = $this->getManager()->createQueryBuilder();
         $builder->select('transaction')
-            ->from('WirecardShopwareElasticEngine\Models\Transaction', 'transaction')
-            ->where('transaction.orderNumber = ' . $orderNumber);
-            
+                ->from(Transaction::class, 'transaction')
+                ->where('transaction.orderNumber = ' . $orderNumber);
 
         $query = $builder->getQuery();
         $result = $query->getArrayResult();
 
         if (!$result || empty($result)) {
-            return $this->View()->assign([ 'success' => false]);
+            return $this->View()->assign(['success' => false]);
         }
 
-        $this->View()->assign([ 'success' => true, 'params' => $params, 'data' => $result ]);
+        return $this->View()->assign(['success' => true, 'params' => $params, 'data' => $result]);
     }
 
     /**
@@ -114,20 +116,25 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
 
     /**
      * ignores empty orders in query for Order View
+     *
+     * @param QueryBuilder $builder
+     * @return QueryBuilder
+     * @throws Enlight_Exception
      */
     private function prepareOrderQueryBuilder(QueryBuilder $builder)
     {
         $builder->leftJoin('sOrder.languageSubShop', 'languageSubShop')
-            ->leftJoin('sOrder.orderStatus', 'orderStatus')
-            ->leftJoin('sOrder.paymentStatus', 'paymentStatus')
-            ->leftJoin('sOrder.payment', 'payment')
+                ->leftJoin('sOrder.orderStatus', 'orderStatus')
+                ->leftJoin('sOrder.paymentStatus', 'paymentStatus')
+                ->leftJoin('sOrder.payment', 'payment')
+                ->addSelect('payment')
+                ->addSelect('orderStatus')
+                ->addSelect('paymentStatus')
+                ->where('sOrder.number != 0');
 
-            ->addSelect('payment')
-            ->addSelect('orderStatus')
-            ->addSelect('paymentStatus')
-            ->where('sOrder.number != 0');
-        $query=$builder->getQuery();
+        $query = $builder->getQuery();
         Shopware()->PluginLogger()->notice($query->getSQL());
+
         return $builder;
     }
 

@@ -34,11 +34,12 @@ namespace WirecardShopwareElasticEngine\Components\Payments;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
+use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
 
 class PaypalPayment extends Payment
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_paypal';
-    
+
     /**
      * @inheritdoc
      */
@@ -54,11 +55,11 @@ class PaypalPayment extends Payment
     {
         return self::PAYMETHOD_IDENTIFIER;
     }
-    
+
     /**
      * @inheritdoc
      */
-    protected function getConfig(array $configData)
+    public function getConfig(array $configData)
     {
         $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
         $paypalConfig = new PaymentMethodConfig(
@@ -71,11 +72,10 @@ class PaypalPayment extends Payment
         return $config;
     }
 
-
     /**
-     * @inheritdoc
+     * @return PayPalTransaction
      */
-    protected function getTransaction()
+    public function getTransaction()
     {
         return new PayPalTransaction();
     }
@@ -124,7 +124,7 @@ class PaypalPayment extends Payment
             'WirecardShopwareElasticEngine',
             'wirecardElasticEnginePaypalShop'
         );
-        
+
         $descriptor = Shopware()->Config()->getByNamespace(
             'WirecardShopwareElasticEngine',
             'wirecardElasticEnginePaypalDescriptor'
@@ -147,11 +147,13 @@ class PaypalPayment extends Payment
     /**
      * @inheritdoc
      */
-    protected function addPaymentSpecificData(PayPalTransaction $transaction, array $paymentData, array $configData)
+    protected function addPaymentSpecificData(WirecardTransaction $transaction, array $paymentData, array $configData)
     {
         $orderDetail = $this->createBasketText($paymentData['basket'], $paymentData['currency']);
 
-        $transaction->setOrderDetail($orderDetail);
+        if ($transaction instanceof PayPalTransaction) {
+            $transaction->setOrderDetail($orderDetail);
+        }
 
         return $transaction;
     }

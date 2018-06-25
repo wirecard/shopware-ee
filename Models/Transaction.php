@@ -62,7 +62,7 @@ class Transaction extends ModelEntity
      * @ORM\JoinColumn(name="order_number", referencedColumnName="ordernumber")
      */
     private $order;
-    
+
     /**
      * @var string
      * @ORM\Column(name="transaction_id", type="string", nullable=true)
@@ -76,13 +76,13 @@ class Transaction extends ModelEntity
     private $providerTransactionId;
 
     /**
-     * @var text
+     * @var string
      * @ORM\Column(name="return_response", type="text", nullable=true)
      */
     private $returnResponse;
 
     /**
-     * @var text
+     * @var string
      * @ORM\Column(name="notification_response", type="text", nullable=true)
      */
     private $notificationResponse;
@@ -92,7 +92,7 @@ class Transaction extends ModelEntity
      * @ORM\Column(name="payment_status", type="string", nullable=true)
      */
     private $paymentStatus;
-    
+
     /**
      * @return int
      */
@@ -128,7 +128,7 @@ class Transaction extends ModelEntity
     /**
      * @param Order $order
      */
-    public function setOrder($order)
+    public function setOrder(Order $order)
     {
         $this->order = $order;
     }
@@ -158,7 +158,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param string $transactionId
+     * @param $providerTransactionId
      */
     public function setProviderTransactionId($providerTransactionId)
     {
@@ -174,7 +174,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param string $transactionId
+     * @param $returnResponse
      */
     public function setReturnResponse($returnResponse)
     {

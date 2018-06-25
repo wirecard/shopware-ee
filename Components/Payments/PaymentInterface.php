@@ -31,6 +31,7 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
+use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Response\Response;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
@@ -77,4 +78,26 @@ interface PaymentInterface
      * @return Response
      */
     public function getPaymentNotification($request);
+
+    /**
+     * Returns payment specific transaction object
+     *
+     * @return \Wirecard\PaymentSdk\Transaction\Transaction
+     */
+    public function getTransaction();
+
+    /**
+     * Returns transaction config
+     *
+     * @param array $configData
+     * @return Config
+     */
+    public function getConfig(array $configData);
+
+    /**
+     * Returns payment specific configuration
+     *
+     * @return array
+     */
+    public function getConfigData();
 }

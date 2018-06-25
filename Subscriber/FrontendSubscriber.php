@@ -73,7 +73,7 @@ class FrontendSubscriber implements SubscriberInterface
         $this->templateManager->addTemplateDir($this->pluginDirectory . '/Resources/views');
     }
 
-    
+
     public function onCollectLessFiles()
     {
         $less = new LessDefinition(
@@ -90,10 +90,10 @@ class FrontendSubscriber implements SubscriberInterface
         $controller = $args->getSubject();
         $request = $controller->Request();
 
-        $errorCode = $request->getParam('wirecard_elast_engine_error_code');
-        $errorMsg = $request->getParam('wirecard_elast_engine_error_msg');
-        $updateCart = $request->getParam('wirecard_elast_engine_update_cart');
-        
+        $errorCode = $request->getParam('wirecard_elastic_engine_error_code');
+        $errorMsg = $request->getParam('wirecard_elastic_engine_error_msg');
+        $updateCart = $request->getParam('wirecard_elastic_engine_update_cart');
+
         $view = $controller->View();
         $actionName = $request->getActionName();
 
@@ -103,9 +103,8 @@ class FrontendSubscriber implements SubscriberInterface
                 $sOrderNumber = $view->getAssign('sOrderNumber');
                 if ($sOrderNumber) {
                     $order = Shopware()->Models()->getRepository(Order::class)
-                           ->findOneBy(['number' => $sOrderNumber]);
+                                                 ->findOneBy(['number' => $sOrderNumber]);
 
-                    $paymentStatusStr = '';
                     if ($order) {
                         $view->assign('wirecardElasticEnginePayment', true);
 
@@ -119,7 +118,6 @@ class FrontendSubscriber implements SubscriberInterface
                             default:
                                 $paymentStatusStr = 'success';
                         }
-                        $paymentStatus = $order->getPaymentStatus()->getId();
 
                         $view->assign('wirecardElasticEnginePaymentStatus', $paymentStatusStr);
                     }
