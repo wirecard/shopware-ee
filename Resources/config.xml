@@ -119,18 +119,6 @@ function (button) {
             <description lang="de">Sende Kundendaten an Wirecard zur Betrugsprevention</description>
             <description lang="en">Send consumer data to Wirecard for fraud prevention</description>
         </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEnginePaypalShop</name>
-            <label lang="de">[PayPal] Shopname</label>
-            <label lang="en">[PayPal] Shop name</label>
-            <value>Web Shop</value>
-            <description lang="de">Max. 9 Zeichen</description>
-            <description lang="en">max. 9 characters</description>
-            <options>
-                <maxLength>9</maxLength>
-                <enforceMaxLength>true</enforceMaxLength>
-            </options>
-        </element>
         <element type="boolean" scope="shop">
             <name>wirecardElasticEnginePaypalDescriptor</name>
             <label lang="de">[PayPal] Beschreibung senden</label>

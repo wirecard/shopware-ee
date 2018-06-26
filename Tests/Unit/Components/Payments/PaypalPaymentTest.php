@@ -32,6 +32,7 @@
 namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Payments;
 
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
+use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 use WirecardShopwareElasticEngine\Tests\Unit\PaymentTestCase;
@@ -64,10 +65,9 @@ class PaypalPaymentTest extends PaymentTestCase
             'httpPass'        => 'qD2wzQ_hrc!8',
             'transactionMAID' => '2a0e9351-24ed-4110-9a1b-fd0fee6bec26',
             'transactionKey'  => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
-            'transactionType' => 'purchase',
+            'transactionType' => Payment::TRANSACTION_TYPE_PURCHASE,
             'sendBasket'      => true,
             'fraudPrevention' => true,
-            'shopName'        => 'Web Shop',
             'descriptor'      => true
         ], $this->payment->getConfigData());
     }

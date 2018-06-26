@@ -120,11 +120,6 @@ class PaypalPayment extends Payment
             'wirecardElasticEnginePaypalFraudPrevention'
         );
 
-        $shopName = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalShop'
-        );
-
         $descriptor = Shopware()->Config()->getByNamespace(
             'WirecardShopwareElasticEngine',
             'wirecardElasticEnginePaypalDescriptor'
@@ -139,7 +134,6 @@ class PaypalPayment extends Payment
             'transactionType' => $transactionType,
             'sendBasket'      => $sendBasket,
             'fraudPrevention' => $fraudPrevention,
-            'shopName'        => $shopName,
             'descriptor'      => $descriptor
         ]);
     }

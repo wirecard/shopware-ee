@@ -131,7 +131,7 @@ abstract class Payment implements PaymentInterface
         $transaction->setOrderNumber($orderNumber);
 
         if ($configData['descriptor']) {
-            $descriptor = $configData['shopName'] . ' ' . $orderNumber;
+            $descriptor = Shopware()->Config()->get('shopName') . ' ' . $orderNumber;
             $transaction->setDescriptor($descriptor);
         }
 
@@ -188,7 +188,6 @@ abstract class Payment implements PaymentInterface
             'transactionType' => '',
             'sendBasket'      => false,
             'fraudPrevention' => false,
-            'shopName'        => 'Web Shop',
             'descriptor'      => ''
         ];
     }
