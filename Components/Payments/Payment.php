@@ -118,7 +118,7 @@ abstract class Payment implements PaymentInterface
             $this->addConsumer($transaction, $paymentData['user']);
             $transaction->setIpAddress($paymentData['ipAddr']);
 
-            $locale = \Locale::getDefault();
+            $locale = Shopware()->Locale()->getLanguage();
             if (strpos($locale, '@') !== false) {
                 $localeArr = explode('@', $locale);
                 $locale = $localeArr[0];
