@@ -63,7 +63,6 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertNull($this->model->getOrder());
 
-        /** @var Order $order */
         $order = new Order();
         $this->model->setOrder($order);
 
