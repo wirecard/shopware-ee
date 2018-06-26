@@ -102,7 +102,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getOrderNumber()
     {
@@ -118,7 +118,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return Order
+     * @return Order|null
      */
     public function getOrder()
     {
@@ -134,7 +134,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getTransactionId()
     {
@@ -150,7 +150,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getProviderTransactionId()
     {
@@ -166,7 +166,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getReturnResponse()
     {
@@ -182,7 +182,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getNotificationResponse()
     {
@@ -198,7 +198,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getPaymentStatus()
     {
