@@ -94,7 +94,8 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         $builder = $this->getManager()->createQueryBuilder();
         $builder->select('transaction')
                 ->from(Transaction::class, 'transaction')
-                ->where('transaction.orderNumber = ' . $orderNumber);
+                ->where('transaction.orderNumber = :orderNumber')
+                ->setParameter('orderNumber', $orderNumber);
 
         $query = $builder->getQuery();
         $result = $query->getArrayResult();
