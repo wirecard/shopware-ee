@@ -94,13 +94,53 @@ class CreditCardPayment extends Payment
             'wirecardElasticEngineCreditCardHttpPassword'
         );
 
-        // TODO add payment specific config data
+        $creditCardMAID = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEngineCreditCardMerchandId'
+        );
+
+        $creditCardKey = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEngineCreditCardSecret'
+        );
+
+        $creditCard3dsMAID = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEngineCreditCard3dsMerchandId'
+        );
+
+        $creditCard3dsKey = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEngineCreditCard3dsSecret'
+        );
+
+        $transactionType = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEngineCreditCardTransactionType'
+        );
+
+        $threeDsOnly = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEngineCreditCard3dsOnly'
+        );
+
+        $threeDsAttempt = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEngineCreditCard3dsAttempt'
+        );
 
         return array_merge(parent::getConfigData(), [
-            'baseUrl'         => $baseUrl,
-            'httpUser'        => $httpUser,
-            'httpPass'        => $httpPass
-        ]);
+            'baseUrl'            => $baseUrl,
+            'httpUser'           => $httpUser,
+            'httpPass'           => $httpPass,
+            'transactionMAID'    => $creditCardMAID,
+            'transactionKey'     => $creditCardKey,
+            'transaction3dsMAID' => $creditCard3dsMAID,
+            'transaction3dsKey'  => $creditCard3dsKey,
+            'transactionType'    => $transactionType,
+            '3dsOnly'            => $threeDsOnly,
+            '3dsAttempt'         => $threeDsAttempt
+         ]);
     }
 
     /**

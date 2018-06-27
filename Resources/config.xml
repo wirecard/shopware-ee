@@ -173,20 +173,20 @@ function (button) {
             <description lang="en">Secret key for digital signature</description>
         </element>
         <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCard3DsMerchandId</name>
-            <label lang="de">[Credid Card] 3Ds Händler ID</label>
-            <label lang="en">[Credid Card] 3Ds Merchand ID</label>
+            <name>wirecardElasticEngineCreditCard3dsMerchandId</name>
+            <label lang="de">[Credid Card] 3DS Händler ID</label>
+            <label lang="en">[Credid Card] 3DS Merchand ID</label>
             <value>508b8896-b37d-4614-845c-26bf8bf2c948</value>
-            <description lang="de">Eindeutige 3Ds Händler-ID Ihres Wirecard Konto. Leer lassen oder "null" eintrgen , um 3Ds zu deaktiviern.</description>
-            <description lang="en">Unique 3Ds merachand account id to Wirecard. Keep empty or write "null", to deactivate 3Ds.</description>
+            <description lang="de">Eindeutige 3DS Händler-ID Ihres Wirecard Konto. Leer lassen oder "null" eintrgen , um 3DS zu deaktiviern.</description>
+            <description lang="en">Unique 3DS merachand account id to Wirecard. Keep empty or write "null", to deactivate 3DS.</description>
         </element>
         <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCard3DsSecret</name>
-            <label lang="de">[Credid Card] 3Ds Geheimschlüssel</label>
-            <label lang="en">[Credid Card] 3Ds Secret Key</label>
+            <name>wirecardElasticEngineCreditCard3dsSecret</name>
+            <label lang="de">[Credid Card] 3ds Geheimschlüssel</label>
+            <label lang="en">[Credid Card] 3ds Secret Key</label>
             <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
-            <description lang="de">3Ds Geheimschlüssel für die digitale Signatur</description>
-            <description lang="en">3Ds Secret key for digital signature</description>
+            <description lang="de">3DS Geheimschlüssel für die digitale Signatur</description>
+            <description lang="en">3DS Secret key for digital signature</description>
         </element>
         <element type="button" scope="shop">
             <name>wirecardElasticEngineCreditCardTestApi</name>
@@ -235,6 +235,40 @@ function (button) {
                     ]]>
                 </handler>
             </options>
+        </element>
+        <element type="select" scope="shop">
+            <name>wirecardElasticEngineCreditCardTransactionType</name>
+            <label lang="de">[Credit Card] Transaktionsart</label>
+            <label lang="en">[Credit Card] Transaction Type</label>
+            <value>purchase</value>
+            <store>
+                <option>
+                    <value>authorization</value>
+                    <label lang="de">Authorizieren</label>
+                    <label lang="en">authorization</label>
+                </option>
+                <option>
+                    <value>purchase</value>
+                    <label lang="de">direkt bezahlen</label>
+                    <label lang="en">purchase</label>
+                </option>
+            </store>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCard3dsOnly</name>
+            <label lang="de">[Credit Card] 3DS-Plifcht Betrag</label>
+            <label lang="en">[Credit Card] 3DS only amount</label>
+            <value>300</value>
+            <description lang="de">Ab diesem Betrag wird die Benutzung von 3DS erzwungen.</description>
+            <description lang="en">This amount forces usage of 3DS</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCard3dsAttempt</name>
+            <label lang="de">[Credit Card] 3DS-Versuch Betrag</label>
+            <label lang="en">[Credit Card] 3DS attempt amount</label>
+            <value>300</value>
+            <description lang="de">Ab diesem Betrag wird 3DS versucht zu verwenden.</description>
+            <description lang="en">This amount attemps of 3DS</description>
         </element>
     </elements>
 </config>
