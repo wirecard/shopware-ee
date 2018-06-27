@@ -61,6 +61,8 @@ function (button) {
         values[el.elementName] = val;
     });
 
+    values['method'] = 'Paypal';
+
     Ext.Ajax.request({
         url: url,
         params: values,
@@ -71,6 +73,9 @@ function (button) {
                 text = '<span style=\"color: green;font-weight: bold;\">Test successfull</span>';
             } else {
                 text = '<span style=\"color: red;font-weight: bold;\">Test failed</span>';
+                if ( data.msg ) {
+                    text += '<br>' + data.msg;
+                }
             }
             Shopware.Notification.createStickyGrowlMessage({
                 title: "Wirecard PayPal test",
@@ -126,6 +131,110 @@ function (button) {
             <value>true</value>
             <description lang="de">Sende Beschreibung</description>
             <description lang="en">Send descriptor</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCardServer</name>
+            <label lang="de">[Credid Card] Wirecard Server Url</label>
+            <label lang="en">[Credid Card] Wirecard Server Url</label>
+            <value>https://api-test.wirecard.com</value>
+            <description lang="de">Wirecard Basis Url (z.B. http://api-test.wirecard.com)</description>
+            <description lang="en">Wirecard Base Url (e.g. http://api-test.wirecard.com)</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCardHttpUser</name>
+            <label lang="de">[Credid Card] HTTP Benutzer</label>
+            <label lang="en">[Credid Card] HTTP User</label>
+            <value>70000-APITEST-AP</value>
+            <description lang="de">HTTP Benutzer</description>
+            <description lang="en">HTTP User</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCardHttpPassword</name>
+            <label lang="de">[Credid Card] HTTP Passwort</label>
+            <label lang="en">[Credid Card] HTTP Password</label>
+            <value>qD2wzQ_hrc!8</value>
+            <description lang="de">HTTP Passwort</description>
+            <description lang="en">HTTP Password</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCardMerchandId</name>
+            <label lang="de">[Credid Card] Händler ID</label>
+            <label lang="en">[Credid Card] Merchand ID</label>
+            <value>53f2895a-e4de-4e82-a813-0d87a10e55e6</value>
+            <description lang="de">Eindeutige Händler-ID Ihres Wirecard Konto</description>
+            <description lang="en">Unique merachand account id to Wirecard</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCardSecret</name>
+            <label lang="de">[Credid Card] Geheimschlüssel</label>
+            <label lang="en">[Credid Card] Secret Key</label>
+            <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
+            <description lang="de">Geheimschlüssel für die digitale Signatur</description>
+            <description lang="en">Secret key for digital signature</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCard3DsMerchandId</name>
+            <label lang="de">[Credid Card] 3Ds Händler ID</label>
+            <label lang="en">[Credid Card] 3Ds Merchand ID</label>
+            <value>508b8896-b37d-4614-845c-26bf8bf2c948</value>
+            <description lang="de">Eindeutige 3Ds Händler-ID Ihres Wirecard Konto. Leer lassen oder "null" eintrgen , um 3Ds zu deaktiviern.</description>
+            <description lang="en">Unique 3Ds merachand account id to Wirecard. Keep empty or write "null", to deactivate 3Ds.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCard3DsSecret</name>
+            <label lang="de">[Credid Card] 3Ds Geheimschlüssel</label>
+            <label lang="en">[Credid Card] 3Ds Secret Key</label>
+            <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
+            <description lang="de">3Ds Geheimschlüssel für die digitale Signatur</description>
+            <description lang="en">3Ds Secret key for digital signature</description>
+        </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEngineCreditCardTestApi</name>
+            <label lang="de">[Credit Card] Konfiguration testen</label>
+            <label lang="en">[Credit Card] Test settings</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    var url = document.location.pathname + 'wirecardTransactions/testSettings',
+        btn = button,
+        panel = button.up('panel'),
+        formFields = panel.query('[isFormField]'),
+        values = {};
+
+    Ext.Array.each(formFields, function(el, i) {
+        var val = el.getSubmitValue();
+        values[el.elementName] = val;
+    });
+
+    values['method'] = 'CreditCard';
+
+    Ext.Ajax.request({
+        url: url,
+        params: values,
+        success: function (response) {
+            var data = Ext.decode(response.responseText);
+
+            if ( data.status == 'success' ) {
+                text = '<span style=\"color: green;font-weight: bold;\">Test successfull</span>';
+            } else {
+                text = '<span style=\"color: red;font-weight: bold;\">Test failed</span>';
+                if ( data.msg ) {
+                    text += '<br>' + data.msg;
+                }
+            }
+            Shopware.Notification.createStickyGrowlMessage({
+                title: "Wirecard Credit Card test",
+                text: text,
+                width: 440,
+                log: false,
+            });
+        }
+    })
+}
+                    ]]>
+                </handler>
+            </options>
         </element>
     </elements>
 </config>

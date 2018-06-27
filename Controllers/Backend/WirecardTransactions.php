@@ -60,20 +60,33 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
     {
         $config = $this->Request()->getParams();
 
-        if (empty($config['wirecardElasticEnginePaypalServer'])
-            || empty($config['wirecardElasticEnginePaypalHttpUser'])
-            || empty($config['wirecardElasticEnginePaypalHttpPassword'])) {
-            return $this->View()->assign(['status' => 'failed']);
+        $payMethod = $config['method'];
+
+        if (empty($config['wirecardElasticEngine' . $payMethod . 'Server'])
+            || empty($config['wirecardElasticEngine' . $payMethod . 'HttpUser'])
+            || empty($config['wirecardElasticEngine' . $payMethod . 'HttpPassword'])) {
+            return $this->View()->assign([
+                'status' => 'failed',
+                'msg' => 'One or more credential information are empty'
+            ]);
         }
 
-        $wirecardUrl = $config['wirecardElasticEnginePaypalServer'];
-        $httpUser = $config['wirecardElasticEnginePaypalHttpUser'];
-        $httpPassword = $config['wirecardElasticEnginePaypalHttpPassword'];
+        $wirecardUrl = $config['wirecardElasticEngine' . $payMethod . 'Server'];
+        $httpUser = $config['wirecardElasticEngine' . $payMethod . 'HttpUser'];
+        $httpPassword = $config['wirecardElasticEngine' . $payMethod . 'HttpPassword'];
 
         $testConfig = new Config($wirecardUrl, $httpUser, $httpPassword);
         $transactionService = new TransactionService($testConfig, Shopware()->PluginLogger());
 
-        $data['status'] = $transactionService->checkCredentials() ? 'success' : 'failed';
+        try {
+            $data['status'] = $transactionService->checkCredentials() ? 'success' : 'failed';
+        } catch (\Exception $e) {
+            return $this->View()->assign([
+                'status' => 'failed',
+                'msg' => $e->getMessage(),
+            ]);
+        }
+        $data['method'] = $payMethod;
 
         return $this->View()->assign($data);
     }

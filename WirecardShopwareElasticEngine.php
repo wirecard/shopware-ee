@@ -44,6 +44,7 @@ use Shopware\Components\Plugin\Context\UninstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
+use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 
 use WirecardShopwareElasticEngine\Models\Transaction;
 
@@ -103,6 +104,7 @@ class WirecardShopwareElasticEngine extends Plugin
     protected function getSupportedPayments()
     {
         return [
+            new CreditCardPayment(),
             new PaypalPayment()
         ];
     }
