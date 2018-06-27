@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/menu.xsd">
+    <entries>
+        <entry>
+            <name>Wirecard</name>
+            <label lang="en">Wirecard</label>
+            <label lang="de">Wirecard</label>
+            <class>sprite--wirecard</class>
+            <parent identifiedBy="controller">Payments</parent>
+            <children>
+                <entry>
+                    <name>WirecardOrderList</name>
+                    <label lang="en">Order List</label>
+                    <label lang="de">Bestellliste</label>
+                    <controller>WirecardTransactions</controller>
+                    <action>index</action>
+                    <class>sprite-wirecard</class>
+                </entry>
+            </children>
+        </entry>
+    </entries>
+</menu>

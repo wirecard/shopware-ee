@@ -31,6 +31,11 @@
 
 namespace WirecardShopwareElasticEngine;
 
+// PSR1.Files.SideEffects is disabled for this file, see `phpcs.xml`
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once(__DIR__ . '/vendor/autoload.php');
+}
+
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\ActivateContext;
 use Shopware\Components\Plugin\Context\DeactivateContext;
@@ -38,17 +43,34 @@ use Shopware\Components\Plugin\Context\InstallContext;
 use Shopware\Components\Plugin\Context\UninstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
+use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
+
+use WirecardShopwareElasticEngine\Models\Transaction;
+
+use Doctrine\ORM\Tools\SchemaTool;
 
 class WirecardShopwareElasticEngine extends Plugin
 {
     public function install(InstallContext $context)
     {
         $this->registerPayments();
+
+        $entityManager = $this->container->get('models');
+        $schemaTool = new SchemaTool($entityManager);
+
+        $schemaTool->updateSchema(
+            [ $entityManager->getClassMetadata(Transaction::class) ],
+            true
+        );
     }
 
     public function uninstall(UninstallContext $context)
     {
         parent::uninstall($context);
+
+        if ($context->keepUserData()) {
+            return;
+        }
     }
 
     public function update(UpdateContext $context)
@@ -80,6 +102,8 @@ class WirecardShopwareElasticEngine extends Plugin
      */
     protected function getSupportedPayments()
     {
-        return [];
+        return [
+            new PaypalPayment()
+        ];
     }
 }

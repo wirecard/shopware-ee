@@ -29,75 +29,46 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Payments;
+namespace WirecardShopwareElasticEngine\Tests\Unit;
 
-use Wirecard\PaymentSdk\Config\Config;
-use Wirecard\PaymentSdk\Response\Response;
-use WirecardShopwareElasticEngine\Models\Transaction;
-
-interface PaymentInterface
+abstract class PaymentTestCase extends \PHPUnit_Framework_TestCase
 {
-    /**
-     * @return string
-     */
-    public function getLabel();
+    public function assertPaymentOptions(array $paymentMethod, $name, $description)
+    {
+        $this->assertEquals([
+            'name'                  => $name,
+            'description'           => $description,
+            'action'                => 'WirecardElasticEnginePayment',
+            'active'                => 0,
+            'position'              => 0,
+            'additionalDescription' => '',
+        ], $paymentMethod);
+    }
+
+    public function assertConfigData(array $expected, array $actual)
+    {
+        $this->assertTrue($this->assertArraysAreSimilar($expected, $actual));
+    }
 
     /**
-     * @return string
-     */
-    public function getName();
-
-    /**
-     * @return array
-     */
-    public function getPaymentOptions();
-
-    /**
-     * Start Transaction
+     * Test helper to compare arrays (regardless of order)
      *
-     * @param array $paymentData
-     * @return array
+     * @param array $expected
+     * @param array $actual
+     * @return bool
      */
-    public function processPayment(array $paymentData);
+    protected function assertArraysAreSimilar(array $expected, array $actual)
+    {
+        if(count(array_diff_assoc($expected, $actual))) {
+            return false;
+        }
 
-    /**
-     * Creates Transaction entry and returns it
-     *
-     * @return Transaction
-     */
-    public function createElasticEngineTransaction();
+        foreach($expected as $key => $value) {
+            if($value !== $actual[$key]) {
+                return false;
+            }
+        }
 
-    /**
-     * @param array $request
-     * @return Response
-     */
-    public function getPaymentResponse(array $request);
-
-    /**
-     * @param string $request
-     * @return Response
-     */
-    public function getPaymentNotification($request);
-
-    /**
-     * Returns payment specific transaction object
-     *
-     * @return \Wirecard\PaymentSdk\Transaction\Transaction
-     */
-    public function getTransaction();
-
-    /**
-     * Returns transaction config
-     *
-     * @param array $configData
-     * @return Config
-     */
-    public function getConfig(array $configData);
-
-    /**
-     * Returns payment specific configuration
-     *
-     * @return array
-     */
-    public function getConfigData();
+        return true;
+    }
 }

@@ -29,75 +29,32 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Payments;
+namespace WirecardShopwareElasticEngine\Components;
 
-use Wirecard\PaymentSdk\Config\Config;
-use Wirecard\PaymentSdk\Response\Response;
-use WirecardShopwareElasticEngine\Models\Transaction;
-
-interface PaymentInterface
+class StatusCodes
 {
     /**
-     * @return string
+     * User canceled payment
      */
-    public function getLabel();
+    const CANCELED_BY_USER = 1;
 
     /**
-     * @return string
+     * Payment couldn't get started
      */
-    public function getName();
+    const ERROR_STARTING_PROCESS_FAILED = 2;
 
     /**
-     * @return array
+     * Paymethod does not exist
      */
-    public function getPaymentOptions();
+    const ERROR_NOT_A_VALID_METHOD = 3;
 
     /**
-     * Start Transaction
-     *
-     * @param array $paymentData
-     * @return array
+     * Payment got rejected
      */
-    public function processPayment(array $paymentData);
+    const ERROR_FAILURE_RESPONSE = 4;
 
     /**
-     * Creates Transaction entry and returns it
-     *
-     * @return Transaction
+     * Critical error - order could not get saved
      */
-    public function createElasticEngineTransaction();
-
-    /**
-     * @param array $request
-     * @return Response
-     */
-    public function getPaymentResponse(array $request);
-
-    /**
-     * @param string $request
-     * @return Response
-     */
-    public function getPaymentNotification($request);
-
-    /**
-     * Returns payment specific transaction object
-     *
-     * @return \Wirecard\PaymentSdk\Transaction\Transaction
-     */
-    public function getTransaction();
-
-    /**
-     * Returns transaction config
-     *
-     * @param array $configData
-     * @return Config
-     */
-    public function getConfig(array $configData);
-
-    /**
-     * Returns payment specific configuration
-     *
-     * @return array
-     */
-    public function getConfigData();
+    const ERROR_CRITICAL_NO_ORDER = 5;
 }
