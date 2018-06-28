@@ -94,6 +94,22 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function creditCardAction()
     {
+        $params = $this->Request()->getParams();
+
+        if (!empty($params['parent_transaction_id']) &&
+            !empty($params['token_id'])) {
+            
+            if (!empty($params['jsresponse']) && $params['jsresponse']) {
+                $router   = $this->Front()->Router();
+                $creditCard = new CreditCardPayment();
+                var_dump($creditCard->processJsResponse(
+                    $params,
+                    $router->assemble(['action' => 'return', 'method' => $method, 'forceSecure' => true])
+                ));
+                exit();
+            }
+        }
+        
         if (!$this->validateBasket()) {
             return $this->redirect([
                 'controller'                          => 'checkout',

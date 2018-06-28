@@ -227,6 +227,16 @@ abstract class Payment implements PaymentInterface
         return ['status' => 'error'];
     }
 
+    public function processJsResponse($params, $return) {
+        $configData = $this->getConfigData();
+
+        $config = $this->getConfig($configData);
+
+        $transactionService = new TransactionService($config);
+
+        return $transactionService->processJsResponse($params, $return);
+    }
+
     /**
      * get payment settings
      *

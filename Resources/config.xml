@@ -266,7 +266,7 @@ function (button) {
             <name>wirecardElasticEngineCreditCard3dsAttempt</name>
             <label lang="de">[Credit Card] 3DS-Versuch Betrag</label>
             <label lang="en">[Credit Card] 3DS attempt amount</label>
-            <value>300</value>
+            <value>100</value>
             <description lang="de">Ab diesem Betrag wird 3DS versucht zu verwenden.</description>
             <description lang="en">This amount attemps of 3DS</description>
         </element>
