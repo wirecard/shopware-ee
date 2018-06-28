@@ -32,13 +32,19 @@
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
 use Wirecard\PaymentSdk\Config\Config;
-use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
+use Wirecard\PaymentSdk\Config\CreditCardConfig;
+use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
 use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
+use Wirecard\PaymentSdk\TransactionService;
 
 class CreditCardPayment extends Payment
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_credit_card';
+
+    private $paymentData;
+    private $creditCardConfig;
+    private $config;
 
     /**
      * @inheritdoc
@@ -63,9 +69,40 @@ class CreditCardPayment extends Payment
     {
         $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
 
-        // TODO add payment specific config
+        $creditCardConfig = new CreditCardConfig(
+            $configData['transactionMAID'],
+            $configData['transactionKey']
+        );
+
+        if ($configData['transaction3dsMAID'] !== '' &&
+            $configData['transaction3dsMAID'] !== 'null') {
+            $creditCardConfig->setThreeDCredentials(
+                $configData['transaction3dsMAID'],
+                $configData['transaction3dsKey']
+            );
+        }
+
+        $creditCardConfig->addSslMaxLimit(
+            new Amount(
+                $configData['3dsOnly'],
+                $this->paymentData['currency']
+            )
+        );
+
+        $creditCardConfig->addThreeDMinLimit(
+            new Amount(
+                $configData['3dsAttempt'],
+                $this->paymentData['currency']
+            )
+        );
+
+        $this->creditCardConfig = $creditCardConfig;
+
+        $config->add($this->creditCardConfig);
+
+        $this->config = $config;
         
-        return $config;
+        return $this->config;
     }
 
     /**
@@ -149,7 +186,19 @@ class CreditCardPayment extends Payment
     protected function addPaymentSpecificData(WirecardTransaction $transaction, array $paymentData, array $configData)
     {
         // TODO add transaction data or delete function
-        
+        $transaction->setTermUrl($paymentData['returnUrl']);
         return $transaction;
+    }
+
+    public function getRequestDataForIframe(array $paymentData) {
+        $this->paymentData = $paymentData;
+        $transaction = $this->createTransaction($paymentData);
+
+        $configData = $this->getConfigData();
+
+        $transaction->setConfig($this->creditCardConfig);
+        $transactionService = new TransactionService($this->config, Shopware()->PluginLogger());
+
+        return $transactionService->getCreditCardUiWithData($transaction, $configData['transactionType'], Shopware()->Locale()->getLanguage());
     }
 }

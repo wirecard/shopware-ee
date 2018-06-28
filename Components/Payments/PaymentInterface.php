@@ -56,6 +56,14 @@ interface PaymentInterface
      * Start Transaction
      *
      * @param array $paymentData
+     * @return \Wirecard\PaymentSdk\Transaction\Transaction
+     */
+    public function createTransaction(array $paymentData);
+
+    /**
+     * Start Transaction
+     *
+     * @param array $paymentData
      * @return array
      */
     public function processPayment(array $paymentData);

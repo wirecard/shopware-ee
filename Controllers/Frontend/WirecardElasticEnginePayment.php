@@ -38,6 +38,7 @@ use Wirecard\PaymentSdk\Response\SuccessResponse;
 
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\StatusCodes;
+use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
@@ -53,6 +54,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     {
         if ($this->getPaymentShortName() === PaypalPayment::PAYMETHOD_IDENTIFIER) {
             return $this->redirect(['action' => 'paypal', 'forceSecure' => true]);
+        } elseif ($this->getPaymentShortName() === CreditCardPayment::PAYMETHOD_IDENTIFIER) {
+            return $this->redirect(['action' => 'creditCard', 'forceSecure' => true]);
         }
 
         return $this->errorHandling(StatusCodes::ERROR_NOT_A_VALID_METHOD);
@@ -83,6 +86,33 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         }
 
         return $this->errorHandling(StatusCodes::ERROR_STARTING_PROCESS_FAILED);
+    }
+
+    /**
+     * Starts transaction with CreditCard.
+     * Loads iframe from Wirecard
+     */
+    public function creditCardAction()
+    {
+        if (!$this->validateBasket()) {
+            return $this->redirect([
+                'controller'                          => 'checkout',
+                'action'                              => 'cart',
+                'wirecard_elastic_engine_update_cart' => 'true',
+            ]);
+        }
+
+        $baseUrl = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEngineCreditCardServer'
+        );
+
+        $this->View()->assign('wirecardUrl', $baseUrl);
+
+        $paymentData = $this->getPaymentData(CreditCardPayment::PAYMETHOD_IDENTIFIER);
+        $creditCard = new CreditCardPayment();
+        $requestData = $creditCard->getRequestDataForIframe($paymentData);
+        $this->View()->assign('wirecardRequestData', $requestData);
     }
 
     /**

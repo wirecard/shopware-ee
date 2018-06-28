@@ -88,6 +88,61 @@ abstract class Payment implements PaymentInterface
     /**
      * @inheritdoc
      */
+    public function createTransaction(array $paymentData)
+    {
+        $configData = $this->getConfigData();
+
+        $config = $this->getConfig($configData);
+
+        $transaction = $this->getTransaction();
+
+        $amount = new Amount($paymentData['amount'], $paymentData['currency']);
+
+        $redirectUrls = new Redirect($paymentData['returnUrl'], $paymentData['cancelUrl']);
+        $notificationUrl = $paymentData['notifyUrl'];
+
+        $transaction->setNotificationUrl($notificationUrl);
+        $transaction->setRedirect($redirectUrls);
+        $transaction->setAmount($amount);
+
+        $customFields = new CustomFieldCollection();
+        $customFields->add(new CustomField('signature', $paymentData['signature']));
+        $transaction->setCustomFields($customFields);
+
+        if ($configData['sendBasket']) {
+            $basket = $this->createBasket($transaction, $paymentData['basket'], $paymentData['currency']);
+            $transaction->setBasket($basket);
+        }
+
+        if ($configData['fraudPrevention']) {
+            $this->addConsumer($transaction, $paymentData['user']);
+            $transaction->setIpAddress($paymentData['ipAddr']);
+
+            $locale = Shopware()->Locale()->getLanguage();
+            if (strpos($locale, '@') !== false) {
+                $localeArr = explode('@', $locale);
+                $locale = $localeArr[0];
+            }
+            $transaction->setLocale($locale);
+        }
+
+        $elasticEngineTransaction = $this->createElasticEngineTransaction();
+        $orderNumber              = $elasticEngineTransaction->getId();
+        $transaction->setOrderNumber($orderNumber);
+
+        if ($configData['descriptor']) {
+            $descriptor = Shopware()->Config()->get('shopName') . ' ' . $orderNumber;
+            $transaction->setDescriptor($descriptor);
+        }
+
+        $this->addPaymentSpecificData($transaction, $paymentData, $configData);
+
+        return $transaction;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function processPayment(array $paymentData)
     {
         $configData = $this->getConfigData();
