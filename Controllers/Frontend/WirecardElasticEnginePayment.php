@@ -108,7 +108,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     $router->assemble([
                         'action' => 'return',
                         'method' => CreditCardPayment::PAYMETHOD_IDENTIFIER,
-                        'forceSecure' => true])
+                        'forceSecure' => true]
+                    )
                 );
 
                 $status = $this->handleReturnResponse($response);
@@ -122,7 +123,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 }
 
                 if ($status['type'] === 'success') {
-                    if(!empty($status['uniqueId'])) {
+                    if (!empty($status['uniqueId'])) {
                         $this->redirect([
                             'module'     => 'frontend',
                             'controller' => 'checkout',
