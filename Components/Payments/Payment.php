@@ -41,6 +41,7 @@ use Wirecard\PaymentSdk\Entity\AccountHolder;
 use Wirecard\PaymentSdk\Entity\Address;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Entity\Status;
+use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Transaction\Reservable;
@@ -227,7 +228,8 @@ abstract class Payment implements PaymentInterface
         return ['status' => 'error'];
     }
 
-    public function processJsResponse($params, $return) {
+    public function processJsResponse($params, $return)
+    {
         $configData = $this->getConfigData();
 
         $config = $this->getConfig($configData);
@@ -235,6 +237,107 @@ abstract class Payment implements PaymentInterface
         $transactionService = new TransactionService($config);
 
         return $transactionService->processJsResponse($params, $return);
+    }
+
+    /**
+     *
+     */
+    public function handleReturnResponse($response)
+    {
+        if ($response instanceof FormInteractionResponse) {
+            return [
+                'type'       => 'form',
+                'method'     => $response->getMethod(),
+                'formFields' => $response->getFormFields(),
+                'url'        => $response->getUrl()
+            ];
+        }
+        exit();
+        if ($response instanceof SuccessResponse) {
+            $customFields    = $response->getCustomFields();
+            $transactionId   = $response->getTransactionId();
+            $paymentUniqueId = $response->getProviderTransactionId();
+            $signature       = $customFields->get('signature');
+
+            $wirecardOrderNumber = $response->findElement('order-number');
+
+            $elasticEngineTransaction = Shopware()->Models()
+                                                  ->getRepository(Transaction::class)
+                                                  ->findOneBy(['id' => $wirecardOrderNumber]);
+
+            if (!$elasticEngineTransaction) {
+                return $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER);
+            }
+
+            $elasticEngineTransaction->setTransactionId($transactionId);
+            $elasticEngineTransaction->setProviderTransactionId($paymentUniqueId);
+            $elasticEngineTransaction->setReturnResponse(serialize($response->getData()));
+            $paymentStatus = intval($elasticEngineTransaction->getPaymentStatus());
+
+            $order = Shopware()->Models()
+                               ->getRepository(Order::class)
+                               ->findOneBy([
+                                   'transactionId' => $transactionId,
+                                   'temporaryId'   => $paymentUniqueId,
+                                   'status'        => -1,
+                               ]);
+
+            if ($order) {
+                Shopware()->Models()->persist($elasticEngineTransaction);
+                Shopware()->Models()->flush();
+                return $this->redirect([
+                    'module'     => 'frontend',
+                    'controller' => 'checkout',
+                    'action'     => 'finish',
+                    'sUniqueID'  => $paymentUniqueId,
+                ]);
+            }
+
+            try {
+                $this->loadBasketFromSignature($signature);
+
+                if ($paymentStatus) {
+                    $orderNumber = $this->saveOrder($transactionId, $paymentUniqueId, $paymentStatus);
+                } else {
+                    $orderNumber = $this->saveOrder($transactionId, $paymentUniqueId);
+                }
+
+                $elasticEngineTransaction->setOrderNumber($orderNumber);
+                Shopware()->Models()->persist($elasticEngineTransaction);
+                Shopware()->Models()->flush();
+
+                return $this->redirect([
+                    'module'     => 'frontend',
+                    'controller' => 'checkout',
+                    'action'     => 'finish',
+                ]);
+            } catch (RuntimeException $e) {
+                Shopware()->PluginLogger()->error($e->getMessage());
+                return $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER, $e->getMessage());
+            }
+        } elseif ($response instanceof FailureResponse) {
+            Shopware()->PluginLogger()->error(
+                'Response validation status: %s',
+                $response->isValidSignature() ? 'true' : 'false'
+            );
+
+            $errorMessages = "";
+
+            foreach ($response->getStatusCollection() as $status) {
+                /** @var \Wirecard\PaymentSdk\Entity\Status $status */
+                $severity      = ucfirst($status->getSeverity());
+                $code          = $status->getCode();
+                $description   = $status->getDescription();
+                $errorMessage  = sprintf('%s with code %s and message "%s" occurred.', $severity, $code, $description);
+                $errorMessages .= $errorMessage . '<br>';
+
+                Shopware()->PluginLogger()->error($errorMessage);
+            }
+
+            return $this->errorHandling(StatusCodes::ERROR_FAILURE_RESPONSE, $errorMessages);
+        }
+        
+        return $this->errorHandling(StatusCodes::ERROR_FAILURE_RESPONSE);
     }
 
     /**

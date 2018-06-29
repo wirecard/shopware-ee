@@ -94,7 +94,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function creditCardAction()
     {
-        $this->container->get('pluginlogger')->info('test');
+        $params = $this->Request()->getParams();
 
         if (!empty($params['parent_transaction_id']) &&
             !empty($params['token_id'])) {
@@ -102,10 +102,21 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             if (!empty($params['jsresponse']) && $params['jsresponse']) {
                 $router   = $this->Front()->Router();
                 $creditCard = new CreditCardPayment();
-                var_dump($creditCard->processJsResponse(
+
+                $response = $creditCard->processJsResponse(
                     $params,
                     $router->assemble(['action' => 'return', 'method' => $method, 'forceSecure' => true])
-                ));
+                );
+
+                $status = $creditCard->handleReturnResponse($response);
+
+                if ($status['type'] === 'form') {
+                    $this->View()->assign('threeDSecure', true);
+                    $this->View()->assign('method', $status['method']);
+                    $this->View()->assign('url', $status['url']);
+                    $this->View()->assign('formFields', $status['formFields']);
+                    return;
+                }
                 exit();
             }
         }

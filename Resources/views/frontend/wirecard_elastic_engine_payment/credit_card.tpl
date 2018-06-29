@@ -5,66 +5,82 @@
 {/block}
 
 {block name="frontend_index_content"}
-    <div class="content content--checkout">
-        <form id="credit-card--form" method="post">
-            <div id="credit-card--iframe-div" style="width: 100%; height: 600px;"></div>
-            <button class="btn is--primary is--large right is--icon-right" type="submit">Senden</button>
-        </form>
-    </div>
+    {if $threeDSecure}
+        <div class="content content--checkout">
+            <h2>Wirecard3DSecureInformation</h2>
+            <form id="redirect--form" method="{$method}" action="{$url}">
+                {foreach from=$formFields item='field' key='key'}
+                    <input type="hidden" name="{$key}" value="{$field}" />
+                {/foreach}
+                <button class="btn is--primary is--large right is--icon-right" type="submit">Senden</button>
+            </form>
+            <script type="text/javascript">
+             document.getElementById('redirect--form').submit();
+            </script>
+        </div>
+    {else}
+        <div class="content content--checkout">
+            <form id="credit-card--form" method="post">
+                <div id="credit-card--iframe-div" style="width: 100%; height: 600px;"></div>
+                <button class="btn is--primary is--large right is--icon-right" type="submit">Senden</button>
+            </form>
+        </div>
+    {/if}
 {/block}
 
 {block name="frontend_index_javascript_async_ready"}
     {$smarty.block.parent}
-    <script type="text/javascript">
-     window.requestData = {$wirecardRequestData};
-     (function() {
+    {if not $threeDSecure}
+        <script type="text/javascript">
+         (function() {
 
-         var logCallback = function(response) {
-             console.log(response);
-         }
+             var logCallback = function(response) {
+                 console.log(response);
+             }
 
-         WirecardPaymentPage.seamlessRenderForm({
-             requestData: {$wirecardRequestData},
-             wrappingDivId: 'credit-card--iframe-div',
-             onSuccess: logCallback,
-             onError: logCallback
-         });
+             WirecardPaymentPage.seamlessRenderForm({
+                 requestData: {$wirecardRequestData},
+                 wrappingDivId: 'credit-card--iframe-div',
+                 onSuccess: logCallback,
+                 onError: logCallback
+             });
 
-         var setParentTransactionId = function (response) {
-             var form = document.getElementById('credit-card--form'),
-                 hiddenField = null;
+             var setParentTransactionId = function (response) {
+                 var form = document.getElementById('credit-card--form'),
+                     hiddenField = null;
 
-             for (var key in response){
-                 if(response.hasOwnProperty(key)) {
-                     hiddenField = document.createElement('div');
-                     hiddenField.innerHTML = "<input type='hidden' name='" + key + "' value='" + response[key] + "'>";
-                     form.appendChild(hiddenField);
+                 for (var key in response){
+                     if(response.hasOwnProperty(key)) {
+                         hiddenField = document.createElement('div');
+                         hiddenField.innerHTML = "<input type='hidden' name='" + key + "' value='" + response[key] + "'>";
+                         form.appendChild(hiddenField);
+                     }
                  }
+
+                 hiddenField = document.createElement('div');
+                 hiddenField.innerHTML = "<input id='jsresponse' type='hidden' name='jsresponse' value='true'>";
+                 form.appendChild(hiddenField);
+                 form.submit();
              }
 
-             hiddenField = document.createElement('div');
-             hiddenField.innerHTML = "<input id='jsresponse' type='hidden' name='jsresponse' value='true'>";
-             form.appendChild(hiddenField);
-             form.submit();
-         }
-
-         document.getElementById('credit-card--form').addEventListener('submit', function(event){
-             event.preventDefault();
-             
-             if (document.getElementById('jsresponse') ) {
-                 console.log('Sending the following request to your server..');
-             } else {
-
+             document.getElementById('credit-card--form').addEventListener('submit', function(event){
                  event.preventDefault();
+                 
+                 if (document.getElementById('jsresponse') ) {
+                     console.log('Sending the following request to your server..');
+                 } else {
 
-                 WirecardPaymentPage.seamlessSubmitForm({
-                     onSuccess: setParentTransactionId,
-                     onError: logCallback
-                 })
-             }
-             
-         });
+                     event.preventDefault();
 
-     }) ();
-    </script>
+                     WirecardPaymentPage.seamlessSubmitForm({
+                         onSuccess: setParentTransactionId,
+                         onError: logCallback
+                     })
+                 }
+                 
+             });
+
+         }) ();
+        </script>
+    {/if}
 {/block}
