@@ -31,6 +31,8 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
+use Shopware\Models\Order\Order;
+
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Basket;
@@ -42,12 +44,14 @@ use Wirecard\PaymentSdk\Entity\Address;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Entity\Status;
 use Wirecard\PaymentSdk\Response\FormInteractionResponse;
+use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Transaction\Reservable;
 use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 
+use WirecardShopwareElasticEngine\Components\StatusCodes;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
 abstract class Payment implements PaymentInterface
@@ -237,105 +241,6 @@ abstract class Payment implements PaymentInterface
         $transactionService = new TransactionService($config);
 
         return $transactionService->processJsResponse($params, $return);
-    }
-
-    /**
-     *
-     */
-    public function handleReturnResponse($response)
-    {
-        if ($response instanceof FormInteractionResponse) {
-            return [
-                'type'       => 'form',
-                'method'     => $response->getMethod(),
-                'formFields' => $response->getFormFields(),
-                'url'        => $response->getUrl()
-            ];
-        } elseif ($response instanceof SuccessResponse) {
-            $customFields    = $response->getCustomFields();
-            $transactionId   = $response->getTransactionId();
-            $paymentUniqueId = $response->getProviderTransactionId();
-            $signature       = $customFields->get('signature');
-
-            $wirecardOrderNumber = $response->findElement('order-number');
-
-            $elasticEngineTransaction = Shopware()->Models()
-                                                  ->getRepository(Transaction::class)
-                                                  ->findOneBy(['id' => $wirecardOrderNumber]);
-
-            if (!$elasticEngineTransaction) {
-                return $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER);
-            }
-
-            $elasticEngineTransaction->setTransactionId($transactionId);
-            $elasticEngineTransaction->setProviderTransactionId($paymentUniqueId);
-            $elasticEngineTransaction->setReturnResponse(serialize($response->getData()));
-            $paymentStatus = intval($elasticEngineTransaction->getPaymentStatus());
-
-            $order = Shopware()->Models()
-                               ->getRepository(Order::class)
-                               ->findOneBy([
-                                   'transactionId' => $transactionId,
-                                   'temporaryId'   => $paymentUniqueId,
-                                   'status'        => -1,
-                               ]);
-
-            if ($order) {
-                Shopware()->Models()->persist($elasticEngineTransaction);
-                Shopware()->Models()->flush();
-                return $this->redirect([
-                    'module'     => 'frontend',
-                    'controller' => 'checkout',
-                    'action'     => 'finish',
-                    'sUniqueID'  => $paymentUniqueId,
-                ]);
-            }
-
-            try {
-                $this->loadBasketFromSignature($signature);
-
-                if ($paymentStatus) {
-                    $orderNumber = $this->saveOrder($transactionId, $paymentUniqueId, $paymentStatus);
-                } else {
-                    $orderNumber = $this->saveOrder($transactionId, $paymentUniqueId);
-                }
-
-                $elasticEngineTransaction->setOrderNumber($orderNumber);
-                Shopware()->Models()->persist($elasticEngineTransaction);
-                Shopware()->Models()->flush();
-
-                return $this->redirect([
-                    'module'     => 'frontend',
-                    'controller' => 'checkout',
-                    'action'     => 'finish',
-                ]);
-            } catch (RuntimeException $e) {
-                Shopware()->PluginLogger()->error($e->getMessage());
-                return $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER, $e->getMessage());
-            }
-        } elseif ($response instanceof FailureResponse) {
-            Shopware()->PluginLogger()->error(
-                'Response validation status: %s',
-                $response->isValidSignature() ? 'true' : 'false'
-            );
-
-            $errorMessages = "";
-
-            foreach ($response->getStatusCollection() as $status) {
-                /** @var \Wirecard\PaymentSdk\Entity\Status $status */
-                $severity      = ucfirst($status->getSeverity());
-                $code          = $status->getCode();
-                $description   = $status->getDescription();
-                $errorMessage  = sprintf('%s with code %s and message "%s" occurred.', $severity, $code, $description);
-                $errorMessages .= $errorMessage . '<br>';
-
-                Shopware()->PluginLogger()->error($errorMessage);
-            }
-
-            return $this->errorHandling(StatusCodes::ERROR_FAILURE_RESPONSE, $errorMessages);
-        }
-        
-        return $this->errorHandling(StatusCodes::ERROR_FAILURE_RESPONSE);
     }
 
     /**
@@ -606,8 +511,7 @@ abstract class Payment implements PaymentInterface
     public function getPaymentResponse(array $request)
     {
         $configData = $this->getConfigData();
-        $config = $this->getConfig($configData); //new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
-        //        $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
+        $config = $this->getConfig($configData);
         $service = new TransactionService($config);
         $response = $service->handleResponse($request);
 
@@ -620,7 +524,7 @@ abstract class Payment implements PaymentInterface
     public function getPaymentNotification($request)
     {
         $configData = $this->getConfigData();
-        $config = $this->getConfig($configData); //new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
+        $config = $this->getConfig($configData);
         $service = new TransactionService($config);
         $notification = $service->handleNotification($request);
 

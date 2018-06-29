@@ -111,7 +111,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                         'forceSecure' => true])
                 );
 
-                $status = $creditCard->handleReturnResponse($response);
+                $status = $this->handleReturnResponse($response);
 
                 if ($status['type'] === 'form') {
                     $this->View()->assign('threeDSecure', true);
@@ -119,6 +119,32 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     $this->View()->assign('url', $status['url']);
                     $this->View()->assign('formFields', $status['formFields']);
                     return;
+                }
+
+                if ($status['type'] === 'success') {
+                    if(!empty($status['uniqueId'])) {
+                        $this->redirect([
+                            'module'     => 'frontend',
+                            'controller' => 'checkout',
+                            'action'     => 'finish',
+                            'sUniqueID'  => $status['uniqueId']
+                        ]);
+                    } else {
+                        $this->redirect([
+                            'module'     => 'frontend',
+                            'controller' => 'checkout',
+                            'action'     => 'finish'
+                        ]);
+                    }
+                    return;
+                }
+
+                if ($status['type'] === 'error') {
+                    if (!empty($status['msg'])) {
+                        $this->errorHandling($status['code'], $status['msg']);
+                    } else {
+                        $this->errorHandling($status['code']);
+                    }
                 }
                 exit();
             }
@@ -174,10 +200,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         }
 
         if ($response instanceof SuccessResponse) {
-            $customFields    = $response->getCustomFields();
-            $transactionId   = $response->getTransactionId();
+            $customFields          = $response->getCustomFields();
+            $transactionId         = $response->getTransactionId();
             $providerTransactionId = $response->getProviderTransactionId();
-            $signature       = $customFields->get('signature');
+            $signature             = $customFields->get('signature');
 
             $wirecardOrderNumber = $response->findElement('order-number');
 
@@ -264,6 +290,127 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         }
 
         return $this->errorHandling(StatusCodes::ERROR_FAILURE_RESPONSE);
+    }
+
+    /**
+     *
+     */
+    public function handleReturnResponse($response)
+    {
+        if ($response instanceof FormInteractionResponse) {
+            return [
+                'type'       => 'form',
+                'method'     => $response->getMethod(),
+                'formFields' => $response->getFormFields(),
+                'url'        => $response->getUrl()
+            ];
+        } elseif ($response instanceof SuccessResponse) {
+            $customFields          = $response->getCustomFields();
+            $transactionId         = $response->getTransactionId();
+            $providerTransactionId = $response->getProviderTransactionId();
+            $signature             = $customFields->get('signature');
+
+            $elasticEngineTransaction = null;
+            try { // FIXXXXME solutions for notify delay ?
+                $wirecardOrderNumber = $response->findElement('order-number');
+
+                $elasticEngineTransaction = Shopware()->Models()
+                                                      ->getRepository(Transaction::class)
+                                                      ->findOneBy(['id' => $wirecardOrderNumber]);
+            } catch (\Exception $e) {
+                $elasticEngineTransaction = Shopware()->Models()
+                                                      ->getRepository(Transaction::class)
+                                                      ->findOneBy(['transactionId' => $transactionId]);
+            }
+
+            if (!$elasticEngineTransaction) {
+                return [
+                    'type' => 'error',
+                    'code' => StatusCodes::ERROR_CRITICAL_NO_ORDER
+                ];
+            }
+
+            $elasticEngineTransaction->setTransactionId($transactionId);
+            $elasticEngineTransaction->setProviderTransactionId($providerTransactionId);
+            $elasticEngineTransaction->setReturnResponse(serialize($response->getData()));
+            $paymentStatus = intval($elasticEngineTransaction->getPaymentStatus());
+
+            if (!$signature) {
+                $signature = $elasticEngineTransaction->getBasketSignature();
+            }
+
+            $order = Shopware()->Models()
+                               ->getRepository(Order::class)
+                               ->findOneBy([
+                                   'transactionId' => $transactionId,
+                                   'temporaryId'   => $transactionId,
+                                   'status'        => -1,
+                               ]);
+
+            if ($order) {
+                Shopware()->Models()->persist($elasticEngineTransaction);
+                Shopware()->Models()->flush();
+                return [
+                    'type'   => 'success',
+                    'uniqueId' => $transactionId
+                ];
+            }
+
+            try {
+                $this->loadBasketFromSignature($signature);
+
+                if ($paymentStatus) {
+                    $orderNumber = $this->saveOrder($transactionId, $transactionId, $paymentStatus);
+                } else {
+                    $orderNumber = $this->saveOrder($transactionId, $transactionId);
+                }
+
+                $elasticEngineTransaction->setOrderNumber($orderNumber);
+                Shopware()->Models()->persist($elasticEngineTransaction);
+                Shopware()->Models()->flush();
+
+                return [ 'type' => 'success' ];
+            } catch (RuntimeException $e) {
+                $this->container->get('pluginlogger')->error($e->getMessage());
+                return [
+                    'type' => 'error',
+                    'code' => StatusCodes::ERROR_CRITICAL_NO_ORDER,
+                    'msg'  => $e->getMessage()
+                ];
+            }
+        } elseif ($response instanceof FailureResponse) {
+            $this->container->get('pluginlogger')->error(
+                sprintf(
+                    'Response validation status: %s',
+                    $response->isValidSignature() ? 'true' : 'false'
+                )
+            );
+
+            $errorMessages = "";
+
+            foreach ($response->getStatusCollection() as $status) {
+                /** @var \Wirecard\PaymentSdk\Entity\Status $status */
+                $severity      = ucfirst($status->getSeverity());
+                $code          = $status->getCode();
+                $description   = $status->getDescription();
+                $errorMessage  = sprintf('%s with code %s and message "%s" occurred.', $severity, $code, $description);
+                $errorMessages .= $errorMessage . '<br>';
+
+                $this->container->get('pluginlogger')->error($errorMessage);
+            }
+
+            return [
+                'type' => 'error',
+                'code' => StatusCodes::ERROR_CRITICAL_NO_ORDER,
+                'msg'  => $errorMessages
+            ];
+        }
+        
+        return [
+            'type' => 'error',
+            'code' => StatusCodes::ERROR_FAILURE_RESPONSE,
+            'msg'  => $errorMessages
+        ];
     }
 
     /**
