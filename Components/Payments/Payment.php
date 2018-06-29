@@ -31,6 +31,7 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Basket;
@@ -47,12 +48,29 @@ use Wirecard\PaymentSdk\Transaction\Reservable;
 use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 
+use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
 use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
 
 abstract class Payment implements PaymentInterface
 {
     const TRANSACTION_TYPE_AUTHORIZATION = 'authorization';
     const TRANSACTION_TYPE_PURCHASE = 'purchase';
+
+    /**
+     * @var ContainerInterface
+     */
+    protected $container;
+
+    /**
+     * Payment constructor.
+     *
+     * @param ContainerInterface $container
+     */
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+    }
 
     /**
      * @inheritdoc
@@ -90,9 +108,9 @@ abstract class Payment implements PaymentInterface
      */
     public function processPayment(array $paymentData)
     {
-        $configData = $this->getConfigData();
+        $configData = $this->getPaymentConfig();
 
-        $config = $this->getConfig($configData);
+        $config = $this->getTransactionConfig($configData);
 
         $transaction = $this->getTransaction();
 
@@ -175,38 +193,38 @@ abstract class Payment implements PaymentInterface
     /**
      * get payment settings
      *
-     * @return array
+     * @return PaymentConfig
      */
-    public function getConfigData()
+    public abstract function getPaymentConfig();
+
+    /**
+     * @inheritdoc
+     */
+    public function getTransactionConfig()
     {
-        return [
-            'baseUrl'         => '',
-            'httpUser'        => '',
-            'httpPass'        => '',
-            'transactionMAID' => '',
-            'transactionKey'  => '',
-            'transactionType' => '',
-            'sendBasket'      => false,
-            'fraudPrevention' => false,
-            'descriptor'      => ''
-        ];
+        $config = new Config(
+            $this->getPaymentConfig()->getBaseUrl(),
+            $this->getPaymentConfig()->getHttpUser(),
+            $this->getPaymentConfig()->getHttpPassword()
+        );
+
+        $config->setShopInfo(
+            $this->container->getParameter('kernel.name'),
+            $this->container->getParameter('shopware.release.version')
+        );
+
+        $plugin = $this->container->get('shopware_plugininstaller.plugin_manager')
+                                  ->getPluginByName(WirecardShopwareElasticEngine::NAME);
+
+        $config->setPluginInfo($plugin->getName(), $plugin->getVersion());
+
+        return $config;
     }
 
     /**
      * @inheritdoc
      */
-    public function getConfig(array $configData)
-    {
-        return null;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getTransaction()
-    {
-        return null;
-    }
+    public abstract function getTransaction();
 
     /**
      * Adds consumer personal information, billing and shipping address to Transaction
@@ -436,7 +454,7 @@ abstract class Payment implements PaymentInterface
      */
     public function getPaymentResponse(array $request)
     {
-        $configData = $this->getConfigData();
+        $configData = $this->getPaymentConfig();
         $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
         $service = new TransactionService($config);
         $response = $service->handleResponse($request);
@@ -449,7 +467,7 @@ abstract class Payment implements PaymentInterface
      */
     public function getPaymentNotification($request)
     {
-        $configData = $this->getConfigData();
+        $configData = $this->getPaymentConfig();
         $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
         $service = new TransactionService($config);
         $notification = $service->handleNotification($request);

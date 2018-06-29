@@ -31,10 +31,11 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
-use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
+use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
+use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
 
 class PaypalPayment extends Payment
 {
@@ -57,22 +58,6 @@ class PaypalPayment extends Payment
     }
 
     /**
-     * @inheritdoc
-     */
-    public function getConfig(array $configData)
-    {
-        $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
-        $paypalConfig = new PaymentMethodConfig(
-            PayPalTransaction::NAME,
-            $configData['transactionMAID'],
-            $configData['transactionKey']
-        );
-        $config->add($paypalConfig);
-
-        return $config;
-    }
-
-    /**
      * @return PayPalTransaction
      */
     public function getTransaction()
@@ -83,59 +68,57 @@ class PaypalPayment extends Payment
     /**
      * @inheritdoc
      */
-    public function getConfigData()
+    public function getTransactionConfig()
     {
-        $baseUrl = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalServer'
-        );
-        $httpUser = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalHttpUser'
-        );
-        $httpPass = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalHttpPassword'
+        $config = parent::getTransactionConfig();
+        $config->add(new PaymentMethodConfig(
+            PayPalTransaction::NAME,
+            $this->getPaymentConfig()->getTransactionMAID(),
+            $this->getPaymentConfig()->getTransactionSecret()
+        ));
+
+        return $config;
+    }
+
+
+    /**
+     * @inheritdoc
+     */
+    public function getPaymentConfig()
+    {
+        $config = Shopware()->Config();
+
+        $paymentConfig = new PaymentConfig(
+            $config->getByNamespace(WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalServer'),
+            $config->getByNamespace(WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalHttpUser'),
+            $config->getByNamespace(WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalHttpPassword')
         );
 
-        $paypalMAID = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalMerchandId'
-        );
-        $paypalKey = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalSecret'
-        );
-        $transactionType = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalTransactionType'
+        $paymentConfig->setTransactionMAID(
+            $config->getByNamespace(WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalMerchandId')
         );
 
-        $sendBasket = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalSendBasket'
-        );
-        $fraudPrevention = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalFraudPrevention'
+        $paymentConfig->setTransactionSecret(
+            $config->getByNamespace(WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalSecret')
         );
 
-        $descriptor = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalDescriptor'
+        $paymentConfig->setTransactionType(
+            $config->getByNamespace(WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalTransactionType')
         );
 
-        return array_merge(parent::getConfigData(), [
-            'baseUrl'         => $baseUrl,
-            'httpUser'        => $httpUser,
-            'httpPass'        => $httpPass,
-            'transactionMAID' => $paypalMAID,
-            'transactionKey'  => $paypalKey,
-            'transactionType' => $transactionType,
-            'sendBasket'      => $sendBasket,
-            'fraudPrevention' => $fraudPrevention,
-            'descriptor'      => $descriptor
-        ]);
+        $paymentConfig->setSendBasket(
+            $config->getByNamespace(WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalSendBasket')
+        );
+
+        $paymentConfig->setFraudPrevention(
+            $config->getByNamespace(WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalFraudPrevention')
+        );
+
+        $paymentConfig->setSendDescriptor(
+            $config->getByNamespace(WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalDescriptor')
+        );
+
+        return $paymentConfig;
     }
 
     /**

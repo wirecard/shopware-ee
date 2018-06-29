@@ -36,7 +36,11 @@ use Shopware\Models\Order\Status;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 
+use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Data\PaymentData;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
+use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
+use WirecardShopwareElasticEngine\Components\Services\PaymentProcessor;
 use WirecardShopwareElasticEngine\Components\StatusCodes;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 use WirecardShopwareElasticEngine\Models\Transaction;
@@ -47,15 +51,50 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     // @codingStandardsIgnoreEnd
 
     /**
-     * Index Action starting payment - redirect to method
+     * Forward to Wirecard Gateway
      */
     public function indexAction()
     {
-        if ($this->getPaymentShortName() === PaypalPayment::PAYMETHOD_IDENTIFIER) {
-            return $this->redirect(['action' => 'paypal', 'forceSecure' => true]);
-        }
+        return $this->forward('gateway');
+    }
 
-        return $this->errorHandling(StatusCodes::ERROR_NOT_A_VALID_METHOD);
+    /**
+     * Gateway to Wirecard
+     */
+    public function gatewayAction()
+    {
+        //        if (! $this->validateBasket()) {
+        //            return $this->redirect([
+        //                'controller'                          => 'checkout',
+        //                'action'                              => 'cart',
+        //                'wirecard_elastic_engine_update_cart' => 'true',
+        //            ]);
+        //        }
+
+        /** @var PaymentFactory $paymentFactory */
+        $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
+        $payment        = $paymentFactory->create($this->getPaymentShortName());
+
+        /** @var PaymentProcessor $processor */
+        $processor = $this->get('wirecard_elastic_engine.payment_processor');
+        $processor->setPayment($payment);
+        $processor->setPaymentData($this->getPaymentData());
+        $processor->setTransactionService(
+            new TransactionService($payment->getTransactionConfig(), $this->get('pluginlogger'))
+        );
+
+        /*
+        $payment     = PaymentFactory::create($this->getPaymentShortName());
+        $processor   = new PaymentProcessor(
+            $payment,
+            $this->getPaymentData(),
+            new \Wirecard\PaymentSdk\TransactionService($payment->getTransactionConfig([]), Shopware()->PluginLogger())
+        );
+
+        $processor->execute();
+        */
+
+        exit('yija');
     }
 
     /**
@@ -300,29 +339,20 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * Important data of order for further processing in transaction get collected-
      *
      * @param string $method
-     * @return array $paymentData
+     * @return PaymentData $paymentData
+     * @throws Exception
      */
-    protected function getPaymentData($method)
+    protected function getPaymentData()
     {
-        $user     = $this->getUser();
-        $basket   = $this->getBasket();
-        $amount   = $this->getAmount();
-        $currency = $this->getCurrencyShortName();
-        $router   = $this->Front()->Router();
-
-        $paymentData = array(
-            'user'      => $user,
-            'ipAddr'    => $this->Request()->getClientIp(),
-            'basket'    => $basket,
-            'amount'    => $amount,
-            'currency'  => $currency,
-            'returnUrl' => $router->assemble(['action' => 'return', 'method' => $method, 'forceSecure' => true]),
-            'cancelUrl' => $router->assemble(['action' => 'cancel', 'forceSecure' => true]),
-            'notifyUrl' => $router->assemble(['action' => 'notify', 'method' => $method, 'forceSecure' => true]),
-            'signature' => $this->persistBasket()
+        return new PaymentData(
+            $this->getUser(),
+            $this->getBasket(),
+            $this->getAmount(),
+            $this->getCurrencyShortName(),
+            $this->Front()->Router(),
+            $this->Request(),
+            $this->getModelManager()
         );
-
-        return $paymentData;
     }
 
     /**

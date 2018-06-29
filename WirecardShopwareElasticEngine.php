@@ -51,6 +51,8 @@ use Doctrine\ORM\Tools\SchemaTool;
 
 class WirecardShopwareElasticEngine extends Plugin
 {
+    const NAME = 'WirecardShopwareElasticEngine';
+
     public function install(InstallContext $context)
     {
         $this->registerPayments();

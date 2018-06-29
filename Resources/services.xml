@@ -3,16 +3,33 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
-        <service id="wirecard_elastic_engine.paypal_payment_service"
-                 class="WirecardElasticEngine\Component\Payments\PaypalPayment">
+        <!-- Payment related -->
+        <service id="wirecard_elastic_engine.payment_factory"
+                 class="WirecardShopwareElasticEngine\Components\Services\PaymentFactory">
+            <argument type="service" id="service_container"/>
         </service>
-        <service id="wirecard_elastic_engine.subscriber.frontend" 
+        <service id="wirecard_elastic_engine.payment"
+                 class="WirecardShopwareElasticEngine\Components\Payments\Payment"
+                 abstract="true">
+            <argument type="service" id="service_container"/>
+        </service>
+        <service id="wirecard_elastic_engine.payments.paypal"
+                 class="WirecardShopwareElasticEngine\Components\Payments\PaypalPayment"
+                 parent="wirecard_elastic_engine.payment">
+        </service>
+        <service id="wirecard_elastic_engine.payment_processor"
+                 class="WirecardShopwareElasticEngine\Components\Services\PaymentProcessor">
+        </service>
+
+        <!-- Subscriber -->
+        <service id="wirecard_elastic_engine.subscriber.frontend"
                  class="WirecardShopwareElasticEngine\Subscriber\FrontendSubscriber">
             <argument>%wirecard_shopware_elastic_engine.plugin_dir%</argument>
             <argument type="service" id="template"/>
             <tag name="shopware.event_subscriber"/>
         </service>
-        <service id="wirecard_elast_engine_order.subscriber.templates" class="WirecardShopwareElasticEngine\Subscriber\ExtendOrder">
+        <service id="wirecard_elastic_engine.subscriber.templates"
+                 class="WirecardShopwareElasticEngine\Subscriber\ExtendOrder">
             <argument>%wirecard_shopware_elastic_engine.plugin_dir%</argument>
             <tag name="shopware.event_subscriber"/>
         </service>

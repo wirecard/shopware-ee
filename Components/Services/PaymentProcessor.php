@@ -29,76 +29,82 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Payments;
+namespace WirecardShopwareElasticEngine\Components\Services;
 
-use Wirecard\PaymentSdk\Config\Config;
-use Wirecard\PaymentSdk\Response\Response;
-use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
-use WirecardShopwareElasticEngine\Models\Transaction;
+use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Data\PaymentData;
+use WirecardShopwareElasticEngine\Components\Payments\Payment;
 
-interface PaymentInterface
+class PaymentProcessor
 {
     /**
-     * @return string
+     * @var Payment
      */
-    public function getLabel();
+    protected $payment;
 
     /**
-     * @return string
+     * @var PaymentData
      */
-    public function getName();
+    protected $paymentData;
 
     /**
-     * @return array
+     * @var TransactionService
      */
-    public function getPaymentOptions();
+    protected $transactionService;
+
+    public function __construct()
+    {
+    }
+
+    public function execute()
+    {
+    }
 
     /**
-     * Start Transaction
-     *
-     * @param array $paymentData
-     * @return array
+     * @param Payment $payment
      */
-    public function processPayment(array $paymentData);
+    public function setPayment(Payment $payment)
+    {
+        $this->payment = $payment;
+    }
 
     /**
-     * Creates Transaction entry and returns it
-     *
-     * @return Transaction
+     * @return Payment
      */
-    public function createElasticEngineTransaction();
+    public function getPayment()
+    {
+        return $this->payment;
+    }
 
     /**
-     * @param array $request
-     * @return Response
+     * @param PaymentData $paymentData
      */
-    public function getPaymentResponse(array $request);
+    public function setPaymentData(PaymentData $paymentData)
+    {
+        $this->paymentData = $paymentData;
+    }
 
     /**
-     * @param string $request
-     * @return Response
+     * @return mixed
      */
-    public function getPaymentNotification($request);
+    public function getPaymentData()
+    {
+        return $this->getPaymentData();
+    }
 
     /**
-     * Returns payment specific transaction object
-     *
-     * @return \Wirecard\PaymentSdk\Transaction\Transaction
+     * @param TransactionService $transactionService
      */
-    public function getTransaction();
+    public function setTransactionService(TransactionService $transactionService)
+    {
+        $this->transactionService = $transactionService;
+    }
 
     /**
-     * Returns transaction config
-     *
-     * @param PaymentConfig $paymentConfig
-     * @return Config
+     * @return TransactionService
      */
-    public function getTransactionConfig();
-
-    /**
-     * Returns payment specific configuration
-     *
-     * @return array
-     */
-    public function getPaymentConfig();
+    public function getTransactionService()
+    {
+        return $this->transactionService;
+    }
 }

@@ -29,76 +29,38 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Payments;
+namespace WirecardShopwareElasticEngine\Components\Services;
 
-use Wirecard\PaymentSdk\Config\Config;
-use Wirecard\PaymentSdk\Response\Response;
-use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
-use WirecardShopwareElasticEngine\Models\Transaction;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
+use WirecardShopwareElasticEngine\Components\Payments\Payment;
+use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
+use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
 
-interface PaymentInterface
+class PaymentFactory
 {
-    /**
-     * @return string
-     */
-    public function getLabel();
+    protected $container;
 
     /**
-     * @return string
+     * @param ContainerInterface $container
      */
-    public function getName();
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+    }
 
     /**
-     * @return array
+     * @param string $paymentName
+     * @return Payment
      */
-    public function getPaymentOptions();
+    public function create($paymentName)
+    {
+        switch ($paymentName) {
+            case PaypalPayment::PAYMETHOD_IDENTIFIER:
+            case PayPalTransaction::NAME:
+                return $this->container->get('wirecard_elastic_engine.payments.paypal');
+        }
 
-    /**
-     * Start Transaction
-     *
-     * @param array $paymentData
-     * @return array
-     */
-    public function processPayment(array $paymentData);
-
-    /**
-     * Creates Transaction entry and returns it
-     *
-     * @return Transaction
-     */
-    public function createElasticEngineTransaction();
-
-    /**
-     * @param array $request
-     * @return Response
-     */
-    public function getPaymentResponse(array $request);
-
-    /**
-     * @param string $request
-     * @return Response
-     */
-    public function getPaymentNotification($request);
-
-    /**
-     * Returns payment specific transaction object
-     *
-     * @return \Wirecard\PaymentSdk\Transaction\Transaction
-     */
-    public function getTransaction();
-
-    /**
-     * Returns transaction config
-     *
-     * @param PaymentConfig $paymentConfig
-     * @return Config
-     */
-    public function getTransactionConfig();
-
-    /**
-     * Returns payment specific configuration
-     *
-     * @return array
-     */
-    public function getPaymentConfig();
+        throw new UnknownPaymentException($paymentName);
+    }
 }
