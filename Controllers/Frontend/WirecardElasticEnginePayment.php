@@ -94,7 +94,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function creditCardAction()
     {
-        $params = $this->Request()->getParams();
+        $this->container->get('pluginlogger')->info('test');
 
         if (!empty($params['parent_transaction_id']) &&
             !empty($params['token_id'])) {
@@ -215,11 +215,11 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     'action'     => 'finish',
                 ]);
             } catch (RuntimeException $e) {
-                Shopware()->PluginLogger()->error($e->getMessage());
+                $this->container->get('pluginlogger')->error($e->getMessage());
                 return $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER, $e->getMessage());
             }
         } elseif ($response instanceof FailureResponse) {
-            Shopware()->PluginLogger()->error(
+            $this->container->get('pluginlogger')->error(
                 'Response validation status: %s',
                 $response->isValidSignature() ? 'true' : 'false'
             );
@@ -234,7 +234,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $errorMessage  = sprintf('%s with code %s and message "%s" occurred.', $severity, $code, $description);
                 $errorMessages .= $errorMessage . '<br>';
 
-                Shopware()->PluginLogger()->error($errorMessage);
+                $this->container->get('pluginlogger')->error($errorMessage);
             }
 
             return $this->errorHandling(StatusCodes::ERROR_FAILURE_RESPONSE, $errorMessages);
@@ -278,7 +278,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $request = $this->Request()->getParams();
         $notification = file_get_contents("php://input");
 
-        Shopware()->PluginLogger()->info("Notification: " . $notification);
+        $this->container->get('pluginlogger')->info("Notification: " . $notification);
 
         $response = null;
 
@@ -288,7 +288,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         }
 
         if (!$response) {
-            Shopware()->PluginLogger()->error("notification called without response");
+            $this->container->get('pluginlogger')->error("notification called without response");
         }
 
         if ($response instanceof SuccessResponse) {
@@ -310,7 +310,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                                                       'id' => $wirecardOrderNumber
                                                   ]);
             if (!$elasticEngineTransaction) {
-                Shopware()->PluginLogger()->error("no Wirecard Transaction found for order");
+                $this->container->get('pluginlogger')->error("no Wirecard Transaction found for order");
                 exit();
             }
 
@@ -331,11 +331,11 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
             if ($order) {
                 if (intval($order['cleared']) === Status::PAYMENT_STATE_OPEN) {
-                    Shopware()->PluginLogger()->info("set PaymentStatus for Order " . $order->getId());
+                    $this->container->get('pluginlogger')->info("set PaymentStatus for Order " . $order->getId());
                     $this->savePaymentStatus($transactionId, $paymentUniqueId, $paymentStatusId, false);
                 } else {
                     // payment state already set
-                    Shopware()->PluginLogger()->error("Order with ID " . $order->getId() . " already set");
+                    $this->container->get('pluginlogger')->error("Order with ID " . $order->getId() . " already set");
                 }
             }
         }
