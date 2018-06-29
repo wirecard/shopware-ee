@@ -71,9 +71,10 @@ interface PaymentInterface
     /**
      * Creates Transaction entry and returns it
      *
+     * @params string $basketSignature
      * @return Transaction
      */
-    public function createElasticEngineTransaction();
+    public function createElasticEngineTransaction($basketSignature = null);
 
     /**
      * @param array $request

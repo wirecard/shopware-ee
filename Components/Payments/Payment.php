@@ -127,7 +127,7 @@ abstract class Payment implements PaymentInterface
             $transaction->setLocale($locale);
         }
 
-        $elasticEngineTransaction = $this->createElasticEngineTransaction();
+        $elasticEngineTransaction = $this->createElasticEngineTransaction($paymentData['signature']);
         $orderNumber              = $elasticEngineTransaction->getId();
         $transaction->setOrderNumber($orderNumber);
 
@@ -251,9 +251,7 @@ abstract class Payment implements PaymentInterface
                 'formFields' => $response->getFormFields(),
                 'url'        => $response->getUrl()
             ];
-        }
-        exit();
-        if ($response instanceof SuccessResponse) {
+        } elseif ($response instanceof SuccessResponse) {
             $customFields    = $response->getCustomFields();
             $transactionId   = $response->getTransactionId();
             $paymentUniqueId = $response->getProviderTransactionId();
@@ -577,9 +575,12 @@ abstract class Payment implements PaymentInterface
     /**
      * @inheritdoc
      */
-    public function createElasticEngineTransaction()
+    public function createElasticEngineTransaction($basketSignature = null)
     {
         $transactionModel = new Transaction();
+        if ($basketSignature) {
+            $transactionModel->setBasketSignature($basketSignature);
+        }
         Shopware()->Models()->persist($transactionModel);
         Shopware()->Models()->flush();
 
@@ -605,7 +606,8 @@ abstract class Payment implements PaymentInterface
     public function getPaymentResponse(array $request)
     {
         $configData = $this->getConfigData();
-        $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
+        $config = $this->getConfig($configData); //new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
+        //        $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
         $service = new TransactionService($config);
         $response = $service->handleResponse($request);
 
@@ -618,7 +620,7 @@ abstract class Payment implements PaymentInterface
     public function getPaymentNotification($request)
     {
         $configData = $this->getConfigData();
-        $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
+        $config = $this->getConfig($configData); //new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
         $service = new TransactionService($config);
         $notification = $service->handleNotification($request);
 

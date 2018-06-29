@@ -105,7 +105,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
                 $response = $creditCard->processJsResponse(
                     $params,
-                    $router->assemble(['action' => 'return', 'method' => $method, 'forceSecure' => true])
+                    $router->assemble([
+                        'action' => 'return',
+                        'method' => CreditCardPayment::PAYMETHOD_IDENTIFIER,
+                        'forceSecure' => true])
                 );
 
                 $status = $creditCard->handleReturnResponse($response);
@@ -161,6 +164,9 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         if ($request['method'] === PaypalPayment::PAYMETHOD_IDENTIFIER) {
             $paypal = new PaypalPayment();
             $response = $paypal->getPaymentResponse($request);
+        } elseif ($request['method'] === CreditCardPayment::PAYMETHOD_IDENTIFIER) {
+            $creditCard = new CreditCardPayment();
+            $response = $creditCard->getPaymentResponse($request);
         }
 
         if (!$response) {
@@ -170,7 +176,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         if ($response instanceof SuccessResponse) {
             $customFields    = $response->getCustomFields();
             $transactionId   = $response->getTransactionId();
-            $paymentUniqueId = $response->getProviderTransactionId();
+            $providerTransactionId = $response->getProviderTransactionId();
             $signature       = $customFields->get('signature');
 
             $wirecardOrderNumber = $response->findElement('order-number');
@@ -184,15 +190,19 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             }
 
             $elasticEngineTransaction->setTransactionId($transactionId);
-            $elasticEngineTransaction->setProviderTransactionId($paymentUniqueId);
+            $elasticEngineTransaction->setProviderTransactionId($providerTransactionId);
             $elasticEngineTransaction->setReturnResponse(serialize($response->getData()));
             $paymentStatus = intval($elasticEngineTransaction->getPaymentStatus());
+
+            if (!$signature) {
+                $signature = $elasticEngineTransaction->getBasketSignature();
+            }
 
             $order = Shopware()->Models()
                                ->getRepository(Order::class)
                                ->findOneBy([
                                    'transactionId' => $transactionId,
-                                   'temporaryId'   => $paymentUniqueId,
+                                   'temporaryId'   => $transactionId,
                                    'status'        => -1,
                                ]);
 
@@ -203,7 +213,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     'module'     => 'frontend',
                     'controller' => 'checkout',
                     'action'     => 'finish',
-                    'sUniqueID'  => $paymentUniqueId,
+                    'sUniqueID'  => $transactionId,
                 ]);
             }
 
@@ -211,9 +221,9 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $this->loadBasketFromSignature($signature);
 
                 if ($paymentStatus) {
-                    $orderNumber = $this->saveOrder($transactionId, $paymentUniqueId, $paymentStatus);
+                    $orderNumber = $this->saveOrder($transactionId, $transactionId, $paymentStatus);
                 } else {
-                    $orderNumber = $this->saveOrder($transactionId, $paymentUniqueId);
+                    $orderNumber = $this->saveOrder($transactionId, $transactionId);
                 }
 
                 $elasticEngineTransaction->setOrderNumber($orderNumber);
@@ -231,8 +241,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             }
         } elseif ($response instanceof FailureResponse) {
             $this->container->get('pluginlogger')->error(
-                'Response validation status: %s',
-                $response->isValidSignature() ? 'true' : 'false'
+                sprintf(
+                    'Response validation status: %s',
+                    $response->isValidSignature() ? 'true' : 'false'
+                )
             );
 
             $errorMessages = "";
@@ -296,6 +308,9 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         if ($request['method'] === PaypalPayment::PAYMETHOD_IDENTIFIER) {
             $paypal = new PaypalPayment();
             $response = $paypal->getPaymentNotification($notification);
+        } elseif ($request['method'] === CreditCardPayment::PAYMETHOD_IDENTIFIER) {
+            $creditCard = new CreditCardPayment();
+            $response = $creditCard->getPaymentNotification($notification);
         }
 
         if (!$response) {
@@ -304,7 +319,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         if ($response instanceof SuccessResponse) {
             $transactionId   = $response->getTransactionId();
-            $paymentUniqueId = $response->getProviderTransactionId();
+            $providerTransactionId = $response->getProviderTransactionId();
             $transactionType = $response-> getTransactionType();
 
             $wirecardOrderNumber = $response->findElement('order-number');
@@ -326,7 +341,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             }
 
             $elasticEngineTransaction->setTransactionId($transactionId);
-            $elasticEngineTransaction->setProviderTransactionId($paymentUniqueId);
+            $elasticEngineTransaction->setProviderTransactionId($providerTransactionId);
             $elasticEngineTransaction->setNotificationResponse(serialize($response->getData()));
             $elasticEngineTransaction->setPaymentStatus($paymentStatusId);
             Shopware()->Models()->persist($elasticEngineTransaction);
@@ -336,14 +351,14 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                                ->getRepository(Order::class)
                                ->findOneBy([
                                    'transactionId' => $transactionId,
-                                   'temporaryId'   => $paymentUniqueId,
+                                   'temporaryId'   => $transactionId,
                                    'status'        => -1,
                                ]);
 
             if ($order) {
                 if (intval($order['cleared']) === Status::PAYMENT_STATE_OPEN) {
                     $this->container->get('pluginlogger')->info("set PaymentStatus for Order " . $order->getId());
-                    $this->savePaymentStatus($transactionId, $paymentUniqueId, $paymentStatusId, false);
+                    $this->savePaymentStatus($transactionId, $transactionId, $paymentStatusId, false);
                 } else {
                     // payment state already set
                     $this->container->get('pluginlogger')->error("Order with ID " . $order->getId() . " already set");

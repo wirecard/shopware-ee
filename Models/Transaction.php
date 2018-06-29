@@ -94,6 +94,12 @@ class Transaction extends ModelEntity
     private $paymentStatus;
 
     /**
+     * @var string
+     * @ORM\Column(name="basket_signature", type="string", nullable=true)
+     */
+    private $basketSignature;
+
+    /**
      * @return int
      */
     public function getId()
@@ -211,5 +217,21 @@ class Transaction extends ModelEntity
     public function setPaymentStatus($paymentStatus)
     {
         $this->paymentStatus = $paymentStatus;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getBasketSignature()
+    {
+        return $this->basketSignature;
+    }
+    
+    /**
+     * @param string $basketSignature
+     */
+    public function setBasketSignature($basketSignature)
+    {
+        $this->basketSignature = $basketSignature;
     }
 }
