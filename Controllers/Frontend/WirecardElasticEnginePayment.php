@@ -35,6 +35,7 @@ use Shopware\Models\Order\Status;
 
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
+use Wirecard\PaymentSdk\TransactionService;
 
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\StatusCodes;
@@ -147,7 +148,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                         $this->errorHandling($status['code']);
                     }
                 }
-                exit();
+                return;
             }
         }
         
@@ -170,6 +171,9 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $creditCard = new CreditCardPayment();
         $requestData = $creditCard->getRequestDataForIframe($paymentData);
         $this->View()->assign('wirecardRequestData', $requestData);
+        $rawRequestData = json_decode($requestData, true);
+        $requestId = $rawRequestData[TransactionService::REQUEST_ID];
+        $creditCard->addTransactionRequestId($requestId);
     }
 
     /**
@@ -319,9 +323,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                                                       ->getRepository(Transaction::class)
                                                       ->findOneBy(['id' => $wirecardOrderNumber]);
             } catch (\Exception $e) {
+                $requestId = $response->getRequestId();
                 $elasticEngineTransaction = Shopware()->Models()
                                                       ->getRepository(Transaction::class)
-                                                      ->findOneBy(['transactionId' => $transactionId]);
+                                                      ->findOneBy(['requestId' => $requestId]);
             }
 
             if (!$elasticEngineTransaction) {

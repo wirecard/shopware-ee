@@ -44,7 +44,7 @@ class CreditCardPayment extends Payment
 
     private $paymentData;
     private $creditCardConfig;
-    private $config;
+    private $paymentConfig;
 
     /**
      * @inheritdoc
@@ -100,9 +100,9 @@ class CreditCardPayment extends Payment
 
         $config->add($this->creditCardConfig);
 
-        $this->config = $config;
+        $this->paymentConfig = $config;
         
-        return $this->config;
+        return $this->paymentConfig;
     }
 
     /**
@@ -197,8 +197,12 @@ class CreditCardPayment extends Payment
         $configData = $this->getConfigData();
 
         $transaction->setConfig($this->creditCardConfig);
-        $transactionService = new TransactionService($this->config, Shopware()->PluginLogger());
+        $transactionService = new TransactionService($this->paymentConfig, Shopware()->PluginLogger());
 
-        return $transactionService->getCreditCardUiWithData($transaction, $configData['transactionType'], Shopware()->Locale()->getLanguage());
+        return $transactionService->getCreditCardUiWithData(
+            $transaction,
+            $configData['transactionType'],
+            Shopware()->Locale()->getLanguage()
+        );
     }
 }

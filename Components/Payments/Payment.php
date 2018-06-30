@@ -59,6 +59,9 @@ abstract class Payment implements PaymentInterface
     const TRANSACTION_TYPE_AUTHORIZATION = 'authorization';
     const TRANSACTION_TYPE_PURCHASE = 'purchase';
 
+    private $config = null;
+    private $orderNumber;
+
     /**
      * @inheritdoc
      */
@@ -97,7 +100,7 @@ abstract class Payment implements PaymentInterface
     {
         $configData = $this->getConfigData();
 
-        $config = $this->getConfig($configData);
+        $this->config = $this->getConfig($configData);
 
         $transaction = $this->getTransaction();
 
@@ -150,54 +153,9 @@ abstract class Payment implements PaymentInterface
      */
     public function processPayment(array $paymentData)
     {
-        $configData = $this->getConfigData();
+        $transaction = $this->createTransaction($paymentData);
 
-        $config = $this->getConfig($configData);
-
-        $transaction = $this->getTransaction();
-
-        $amount = new Amount($paymentData['amount'], $paymentData['currency']);
-
-        $redirectUrls = new Redirect($paymentData['returnUrl'], $paymentData['cancelUrl']);
-        $notificationUrl = $paymentData['notifyUrl'];
-
-        $transaction->setNotificationUrl($notificationUrl);
-        $transaction->setRedirect($redirectUrls);
-        $transaction->setAmount($amount);
-
-        $customFields = new CustomFieldCollection();
-        $customFields->add(new CustomField('signature', $paymentData['signature']));
-        $transaction->setCustomFields($customFields);
-
-        if ($configData['sendBasket']) {
-            $basket = $this->createBasket($transaction, $paymentData['basket'], $paymentData['currency']);
-            $transaction->setBasket($basket);
-        }
-
-        if ($configData['fraudPrevention']) {
-            $this->addConsumer($transaction, $paymentData['user']);
-            $transaction->setIpAddress($paymentData['ipAddr']);
-
-            $locale = Shopware()->Locale()->getLanguage();
-            if (strpos($locale, '@') !== false) {
-                $localeArr = explode('@', $locale);
-                $locale = $localeArr[0];
-            }
-            $transaction->setLocale($locale);
-        }
-
-        $elasticEngineTransaction = $this->createElasticEngineTransaction();
-        $orderNumber              = $elasticEngineTransaction->getId();
-        $transaction->setOrderNumber($orderNumber);
-
-        if ($configData['descriptor']) {
-            $descriptor = Shopware()->Config()->get('shopName') . ' ' . $orderNumber;
-            $transaction->setDescriptor($descriptor);
-        }
-
-        $this->addPaymentSpecificData($transaction, $paymentData, $configData);
-
-        $transactionService = new TransactionService($config, Shopware()->PluginLogger());
+        $transactionService = new TransactionService($this->config, Shopware()->PluginLogger());
 
         $response = null;
         if ($configData['transactionType'] === self::TRANSACTION_TYPE_AUTHORIZATION
@@ -489,7 +447,35 @@ abstract class Payment implements PaymentInterface
         Shopware()->Models()->persist($transactionModel);
         Shopware()->Models()->flush();
 
+        $this->orderNumber = $transactionModel->getId();
+        
         return $transactionModel;
+    }
+
+    /**
+     * adds request id to transaction model
+     *
+     * @params string requestId
+     * @return boolean
+     */
+    public function addTransactionRequestId($requestId)
+    {
+        if (!$this->orderNumber) {
+            return false;
+        }
+
+        $transactionModel = Shopware()->Models()
+            ->getRepository(Transaction::class)
+            ->findOneBy(['id' => $this->orderNumber]);
+
+        if (!$transactionModel) {
+            return false;
+        }
+        $transactionModel->setRequestId($requestId);
+        Shopware()->Models()->persist($transactionModel);
+        Shopware()->Models()->flush();
+
+        return true;
     }
 
     /**

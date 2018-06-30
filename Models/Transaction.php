@@ -100,6 +100,12 @@ class Transaction extends ModelEntity
     private $basketSignature;
 
     /**
+     * @var string
+     * @ORM\Column(name="request_id", type="string", nullable=true)
+     */
+    private $requestId;
+
+    /**
      * @return int
      */
     public function getId()
@@ -233,5 +239,21 @@ class Transaction extends ModelEntity
     public function setBasketSignature($basketSignature)
     {
         $this->basketSignature = $basketSignature;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getRequestId()
+    {
+        return $this->requestId;
+    }
+    
+    /**
+     * @param string $requestId
+     */
+    public function setRequestId($requestId)
+    {
+        $this->requestId = $requestId;
     }
 }
