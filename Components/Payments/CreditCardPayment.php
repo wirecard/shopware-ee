@@ -82,16 +82,26 @@ class CreditCardPayment extends Payment
             );
         }
 
+        $threeDsOnly = $configData['3dsOnly'];
+        $threeDsAttempt = $configData['3dsAttempt'];
+        $shop = Shopware()->Container()->get('shop');
+
+        if (!$shop->getCurrency()->getDefault()) {
+            $factor = $shop->getCurrency()->getFactor();
+            $threeDsOnly *= $factor;
+            $threeDsAttempt *= $factor;
+        }
+
         $creditCardConfig->addSslMaxLimit(
             new Amount(
-                $configData['3dsOnly'],
+                $threeDsOnly,
                 $this->paymentData['currency']
             )
         );
 
         $creditCardConfig->addThreeDMinLimit(
             new Amount(
-                $configData['3dsAttempt'],
+                $threeDsAttempt,
                 $this->paymentData['currency']
             )
         );
@@ -185,11 +195,16 @@ class CreditCardPayment extends Payment
      */
     protected function addPaymentSpecificData(WirecardTransaction $transaction, array $paymentData, array $configData)
     {
-        // TODO add transaction data or delete function
         $transaction->setTermUrl($paymentData['returnUrl']);
         return $transaction;
     }
 
+    /**
+     * Get request data as json string
+     *
+     * @params array paymentData
+     * @return string
+     */
     public function getRequestDataForIframe(array $paymentData) {
         $this->paymentData = $paymentData;
         $transaction = $this->createTransaction($paymentData);

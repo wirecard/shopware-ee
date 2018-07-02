@@ -33,6 +33,7 @@ use Shopware\Components\CSRFWhitelistAware;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 
+use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
@@ -316,7 +317,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $signature             = $customFields->get('signature');
 
             $elasticEngineTransaction = null;
-            try { // FIXXXXME solutions for notify delay ?
+            try {
                 $wirecardOrderNumber = $response->findElement('order-number');
 
                 $elasticEngineTransaction = Shopware()->Models()
