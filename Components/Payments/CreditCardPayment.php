@@ -205,7 +205,8 @@ class CreditCardPayment extends Payment
      * @params array paymentData
      * @return string
      */
-    public function getRequestDataForIframe(array $paymentData) {
+    public function getRequestDataForIframe(array $paymentData)
+    {
         $this->paymentData = $paymentData;
         $transaction = $this->createTransaction($paymentData);
 

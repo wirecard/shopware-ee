@@ -100,7 +100,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         if (!empty($params['parent_transaction_id']) &&
             !empty($params['token_id'])) {
-            
             if (!empty($params['jsresponse']) && $params['jsresponse']) {
                 $router   = $this->Front()->Router();
                 $creditCard = new CreditCardPayment();
@@ -110,8 +109,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     $router->assemble([
                         'action' => 'return',
                         'method' => CreditCardPayment::PAYMETHOD_IDENTIFIER,
-                        'forceSecure' => true]
-                    )
+                        'forceSecure' => true
+                    ])
                 );
 
                 $status = $this->handleReturnResponse($response);
