@@ -31,12 +31,17 @@
 
 namespace WirecardShopwareElasticEngine\Components\Data;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Basket;
+use WirecardShopwareElasticEngine\Components\Payments\Payment;
 
 class PaymentData
 {
+    /**
+     * @var Payment
+     */
+    protected $payment;
+
     /**
      * @var array
      */
@@ -44,6 +49,11 @@ class PaymentData
 
     /**
      * @var array
+     */
+    protected $rawBasket;
+
+    /**
+     * @var Basket
      */
     protected $basket;
 
@@ -73,38 +83,43 @@ class PaymentData
     protected $request;
 
     /**
-     * @var EntityManagerInterface
+     * @var \sArticles
      */
-    protected $em;
+    protected $articles;
 
     /**
      * PaymentData constructor.
      *
+     * @param Payment                             $payment
      * @param array                               $user
      * @param array                               $basket
      * @param                                     $amount
      * @param                                     $currency
      * @param \Enlight_Controller_Router          $router
      * @param \Enlight_Controller_Request_Request $request
-     * @param EntityManagerInterface              $em
+     * @param \sArticles                          $articles
      */
     public function __construct(
+        Payment $payment,
         array $user,
         array $basket,
         $amount,
         $currency,
         \Enlight_Controller_Router $router,
         \Enlight_Controller_Request_Request $request,
-        EntityManagerInterface $em
+        \sArticles $articles
     ) {
+        $this->payment   = $payment;
         $this->user      = $user;
-        $this->basket    = $basket;
         $this->currency  = $currency;
         $this->router    = $router;
         $this->request   = $request;
+        $this->rawBasket = $basket;
         $this->rawAmount = $amount;
-        $this->em        = $em;
+        $this->articles  = $articles;
+
         $this->amount    = new Amount($amount, $currency);
+        $this->basket    = new Basket();
     }
 
     /**
@@ -118,18 +133,17 @@ class PaymentData
     /**
      * @return array
      */
-    public function getBasket()
+    public function getRawBasket()
     {
-        return $this->basket;
+        return $this->rawBasket;
     }
 
     /**
      * @return Basket
      */
-    public function getElasticEngineBasket()
+    public function getBasket()
     {
-        $basket = new Basket();
-        return $basket;
+        return $this->basket;
     }
 
     /**
@@ -137,7 +151,36 @@ class PaymentData
      */
     public function getBasketText()
     {
-        return '';
+        $currency     = $this->getCurrency();
+        $basket       = $this->getBasket();
+        $basketString = '';
+
+        foreach ($basket['content'] as $item) {
+            $name        = $item['articlename'];
+            $orderNumber = $item['ordernumber'];
+            $taxRate     = floatval($item['tax_rate']);
+            $quantity    = $item['quantity'];
+
+            if (isset($item['additional_details'])) {
+                if (isset($item['additional_details']['prices'])
+                    && count($item['additional_details']['prices']) === 1) {
+                    $price = $item['additional_details']['prices'][0]['price_numeric'];
+                } else {
+                    $price = $item['additional_details']['price_numeric'];
+                }
+            } else {
+                $price = floatval(str_replace(',', '.', $item['price']));
+            }
+
+            $basketString .= "${name}-${orderNumber}-${price}-${currency}-${quantity}-${taxRate}%\n";
+        }
+
+        if (! empty($basket['sShippingcostsWithTax']) && isset($basket['sShippingcostsTax'])) {
+            $basketString .= "Shipping - shipping - ${basket['sShippingcostsWithTax']} " .
+                             "${currency} - ${basket['sShippingcostsTax']}";
+        }
+
+        return $basketString;
     }
 
     /**
@@ -145,7 +188,32 @@ class PaymentData
      */
     public function validateBasket()
     {
-        return false;
+        $basket = $this->getBasket();
+
+        if (! isset($basket['content'])) {
+            return false;
+        }
+
+        foreach ($basket['content'] as $item) {
+            if (! isset($item['ordernumber'])) {
+                return false;
+            }
+
+            $article = $this->articles->sGetProductByOrdernumber($item['ordernumber']);
+
+            if (! $article) {
+                // Some items (extra charges, ...) might have an order number but no article.
+                continue;
+            }
+
+            if (! $article['isAvailable']
+                || ($article['laststock']
+                    && intval($item['quantity']) > $article['instock'])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
