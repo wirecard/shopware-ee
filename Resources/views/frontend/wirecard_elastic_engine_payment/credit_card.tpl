@@ -5,6 +5,9 @@
 {/block}
 
 {block name="frontend_index_content"}
+    <div class="wirecard-credit-card-error-message" style="display: none;">
+        {include file='frontend/_includes/messages.tpl' type='error' content="test"}
+    </div>
     {if $threeDSecure}
         <div class="content content--checkout">
             <h2>Wirecard3DSecureInformation</h2>
@@ -21,7 +24,7 @@
     {else}
         <div class="content content--checkout">
             <form id="credit-card--form" method="post">
-                <div id="credit-card--iframe-div" style="width: 100%; height: 600px;"></div>
+                <div id="credit-card--iframe-div" style="width: 100%; height: 550px;"></div>
                 <button class="btn is--primary is--large right is--icon-right" type="submit">Senden</button>
             </form>
         </div>
@@ -32,10 +35,14 @@
     {$smarty.block.parent}
     {if not $threeDSecure}
         <script type="text/javascript">
-         (function() {
+         document.asyncReady(function () {
+             var $ = jQuery;
 
              var logCallback = function(response) {
-                 console.log(response);
+                 if (response.transaction_state === 'failed') {
+                     $('.wirecard-credit-card-error-message .alert--content').html(response.status_description_1)
+                     $('.wirecard-credit-card-error-message').show();
+                 }
              }
 
              WirecardPaymentPage.seamlessRenderForm({
@@ -73,6 +80,7 @@
                      event.preventDefault();
 
                      WirecardPaymentPage.seamlessSubmitForm({
+                         wrappingDivId: 'credit-card--iframe-div',
                          onSuccess: setParentTransactionId,
                          onError: logCallback
                      })
@@ -80,7 +88,7 @@
                  
              });
 
-         }) ();
+         });
         </script>
     {/if}
 {/block}
