@@ -35,6 +35,7 @@ use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\CreditCardConfig;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
+use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 
@@ -213,11 +214,20 @@ class CreditCardPayment extends Payment
         $configData = $this->getConfigData();
 
         $transaction->setConfig($this->creditCardConfig);
+
+        $transactionType = null;
+        if ($configData['transactionType'] === parent::TRANSACTION_TYPE_AUTHORIZATION
+            && $transaction instanceof Reservable) {
+            $transactionType = Operation::RESERVE;
+        } else {
+            $transactionType = Operation::PAY;
+        }
+
         $transactionService = new TransactionService($this->paymentConfig, Shopware()->PluginLogger());
 
         return $transactionService->getCreditCardUiWithData(
             $transaction,
-            $configData['transactionType'],
+            $transactionType,
             Shopware()->Locale()->getLanguage()
         );
     }
