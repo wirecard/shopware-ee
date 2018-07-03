@@ -127,7 +127,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
             ->from(OrderTransaction::class, 'orderTransaction')
             ->where('orderTransaction.parentTransactionId = :parentTransactionId')
             ->setParameter('parentTransactionId', $transactionData[0]['transactionId']);
-            
+
         $historyQuery = $historyBuilder->getQuery();
         $transactionsHistory = $historyQuery->getArrayResult();
 
@@ -139,7 +139,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
                 $entry['returnResponse'] = print_r(unserialize($entry['returnResponse']), true);
             }
         }
-        
+
         $backendOperations = [];
 
         if ($payMethod === PaypalPayment::PAYMETHOD_IDENTIFIER) {
@@ -207,7 +207,6 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
             if ($elasticEngineTransactions) {
                 $result['data'][$key]['wirecardTransactions'] = $elasticEngineTransactions;
             }
-
         }
 
         return $result;
