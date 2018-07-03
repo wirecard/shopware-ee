@@ -40,7 +40,7 @@ use WirecardShopwareElasticEngine\Models\Transaction;
  * @ORM\Entity
  * @ORM\Table(name="wirecard_elastic_engine_order_transaction")
  */
-class OrderTransactions extends ModelEntity
+class OrderTransaction extends ModelEntity
 {
     /**
      * @var int
@@ -101,19 +101,19 @@ class OrderTransactions extends ModelEntity
     private $currency;
 
     /**
-     * @var text
+     * @var string
      * @ORM\Column(name="return_response", type="text", nullable=true)
      */
     private $returnResponse;
 
     /**
-     * @var text
+     * @var string
      * @ORM\Column(name="notification_response", type="text", nullable=true)
      */
     private $notificationResponse;
 
     /**
-     * @var datetime
+     * @var \DateTime
      * @ORM\Column(name="created_at", type="datetime", nullable=false)
      */
     private $createdAt;
@@ -200,7 +200,7 @@ class OrderTransactions extends ModelEntity
     }
 
     /**
-     * @param string $transactionId
+     * @param string $providerTransactionId
      */
     public function setProviderTransactionId($providerTransactionId)
     {
@@ -264,7 +264,7 @@ class OrderTransactions extends ModelEntity
     }
 
     /**
-     * @param string $transactionId
+     * @param string $returnResponse
      */
     public function setReturnResponse($returnResponse)
     {
@@ -292,7 +292,7 @@ class OrderTransactions extends ModelEntity
      */
     public function setCreatedAt(\DateTime $createdAt)
     {
-        return $this->createdAt = $createdAt;
+        $this->createdAt = $createdAt;
     }
 
     /**

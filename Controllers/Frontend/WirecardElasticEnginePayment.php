@@ -43,7 +43,7 @@ use WirecardShopwareElasticEngine\Components\StatusCodes;
 use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 use WirecardShopwareElasticEngine\Models\Transaction;
-use WirecardShopwareElasticEngine\Models\OrderTransactions;
+use WirecardShopwareElasticEngine\Models\OrderTransaction;
 
 // @codingStandardsIgnoreStart
 class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopware_Controllers_Frontend_Payment implements CSRFWhitelistAware
@@ -228,11 +228,11 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $elasticEngineTransaction->setReturnResponse(serialize($response->getData()));
             $paymentStatus = intval($elasticEngineTransaction->getPaymentStatus());
 
-            $orderTransaction = Shopware()->Models()->getRepository(OrderTransactions::class)
+            $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
                               ->findOneBy(['transactionId' => $transactionId, 'parentTransactionId' => $transactionId]);
 
             if (!$orderTransaction) {
-                $orderTransaction = new OrderTransactions();
+                $orderTransaction = new OrderTransaction();
                 $orderTransaction->setParentTransactionId($transactionId);
                 $orderTransaction->setTransactionId($transactionId);
                 $orderTransaction->setProviderTransactionId($paymentUniqueId);
@@ -361,11 +361,11 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $elasticEngineTransaction->setReturnResponse(serialize($response->getData()));
             $paymentStatus = intval($elasticEngineTransaction->getPaymentStatus());
 
-            $orderTransaction = Shopware()->Models()->getRepository(OrderTransactions::class)
+            $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
                               ->findOneBy(['transactionId' => $transactionId, 'parentTransactionId' => $transactionId]);
 
             if (!$orderTransaction) {
-                $orderTransaction = new OrderTransactions();
+                $orderTransaction = new OrderTransaction();
                 $orderTransaction->setParentTransactionId($transactionId);
                 $orderTransaction->setTransactionId($transactionId);
                 $orderTransaction->setProviderTransactionId($paymentUniqueId);
@@ -531,11 +531,11 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 exit();
             }
 
-            $orderTransaction = Shopware()->Models()->getRepository(OrderTransactions::class)
+            $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
                               ->findOneBy(['transactionId' => $transactionId, 'parentTransactionId' => $transactionId]);
 
             if (!$orderTransaction) {
-                $orderTransaction = new OrderTransactions();
+                $orderTransaction = new OrderTransaction();
                 $orderTransaction->setParentTransactionId($transactionId);
                 $orderTransaction->setTransactionId($transactionId);
                 $orderTransaction->setProviderTransactionId($paymentUniqueId);
@@ -622,7 +622,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $amount = $notificationResponse['requested-amount'];
             $currency = $notificationResponse['currency'];
             
-            $orderTransaction = Shopware()->Models()->getRepository(OrderTransactions::class)
+            $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
                 ->findOneBy(['transactionId' => $transactionId, 'parentTransactionId' => $parentTransactionId]);
 
             $paymentStatusId = 0;
@@ -636,7 +636,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             }
 
             if (!$orderTransaction) {
-                $orderTransaction = new OrderTransactions();
+                $orderTransaction = new OrderTransaction();
                 $orderTransaction->setOrderNumber($orderNumber);
                 $orderTransaction->setParentTransactionId($parentTransactionId);
                 $orderTransaction->setTransactionId($transactionId);

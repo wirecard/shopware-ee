@@ -119,7 +119,6 @@ class FrontendSubscriber implements SubscriberInterface
                             default:
                                 $paymentStatusStr = 'success';
                         }
-                        $paymentStatus = $order->getPaymentStatus()->getId();
 
                         $view->assign('wirecardElasticEnginePaymentStatus', $paymentStatusStr);
                     }

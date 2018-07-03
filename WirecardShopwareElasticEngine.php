@@ -47,7 +47,7 @@ use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 
 use WirecardShopwareElasticEngine\Models\Transaction;
-use WirecardShopwareElasticEngine\Models\OrderTransactions;
+use WirecardShopwareElasticEngine\Models\OrderTransaction;
 
 use Doctrine\ORM\Tools\SchemaTool;
 
@@ -63,7 +63,7 @@ class WirecardShopwareElasticEngine extends Plugin
         $schemaTool->updateSchema(
             [
                 $entityManager->getClassMetadata(Transaction::class),
-                $entityManager->getClassMetadata(OrderTransactions::class)
+                $entityManager->getClassMetadata(OrderTransaction::class)
             ],
             true
         );

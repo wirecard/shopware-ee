@@ -36,6 +36,7 @@ use Shopware\Models\Order\Order;
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Models\OrderTransaction;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
 use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
@@ -123,7 +124,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
 
         $historyBuilder = $this->getManager()->createQueryBuilder();
         $historyBuilder->select('orderTransaction')
-            ->from('WirecardShopwareElasticEngine\Models\OrderTransactions', 'orderTransaction')
+            ->from(OrderTransaction::class, 'orderTransaction')
             ->where('orderTransaction.parentTransactionId = :parentTransactionId')
             ->setParameter('parentTransactionId', $transactionData[0]['transactionId']);
             
@@ -195,7 +196,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
     {
         $result = parent::getList($offset, $limit, $sort, $filter, $wholeParams);
 
-        foreach ($result['data'] as $key=>$current) {
+        foreach ($result['data'] as $key => $current) {
             $number = $current['number'];
             $builder = $this->getManager()->createQueryBuilder();
             $builder->select(['wirecardTransactions'])

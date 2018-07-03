@@ -28,12 +28,12 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
             'authorize': 'Authorize',
             'purchase': 'Purchase',
             'refund': 'Refund',
-            'cancle': 'Cancle',
+            'cancel': 'Cancel',
             'credit': 'Credit'
         },
 
         buttons: {
-            Cancel: '{s name="CancleButtonText" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}',
+            Cancel: '{s name="CancelButtonText" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}',
             Capture: '{s name="CaptureButtonText" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}',
             Credit: '{s name="CreditButtonText" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}',
             Pay: '{s name="PayButtonText" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}',
