@@ -89,6 +89,23 @@ interface PaymentInterface
     public function getPaymentNotification($request);
 
     /**
+     * Retrieve backend operations for specific transaction
+     *
+     * @param string $transactionId
+     * @return array
+     */
+    public function getBackendOperations($transactionId);
+
+    /**
+     * Process backend operation
+     *
+     * @param string $operation
+     * @param string $orderNumber
+     * @param float $amount
+     */
+    public function processBackendOperationsForOrder($orderNumber, $operation, $amount = 0);
+
+    /**
      * Returns payment specific transaction object
      *
      * @return \Wirecard\PaymentSdk\Transaction\Transaction

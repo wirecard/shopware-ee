@@ -38,6 +38,9 @@ use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
+use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
+use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
+
 // @codingStandardsIgnoreStart
 class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Controllers_Backend_Application implements CSRFWhitelistAware
 {
@@ -99,6 +102,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         $params = $this->Request()->getParams();
 
         $orderNumber = $params['orderNumber'];
+        $payMethod = $params['payMethod'];
 
         if (!$orderNumber) {
             return $this->View()->assign(['success' => false]);
@@ -111,13 +115,101 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
                 ->setParameter('orderNumber', $orderNumber);
 
         $query = $builder->getQuery();
-        $result = $query->getArrayResult();
+        $transactionData = $query->getArrayResult();
 
-        if (!$result || empty($result)) {
-            return $this->View()->assign(['success' => false]);
+        if (!$transactionData || empty($transactionData)) {
+            return $this->View()->assign([ 'success' => false ]);
         }
 
-        return $this->View()->assign(['success' => true, 'params' => $params, 'data' => $result]);
+        $historyBuilder = $this->getManager()->createQueryBuilder();
+        $historyBuilder->select('orderTransaction')
+            ->from('WirecardShopwareElasticEngine\Models\OrderTransactions', 'orderTransaction')
+            ->where('orderTransaction.parentTransactionId = :parentTransactionId')
+            ->setParameter('parentTransactionId', $transactionData[0]['transactionId']);
+            
+        $historyQuery = $historyBuilder->getQuery();
+        $transactionsHistory = $historyQuery->getArrayResult();
+
+        foreach ($transactionsHistory as &$entry) {
+            if ($entry['notificationResponse']) {
+                $entry['notificationResponse'] = print_r(unserialize($entry['notificationResponse']), true);
+            }
+            if ($entry['returnResponse']) {
+                $entry['returnResponse'] = print_r(unserialize($entry['returnResponse']), true);
+            }
+        }
+        
+        $backendOperations = [];
+
+        if ($payMethod === PaypalPayment::PAYMETHOD_IDENTIFIER) {
+            $paypal = new PaypalPayment();
+            $backendOperations = $paypal->getBackendOperations($transactionData[0]['transactionId']);
+        } elseif ($payMethod === CreditCardPayment::PAYMETHOD_IDENTIFIER) {
+            $creditCard = new CreditCardPayment();
+            $backendOperations = $creditCard->getBackendOperations($transactionData[0]['transactionId']);
+        }
+
+        $result = [
+            'transactionData'   => $transactionData[0],
+            'transactionHistory' => $transactionsHistory,
+            'backendOperations' => $backendOperations
+        ];
+
+        $this->View()->assign([ 'success' => true, 'data' => $result ]);
+    }
+
+    /**
+     *
+     */
+    public function processBackendOperationsAction()
+    {
+        $params = $this->Request()->getParams();
+
+        $operation = $params['operation'];
+        $orderNumber = $params['orderNumber'];
+        $payMethod = $params['payMethod'];
+        $amount = empty($params['amount']) ? null : $params['amount'];
+        $currency = empty($params['currency']) ? null : $params['currency'];
+        $payment = null;
+
+        if (!$operation || !$orderNumber || !$payMethod) {
+            return $this->View()->assign([ 'success' => false, 'msg' => 'unsufficiantData' ]);
+        }
+
+        if ($payMethod === PaypalPayment::PAYMETHOD_IDENTIFIER) {
+            $payment = new PaypalPayment();
+        }
+
+        if (!$payment) {
+            return $this->View()->assign([ 'success' => false, 'msg' => 'unknownPaymethod' ]);
+        }
+
+        $result = $payment->processBackendOperationsForOrder($orderNumber, $operation, $amount, $currency);
+        $this->View()->assign($result);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getList($offset, $limit, $sort = [], $filter = [], array $wholeParams = [])
+    {
+        $result = parent::getList($offset, $limit, $sort, $filter, $wholeParams);
+
+        foreach ($result['data'] as $key=>$current) {
+            $number = $current['number'];
+            $builder = $this->getManager()->createQueryBuilder();
+            $builder->select(['wirecardTransactions'])
+                ->from(Transaction::class, 'wirecardTransactions')
+                ->where('wirecardTransactions.orderNumber = :orderNumber')
+                ->setParameter('orderNumber', $number);
+            $elasticEngineTransactions = $builder->getQuery()->getArrayResult();
+            if ($elasticEngineTransactions) {
+                $result['data'][$key]['wirecardTransactions'] = $elasticEngineTransactions;
+            }
+
+        }
+
+        return $result;
     }
 
     /**
@@ -146,9 +238,6 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
                 ->addSelect('paymentStatus')
                 ->where('sOrder.number != 0');
 
-        $query = $builder->getQuery();
-        Shopware()->PluginLogger()->notice($query->getSQL());
-
         return $builder;
     }
 
@@ -157,6 +246,6 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
      */
     public function getWhitelistedCSRFActions()
     {
-        return array('testSettings');
+        return array('notify', 'testSettings');
     }
 }

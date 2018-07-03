@@ -105,6 +105,7 @@ class FrontendSubscriber implements SubscriberInterface
                     $order = Shopware()->Models()->getRepository(Order::class)
                                                  ->findOneBy(['number' => $sOrderNumber]);
 
+                    $paymentStatusStr = '';
                     if ($order) {
                         $view->assign('wirecardElasticEnginePayment', true);
 
@@ -118,6 +119,7 @@ class FrontendSubscriber implements SubscriberInterface
                             default:
                                 $paymentStatusStr = 'success';
                         }
+                        $paymentStatus = $order->getPaymentStatus()->getId();
 
                         $view->assign('wirecardElasticEnginePaymentStatus', $paymentStatusStr);
                     }

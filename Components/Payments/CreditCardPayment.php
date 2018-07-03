@@ -112,7 +112,7 @@ class CreditCardPayment extends Payment
         $config->add($this->creditCardConfig);
 
         $this->paymentConfig = $config;
-        
+
         return $this->paymentConfig;
     }
 

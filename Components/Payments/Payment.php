@@ -434,7 +434,7 @@ abstract class Payment implements PaymentInterface
         Shopware()->Models()->flush();
 
         $this->orderNumber = $transactionModel->getId();
-        
+
         return $transactionModel;
     }
 
@@ -501,5 +501,267 @@ abstract class Payment implements PaymentInterface
         $notification = $service->handleNotification($request);
 
         return $notification;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getBackendOperations($transactionId)
+    {
+        $configData = $this->getConfigData();
+        $config = $this->getConfig($configData);
+
+        $transaction = $this->getTransaction();
+        $transaction->setParentTransactionId($transactionId);
+        $service = new BackendService($config, Shopware()->PluginLogger());
+
+        return $service->retrieveBackendOperations($transaction, true);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function processBackendOperationsForOrder($orderNumber, $operation, $amount = 0, $currency = '')
+    {
+        if ($amount && !$currency) {
+            return [ 'success' => false, 'msg' => 'AmountWithoutCurrency'];
+        }
+
+        if ($operation === 'Refund') {
+            return $this->refundForOrder($orderNumber, $amount, $currency);
+        }
+
+        if ($operation === 'Capture') {
+            return $this->captureForOrder($orderNumber, $amount, $currency);
+        }
+
+        if ($operation === 'Cancel') {
+            return $this->cancelOrder($orderNumber);
+        }
+
+        return [ 'success' => false, 'msg' => 'InvalidOperation'];
+    }
+
+    /**
+     * @param string $orderNumber
+     * @param float $amount
+     * @param string $currency
+     * @return array
+     */
+    protected function refundForOrder($orderNumber, $amount = 0, $currency = '')
+    {
+        $elasticEngineTransaction = Shopware()->Models()->getRepository(Transaction::class)
+                                  ->findOneBy(['orderNumber' => $orderNumber]);
+
+        $parentTransactionId = $elasticEngineTransaction->getTransactionId();
+        if (!$elasticEngineTransaction) {
+            return [ 'success' => false, 'msg' => 'NoTransactionFound' ];
+        }
+
+        $configData = $this->getConfigData();
+        $config = $this->getConfig($configData);
+
+        $transaction = $this->getTransaction();
+        $transaction->setParentTransactionId($parentTransactionId);
+        $notificationUrl = Shopware()->Front()->Router()->assemble([
+            'module' => 'frontend',
+            'controller' => 'WirecardElasticEnginePayment',
+            'action' => 'notifyBackend',
+            'method' => $this->getName(),
+            'forceSecure' => true
+        ]);
+        $transaction->setNotificationUrl($notificationUrl);
+
+        if ($amount) {
+            $amountObj = new Amount($amount, $currency);
+            $transaction->setAmount($amountObj);
+        }
+
+        $transactionService = new BackendService($config, Shopware()->PluginLogger());
+
+        try {
+            $response = $transactionService->process($transaction, Operation::REFUND);
+        } catch (\Exception $exception) {
+            Shopware()->PluginLogger()->error('Processing refund failed:' . $exception->getMessage());
+            return [ 'success' => false, 'msg' => 'RefundFailed'];
+        }
+
+        if ($response instanceof SuccessResponse) {
+            Shopware()->PluginLogger()->info($response->getData());
+            $transactionId = $response->getTransactionId();
+            $providerTransactionId = $response->getProviderTransactionId() ? $response->getProviderTransactionId() : '';
+
+            $orderTransaction = Shopware()->Models()->getRepository(OrderTransactions::class)
+                ->findOneBy(['transactionId' => $parentTransactionId, 'parentTransactionId' => $transactionId]);
+
+            if (!$orderTransaction) {
+                $orderTransaction = new OrderTransactions();
+                $orderTransaction->setOrderNumber($orderNumber);
+                $orderTransaction->setParentTransactionId($parentTransactionId);
+                $orderTransaction->setTransactionId($transactionId);
+                $orderTransaction->setProviderTransactionId($providerTransactionId);
+                $orderTransaction->setCreatedAt(new \DateTime('now'));
+                $orderTransaction->setTransactionType('pending');
+            }
+
+            $orderTransaction->setReturnResponse(serialize($response->getData()));
+
+            Shopware()->Models()->persist($orderTransaction);
+            Shopware()->Models()->flush();
+
+            return [ 'success' => true, 'transactionId' => $response->getTransactionId() ];
+        }
+        if ($response instanceof FailureResponse) {
+            return [ 'success' => false, 'msg' => 'RefundFailed'];
+        }
+
+        return $operation;
+    }
+
+    /**
+     * @param string $orderNumber
+     * @param float $amount
+     * @param string $currency
+     * @return array
+     */
+    protected function captureForOrder($orderNumber, $amount = 0, $currency = '')
+    {
+        $elasticEngineTransaction = Shopware()->Models()->getRepository(Transaction::class)
+                                  ->findOneBy(['orderNumber' => $orderNumber]);
+
+        $parentTransactionId = $elasticEngineTransaction->getTransactionId();
+        if (!$elasticEngineTransaction) {
+            return [ 'success' => false, 'msg' => 'NoTransactionFound' ];
+        }
+
+        $configData = $this->getConfigData();
+        $config = $this->getConfig($configData);
+
+        $transaction = $this->getTransaction();
+        $transaction->setParentTransactionId($parentTransactionId);
+        $notificationUrl = Shopware()->Front()->Router()->assemble([
+            'module' => 'frontend',
+            'controller' => 'WirecardElasticEnginePayment',
+            'action' => 'notifyBackend',
+            'method' => $this->getName(),
+            'forceSecure' => true
+        ]);
+
+        $transaction->setNotificationUrl($notificationUrl);
+
+        if ($amount) {
+            $amountObj = new Amount($amount, $currency);
+            $transaction->setAmount($amountObj);
+        }
+
+        $transactionService = new BackendService($config, Shopware()->PluginLogger());
+
+        try {
+            $response = $transactionService->process($transaction, Operation::PAY);
+        } catch (\Exception $exception) {
+            Shopware()->PluginLogger()->error('Processing capture failed:' . $exception->getMessage());
+            return [ 'success' => false, 'msg' => 'CaptureFailed'];
+        }
+
+        if ($response instanceof SuccessResponse) {
+            Shopware()->PluginLogger()->info($response->getData());
+            $transactionId = $response->getTransactionId();
+            $providerTransactionId = $response->getProviderTransactionId() ? $response->getProviderTransactionId() : '';
+
+            $orderTransaction = Shopware()->Models()->getRepository(OrderTransactions::class)
+                ->findOneBy(['transactionId' => $parentTransactionId, 'parentTransactionId' => $transactionId]);
+
+            if (!$orderTransaction) {
+                $orderTransaction = new OrderTransactions();
+                $orderTransaction->setOrderNumber($orderNumber);
+                $orderTransaction->setParentTransactionId($parentTransactionId);
+                $orderTransaction->setTransactionId($transactionId);
+                $orderTransaction->setProviderTransactionId($providerTransactionId);
+                $orderTransaction->setCreatedAt(new \DateTime('now'));
+                $orderTransaction->setTransactionType('pending');
+            }
+
+            $orderTransaction->setReturnResponse(serialize($response->getData()));
+
+            Shopware()->Models()->persist($orderTransaction);
+            Shopware()->Models()->flush();
+
+            return [ 'success' => true, 'transactionId' => $response->getTransactionId() ];
+        }
+        if ($response instanceof FailureResponse) {
+            return [ 'success' => false, 'msg' => 'CaptureFailed'];
+        }
+
+        return $operation;
+    }
+
+    /**
+     * @param string $orderNumber
+     * @return array
+     */
+    protected function cancelOrder($orderNumber)
+    {
+        $elasticEngineTransaction = Shopware()->Models()->getRepository(Transaction::class)
+                                  ->findOneBy(['orderNumber' => $orderNumber]);
+
+        $parentTransactionId = $elasticEngineTransaction->getTransactionId();
+        if (!$elasticEngineTransaction) {
+            return [ 'success' => false, 'msg' => 'NoTransactionFound' ];
+        }
+
+        $configData = $this->getConfigData();
+        $config = $this->getConfig($configData);
+
+        $transaction = $this->getTransaction();
+        $transaction->setParentTransactionId($parentTransactionId);
+        $notificationUrl = Shopware()->Front()->Router()->assemble([
+            'module' => 'frontend',
+            'controller' => 'WirecardElasticEnginePayment',
+            'action' => 'notifyBackend',
+            'method' => $this->getName(),
+            'forceSecure' => true
+        ]);
+
+        $transaction->setNotificationUrl($notificationUrl);
+
+        $transactionService = new BackendService($config, Shopware()->PluginLogger());
+
+        try {
+            $response = $transactionService->process($transaction, Operation::CANCEL);
+        } catch (\Exception $exception) {
+            Shopware()->PluginLogger()->error('Processing cancel failed:' . $exception->getMessage());
+            return [ 'success' => false, 'msg' => 'CancelFailed'];
+        }
+
+        if ($response instanceof SuccessResponse) {
+            Shopware()->PluginLogger()->info($response->getData());
+            $transactionId = $response->getTransactionId();
+            $providerTransactionId = $response->getProviderTransactionId() ? $response->getProviderTransactionId() : '';
+
+            $orderTransaction = Shopware()->Models()->getRepository(OrderTransactions::class)
+                ->findOneBy(['transactionId' => $parentTransactionId, 'parentTransactionId' => $transactionId]);
+
+            if (!$orderTransaction) {
+                $orderTransaction = new OrderTransactions();
+                $orderTransaction->setOrderNumber($orderNumber);
+                $orderTransaction->setParentTransactionId($parentTransactionId);
+                $orderTransaction->setTransactionId($transactionId);
+                $orderTransaction->setProviderTransactionId($providerTransactionId);
+                $orderTransaction->setCreatedAt(new \DateTime('now'));
+                $orderTransaction->setTransactionType('pending');
+            }
+
+            $orderTransaction->setReturnResponse(serialize($response->getData()));
+
+            Shopware()->Models()->persist($orderTransaction);
+            Shopware()->Models()->flush();
+
+            return [ 'success' => true, 'transactionId' => $response->getTransactionId() ];
+        }
+        if ($response instanceof FailureResponse) {
+            return [ 'success' => false, 'msg' => 'CancelFailed'];
+        }
+
+        return $operation;
     }
 }
