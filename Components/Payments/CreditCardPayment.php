@@ -43,7 +43,6 @@ class CreditCardPayment extends Payment
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_credit_card';
 
-    private $paymentData;
     private $creditCardConfig;
     private $paymentConfig;
 
@@ -92,18 +91,19 @@ class CreditCardPayment extends Payment
             $threeDsOnly *= $factor;
             $threeDsAttempt *= $factor;
         }
+        $currency = $shop->getCurrency()->getCurrency();
 
         $creditCardConfig->addSslMaxLimit(
             new Amount(
                 $threeDsOnly,
-                $this->paymentData['currency']
+                $currency
             )
         );
 
         $creditCardConfig->addThreeDMinLimit(
             new Amount(
                 $threeDsAttempt,
-                $this->paymentData['currency']
+                $currency
             )
         );
 
@@ -205,12 +205,11 @@ class CreditCardPayment extends Payment
     /**
      * Get request data as json string
      *
-     * @param array paymentData
+     * @param array $paymentData
      * @return string
      */
     public function getRequestDataForIframe(array $paymentData)
     {
-        $this->paymentData = $paymentData;
         $transaction = $this->createTransaction($paymentData);
 
         $configData = $this->getConfigData();
@@ -218,12 +217,10 @@ class CreditCardPayment extends Payment
             $transaction->setConfig($this->creditCardConfig);
         }
 
-        $transactionType = null;
+        $transactionType = WirecardTransaction::TYPE_PURCHASE;
         if ($configData['transactionType'] === parent::TRANSACTION_TYPE_AUTHORIZATION
             && $transaction instanceof Reservable) {
             $transactionType = WirecardTransaction::TYPE_AUTHORIZATION;
-        } else {
-            $transactionType = WirecardTransaction::TYPE_PURCHASE;
         }
 
         $transactionService = new TransactionService($this->paymentConfig, Shopware()->PluginLogger());

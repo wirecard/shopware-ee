@@ -31,9 +31,6 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
-use Shopware\Models\Order\Order;
-
-use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Basket;
 use Wirecard\PaymentSdk\Entity\CustomField;
@@ -43,15 +40,12 @@ use Wirecard\PaymentSdk\Entity\AccountHolder;
 use Wirecard\PaymentSdk\Entity\Address;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Entity\Status;
-use Wirecard\PaymentSdk\Response\FormInteractionResponse;
-use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Transaction\Reservable;
 use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 
-use WirecardShopwareElasticEngine\Components\StatusCodes;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
 abstract class Payment implements PaymentInterface
@@ -100,7 +94,7 @@ abstract class Payment implements PaymentInterface
     public function createTransaction(array $paymentData)
     {
         $configData = $this->getConfigData();
-        $this->$configData = $configData;
+        $this->configData = $configData;
 
         $this->config = $this->getConfig($configData);
 
@@ -168,10 +162,6 @@ abstract class Payment implements PaymentInterface
         }
 
         if ($response instanceof InteractionResponse) {
-            $elasticEngineTransaction->setTransactionId($response->getTransactionId());
-            Shopware()->Models()->persist($elasticEngineTransaction);
-            Shopware()->Models()->flush();
-
             return [
                 'status'   => 'success',
                 'redirect' => $response->getRedirectUrl()
@@ -226,18 +216,12 @@ abstract class Payment implements PaymentInterface
     /**
      * @inheritdoc
      */
-    public function getConfig(array $configData)
-    {
-        return null;
-    }
+    abstract public function getConfig(array $configData);
 
     /**
      * @inheritdoc
      */
-    public function getTransaction()
-    {
-        return null;
-    }
+    abstract public function getTransaction();
 
     /**
      * Adds consumer personal information, billing and shipping address to Transaction
