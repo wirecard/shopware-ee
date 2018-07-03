@@ -5,7 +5,7 @@
     {if $payment == "wirecard_elastic_engine"}
         {if $payment_mean.name == "wirecard_elastic_engine_credit_card"}
             <div class="wirecard-elastic-engine--payments" >
-                <img title="{s name="CreditCardTitle" namespace="frontend/wirecard_elastic_engine/payments"}CreditCard{/s}"
+                <img title="{s name="CreditCardTitle" namespace="frontend/wirecard_elastic_engine/payments"}Credit Card{/s}"
                      src="{s name="CreditCardLogo" namespace="frontend/wirecard_elastic_engine/payments"}{/s}" />
             </div>
         {elseif $payment_mean.name == "wirecard_elastic_engine_paypal"}

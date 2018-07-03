@@ -71,8 +71,6 @@
              }
 
              document.getElementById('credit-card--form').addEventListener('submit', function(event){
-                 event.preventDefault();
-                 
                  if (document.getElementById('jsresponse') ) {
                      console.log('Sending the following request to your server..');
                  } else {

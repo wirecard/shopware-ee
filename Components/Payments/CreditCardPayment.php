@@ -86,26 +86,28 @@ class CreditCardPayment extends Payment
         $threeDsAttempt = $configData['3dsAttempt'];
         $shop = Shopware()->Container()->get('shop');
 
-        if (!$shop->getCurrency()->getDefault()) {
-            $factor = $shop->getCurrency()->getFactor();
-            $threeDsOnly *= $factor;
-            $threeDsAttempt *= $factor;
+        if ($shop) {
+            if (!$shop->getCurrency()->getDefault()) {
+                $factor = $shop->getCurrency()->getFactor();
+                $threeDsOnly *= $factor;
+                $threeDsAttempt *= $factor;
+            }
+            $currency = $shop->getCurrency()->getCurrency();
+
+            $creditCardConfig->addSslMaxLimit(
+                new Amount(
+                    $threeDsOnly,
+                    $currency
+                )
+            );
+
+            $creditCardConfig->addThreeDMinLimit(
+                new Amount(
+                    $threeDsAttempt,
+                    $currency
+                )
+            );
         }
-        $currency = $shop->getCurrency()->getCurrency();
-
-        $creditCardConfig->addSslMaxLimit(
-            new Amount(
-                $threeDsOnly,
-                $currency
-            )
-        );
-
-        $creditCardConfig->addThreeDMinLimit(
-            new Amount(
-                $threeDsAttempt,
-                $currency
-            )
-        );
 
         $this->creditCardConfig = $creditCardConfig;
 

@@ -174,7 +174,9 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $this->View()->assign('wirecardRequestData', $requestData);
         $rawRequestData = json_decode($requestData, true);
         $requestId = $rawRequestData[TransactionService::REQUEST_ID];
-        $creditCard->addTransactionRequestId($requestId);
+        if (!$creditCard->addTransactionRequestId($requestId)) {
+            return $this->errorHandling(StatusCodes::ERROR_STARTING_PROCESS_FAILED);
+        }
     }
 
     /**
@@ -316,7 +318,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     }
 
     /**
-     *
+     * Handles responses for iframe payments
      */
     public function handleReturnResponse($response)
     {
@@ -450,7 +452,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         return [
             'type' => 'error',
             'code' => StatusCodes::ERROR_FAILURE_RESPONSE,
-            'msg'  => $errorMessages
+            'msg'  => ''
         ];
     }
 
@@ -508,7 +510,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         if ($response instanceof SuccessResponse) {
             $transactionId   = $response->getTransactionId();
             $providerTransactionId = $response->getProviderTransactionId();
-            $transactionType = $response-> getTransactionType();
+            $transactionType = $response->getTransactionType();
 
             $wirecardOrderNumber = $response->findElement('order-number');
 

@@ -445,7 +445,7 @@ abstract class Payment implements PaymentInterface
     /**
      * adds request id to transaction model
      *
-     * @params string requestId
+     * @params string $requestId
      * @return boolean
      */
     public function addTransactionRequestId($requestId)
