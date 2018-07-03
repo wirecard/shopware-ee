@@ -59,6 +59,7 @@ abstract class Payment implements PaymentInterface
     const TRANSACTION_TYPE_AUTHORIZATION = 'authorization';
     const TRANSACTION_TYPE_PURCHASE = 'purchase';
 
+    private $configData = [];
     private $config = null;
     private $orderNumber;
 
@@ -99,6 +100,7 @@ abstract class Payment implements PaymentInterface
     public function createTransaction(array $paymentData)
     {
         $configData = $this->getConfigData();
+        $this->$configData = $configData;
 
         $this->config = $this->getConfig($configData);
 
@@ -158,10 +160,10 @@ abstract class Payment implements PaymentInterface
         $transactionService = new TransactionService($this->config, Shopware()->PluginLogger());
 
         $response = null;
-        if ($configData['transactionType'] === self::TRANSACTION_TYPE_AUTHORIZATION
+        if ($this->configData['transactionType'] === self::TRANSACTION_TYPE_AUTHORIZATION
             && $transaction instanceof Reservable) {
             $response = $transactionService->reserve($transaction);
-        } elseif ($configData['transactionType'] === self::TRANSACTION_TYPE_PURCHASE) {
+        } elseif ($this->configData['transactionType'] === self::TRANSACTION_TYPE_PURCHASE) {
             $response = $transactionService->pay($transaction);
         }
 
