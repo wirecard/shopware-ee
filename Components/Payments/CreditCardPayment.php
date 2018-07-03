@@ -196,14 +196,16 @@ class CreditCardPayment extends Payment
      */
     protected function addPaymentSpecificData(WirecardTransaction $transaction, array $paymentData, array $configData)
     {
-        $transaction->setTermUrl($paymentData['returnUrl']);
+        if ($transaction instanceof CreditCardTransaction) {
+            $transaction->setTermUrl($paymentData['returnUrl']);
+        }
         return $transaction;
     }
 
     /**
      * Get request data as json string
      *
-     * @params array paymentData
+     * @param array paymentData
      * @return string
      */
     public function getRequestDataForIframe(array $paymentData)
@@ -212,7 +214,9 @@ class CreditCardPayment extends Payment
         $transaction = $this->createTransaction($paymentData);
 
         $configData = $this->getConfigData();
-        $transaction->setConfig($this->creditCardConfig);
+        if ($transaction instanceof CreditCardTransaction) {
+            $transaction->setConfig($this->creditCardConfig);
+        }
 
         $transactionType = null;
         if ($configData['transactionType'] === parent::TRANSACTION_TYPE_AUTHORIZATION
