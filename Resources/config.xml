@@ -286,5 +286,19 @@ function (button) {
             <description lang="de">Leer lassen für Standardwährung.</description>
             <description lang="en">Keep empty for default currency.</description>
         </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEngineCreditCard3dsDescription</name>
+            <label lang="de">[Credit Card] Erklärung zu 3DS</label>
+            <label lang="en">[Credit Card] Description about 3DS</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    window.open('https://raw.githubusercontent.com/wiki/wirecard/woocommerce-ee/img/creditcard-ssl-3d-new.png','_blank');
+}
+                    ]]>
+                </handler>
+            </options>
+        </element>
     </elements>
 </config>
