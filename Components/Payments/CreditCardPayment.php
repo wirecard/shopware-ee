@@ -73,7 +73,7 @@ class CreditCardPayment extends Payment
 
         if ($configData['transactionMAID'] !== '' &&
             $configData['transactionKey'] !== 'null') {
-            $creditcardConfig->setSSLCredentials(
+            $creditCardConfig->setSSLCredentials(
                 $configData['transactionMAID'],
                 $configData['transactionKey']
             );
@@ -112,7 +112,7 @@ class CreditCardPayment extends Payment
                     $threeDsOnly *= $factor;
                 }
             }
-                
+
             if ($threeDsAttemptCurrency) {
                 if( $shop->getCurrency()->getCurrency() !== $threeDsAttemptCurrency) {
                     foreach ($shop->getCurrencies() as $currency) {
