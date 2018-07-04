@@ -31,6 +31,8 @@
 
 namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Payments;
 
+use Wirecard\PaymentSdk\Config\Config;
+use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
@@ -55,6 +57,20 @@ class PaypalPaymentTest extends PaymentTestCase
     public function testGetTransaction()
     {
         $this->assertInstanceOf(PayPalTransaction::class, $this->payment->getTransaction());
+    }
+
+    public function testGetConfig()
+    {
+        $configData = $this->payment->getConfigData();
+        $config = $this->payment->getConfig($configData);
+
+        $this->assertInstanceOf(Config::class, $config);
+        $this->assertSame($configData['baseUrl'], $config->getBaseUrl());
+        $this->assertSame($configData['httpUser'], $config->getHttpUser());
+        $this->assertSame($configData['httpPass'], $config->getHttpPassword());
+        $this->assertInstanceOf(PaymentMethodConfig::class, $config->get(PayPalTransaction::NAME));
+        $this->assertSame($configData['transactionMAID'], $config->get(PayPalTransaction::NAME)->getMerchantAccountId());
+        $this->assertSame($configData['transactionKey'], $config->get(PayPalTransaction::NAME)->getSecret());
     }
 
     public function testGetConfigData()

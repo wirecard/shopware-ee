@@ -31,6 +31,7 @@
 
 namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Payments;
 
+use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
 use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
@@ -56,6 +57,17 @@ class CreditCardPaymentTest extends PaymentTestCase
     public function testGetTransaction()
     {
         $this->assertInstanceOf(CreditCardTransaction::class, $this->payment->getTransaction());
+    }
+
+    public function testGetConfig()
+    {
+        $configData = $this->payment->getConfigData();
+        $config = $this->payment->getConfig($configData);
+
+        $this->assertInstanceOf(Config::class, $config);
+        $this->assertSame($configData['baseUrl'], $config->getBaseUrl());
+        $this->assertSame($configData['httpUser'], $config->getHttpUser());
+        $this->assertSame($configData['httpPass'], $config->getHttpPassword());
     }
 
     public function testGetConfigData()
