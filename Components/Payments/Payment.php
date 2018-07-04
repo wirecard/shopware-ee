@@ -581,12 +581,14 @@ abstract class Payment implements PaymentInterface
             $transaction->setAmount($amountObj);
         }
 
-        $transactionService = new BackendService($config, Shopware()->PluginLogger());
+        $transactionService = new TransactionService($config, Shopware()->PluginLogger());
 
         try {
-            $response = $transactionService->process($transaction, Operation::REFUND);
+            $response = $transactionService->process($transaction, Operation::CANCEL);
         } catch (\Exception $exception) {
-            Shopware()->PluginLogger()->error('Processing refund failed:' . $exception->getMessage());
+            Shopware()->PluginLogger()->error('Processing refund failed: '  .
+                                              get_class($exception) . ' ' .
+                                              $exception->getMessage());
             return [ 'success' => false, 'msg' => 'RefundFailed'];
         }
 
@@ -616,6 +618,22 @@ abstract class Payment implements PaymentInterface
             return [ 'success' => true, 'transactionId' => $response->getTransactionId() ];
         }
         if ($response instanceof FailureResponse) {
+            $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
+                ->findOneBy(['transactionId' => $parentTransactionId, 'parentTransactionId' => $transactionId]);
+            $rawData = $response->getData();
+            if (!$orderTransaction) {
+                $orderTransaction = new OrderTransaction();
+                $orderTransaction->setOrderNumber($orderNumber);
+                $orderTransaction->setParentTransactionId($parentTransactionId);
+                $orderTransaction->setTransactionId($rawData['transaction-id']);
+                $orderTransaction->setCreatedAt(new \DateTime('now'));
+                $orderTransaction->setTransactionType('failed');
+            }
+
+            $orderTransaction->setReturnResponse(serialize($response->getData()));
+
+            Shopware()->Models()->persist($orderTransaction);
+            Shopware()->Models()->flush();
             return [ 'success' => false, 'msg' => 'RefundFailed'];
         }
 
