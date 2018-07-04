@@ -29,6 +29,8 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
+use Doctrine\DBAL\DBALException;
+
 use Shopware\Components\CSRFWhitelistAware;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
@@ -254,9 +256,32 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                                ]);
 
             if ($order) {
-                Shopware()->Models()->persist($orderTransaction);
-                Shopware()->Models()->persist($elasticEngineTransaction);
                 Shopware()->Models()->flush();
+                try {
+                    Shopware()->Models()->persist($orderTransaction);
+                    Shopware()->Models()->flush();
+                } catch (DBALException $e) {
+                    $this->container->get('pluginlogger')->info('duplicate entry on OrderTransaction');
+                    $em = $this->container->get('models');
+                    if (!$em->isOpen()) {
+                        $em = $em->create(
+                            $em->getConnection(),
+                            $em->getConfiguration()
+                        );
+                    }
+                    $orderTransaction = $em->getRepository(OrderTransaction::class)
+                                      ->findOneBy([
+                                          'transactionId' => $transactionId,
+                                          'parentTransactionId' => $transactionId
+                                      ]);
+                    if ($orderTransaction) {
+                        $em->setReturnResponse(serialize($response->getData()));
+                        $em->flush();
+                    } else {
+                        $this->container->get('pluginlogger')->error($e->getMessage());
+                        return $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER, $e->getMessage());
+                    }
+                }
                 return $this->redirect([
                     'module'     => 'frontend',
                     'controller' => 'checkout',
@@ -274,12 +299,36 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     $orderNumber = $this->saveOrder($transactionId, $transactionId);
                 }
 
-                $orderTransaction->setOrderNumber($orderNumber);
-                Shopware()->Models()->persist($orderTransaction);
-
                 $elasticEngineTransaction->setOrderNumber($orderNumber);
-                Shopware()->Models()->persist($elasticEngineTransaction);
+                $orderTransaction->setOrderNumber($orderNumber);
                 Shopware()->Models()->flush();
+                try {
+                    if (!$orderTransaction->getId()) {
+                        Shopware()->Models()->persist($orderTransaction);
+                        Shopware()->Models()->flush();
+                    }
+                } catch (DBALException $e) {
+                    $em = $this->container->get('models');
+                    if (!$em->isOpen()) {
+                        $em = $em->create(
+                            $em->getConnection(),
+                            $em->getConfiguration()
+                        );
+                    }
+                    $this->container->get('pluginlogger')->info('duplicate entry on OrderTransaction');
+                    $orderTransaction = $em->getRepository(OrderTransaction::class)
+                                      ->findOneBy([
+                                          'transactionId' => $transactionId,
+                                          'parentTransactionId' => $transactionId
+                                      ]);
+                    if ($orderTransaction) {
+                        $orderTransaction->setReturnResponse(serialize($response->getData()));
+                        $em->flush();
+                    } else {
+                        $this->container->get('pluginlogger')->error($e->getMessage());
+                        return $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER, $e->getMessage());
+                    }
+                }
 
                 return $this->redirect([
                     'module'     => 'frontend',
@@ -387,9 +436,34 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                                ]);
 
             if ($order) {
-                Shopware()->Models()->persist($orderTransaction);
-                Shopware()->Models()->persist($elasticEngineTransaction);
                 Shopware()->Models()->flush();
+                try {
+                    if ($orderTransaction->getId()) {
+                        Shopware()->Models()->persist($orderTransaction);
+                        Shopware()->Models()->flush();
+                    }
+                } catch (DBALException $e) {
+                    $this->container->get('pluginlogger')->info('duplicate entry on OrderTransaction');
+                    $em = $this->container->get('models');
+                    if (!$em->isOpen()) {
+                        $em = $em->create(
+                            $em->getConnection(),
+                            $em->getConfiguration()
+                        );
+                    }
+                    $orderTransaction = $em->getRepository(OrderTransaction::class)
+                                      ->findOneBy([
+                                          'transactionId' => $transactionId,
+                                          'parentTransactionId' => $transactionId
+                                      ]);
+                    if ($orderTransaction) {
+                        $orderTransaction->setReturnResponse(serialize($response->getData()));
+                        $em->flush();
+                    } else {
+                        $this->container->get('pluginlogger')->error($e->getMessage());
+                        return $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER, $e->getMessage());
+                    }
+                }
                 return [
                     'type'   => 'success',
                     'uniqueId' => $transactionId
@@ -405,12 +479,39 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     $orderNumber = $this->saveOrder($transactionId, $transactionId);
                 }
 
-                $orderTransaction->setOrderNumber($orderNumber);
-                Shopware()->Models()->persist($orderTransaction);
-
                 $elasticEngineTransaction->setOrderNumber($orderNumber);
-                Shopware()->Models()->persist($elasticEngineTransaction);
+                $orderTransaction->setOrderNumber($orderNumber);
                 Shopware()->Models()->flush();
+
+                try {
+                    if (!$orderTransaction->getId()) {
+                        Shopware()->Models()->persist($orderTransaction);
+                        Shopware()->Models()->flush();
+                    }
+                } catch (DBALException $e) {
+                    $em = $this->container->get('models');
+                    if (!$em->isOpen()) {
+                        $em = $em->create(
+                            $em->getConnection(),
+                            $em->getConfiguration()
+                        );
+                    }
+                    $this->container->get('pluginlogger')->info('duplicate entry on OrderTransaction');
+
+                    $orderTransaction = $em->getRepository(OrderTransaction::class)
+                                      ->findOneBy([
+                                          'transactionId' => $transactionId,
+                                          'parentTransactionId' => $transactionId
+                                      ]);
+                    if ($orderTransaction) {
+                        $orderTransaction->setOrderNumber($orderNumber);
+                        $orderTransaction->setReturnResponse(serialize($response->getData()));
+                        $em->flush();
+                    } else {
+                        $this->container->get('pluginlogger')->error($e->getMessage());
+                        return $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER, $e->getMessage());
+                    }
+                }
 
                 return [ 'type' => 'success' ];
             } catch (RuntimeException $e) {
@@ -544,12 +645,41 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
             $notificationResponse = $response->getData();
             
-            $orderTransaction->setNotificationResponse(serialize($notificationResponse));
-            $orderTransaction->setTransactionType($transactionType === 'authorization' ? 'authorization' : 'purchase');
-            $orderTransaction->setAmount($notificationResponse['requested-amount']);
-            $orderTransaction->setCurrency($notificationResponse['currency']);
-            Shopware()->Models()->persist($orderTransaction);
-            Shopware()->Models()->flush();
+            try {
+                $orderTransaction->setNotificationResponse(serialize($notificationResponse));
+                $orderTransaction->setTransactionType($transactionType === 'authorization' ?
+                                                      'authorization' :
+                                                      'purchase');
+                $orderTransaction->setAmount($notificationResponse['requested-amount']);
+                $orderTransaction->setCurrency($notificationResponse['currency']);
+                Shopware()->Models()->persist($orderTransaction);
+                Shopware()->Models()->flush();
+            } catch (DBALException $e) {
+                $this->container->get('pluginlogger')->info('duplicate entry on OrderTransaction');
+                if (!$em->isOpen()) {
+                    $em = $em->create(
+                        $em->getConnection(),
+                        $em->getConfiguration()
+                    );
+                }
+                $orderTransaction = $em->getRepository(OrderTransaction::class)
+                                  ->findOneBy([
+                                      'transactionId' => $transactionId,
+                                      'parentTransactionId' => $transactionId
+                                  ]);
+                if ($orderTransaction) {
+                    $orderTransaction->setNotificationResponse(serialize($notificationResponse));
+                    $orderTransaction->setTransactionType($transactionType === 'authorization' ?
+                                                          'authorization' :
+                                                          'purchase');
+                    $orderTransaction->setAmount($notificationResponse['requested-amount']);
+                    $orderTransaction->setCurrency($notificationResponse['currency']);
+                    $em->flush();
+                } else {
+                    $this->container->get('pluginlogger')->error($e->getMessage());
+                    exit();
+                }
+            }
 
             $elasticEngineTransaction->setTransactionId($transactionId);
             $elasticEngineTransaction->setProviderTransactionId($providerTransactionId);
@@ -648,8 +778,34 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $orderTransaction->setCurrency($currency);
             $orderTransaction->setTransactionType($transactionType);
 
-            Shopware()->Models()->persist($orderTransaction);
-            Shopware()->Models()->flush();
+            try {
+                Shopware()->Models()->persist($orderTransaction);
+                Shopware()->Models()->flush();
+            } catch (DBALException $e) {
+                $em = $this->container->get('models');
+                if (!$em->isOpen()) {
+                    $em = $em->create(
+                        $em->getConnection(),
+                        $em->getConfiguration()
+                    );
+                }
+                $this->container->get('pluginlogger')->info('duplicate entry on OrderTransaction');
+                $orderTransaction = $em->getRepository(OrderTransaction::class)
+                                  ->findOneBy([
+                                      'transactionId' => $transactionId,
+                                      'parentTransactionId' => $parentTransactionId
+                                  ]);
+                if ($orderTransaction) {
+                    $orderTransaction->setNotificationResponse(serialize($notificationResponse));
+                    $orderTransaction->setAmount($amount);
+                    $orderTransaction->setCurrency($currency);
+                    $orderTransaction->setTransactionType($transactionType);
+                    $em->flush();
+                } else {
+                    $this->container->get('pluginlogger')->error($e->getMessage());
+                    exit();
+                }
+            }
 
             if ($paymentStatusId) {
                 $this->savePaymentStatus(
@@ -685,7 +841,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             'currency'  => $currency,
             'returnUrl' => $router->assemble(['action' => 'return', 'method' => $method, 'forceSecure' => true]),
             'cancelUrl' => $router->assemble(['action' => 'cancel', 'forceSecure' => true]),
-            'notifyUrl' => $router->assemble(['action' => 'notify', 'method' => $method, 'forceSecure' => true]),
+            //'notifyUrl' => $router->assemble(['action' => 'notify', 'method' => $method, 'forceSecure' => true]),
+            'notifyUrl' => 'http://50796774.ngrok.io/WirecardElasticEnginePayment/notify/method/' . $method,
             'signature' => $this->persistBasket()
         );
 

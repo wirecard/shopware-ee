@@ -32,7 +32,7 @@
             <label lang="en">[PayPal] Merchant ID</label>
             <value>2a0e9351-24ed-4110-9a1b-fd0fee6bec26</value>
             <description lang="de">Eindeutige Händler-ID Ihres Wirecard Konto</description>
-            <description lang="en">Unique merachand account id to Wirecard</description>
+            <description lang="en">Unique merchant account id to Wirecard</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEnginePaypalSecret</name>
@@ -162,7 +162,7 @@ function (button) {
             <label lang="en">[Credit Card] Merchant ID</label>
             <value>53f2895a-e4de-4e82-a813-0d87a10e55e6</value>
             <description lang="de">Eindeutige Händler-ID Ihres Wirecard Konto</description>
-            <description lang="en">Unique merachant account id to Wirecard</description>
+            <description lang="en">Unique merchant account id to Wirecard</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardSecret</name>
@@ -178,7 +178,7 @@ function (button) {
             <label lang="en">[Credit Card] 3DS Merchant ID</label>
             <value>508b8896-b37d-4614-845c-26bf8bf2c948</value>
             <description lang="de">Eindeutige 3DS Händler-ID Ihres Wirecard Konto. Leer lassen oder "null" eintrgen , um 3DS zu deaktiviern.</description>
-            <description lang="en">Unique 3DS merachand account id to Wirecard. Keep empty or write "null", to deactivate 3DS.</description>
+            <description lang="en">Unique 3DS merchant account id to Wirecard. Keep empty or write "null", to deactivate 3DS.</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCard3dsSecret</name>

@@ -25,7 +25,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
             currency: 'Currency'
         },
         transactionType: {
-            'authorize': 'Authorize',
+            'authorization': 'Authorize',
             'purchase': 'Purchase',
             'refund': 'Refund',
             'cancel': 'Cancel',
@@ -197,7 +197,8 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                                 var backendOperationWindow = Ext.create('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
                                     record: me.record,
                                     data: data,
-                                    operation: operation
+                                    operation: operation,
+                                    title: 'BackendOperationWindow: ' + operation
                                 });
                                 backendOperationWindow.show();
                                 // me.processBackendOperation(operationType);
