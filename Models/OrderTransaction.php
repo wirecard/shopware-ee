@@ -72,7 +72,7 @@ class OrderTransaction extends ModelEntity
 
     /**
      * @var string
-     * @ORM\Column(name="transaction_id", type="string", nullable=false)
+     * @ORM\Column(name="transaction_id", type="string", nullable=false, unique=true)
      */
     private $transactionId;
 
