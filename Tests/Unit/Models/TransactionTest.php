@@ -34,17 +34,18 @@ namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Payments;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardShopwareElasticEngine\Tests\Unit\ModelTestCase;
 
-class TransactionTest extends \PHPUnit_Framework_TestCase
+class TransactionTest extends ModelTestCase
 {
     /**
      * @var Transaction
      */
     protected $model;
 
-    public function setUp()
+    public function getModel()
     {
-        $this->model = new Transaction();
+        return new Transaction();
     }
 
     public function testGetId()
@@ -52,67 +53,29 @@ class TransactionTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($this->model->getId());
     }
 
-    public function testOrderNumber()
+    public function testGettersAndSetters()
     {
-        $this->assertNull($this->model->getOrderNumber());
-        $this->model->setOrderNumber(42);
-        $this->assertEquals(42, $this->model->getOrderNumber());
-    }
+        $this->assertGetterAndSetter('orderNumber', 42);
+        $this->assertGetterAndSetter('order', new Order());
+        $this->assertGetterAndSetter('transactionId', '6832b2f0-792b-4161-9f9a-f2916f7aae8e');
+        $this->assertGetterAndSetter('providerTransactionId', '14B82779CX007053E');
+        $this->assertGetterAndSetter('paymentStatus', Status::PAYMENT_STATE_RESERVED);
+        $this->assertGetterAndSetter('basketSignature',
+            '0fc30f3d8823f331f59b08f7d9942700451f6d5d2a360e67a4023ac740f9e421');
+        $this->assertGetterAndSetter('requestId', '693715a8071485c44fe4a5d8c1114e697555f84ca7daded7e3d314e0815aec01');
 
-    public function testOrder()
-    {
-        $this->assertNull($this->model->getOrder());
-
-        $order = new Order();
-        $this->model->setOrder($order);
-
-        $this->assertSame($order, $this->model->getOrder());
-    }
-
-    public function testTransactionId()
-    {
-        $this->assertNull($this->model->getTransactionId());
-        $this->model->setTransactionId('6832b2f0-792b-4161-9f9a-f2916f7aae8e');
-        $this->assertEquals('6832b2f0-792b-4161-9f9a-f2916f7aae8e', $this->model->getTransactionId());
-    }
-
-    public function testProviderTransactionId()
-    {
-        $this->assertNull($this->model->getProviderTransactionId());
-        $this->model->setProviderTransactionId('14B82779CX007053E');
-        $this->assertEquals('14B82779CX007053E', $this->model->getProviderTransactionId());
-    }
-
-    public function testReturnResponse()
-    {
-        $this->assertNull($this->model->getReturnResponse());
-
-        $response = [
+        $returnResponse = [
             'transaction-id' => '1bd5e7cb-552d-4a31-b72c-dfac4ec30130',
             'request-id'     => 'de4cf94fd467aa5c4a5590d4490ff855',
         ];
 
-        $this->model->setReturnResponse(serialize($response));
-        $this->assertEquals(serialize($response), $this->model->getReturnResponse());
-    }
+        $this->model->setReturnResponse(serialize($returnResponse));
 
-    public function testNotificationResponse()
-    {
-        $this->assertNull($this->model->getNotificationResponse());
-
-        $response = [
+        $notificationResponse = [
             'transaction-id' => '6832b2f0-792b-4161-9f9a-f2916f7aae8e',
             'request-id'     => 'db2616a7bc7d140ec4e20117c8582a54',
         ];
 
-        $this->model->setNotificationResponse(serialize($response));
-        $this->assertEquals(serialize($response), $this->model->getNotificationResponse());
-    }
-
-    public function testPaymentStatus()
-    {
-        $this->assertNull($this->model->getPaymentStatus());
-        $this->model->setPaymentStatus(Status::PAYMENT_STATE_RESERVED);
-        $this->assertEquals(Status::PAYMENT_STATE_RESERVED, $this->model->getPaymentStatus());
+        $this->model->setNotificationResponse(serialize($notificationResponse));
     }
 }
