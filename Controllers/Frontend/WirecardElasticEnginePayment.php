@@ -841,8 +841,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             'currency'  => $currency,
             'returnUrl' => $router->assemble(['action' => 'return', 'method' => $method, 'forceSecure' => true]),
             'cancelUrl' => $router->assemble(['action' => 'cancel', 'forceSecure' => true]),
-            //'notifyUrl' => $router->assemble(['action' => 'notify', 'method' => $method, 'forceSecure' => true]),
-            'notifyUrl' => 'http://50796774.ngrok.io/WirecardElasticEnginePayment/notify/method/' . $method,
+            'notifyUrl' => $router->assemble(['action' => 'notify', 'method' => $method, 'forceSecure' => true]),
             'signature' => $this->persistBasket()
         );
 
