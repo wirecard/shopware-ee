@@ -69,8 +69,8 @@ class CreditCardPaymentTest extends PaymentTestCase
             'transactionType'    => Payment::TRANSACTION_TYPE_PURCHASE,
             'transaction3dsMAID' => '508b8896-b37d-4614-845c-26bf8bf2c948',
             'transaction3dsKey'  => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
-            '3dsOnly'            => '300',
-            '3dsAttempt'         => '100',
+            '3dsOnly'            => 300,
+            '3dsAttempt'         => 100,
         ], $this->payment->getConfigData());
     }
 }
