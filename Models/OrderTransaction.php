@@ -34,7 +34,6 @@ namespace WirecardShopwareElasticEngine\Models;
 use Shopware\Components\Model\ModelEntity;
 use Shopware\Models\Order\Order;
 use Doctrine\ORM\Mapping as ORM;
-use WirecardShopwareElasticEngine\Models\Transaction;
 
 /**
  * @ORM\Entity
@@ -300,6 +299,6 @@ class OrderTransaction extends ModelEntity
      */
     public function getCreatedAt()
     {
-        return new \DateTime($this->createdAt);
+        return $this->createdAt;
     }
 }
