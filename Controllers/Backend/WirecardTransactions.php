@@ -132,12 +132,18 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         $transactionsHistory = $historyQuery->getArrayResult();
 
         foreach ($transactionsHistory as &$entry) {
+            $requestId = '';
             if ($entry['notificationResponse']) {
-                $entry['notificationResponse'] = print_r(unserialize($entry['notificationResponse']), true);
+                $notificationResponse = unserialize($entry['notificationResponse']);
+                $entry['notificationResponse'] = print_r($notificationResponse, true);
+                $requestId = $notificationResponse['request-id'];
             }
             if ($entry['returnResponse']) {
-                $entry['returnResponse'] = print_r(unserialize($entry['returnResponse']), true);
+                $returnResponse = unserialize($entry['returnResponse']);
+                $entry['returnResponse'] = print_r($returnResponse, true);
+                $requestId = $returnResponse['request-id'];
             }
+            $entry['requestId'] = $requestId;
         }
 
         $backendOperations = [];
@@ -179,6 +185,8 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
 
         if ($payMethod === PaypalPayment::PAYMETHOD_IDENTIFIER) {
             $payment = new PaypalPayment();
+        } elseif ($payMethod === CreditCardPayment::PAYMETHOD_IDENTIFIER) {
+            $payment = new CreditCardPayment();
         }
 
         if (!$payment) {

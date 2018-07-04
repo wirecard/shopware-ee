@@ -26,6 +26,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
         },
         transactionType: {
             'authorization': 'Authorize',
+            'failed': 'Failed',
             'purchase': 'Purchase',
             'refund': 'Refund',
             'cancel': 'Cancel',
@@ -83,6 +84,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
             fields: [
                 'orderNumber',
                 'parentTransactionId',
+                'requestId',
                 'transactionId',
                 'providerTransactionId',
                 'createdAt',
@@ -169,6 +171,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                         var entryData = {
                             orderNumber: transaction.orderNumber,
                             parentTransactionId: transaction.parentTransactionId,
+                            requestId: transaction.requestId,
                             transactionId: transaction.transactionId,
                             providerTransactionId: transaction.providerTransactionId,
                             createdAt: new Date(transaction.createdAt).toLocaleString(),

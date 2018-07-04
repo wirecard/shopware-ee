@@ -15,6 +15,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', {
     snippets: {
         createdAt: 'Created at',
         orderNumber: 'Order number',
+        requestId: 'Request ID',
         parentTransactionId: 'Parent transaction ID',
         transactionId: 'Transaction ID',
         providerTransactionId: 'Provider transaction ID',
@@ -50,6 +51,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', {
             '<div class="wirecard-history-entry-pnl">',
             '<p><label class="x-form-item-label">' + me.snippets.createdAt + ':</label> {createdAt}</p>',
             '<p><label class="x-form-item-label">' + me.snippets.orderNumber + ':</label> {orderNumber}</p>',
+            '<p><label class="x-form-item-label">' + me.snippets.requestId + ':</label> {requestId}</p>',
             '<p><label class="x-form-item-label">' + me.snippets.parentTransactionId + ':</label> {parentTransactionId}</p>',
             '<p><label class="x-form-item-label">' + me.snippets.transactionId + ':</label> {transactionId}</p>',
             '<p><label class="x-form-item-label">' + me.snippets.providerTransactionId + ':</label> {providerTransactionId}</p>',

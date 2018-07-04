@@ -120,11 +120,11 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
     createAmountFormContainer: function() {
         var me = this;
 
-        if (me.operation.cancel === 'Refund') {
+        if (me.operation === 'Refund') {
             return me.createRefundForm();
         }
 
-        if (me.operation.pay === 'Capture') {
+        if (me.operation === 'Capture') {
             return me.createCaptureForm();
         }
 
@@ -249,6 +249,12 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
                 me.amountFormContainer.getForm().findField('amount').setValue(Ext.util.Format.number(me.maxValue));
                 return;
             }
+
+            amount = parseFloat(
+                amount.replace(Ext.util.Format.thousandSeparator, '')
+                    .replace(Ext.util.Format.decimalSeparator, '.')
+            );
+
             params.amount = amount;
             params.currency = 'EUR';
         }
