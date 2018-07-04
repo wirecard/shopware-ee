@@ -69,10 +69,15 @@ class CreditCardPayment extends Payment
     {
         $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
 
-        $creditCardConfig = new CreditCardConfig(
-            $configData['transactionMAID'],
-            $configData['transactionKey']
-        );
+        $creditCardConfig = new CreditCardConfig();
+
+        if ($configData['transactionMAID'] !== '' &&
+            $configData['transactionKey'] !== 'null') {
+            $creditcardConfig->setSSLCredentials(
+                $configData['transactionMAID'],
+                $configData['transactionKey']
+            );
+        }
 
         if ($configData['transaction3dsMAID'] !== '' &&
             $configData['transaction3dsMAID'] !== 'null') {
