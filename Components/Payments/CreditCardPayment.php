@@ -83,15 +83,50 @@ class CreditCardPayment extends Payment
         }
 
         $threeDsOnly = $configData['3dsOnly'];
+        $threeDsOnlyCurrency = $configData['3dsOnlyCurrency'];
         $threeDsAttempt = $configData['3dsAttempt'];
+        $threeDsAttemptCurrency = $configData['3dsAttemptCurrency'];
         $shop = Shopware()->Container()->get('shop');
 
         if ($shop) {
-            if (!$shop->getCurrency()->getDefault()) {
-                $factor = $shop->getCurrency()->getFactor();
-                $threeDsOnly *= $factor;
-                $threeDsAttempt *= $factor;
+            if ($threeDsOnlyCurrency) {
+                if( $shop->getCurrency()->getCurrency() !== $threeDsOnlyCurrency) {
+                    foreach ($shop->getCurrencies() as $currency) {
+                        if ($currency->getCurrency() === $threeDsOnlyCurrency) {
+                            $factorOld = $currency->getFactor();
+                            $threeDsOnly /= $factorOld;
+                            $factorNew = $shop->getCurrency()->getFactor();
+                            $threeDsOnly *= $factorNew;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                if (!$shop->getCurrency()->getDefault()) {
+                    $factor = $shop->getCurrency()->getFactor();
+                    $threeDsOnly *= $factor;
+                }
             }
+                
+            if ($threeDsAttemptCurrency) {
+                if( $shop->getCurrency()->getCurrency() !== $threeDsAttemptCurrency) {
+                    foreach ($shop->getCurrencies() as $currency) {
+                        if ($currency->getCurrency() === $threeDsAttemptCurrency) {
+                            $factorOld = $currency->getFactor();
+                            $threeDsAttempt /= $factorOld;
+                            $factorNew = $shop->getCurrency()->getFactor();
+                            $threeDsAttempt *= $factorNew;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                if (!$shop->getCurrency()->getDefault()) {
+                    $factor = $shop->getCurrency()->getFactor();
+                    $threeDsAttempt *= $factor;
+                }
+            }
+
             $currency = $shop->getCurrency()->getCurrency();
 
             $creditCardConfig->addSslMaxLimit(
@@ -174,9 +209,19 @@ class CreditCardPayment extends Payment
             'wirecardElasticEngineCreditCard3dsOnly'
         );
 
+        $threeDsOnlyCurrency = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEngineCreditCard3dsOnlyCurrency'
+        );
+
         $threeDsAttempt = Shopware()->Config()->getByNamespace(
             'WirecardShopwareElasticEngine',
             'wirecardElasticEngineCreditCard3dsAttempt'
+        );
+
+        $threeDsAttemptCurrency = Shopware()->Config()->getByNamespace(
+            'WirecardShopwareElasticEngine',
+            'wirecardElasticEngineCreditCard3dsAttemptCurrency'
         );
 
         return array_merge(parent::getConfigData(), [
@@ -189,7 +234,9 @@ class CreditCardPayment extends Payment
             'transaction3dsKey'  => $creditCard3dsKey,
             'transactionType'    => $transactionType,
             '3dsOnly'            => $threeDsOnly,
-            '3dsAttempt'         => $threeDsAttempt
+            '3dsOnlyCurrency'    => $threeDsOnlyCurrency,
+            '3dsAttempt'         => $threeDsAttempt,
+            '3dsAttemptCurrency' => $threeDsAttemptCurrency
          ]);
     }
 

@@ -263,12 +263,28 @@ function (button) {
             <description lang="en">This amount forces usage of 3DS</description>
         </element>
         <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCard3dsOnlyCurrency</name>
+            <label lang="de">[Credit Card] 3DS-Pflicht Betrag Währung</label>
+            <label lang="en">[Credit Card] 3DS only amount currency</label>
+            <value></value>
+            <description lang="de">Leer lassen für Standardwährung,</description>
+            <description lang="en">Keep empty for default currency.</description>
+        </element>
+        <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCard3dsAttempt</name>
             <label lang="de">[Credit Card] 3DS-Versuch Betrag</label>
             <label lang="en">[Credit Card] 3DS attempt amount</label>
             <value>100</value>
             <description lang="de">Ab diesem Betrag wird 3DS versucht zu verwenden.</description>
             <description lang="en">This amount attemps usage of 3DS</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCard3dsAttemptCurrency</name>
+            <label lang="de">[Credit Card] 3DS-Pflicht Betrag Währung</label>
+            <label lang="en">[Credit Card] 3DS only amount currency</label>
+            <value></value>
+            <description lang="de">Leer lassen für Standardwährung.</description>
+            <description lang="en">Keep empty for default currency.</description>
         </element>
     </elements>
 </config>
