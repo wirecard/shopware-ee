@@ -35,6 +35,8 @@
             Wiedergutschrift
         {elseif $offerPosition.cleared==21}
             Überprüfung notwendig
+        {elseif $offerPosition.cleared==35}
+            Vorgang abgebrochen
         {/if}
     </p>
 {/block}
