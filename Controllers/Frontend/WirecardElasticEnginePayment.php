@@ -642,6 +642,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 exit();
             }
 
+            $elasticEngineTransaction->setTransactionId($transactionId);
+            $elasticEngineTransaction->setProviderTransactionId($providerTransactionId);
+            $elasticEngineTransaction->setNotificationResponse(serialize($response->getData()));
+            $elasticEngineTransaction->setPaymentStatus($paymentStatusId);
+            Shopware()->Models()->flush();
+
             $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
                               ->findOneBy(['transactionId' => $transactionId, 'parentTransactionId' => $transactionId]);
 
@@ -691,13 +697,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     exit();
                 }
             }
-
-            $elasticEngineTransaction->setTransactionId($transactionId);
-            $elasticEngineTransaction->setProviderTransactionId($providerTransactionId);
-            $elasticEngineTransaction->setNotificationResponse(serialize($response->getData()));
-            $elasticEngineTransaction->setPaymentStatus($paymentStatusId);
-            Shopware()->Models()->persist($elasticEngineTransaction);
-            Shopware()->Models()->flush();
 
             $order = Shopware()->Models()
                                ->getRepository(Order::class)
