@@ -703,12 +703,11 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                                ->getRepository(Order::class)
                                ->findOneBy([
                                    'transactionId' => $transactionId,
-                                   'temporaryId'   => $transactionId,
-                                   'status'        => -1,
+                                   'temporaryId'   => $transactionId
                                ]);
 
             if ($order) {
-                if (intval($order['cleared']) === Status::PAYMENT_STATE_OPEN) {
+                if ($order->getPaymentStatus()->getId() === Status::PAYMENT_STATE_OPEN) {
                     $this->container->get('pluginlogger')->info("set PaymentStatus for Order " . $order->getId());
                     $this->savePaymentStatus($transactionId, $transactionId, $paymentStatusId, false);
                 } else {
