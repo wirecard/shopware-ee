@@ -21,6 +21,10 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
             backendOperationTitle: '{s name="BackendOperationErrorTitle" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}',
             unknownBackendOperation: '{s name="UnknownBackendOperationError" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}',
             unknownPaymethod: '{s name="UnknownPaymethodError" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}'
+        },
+        success: {
+            backendOperationTitle: 'Backendoperation successful',
+            msg: ': the operation was successul'
         }
     },
 
@@ -280,6 +284,12 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
                         log: false
                     });
                 } else {
+                    Shopware.Notification.createStickyGrowlMessage({
+                        title: me.snippets.success.backendOperationTitle,
+                        text: me.operation + me.snippets.success.msg,
+                        width: 440,
+                        log: false
+                    });
                     me.close();
                 }
             }
