@@ -30,7 +30,10 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
             'purchase': 'Purchase',
             'refund': 'Refund',
             'cancel': 'Cancel',
-            'credit': 'Credit'
+            'credit': 'Credit',
+            'capture': 'Capture',
+            'pending': 'Pending',
+            'void-authorization' : 'Void Authorization'
         },
 
         buttons: {
