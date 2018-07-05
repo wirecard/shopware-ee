@@ -144,6 +144,11 @@ abstract class Payment implements PaymentInterface
 
         $elasticEngineTransaction = $this->createElasticEngineTransaction($paymentData['signature']);
         $orderNumber              = $elasticEngineTransaction->getId();
+
+        if (getenv('SHOPWARE_ENV') === 'dev' || getenv('SHOPWARE_ENV') === 'development') {
+            $orderNumber = uniqid() . '-' . $orderNumber;
+        }
+
         $transaction->setOrderNumber($orderNumber);
 
         if ($configData['descriptor']) {
