@@ -100,7 +100,7 @@ class CreditCardPayment extends Payment
 
         if ($shop) {
             if ($threeDsOnlyCurrency) {
-                if( $shop->getCurrency()->getCurrency() !== $threeDsOnlyCurrency) {
+                if ($shop->getCurrency()->getCurrency() !== $threeDsOnlyCurrency) {
                     foreach ($shop->getCurrencies() as $currency) {
                         if ($currency->getCurrency() === $threeDsOnlyCurrency) {
                             $factorOld = $currency->getFactor();
@@ -119,7 +119,7 @@ class CreditCardPayment extends Payment
             }
 
             if ($threeDsAttemptCurrency) {
-                if( $shop->getCurrency()->getCurrency() !== $threeDsAttemptCurrency) {
+                if ($shop->getCurrency()->getCurrency() !== $threeDsAttemptCurrency) {
                     foreach ($shop->getCurrencies() as $currency) {
                         if ($currency->getCurrency() === $threeDsAttemptCurrency) {
                             $factorOld = $currency->getFactor();
