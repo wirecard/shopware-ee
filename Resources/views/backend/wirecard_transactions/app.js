@@ -15,7 +15,8 @@ Ext.define('Shopware.apps.WirecardTransactions', {
     ],
 
     models: [
-        'ShopwareOrder'
+        'ShopwareOrder',
+        'WirecardTransactions'
     ],
 
     stores: [

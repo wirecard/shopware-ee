@@ -57,6 +57,14 @@ class PaypalPayment extends Payment
     }
 
     /**
+     * @return int
+     */
+    public function getPosition()
+    {
+        return 1;
+    }
+
+    /**
      * @inheritdoc
      */
     public function getConfig(array $configData)

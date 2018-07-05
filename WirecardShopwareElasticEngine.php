@@ -44,8 +44,10 @@ use Shopware\Components\Plugin\Context\UninstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
+use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 
 use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardShopwareElasticEngine\Models\OrderTransaction;
 
 use Doctrine\ORM\Tools\SchemaTool;
 
@@ -54,14 +56,7 @@ class WirecardShopwareElasticEngine extends Plugin
     public function install(InstallContext $context)
     {
         $this->registerPayments();
-
-        $entityManager = $this->container->get('models');
-        $schemaTool = new SchemaTool($entityManager);
-
-        $schemaTool->updateSchema(
-            [ $entityManager->getClassMetadata(Transaction::class) ],
-            true
-        );
+        $this->updateDatabase();
     }
 
     public function uninstall(UninstallContext $context)
@@ -76,6 +71,7 @@ class WirecardShopwareElasticEngine extends Plugin
     public function update(UpdateContext $context)
     {
         parent::update($context);
+        $this->updateDatabase();
     }
 
     public function activate(ActivateContext $context)
@@ -86,6 +82,20 @@ class WirecardShopwareElasticEngine extends Plugin
     public function deactivate(DeactivateContext $context)
     {
         parent::deactivate($context);
+    }
+
+    protected function updateDatabase()
+    {
+        $entityManager = $this->container->get('models');
+        $schemaTool = new SchemaTool($entityManager);
+
+        $schemaTool->updateSchema(
+            [
+                $entityManager->getClassMetadata(Transaction::class),
+                $entityManager->getClassMetadata(OrderTransaction::class)
+            ],
+            true
+        );
     }
 
     protected function registerPayments()
@@ -103,6 +113,7 @@ class WirecardShopwareElasticEngine extends Plugin
     protected function getSupportedPayments()
     {
         return [
+            new CreditCardPayment(),
             new PaypalPayment()
         ];
     }

@@ -6,5 +6,11 @@ Ext.define('Shopware.apps.WirecardTransactions.store.Order', {
             controller: 'WirecardTransactions'
         };
     },
+
+    sorter: [{
+        property: 'number',
+        direction: 'DESC'
+    }],
+
     model: 'Shopware.apps.WirecardTransactions.model.ShopwareOrder'
 });

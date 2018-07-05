@@ -48,9 +48,22 @@ interface PaymentInterface
     public function getName();
 
     /**
+     * @return int
+     */
+    public function getPosition();
+
+    /**
      * @return array
      */
     public function getPaymentOptions();
+
+    /**
+     * Start Transaction
+     *
+     * @param array $paymentData
+     * @return \Wirecard\PaymentSdk\Transaction\Transaction
+     */
+    public function createTransaction(array $paymentData);
 
     /**
      * Start Transaction
@@ -63,9 +76,10 @@ interface PaymentInterface
     /**
      * Creates Transaction entry and returns it
      *
+     * @params string $basketSignature
      * @return Transaction
      */
-    public function createElasticEngineTransaction();
+    public function createElasticEngineTransaction($basketSignature = null);
 
     /**
      * @param array $request
@@ -78,6 +92,23 @@ interface PaymentInterface
      * @return Response
      */
     public function getPaymentNotification($request);
+
+    /**
+     * Retrieve backend operations for specific transaction
+     *
+     * @param string $transactionId
+     * @return array
+     */
+    public function getBackendOperations($transactionId);
+
+    /**
+     * Process backend operation
+     *
+     * @param string $operation
+     * @param string $orderNumber
+     * @param float $amount
+     */
+    public function processBackendOperationsForOrder($orderNumber, $operation, $amount = 0);
 
     /**
      * Returns payment specific transaction object

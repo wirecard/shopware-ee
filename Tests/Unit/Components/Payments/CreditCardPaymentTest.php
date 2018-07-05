@@ -32,31 +32,31 @@
 namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Payments;
 
 use Wirecard\PaymentSdk\Config\Config;
-use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
-use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
+use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
+use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
-use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 use WirecardShopwareElasticEngine\Tests\Unit\PaymentTestCase;
 
-class PaypalPaymentTest extends PaymentTestCase
+class CreditCardPaymentTest extends PaymentTestCase
 {
     /** @var PaymentInterface */
     protected $payment;
 
     public function setUp()
     {
-        $this->payment = new PaypalPayment();
+        $this->payment = new CreditCardPayment();
     }
 
     public function testGetPaymentOptions()
     {
-        $this->assertPaymentOptions($this->payment->getPaymentOptions(), 'wirecard_elastic_engine_paypal', 'Wirecard PayPal', 1);
+        $this->assertPaymentOptions($this->payment->getPaymentOptions(), 'wirecard_elastic_engine_credit_card',
+            'Wirecard Credit Card', 0);
     }
 
     public function testGetTransaction()
     {
-        $this->assertInstanceOf(PayPalTransaction::class, $this->payment->getTransaction());
+        $this->assertInstanceOf(CreditCardTransaction::class, $this->payment->getTransaction());
     }
 
     public function testGetConfig()
@@ -68,23 +68,21 @@ class PaypalPaymentTest extends PaymentTestCase
         $this->assertSame($configData['baseUrl'], $config->getBaseUrl());
         $this->assertSame($configData['httpUser'], $config->getHttpUser());
         $this->assertSame($configData['httpPass'], $config->getHttpPassword());
-        $this->assertInstanceOf(PaymentMethodConfig::class, $config->get(PayPalTransaction::NAME));
-        $this->assertSame($configData['transactionMAID'], $config->get(PayPalTransaction::NAME)->getMerchantAccountId());
-        $this->assertSame($configData['transactionKey'], $config->get(PayPalTransaction::NAME)->getSecret());
     }
 
     public function testGetConfigData()
     {
         $this->assertConfigData([
-            'baseUrl'         => 'https://api-test.wirecard.com',
-            'httpUser'        => '70000-APITEST-AP',
-            'httpPass'        => 'qD2wzQ_hrc!8',
-            'transactionMAID' => '2a0e9351-24ed-4110-9a1b-fd0fee6bec26',
-            'transactionKey'  => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
-            'transactionType' => Payment::TRANSACTION_TYPE_PURCHASE,
-            'sendBasket'      => true,
-            'fraudPrevention' => true,
-            'descriptor'      => true
+            'baseUrl'            => 'https://api-test.wirecard.com',
+            'httpUser'           => '70000-APITEST-AP',
+            'httpPass'           => 'qD2wzQ_hrc!8',
+            'transactionMAID'    => '53f2895a-e4de-4e82-a813-0d87a10e55e6',
+            'transactionKey'     => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
+            'transactionType'    => Payment::TRANSACTION_TYPE_PURCHASE,
+            'transaction3dsMAID' => '508b8896-b37d-4614-845c-26bf8bf2c948',
+            'transaction3dsKey'  => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
+            '3dsOnly'            => 300,
+            '3dsAttempt'         => 100,
         ], $this->payment->getConfigData());
     }
 }
