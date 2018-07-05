@@ -51,7 +51,7 @@ class CreditCardPaymentTest extends PaymentTestCase
     public function testGetPaymentOptions()
     {
         $this->assertPaymentOptions($this->payment->getPaymentOptions(), 'wirecard_elastic_engine_credit_card',
-            'Wirecard Credit Card');
+            'Wirecard Credit Card', 0);
     }
 
     public function testGetTransaction()

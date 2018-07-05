@@ -78,6 +78,14 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
+     * @return int
+     */
+    public function getPosition()
+    {
+        return 0;
+    }
+
+    /**
      * @inheritdoc
      */
     public function getPaymentOptions()
@@ -87,7 +95,7 @@ abstract class Payment implements PaymentInterface
             'description'           => $this->getLabel(),
             'action'                => 'WirecardElasticEnginePayment',
             'active'                => 0,
-            'position'              => 0,
+            'position'              => $this->getPosition(),
             'additionalDescription' => '',
         ];
     }

@@ -51,7 +51,7 @@ class PaypalPaymentTest extends PaymentTestCase
 
     public function testGetPaymentOptions()
     {
-        $this->assertPaymentOptions($this->payment->getPaymentOptions(), 'wirecard_elastic_engine_paypal', 'Wirecard PayPal');
+        $this->assertPaymentOptions($this->payment->getPaymentOptions(), 'wirecard_elastic_engine_paypal', 'Wirecard PayPal', 1);
     }
 
     public function testGetTransaction()
