@@ -152,6 +152,9 @@ abstract class Payment implements PaymentInterface
         $transaction->setOrderNumber($orderNumber);
 
         if ($configData['descriptor']) {
+            //
+            // Change descriptor value here!
+            //
             $descriptor = Shopware()->Config()->get('shopName') . ' ' . $orderNumber;
             $transaction->setDescriptor($descriptor);
         }
