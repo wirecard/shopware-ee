@@ -48,6 +48,11 @@ interface PaymentInterface
     public function getName();
 
     /**
+     * @return int
+     */
+    public function getPosition();
+
+    /**
      * @return array
      */
     public function getPaymentOptions();

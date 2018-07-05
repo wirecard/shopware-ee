@@ -62,6 +62,11 @@ class CreditCardPayment extends Payment
         return self::PAYMETHOD_IDENTIFIER;
     }
 
+    public function getPosition()
+    {
+        return 0;
+    }
+
     /**
      * @inheritdoc
      */

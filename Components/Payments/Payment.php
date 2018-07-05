@@ -78,6 +78,14 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
+     * @return int
+     */
+    public function getPosition()
+    {
+        return 0;
+    }
+
+    /**
      * @inheritdoc
      */
     public function getPaymentOptions()
@@ -87,7 +95,7 @@ abstract class Payment implements PaymentInterface
             'description'           => $this->getLabel(),
             'action'                => 'WirecardElasticEnginePayment',
             'active'                => 0,
-            'position'              => 0,
+            'position'              => $this->getPosition(),
             'additionalDescription' => '',
         ];
     }
@@ -136,6 +144,11 @@ abstract class Payment implements PaymentInterface
 
         $elasticEngineTransaction = $this->createElasticEngineTransaction($paymentData['signature']);
         $orderNumber              = $elasticEngineTransaction->getId();
+
+        if (getenv('SHOPWARE_ENV') === 'dev' || getenv('SHOPWARE_ENV') === 'development') {
+            $orderNumber = uniqid() . '-' . $orderNumber;
+        }
+
         $transaction->setOrderNumber($orderNumber);
 
         if ($configData['descriptor']) {
