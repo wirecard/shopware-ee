@@ -572,8 +572,10 @@ abstract class Payment implements PaymentInterface
             'controller' => 'WirecardElasticEnginePayment',
             'action' => 'notifyBackend',
             'method' => $this->getName(),
+            'transaction' => $parentTransactionId,
             'forceSecure' => true
         ]);
+
         $transaction->setNotificationUrl($notificationUrl);
 
         if ($amount) {
@@ -618,14 +620,15 @@ abstract class Payment implements PaymentInterface
             return [ 'success' => true, 'transactionId' => $response->getTransactionId() ];
         }
         if ($response instanceof FailureResponse) {
+            $rawData = $response->getData();
+            $transactionId = $rawData['transaction-id'];
             $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
                 ->findOneBy(['transactionId' => $parentTransactionId, 'parentTransactionId' => $transactionId]);
-            $rawData = $response->getData();
             if (!$orderTransaction) {
                 $orderTransaction = new OrderTransaction();
                 $orderTransaction->setOrderNumber($orderNumber);
                 $orderTransaction->setParentTransactionId($parentTransactionId);
-                $orderTransaction->setTransactionId($rawData['transaction-id']);
+                $orderTransaction->setTransactionId($transactionId);
                 $orderTransaction->setCreatedAt(new \DateTime('now'));
                 $orderTransaction->setTransactionType('failed');
             }
@@ -666,6 +669,7 @@ abstract class Payment implements PaymentInterface
             'controller' => 'WirecardElasticEnginePayment',
             'action' => 'notifyBackend',
             'method' => $this->getName(),
+            'transaction' => $parentTransactionId,
             'forceSecure' => true
         ]);
 
@@ -711,6 +715,23 @@ abstract class Payment implements PaymentInterface
             return [ 'success' => true, 'transactionId' => $response->getTransactionId() ];
         }
         if ($response instanceof FailureResponse) {
+            $rawData = $response->getData();
+            $transactionId = $rawData['transaction-id'];
+            $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
+                ->findOneBy(['transactionId' => $parentTransactionId, 'parentTransactionId' => $transactionId]);
+            if (!$orderTransaction) {
+                $orderTransaction = new OrderTransaction();
+                $orderTransaction->setOrderNumber($orderNumber);
+                $orderTransaction->setParentTransactionId($parentTransactionId);
+                $orderTransaction->setTransactionId($transactionId);
+                $orderTransaction->setCreatedAt(new \DateTime('now'));
+                $orderTransaction->setTransactionType('failed');
+            }
+
+            $orderTransaction->setReturnResponse(serialize($response->getData()));
+
+            Shopware()->Models()->persist($orderTransaction);
+            Shopware()->Models()->flush();
             return [ 'success' => false, 'msg' => 'CaptureFailed'];
         }
 
@@ -741,6 +762,7 @@ abstract class Payment implements PaymentInterface
             'controller' => 'WirecardElasticEnginePayment',
             'action' => 'notifyBackend',
             'method' => $this->getName(),
+            'transaction' => $parentTransactionId,
             'forceSecure' => true
         ]);
 
@@ -781,6 +803,23 @@ abstract class Payment implements PaymentInterface
             return [ 'success' => true, 'transactionId' => $response->getTransactionId() ];
         }
         if ($response instanceof FailureResponse) {
+            $rawData = $response->getData();
+            $transactionId = $rawData['transaction-id'];
+            $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
+                ->findOneBy(['transactionId' => $parentTransactionId, 'parentTransactionId' => $transactionId]);
+            if (!$orderTransaction) {
+                $orderTransaction = new OrderTransaction();
+                $orderTransaction->setOrderNumber($orderNumber);
+                $orderTransaction->setParentTransactionId($parentTransactionId);
+                $orderTransaction->setTransactionId($transactionId);
+                $orderTransaction->setCreatedAt(new \DateTime('now'));
+                $orderTransaction->setTransactionType('failed');
+            }
+
+            $orderTransaction->setReturnResponse(serialize($response->getData()));
+
+            Shopware()->Models()->persist($orderTransaction);
+            Shopware()->Models()->flush();
             return [ 'success' => false, 'msg' => 'CancelFailed'];
         }
 
