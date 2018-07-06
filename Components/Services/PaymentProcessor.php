@@ -31,6 +31,7 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
+use Psr\Log\LoggerInterface;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Data\PaymentData;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
@@ -52,8 +53,17 @@ class PaymentProcessor
      */
     protected $transactionService;
 
-    public function __construct()
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
+     * @param LoggerInterface $logger
+     */
+    public function __construct(LoggerInterface $logger)
     {
+        $this->logger = $logger;
     }
 
     public function execute()

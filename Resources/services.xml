@@ -19,6 +19,7 @@
         </service>
         <service id="wirecard_elastic_engine.payment_processor"
                  class="WirecardShopwareElasticEngine\Components\Services\PaymentProcessor">
+            <argument type="service" id="pluginlogger"/>
         </service>
 
         <!-- Subscriber -->
