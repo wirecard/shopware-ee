@@ -191,13 +191,6 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
-     * get payment settings
-     *
-     * @return PaymentConfig
-     */
-    public abstract function getPaymentConfig();
-
-    /**
      * @inheritdoc
      */
     public function getTransactionConfig()
@@ -220,11 +213,6 @@ abstract class Payment implements PaymentInterface
 
         return $config;
     }
-
-    /**
-     * @inheritdoc
-     */
-    public abstract function getTransaction();
 
     /**
      * Adds consumer personal information, billing and shipping address to Transaction
