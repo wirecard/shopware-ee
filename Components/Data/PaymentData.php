@@ -31,12 +31,29 @@
 
 namespace WirecardShopwareElasticEngine\Components\Data;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Basket;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 
 class PaymentData
 {
+    const BASKET_CONTENT = 'content';
+    const BASKET_ITEM_ARTICLE_NAME = 'articlename';
+    const BASKET_ITEM_ORDER_NUMBER = 'ordernumber';
+    const BASKET_ITEM_TAX_RATE = 'tax_rate';
+    const BASKET_ITEM_QUANTITY = 'quantity';
+    const BASKET_ITEM_ADDITIONAL_DETAILS = 'additional_details';
+    const BASKET_ITEM_ADDITIONAL_DETAILS_PRICES = 'prices';
+    const BASKET_ITEM_ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC = 'price_numeric';
+    const BASKET_ITEM_PRICE = 'price';
+    const BASKET_SHIPPING_COSTS_WITH_TAX = 'sShippingcostsWithTax';
+    const BASKET_SHIPPING_COSTS_TAX = 'sShippingcostsTax';
+    const ARTICLE_IS_AVAILABLE = 'isAvailable';
+    const ARTICLE_LAST_STOCK = 'laststock';
+    const ARTICLE_IN_STOCK = 'instock';
+    const ARTICLE_QUANTITY = 'quantity';
+
     /**
      * @var Payment
      */
@@ -83,9 +100,9 @@ class PaymentData
     protected $request;
 
     /**
-     * @var \sArticles
+     * @var ContainerInterface
      */
-    protected $articles;
+    protected $container;
 
     /**
      * PaymentData constructor.
@@ -97,7 +114,7 @@ class PaymentData
      * @param                                     $currency
      * @param \Enlight_Controller_Router          $router
      * @param \Enlight_Controller_Request_Request $request
-     * @param \sArticles                          $articles
+     * @param ContainerInterface                  $container
      */
     public function __construct(
         Payment $payment,
@@ -107,7 +124,7 @@ class PaymentData
         $currency,
         \Enlight_Controller_Router $router,
         \Enlight_Controller_Request_Request $request,
-        \sArticles $articles
+        ContainerInterface $container
     ) {
         $this->payment   = $payment;
         $this->user      = $user;
@@ -116,10 +133,10 @@ class PaymentData
         $this->request   = $request;
         $this->rawBasket = $basket;
         $this->rawAmount = $amount;
-        $this->articles  = $articles;
+        $this->container = $container;
 
-        $this->amount    = new Amount($amount, $currency);
-        $this->basket    = new Basket();
+        $this->amount = new Amount($amount, $currency);
+        $this->basket = new Basket();
     }
 
     /**
@@ -155,18 +172,22 @@ class PaymentData
         $basket       = $this->getBasket();
         $basketString = '';
 
-        foreach ($basket['content'] as $item) {
-            $name        = $item['articlename'];
-            $orderNumber = $item['ordernumber'];
-            $taxRate     = floatval($item['tax_rate']);
-            $quantity    = $item['quantity'];
+        foreach ($basket[self::BASKET_CONTENT] as $item) {
+            $name        = $item[self::BASKET_ITEM_ARTICLE_NAME];
+            $orderNumber = $item[self::BASKET_ITEM_ORDER_NUMBER];
+            $taxRate     = floatval($item[self::BASKET_ITEM_TAX_RATE]);
+            $quantity    = $item[self::BASKET_ITEM_QUANTITY];
 
-            if (isset($item['additional_details'])) {
-                if (isset($item['additional_details']['prices'])
-                    && count($item['additional_details']['prices']) === 1) {
-                    $price = $item['additional_details']['prices'][0]['price_numeric'];
+            if (isset($item[self::BASKET_ITEM_ADDITIONAL_DETAILS])) {
+                $additionalDetails = $item[self::BASKET_ITEM_ADDITIONAL_DETAILS];
+
+                if (isset($additionalDetails[self::BASKET_ITEM_ADDITIONAL_DETAILS_PRICES])
+                    && count($additionalDetails[self::BASKET_ITEM_ADDITIONAL_DETAILS_PRICES])
+                       === 1) {
+                    $prices = $additionalDetails[self::BASKET_ITEM_ADDITIONAL_DETAILS_PRICES];
+                    $price = $prices[0][self::BASKET_ITEM_ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC];
                 } else {
-                    $price = $item['additional_details']['price_numeric'];
+                    $price = $additionalDetails[self::BASKET_ITEM_ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC];
                 }
             } else {
                 $price = floatval(str_replace(',', '.', $item['price']));
@@ -175,9 +196,9 @@ class PaymentData
             $basketString .= "${name}-${orderNumber}-${price}-${currency}-${quantity}-${taxRate}%\n";
         }
 
-        if (! empty($basket['sShippingcostsWithTax']) && isset($basket['sShippingcostsTax'])) {
-            $basketString .= "Shipping - shipping - ${basket['sShippingcostsWithTax']} " .
-                             "${currency} - ${basket['sShippingcostsTax']}";
+        if (! empty($basket[self::BASKET_SHIPPING_COSTS_WITH_TAX]) && isset($basket[self::BASKET_SHIPPING_COSTS_TAX])) {
+            $basketString .= "Shipping - shipping - ${basket[self::BASKET_SHIPPING_COSTS_WITH_TAX]} " .
+                             "${currency} - ${basket[self::BASKET_SHIPPING_COSTS_TAX]}";
         }
 
         return $basketString;
@@ -190,25 +211,25 @@ class PaymentData
     {
         $basket = $this->getBasket();
 
-        if (! isset($basket['content'])) {
+        if (! isset($basket[self::BASKET_CONTENT])) {
             return false;
         }
 
-        foreach ($basket['content'] as $item) {
-            if (! isset($item['ordernumber'])) {
+        foreach ($basket[self::BASKET_CONTENT] as $item) {
+            if (! isset($item[self::BASKET_ITEM_ORDER_NUMBER])) {
                 return false;
             }
 
-            $article = $this->articles->sGetProductByOrdernumber($item['ordernumber']);
+            $article = $this->container->get('shopware.api.article')->sGetProductByOrdernumber($item['ordernumber']);
 
             if (! $article) {
                 // Some items (extra charges, ...) might have an order number but no article.
                 continue;
             }
 
-            if (! $article['isAvailable']
-                || ($article['laststock']
-                    && intval($item['quantity']) > $article['instock'])) {
+            if (! $article[self::ARTICLE_IS_AVAILABLE]
+                || ($article[self::ARTICLE_LAST_STOCK]
+                    && intval($item[self::ARTICLE_QUANTITY]) > $article[self::ARTICLE_IN_STOCK])) {
                 return false;
             }
         }
