@@ -34,6 +34,7 @@ namespace WirecardShopwareElasticEngine\Components\Data;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Basket;
+use Wirecard\PaymentSdk\Entity\Redirect;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 
 class PaymentData
@@ -105,13 +106,19 @@ class PaymentData
     protected $container;
 
     /**
+     * @var Redirect
+     */
+    protected $redirect;
+
+    /**
      * PaymentData constructor.
      *
      * @param Payment                             $payment
      * @param array                               $user
-     * @param array                               $basket
-     * @param                                     $amount
+     * @param Basket                              $basket
+     * @param Amount                              $amount
      * @param                                     $currency
+     * @param Redirect                            $redirect
      * @param \Enlight_Controller_Router          $router
      * @param \Enlight_Controller_Request_Request $request
      * @param ContainerInterface                  $container
@@ -119,9 +126,10 @@ class PaymentData
     public function __construct(
         Payment $payment,
         array $user,
-        array $basket,
-        $amount,
+        Basket $basket,
+        Amount $amount,
         $currency,
+        Redirect $redirect,
         \Enlight_Controller_Router $router,
         \Enlight_Controller_Request_Request $request,
         ContainerInterface $container
@@ -131,12 +139,10 @@ class PaymentData
         $this->currency  = $currency;
         $this->router    = $router;
         $this->request   = $request;
-        $this->rawBasket = $basket;
-        $this->rawAmount = $amount;
         $this->container = $container;
-
-        $this->amount = new Amount($amount, $currency);
-        $this->basket = new Basket();
+        $this->amount    = $amount;
+        $this->basket    = $basket;
+        $this->redirect  = $redirect;
     }
 
     /**
@@ -261,8 +267,11 @@ class PaymentData
         return $this->currency;
     }
 
-    public function getRedirectUrl()
+    /**
+     * @return Redirect
+     */
+    public function getRedirect()
     {
-        //        return new Redirect();
+        return $this->redirect;
     }
 }
