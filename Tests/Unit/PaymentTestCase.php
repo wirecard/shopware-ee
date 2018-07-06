@@ -33,14 +33,14 @@ namespace WirecardShopwareElasticEngine\Tests\Unit;
 
 abstract class PaymentTestCase extends \PHPUnit_Framework_TestCase
 {
-    public function assertPaymentOptions(array $paymentMethod, $name, $description)
+    public function assertPaymentOptions(array $paymentMethod, $name, $description, $position)
     {
         $this->assertEquals([
             'name'                  => $name,
             'description'           => $description,
             'action'                => 'WirecardElasticEnginePayment',
             'active'                => 0,
-            'position'              => 0,
+            'position'              => $position,
             'additionalDescription' => '',
         ], $paymentMethod);
     }

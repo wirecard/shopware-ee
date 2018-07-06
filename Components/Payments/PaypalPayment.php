@@ -31,6 +31,7 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
+use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
@@ -55,6 +56,30 @@ class PaypalPayment extends Payment
     public function getName()
     {
         return self::PAYMETHOD_IDENTIFIER;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPosition()
+    {
+        return 1;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getConfig(array $configData)
+    {
+        $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
+        $paypalConfig = new PaymentMethodConfig(
+            PayPalTransaction::NAME,
+            $configData['transactionMAID'],
+            $configData['transactionKey']
+        );
+        $config->add($paypalConfig);
+
+        return $config;
     }
 
     /**

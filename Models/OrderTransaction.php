@@ -37,9 +37,9 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="wirecard_elastic_engine_transactions")
+ * @ORM\Table(name="wirecard_elastic_engine_order_transaction")
  */
-class Transaction extends ModelEntity
+class OrderTransaction extends ModelEntity
 {
     /**
      * @var int
@@ -58,14 +58,20 @@ class Transaction extends ModelEntity
 
     /**
      * @var Order
-     * @ORM\OneToOne(targetEntity="Shopware\Models\Order\Order")
+     * @ORM\ManyToOne(targetEntity="Shopware\Models\Order\Order")
      * @ORM\JoinColumn(name="order_number", referencedColumnName="ordernumber")
      */
     private $order;
 
     /**
      * @var string
-     * @ORM\Column(name="transaction_id", type="string", nullable=true)
+     * @ORM\Column(name="parent_transaction_id", type="string", nullable=false)
+     */
+    private $parentTransactionId;
+
+    /**
+     * @var string
+     * @ORM\Column(name="transaction_id", type="string", nullable=false, unique=true)
      */
     private $transactionId;
 
@@ -74,6 +80,24 @@ class Transaction extends ModelEntity
      * @ORM\Column(name="provider_transaction_id", type="string", nullable=true)
      */
     private $providerTransactionId;
+
+    /**
+     * @var string
+     * @ORM\Column(name="transaction_type", type="string", nullable=true)
+     */
+    private $transactionType;
+
+    /**
+     * @var float
+     * @ORM\Column(name="amount", type="float", nullable=true)
+     */
+    private $amount;
+
+    /**
+     * @var string
+     * @ORM\Column(name="currency", type="string", nullable=true)
+     */
+    private $currency;
 
     /**
      * @var string
@@ -88,22 +112,10 @@ class Transaction extends ModelEntity
     private $notificationResponse;
 
     /**
-     * @var string
-     * @ORM\Column(name="payment_status", type="string", nullable=true)
+     * @var \DateTime
+     * @ORM\Column(name="created_at", type="datetime", nullable=false)
      */
-    private $paymentStatus;
-
-    /**
-     * @var string
-     * @ORM\Column(name="basket_signature", type="string", nullable=true)
-     */
-    private $basketSignature;
-
-    /**
-     * @var string
-     * @ORM\Column(name="request_id", type="string", nullable=true)
-     */
-    private $requestId;
+    private $createdAt;
 
     /**
      * @return int
@@ -114,7 +126,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string|null
+     * @return string
      */
     public function getOrderNumber()
     {
@@ -130,7 +142,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return Order|null
+     * @return Order
      */
     public function getOrder()
     {
@@ -140,13 +152,30 @@ class Transaction extends ModelEntity
     /**
      * @param Order $order
      */
-    public function setOrder(Order $order)
+    public function setOrder($order)
     {
         $this->order = $order;
     }
 
+
     /**
-     * @return string|null
+     * @return string
+     */
+    public function getParentTransactionId()
+    {
+        return $this->parentTransactionId;
+    }
+
+    /**
+     * @param string $parentTransactionId
+     */
+    public function setParentTransactionId($parentTransactionId)
+    {
+        $this->parentTransactionId = $parentTransactionId;
+    }
+
+    /**
+     * @return string
      */
     public function getTransactionId()
     {
@@ -162,7 +191,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string|null
+     * @return string
      */
     public function getProviderTransactionId()
     {
@@ -170,7 +199,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param $providerTransactionId
+     * @param string $providerTransactionId
      */
     public function setProviderTransactionId($providerTransactionId)
     {
@@ -178,7 +207,55 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string|null
+     * @return string
+     */
+    public function getTransactionType()
+    {
+        return $this->transactionType;
+    }
+
+    /**
+     * @param string $transactionType
+     */
+    public function setTransactionType($transactionType)
+    {
+        $this->transactionType = $transactionType;
+    }
+
+    /**
+     * @return float
+     */
+    public function getAmount()
+    {
+        return $this->amount;
+    }
+
+    /**
+     * @param float $amount
+     */
+    public function setAmount($amount)
+    {
+        $this->amount = $amount;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCurrency()
+    {
+        return $this->currency;
+    }
+
+    /**
+     * @param string $currency
+     */
+    public function setCurrency($currency)
+    {
+        $this->currency = $currency;
+    }
+
+    /**
+     * @return string
      */
     public function getReturnResponse()
     {
@@ -186,7 +263,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param $returnResponse
+     * @param string $returnResponse
      */
     public function setReturnResponse($returnResponse)
     {
@@ -194,7 +271,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string|null
+     * @return string
      */
     public function getNotificationResponse()
     {
@@ -210,50 +287,18 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string|null
+     * @param \DateTime
      */
-    public function getPaymentStatus()
+    public function setCreatedAt(\DateTime $createdAt)
     {
-        return $this->paymentStatus;
+        $this->createdAt = $createdAt;
     }
 
     /**
-     * @param string $paymentStatus
+     * @return \DateTime
      */
-    public function setPaymentStatus($paymentStatus)
+    public function getCreatedAt()
     {
-        $this->paymentStatus = $paymentStatus;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getBasketSignature()
-    {
-        return $this->basketSignature;
-    }
-    
-    /**
-     * @param string $basketSignature
-     */
-    public function setBasketSignature($basketSignature)
-    {
-        $this->basketSignature = $basketSignature;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getRequestId()
-    {
-        return $this->requestId;
-    }
-    
-    /**
-     * @param string $requestId
-     */
-    public function setRequestId($requestId)
-    {
-        $this->requestId = $requestId;
+        return $this->createdAt;
     }
 }

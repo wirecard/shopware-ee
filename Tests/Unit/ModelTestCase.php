@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?php
 /**
  * Shop System Plugins - Terms of Use
  *
@@ -29,15 +28,39 @@
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
  */
--->
-<plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/plugin.xsd">
-    <label>Wirecard</label>
 
-    <version>0.2.0</version>
-    <compatibility minVersion="5.3.0" />
+namespace WirecardShopwareElasticEngine\Tests\Unit;
 
-    <author>Wirecard</author>
-    <link>https://www.wirecard.at/</link>
-    <license>GPL-3.0</license>
-</plugin>
+abstract class ModelTestCase extends \PHPUnit_Framework_TestCase
+{
+    protected $model;
+
+    abstract public function getModel();
+
+    public function setUp()
+    {
+        $this->model = $this->getModel();
+    }
+
+    public function assertGetterAndSetter($property, $value, $assertInitialNull = true, $setter = null, $getter = null)
+    {
+        if (! $setter) {
+            $setter = 'set' . ucfirst($property);
+        }
+
+        if (! $getter) {
+            $getter = 'get' . ucfirst($property);
+        }
+
+        if (! method_exists($this->model, $setter) || ! method_exists($this->model, $getter)) {
+            throw new \Exception('Getter or setter not defined for ' . get_class($this->model) . ' (' . $property . ')');
+        }
+
+        if($assertInitialNull) {
+            $this->assertNull($this->model->$getter());
+        }
+
+        $this->model->$setter($value);
+        $this->assertSame($this->model->$getter(), $value);
+    }
+}

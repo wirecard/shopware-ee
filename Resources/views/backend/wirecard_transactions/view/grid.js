@@ -60,7 +60,8 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
             },
             temporaryId: {
                 header: me.snippets.providerTransactionId,
-                draggable: false
+                draggable: false,
+                renderer: me.providerTransactionRenderer
             },
             invoiceAmount: {
                 header: me.snippets.amount,
@@ -129,6 +130,22 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
         }
 
         return value;
+    },
+
+    /**
+     * @param { String } value
+     * @param { Object } metaData
+     * @param { Ext.data.Model } record
+     * @return { String }
+     */
+    providerTransactionRenderer: function(value, metaData, record) {
+        var status = record.getWirecardTransactions().first();
+
+        if (status instanceof Ext.data.Model) {
+            return status.get('providerTransactionId');
+        }
+
+        return '';
     },
 
     /**
