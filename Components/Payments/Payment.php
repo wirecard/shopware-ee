@@ -474,4 +474,13 @@ abstract class Payment implements PaymentInterface
 
         return $notification;
     }
+
+    /**
+     * @param $name
+     * @return mixed
+     */
+    protected function getPluginConfig($name)
+    {
+        return $this->container->get('config')->getByNamespace(WirecardShopwareElasticEngine::NAME, $name);
+    }
 }

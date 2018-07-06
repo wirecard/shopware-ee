@@ -86,36 +86,34 @@ class PaypalPayment extends Payment
      */
     public function getPaymentConfig()
     {
-        $config = Shopware()->Config();
-
         $paymentConfig = new PaymentConfig(
-            $config->getByNamespace(WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalServer'),
-            $config->getByNamespace(WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalHttpUser'),
-            $config->getByNamespace(WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalHttpPassword')
+            $this->getPluginConfig('wirecardElasticEnginePaypalServer'),
+            $this->getPluginConfig('wirecardElasticEnginePaypalHttpUser'),
+            $this->getPluginConfig('wirecardElasticEnginePaypalHttpPassword')
         );
 
         $paymentConfig->setTransactionMAID(
-            $config->getByNamespace(WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalMerchandId')
+            $this->getPluginConfig('wirecardElasticEnginePaypalMerchantId')
         );
 
         $paymentConfig->setTransactionSecret(
-            $config->getByNamespace(WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalSecret')
+            $this->getPluginConfig('wirecardElasticEnginePaypalSecret')
         );
 
         $paymentConfig->setTransactionType(
-            $config->getByNamespace(WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalTransactionType')
+            $this->getPluginConfig('wirecardElasticEnginePaypalTransactionType')
         );
 
         $paymentConfig->setSendBasket(
-            $config->getByNamespace(WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalSendBasket')
+            $this->getPluginConfig('wirecardElasticEnginePaypalSendBasket')
         );
 
         $paymentConfig->setFraudPrevention(
-            $config->getByNamespace(WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalFraudPrevention')
+            $this->getPluginConfig('wirecardElasticEnginePaypalFraudPrevention')
         );
 
         $paymentConfig->setSendDescriptor(
-            $config->getByNamespace(WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalDescriptor')
+            $this->getPluginConfig('wirecardElasticEnginePaypalDescriptor')
         );
 
         return $paymentConfig;
