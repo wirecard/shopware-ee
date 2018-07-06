@@ -33,8 +33,8 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
             'credit': 'Credit',
             'capture': 'Capture',
             'pending': 'Pending',
-            'void-authorization' : 'Void Authorization',
-            'void-purchase' : 'Void Purchase'
+            'void-authorization': 'Void Authorization',
+            'void-purchase': 'Void Purchase'
         },
 
         buttons: {
