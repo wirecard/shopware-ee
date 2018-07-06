@@ -90,7 +90,6 @@ interface PaymentInterface
     /**
      * Returns transaction config
      *
-     * @param PaymentConfig $paymentConfig
      * @return Config
      */
     public function getTransactionConfig();
