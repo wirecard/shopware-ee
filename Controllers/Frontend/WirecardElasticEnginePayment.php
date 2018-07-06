@@ -63,13 +63,15 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function gatewayAction()
     {
-        //        if (! $this->validateBasket()) {
-        //            return $this->redirect([
-        //                'controller'                          => 'checkout',
-        //                'action'                              => 'cart',
-        //                'wirecard_elastic_engine_update_cart' => 'true',
-        //            ]);
-        //        }
+        $paymentData    = $this->getPaymentData();
+
+        if (! $paymentData->validateBasket()) {
+            return $this->redirect([
+                'controller'                          => 'checkout',
+                'action'                              => 'cart',
+                'wirecard_elastic_engine_update_cart' => 'true',
+            ]);
+        }
 
         /** @var PaymentFactory $paymentFactory */
         $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
@@ -78,23 +80,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         /** @var PaymentProcessor $processor */
         $processor = $this->get('wirecard_elastic_engine.payment_processor');
         $processor->setPayment($payment);
-        $processor->setPaymentData($this->getPaymentData());
+        $processor->setPaymentData($paymentData);
         $processor->setTransactionService(
             new TransactionService($payment->getTransactionConfig(), $this->get('pluginlogger'))
         );
 
-        /*
-        $payment     = PaymentFactory::create($this->getPaymentShortName());
-        $processor   = new PaymentProcessor(
-            $payment,
-            $this->getPaymentData(),
-            new \Wirecard\PaymentSdk\TransactionService($payment->getTransactionConfig([]), Shopware()->PluginLogger())
-        );
-
         $processor->execute();
-        */
-
-        exit('yija');
     }
 
     /**
@@ -103,25 +94,25 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function paypalAction()
     {
-        if (!$this->validateBasket()) {
-            return $this->redirect([
-                'controller'                          => 'checkout',
-                'action'                              => 'cart',
-                'wirecard_elastic_engine_update_cart' => 'true',
-            ]);
-        }
-
-        $paymentData = $this->getPaymentData(PaypalPayment::PAYMETHOD_IDENTIFIER);
-
-        $paypal = new PaypalPayment();
-
-        $paymentProcess = $paypal->processPayment($paymentData);
-
-        if ($paymentProcess['status'] === 'success') {
-            return $this->redirect($paymentProcess['redirect']);
-        }
-
-        return $this->errorHandling(StatusCodes::ERROR_STARTING_PROCESS_FAILED);
+//        if (!$this->validateBasket()) {
+//            return $this->redirect([
+//                'controller'                          => 'checkout',
+//                'action'                              => 'cart',
+//                'wirecard_elastic_engine_update_cart' => 'true',
+//            ]);
+//        }
+//
+//        $paymentData = $this->getPaymentData(PaypalPayment::PAYMETHOD_IDENTIFIER);
+//
+//        $paypal = new PaypalPayment();
+//
+//        $paymentProcess = $paypal->processPayment($paymentData);
+//
+//        if ($paymentProcess['status'] === 'success') {
+//            return $this->redirect($paymentProcess['redirect']);
+//        }
+//
+//        return $this->errorHandling(StatusCodes::ERROR_STARTING_PROCESS_FAILED);
     }
 
     /**
@@ -353,31 +344,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $this->Request(),
             $this->getModelManager()
         );
-    }
-
-    /**
-     * Validate basket for availability of products.
-     *
-     * @return boolean
-     */
-    protected function validateBasket()
-    {
-        $basket = $this->getBasket();
-
-        foreach ($basket['content'] as $item) {
-            $article = Shopware()->Modules()->Articles()->sGetProductByOrdernumber($item['ordernumber']);
-
-            if (!$article) {
-                continue;
-            }
-
-            if (!$article['isAvailable'] ||
-                ($article['laststock'] && intval($item['quantity']) > $article['instock'])) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     /**
