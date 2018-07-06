@@ -190,7 +190,7 @@ class PaymentData
                     $price = $additionalDetails[self::BASKET_ITEM_ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC];
                 }
             } else {
-                $price = floatval(str_replace(',', '.', $item['price']));
+                $price = floatval(str_replace(',', '.', $item[self::BASKET_ITEM_PRICE]));
             }
 
             $basketString .= "${name}-${orderNumber}-${price}-${currency}-${quantity}-${taxRate}%\n";
