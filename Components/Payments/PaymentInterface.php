@@ -33,7 +33,8 @@ namespace WirecardShopwareElasticEngine\Components\Payments;
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Response\Response;
-use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
+use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Data\PaymentData;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
 interface PaymentInterface
@@ -56,10 +57,11 @@ interface PaymentInterface
     /**
      * Start Transaction
      *
-     * @param array $paymentData
+     * @param PaymentData        $paymentData
+     * @param TransactionService $transactionService
      * @return array
      */
-    public function processPayment(array $paymentData);
+    public function processPayment(PaymentData $paymentData, TransactionService $transactionService);
 
     /**
      * Creates Transaction entry and returns it
