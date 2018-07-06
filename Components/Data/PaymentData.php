@@ -37,6 +37,7 @@ use Wirecard\PaymentSdk\Entity\Basket;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 
+// TODO: rename orderdetails
 class PaymentData
 {
     const BASKET_CONTENT = 'content';
@@ -66,11 +67,6 @@ class PaymentData
     protected $user;
 
     /**
-     * @var array
-     */
-    protected $rawBasket;
-
-    /**
      * @var Basket
      */
     protected $basket;
@@ -84,21 +80,6 @@ class PaymentData
      * @var Amount
      */
     protected $amount;
-
-    /**
-     * @var string
-     */
-    protected $currency;
-
-    /**
-     * @var \Enlight_Controller_Router
-     */
-    protected $router;
-
-    /**
-     * @var \Enlight_Controller_Request_Request
-     */
-    protected $request;
 
     /**
      * @var ContainerInterface
@@ -117,28 +98,21 @@ class PaymentData
      * @param array                               $user
      * @param Basket                              $basket
      * @param Amount                              $amount
-     * @param                                     $currency
      * @param Redirect                            $redirect
-     * @param \Enlight_Controller_Router          $router
-     * @param \Enlight_Controller_Request_Request $request
      * @param ContainerInterface                  $container
      */
     public function __construct(
         Payment $payment,
+        // TODO: UserMapper
         array $user,
+        // TODO: BasketMapper
         Basket $basket,
         Amount $amount,
-        $currency,
         Redirect $redirect,
-        \Enlight_Controller_Router $router,
-        \Enlight_Controller_Request_Request $request,
         ContainerInterface $container
     ) {
         $this->payment   = $payment;
         $this->user      = $user;
-        $this->currency  = $currency;
-        $this->router    = $router;
-        $this->request   = $request;
         $this->container = $container;
         $this->amount    = $amount;
         $this->basket    = $basket;

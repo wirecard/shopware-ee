@@ -17,8 +17,8 @@
                  class="WirecardShopwareElasticEngine\Components\Payments\PaypalPayment"
                  parent="wirecard_elastic_engine.payment">
         </service>
-        <service id="wirecard_elastic_engine.payment_processor"
-                 class="WirecardShopwareElasticEngine\Components\Services\PaymentProcessor">
+        <service id="wirecard_elastic_engine.payment_handler"
+                 class="WirecardShopwareElasticEngine\Components\Services\PaymentHandler">
             <argument type="service" id="pluginlogger"/>
         </service>
 

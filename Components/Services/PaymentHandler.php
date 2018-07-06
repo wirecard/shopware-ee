@@ -36,7 +36,7 @@ use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Data\PaymentData;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 
-class PaymentProcessor
+class PaymentHandler
 {
     /**
      * @var Payment
@@ -68,6 +68,7 @@ class PaymentProcessor
 
     public function execute()
     {
+        $this->payment->processPayment();
     }
 
     /**
