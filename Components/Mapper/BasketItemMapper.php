@@ -33,6 +33,7 @@ namespace WirecardShopwareElasticEngine\Components\Mapper;
 
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Item;
+use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Exception\InvalidBasketItemException;
 
 class BasketItemMapper
@@ -70,6 +71,7 @@ class BasketItemMapper
      * @param string $currency
      *
      * @throws InvalidBasketItemException
+     * @throws ArrayKeyNotFoundException
      */
     public function __construct(array $shopwareItem, $currency)
     {
@@ -96,18 +98,20 @@ class BasketItemMapper
 
     /**
      * @return string
+     * @throws ArrayKeyNotFoundException
      */
     public function getArticleName()
     {
-        return $this->getShopwareItem()[self::ITEM_ARTICLE_NAME];
+        return $this->getKey(self::ITEM_ARTICLE_NAME);
     }
 
     /**
      * @return string
+     * @throws ArrayKeyNotFoundException
      */
     public function getOrderNumber()
     {
-        return $this->getShopwareItem()[self::ITEM_ORDER_NUMBER];
+        return $this->getKey(self::ITEM_ORDER_NUMBER);
     }
 
     /**
@@ -120,38 +124,43 @@ class BasketItemMapper
 
     /**
      * @return array
+     * @throws ArrayKeyNotFoundException
      */
     public function getAdditionalDetails()
     {
-        return $this->getShopwareItem()[self::ITEM_ADDITIONAL_DETAILS];
+        return $this->getKey(self::ITEM_ADDITIONAL_DETAILS, []);
     }
 
     /**
      * @return float
+     * @throws ArrayKeyNotFoundException
      */
     public function getTaxRate()
     {
-        return $this->getShopwareItem()[self::ITEM_TAX_RATE];
+        return $this->getKey(self::ITEM_TAX_RATE);
     }
 
     /**
      * @return float
+     * @throws ArrayKeyNotFoundException
      */
     public function getTax()
     {
-        return $this->getShopwareItem()[self::ITEM_TAX];
+        return $this->getKey(self::ITEM_TAX);
     }
 
     /**
      * @return int
+     * @throws ArrayKeyNotFoundException
      */
     public function getQuantity()
     {
-        return $this->getShopwareItem()[self::ITEM_QUANTITY];
+        return $this->getKey(self::ITEM_QUANTITY);
     }
 
     /**
      * @return string
+     * @throws ArrayKeyNotFoundException
      */
     public function getDescription()
     {
@@ -164,7 +173,8 @@ class BasketItemMapper
     }
 
     /**
-     * @return float
+     * @return float|mixed
+     * @throws ArrayKeyNotFoundException
      */
     public function getPrice()
     {
@@ -185,10 +195,32 @@ class BasketItemMapper
     }
 
     /**
+     * @param      $key
+     * @param null $default
+     *
+     * @return mixed|null
+     * @throws ArrayKeyNotFoundException
+     */
+    protected function getKey($key, $default = null)
+    {
+        $item = $this->getShopwareItem();
+        if (! isset($item[$key])) {
+            if ($default !== null) {
+                return $default;
+            }
+
+            throw new ArrayKeyNotFoundException($key, get_class($this));
+        }
+
+        return $item[$key];
+    }
+
+    /**
      * Creates a Wirecard SDK basket object based on the given shopware item.
      *
-     * @return mixed|Item
+     * @return Item
      * @throws InvalidBasketItemException
+     * @throws ArrayKeyNotFoundException
      */
     protected function createWirecardItem()
     {
