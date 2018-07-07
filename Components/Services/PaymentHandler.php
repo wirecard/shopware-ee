@@ -33,7 +33,7 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 
 use Psr\Log\LoggerInterface;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Data\PaymentData;
+use WirecardShopwareElasticEngine\Components\Data\OrderDetails;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 
 class PaymentHandler
@@ -44,9 +44,9 @@ class PaymentHandler
     protected $payment;
 
     /**
-     * @var PaymentData
+     * @var OrderDetails
      */
-    protected $paymentData;
+    protected $orderDetails;
 
     /**
      * @var TransactionService
@@ -68,7 +68,6 @@ class PaymentHandler
 
     public function execute()
     {
-        $this->payment->processPayment();
     }
 
     /**
@@ -88,19 +87,19 @@ class PaymentHandler
     }
 
     /**
-     * @param PaymentData $paymentData
+     * @param OrderDetails $orderDetails
      */
-    public function setPaymentData(PaymentData $paymentData)
+    public function setOrderDetails(OrderDetails $orderDetails)
     {
-        $this->paymentData = $paymentData;
+        $this->orderDetails = $orderDetails;
     }
 
     /**
      * @return mixed
      */
-    public function getPaymentData()
+    public function getOrderDetails()
     {
-        return $this->getPaymentData();
+        return $this->getOrderDetails();
     }
 
     /**

@@ -40,7 +40,7 @@ use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
 
-use WirecardShopwareElasticEngine\Components\Data\PaymentData;
+use WirecardShopwareElasticEngine\Components\Data\OrderDetails;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
 use WirecardShopwareElasticEngine\Components\Services\PaymentHandler;
@@ -74,9 +74,9 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
         $payment        = $paymentFactory->create($this->getPaymentShortName());
 
-        $paymentData    = $this->getPaymentData();
+        $orderDetails    = $this->getPaymentData();
 
-        if (! $paymentData->validateBasket()) {
+        if (! $orderDetails->validateBasket()) {
             return $this->redirect([
                 'controller'                          => 'checkout',
                 'action'                              => 'cart',
@@ -86,8 +86,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         /** @var PaymentHandler $handler */
         $handler = $this->get('wirecard_elastic_engine.payment_handler');
-        $handler->setPayment($payment);
-        $handler->setPaymentData($paymentData);
+        $handler->setOrderDetails($orderDetails);
         $handler->setTransactionService(
             new TransactionService($payment->getTransactionConfig(), $this->get('pluginlogger'))
         );
@@ -873,12 +872,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     /**
      * Important data of order for further processing in transaction get collected-
      *
-     * @return PaymentData $paymentData
+     * @return OrderDetails $paymentData
      * @throws Exception
      */
     protected function getPaymentData()
     {
-        return new PaymentData(
+        return new OrderDetails(
             null,
             $this->getUser(),
             $this->getBasket(),

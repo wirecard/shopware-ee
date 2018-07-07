@@ -37,8 +37,7 @@ use Wirecard\PaymentSdk\Entity\Basket;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 
-// TODO: rename orderdetails
-class PaymentData
+class OrderDetails
 {
     const BASKET_CONTENT = 'content';
     const BASKET_ITEM_ARTICLE_NAME = 'articlename';
@@ -92,7 +91,7 @@ class PaymentData
     protected $redirect;
 
     /**
-     * PaymentData constructor.
+     * OrderDetails constructor.
      *
      * @param Payment                             $payment
      * @param array                               $user
