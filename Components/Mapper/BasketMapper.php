@@ -37,7 +37,7 @@ use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Exception\InvalidBasketException;
 use WirecardShopwareElasticEngine\Exception\InvalidBasketItemException;
 
-class BasketMapper
+class BasketMapper extends Mapper
 {
     const BASKET_CONTENT = 'content';
     const ARTICLE_QUANTITY = 'quantity';
@@ -46,11 +46,6 @@ class BasketMapper
     const ARTICLE_IS_AVAILABLE = 'isAvailable';
     const ARTICLE_LAST_STOCK = 'laststock';
     const ARTICLE_IN_STOCK = 'instock';
-
-    /**
-     * @var array
-     */
-    protected $shopwareBasket;
 
     /**
      * @var Basket
@@ -86,11 +81,11 @@ class BasketMapper
      */
     public function __construct(array $shopwareBasket, $currency, \sArticles $articles, Transaction $transaction)
     {
-        $this->shopwareBasket = $shopwareBasket;
-        $this->currency       = $currency;
-        $this->articles       = $articles;
-        $this->transaction    = $transaction;
-        $this->wirecardBasket = $this->createWirecardBasket();
+        $this->shopwareArrayEntity = $shopwareBasket;
+        $this->currency            = $currency;
+        $this->articles            = $articles;
+        $this->transaction         = $transaction;
+        $this->wirecardBasket      = $this->createWirecardBasket();
     }
 
     /**
@@ -98,7 +93,7 @@ class BasketMapper
      */
     public function getShopwareBasket()
     {
-        return $this->shopwareBasket;
+        return $this->shopwareArrayEntity;
     }
 
     /**
@@ -114,7 +109,7 @@ class BasketMapper
      */
     public function getContent()
     {
-        return $this->shopwareBasket['basket'];
+        return $this->getShopwareBasket()['basket'];
     }
 
     /**

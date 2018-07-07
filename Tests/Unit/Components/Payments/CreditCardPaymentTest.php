@@ -41,7 +41,7 @@ use WirecardShopwareElasticEngine\Tests\Unit\PaymentTestCase;
 class CreditCardPaymentTest extends PaymentTestCase
 {
     /** @var PaymentInterface */
-    protected $payment;
+    /*protected $payment;
 
     public function setUp()
     {
@@ -84,5 +84,5 @@ class CreditCardPaymentTest extends PaymentTestCase
             '3dsOnly'            => 300,
             '3dsAttempt'         => 100,
         ], $this->payment->getConfigData());
-    }
+    }*/
 }

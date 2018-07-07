@@ -115,8 +115,8 @@ class WirecardShopwareElasticEngine extends Plugin
     protected function getSupportedPayments()
     {
         return [
-            new CreditCardPayment(),
-            new PaypalPayment()
+            //new CreditCardPayment(),
+            //new PaypalPayment()
         ];
     }
 }

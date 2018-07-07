@@ -36,7 +36,7 @@ use Wirecard\PaymentSdk\Entity\Item;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Exception\InvalidBasketItemException;
 
-class BasketItemMapper
+class BasketItemMapper extends Mapper
 {
     const ITEM_ARTICLE_NAME = 'articlename';
     const ITEM_ORDER_NUMBER = 'ordernumber';
@@ -48,11 +48,6 @@ class BasketItemMapper
     const ITEM_TAX_RATE = 'tax_rate';
     const ITEM_QUANTITY = 'quantity';
     const ITEM_PRICE = 'price';
-
-    /**
-     * @var array
-     */
-    protected $shopwareItem;
 
     /**
      * @var Item
@@ -75,9 +70,9 @@ class BasketItemMapper
      */
     public function __construct(array $shopwareItem, $currency)
     {
-        $this->shopwareItem = $shopwareItem;
-        $this->currency     = $currency;
-        $this->wirecardItem = $this->createWirecardItem();
+        $this->shopwareArrayEntity = $shopwareItem;
+        $this->currency            = $currency;
+        $this->wirecardItem        = $this->createWirecardItem();
     }
 
     /**
@@ -85,7 +80,7 @@ class BasketItemMapper
      */
     public function getShopwareItem()
     {
-        return $this->shopwareItem;
+        return $this->shopwareArrayEntity;
     }
 
     /**
@@ -128,7 +123,7 @@ class BasketItemMapper
      */
     public function getAdditionalDetails()
     {
-        return $this->getKey(self::ITEM_ADDITIONAL_DETAILS, []);
+        return $this->getKey(self::ITEM_ADDITIONAL_DETAILS, false, []);
     }
 
     /**
@@ -192,27 +187,6 @@ class BasketItemMapper
         }
 
         return $price;
-    }
-
-    /**
-     * @param      $key
-     * @param null $default
-     *
-     * @return mixed|null
-     * @throws ArrayKeyNotFoundException
-     */
-    protected function getKey($key, $default = null)
-    {
-        $item = $this->getShopwareItem();
-        if (! isset($item[$key])) {
-            if ($default !== null) {
-                return $default;
-            }
-
-            throw new ArrayKeyNotFoundException($key, get_class($this));
-        }
-
-        return $item[$key];
     }
 
     /**

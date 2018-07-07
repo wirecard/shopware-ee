@@ -29,28 +29,37 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Payments;
+namespace WirecardShopwareElasticEngine\Components\Mapper;
 
-use Shopware\Components\Test\Plugin\TestCase;
-use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
-use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
-use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
+use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 
-class PaymentFactoryTest extends TestCase
+class Mapper
 {
     /**
-     * @var PaymentFactory
+     * @var array
      */
-    /*protected $factory;
+    protected $shopwareArrayEntity = [];
 
-    public function setUp()
+    /**
+     * @param        $key
+     * @param bool   $throwException
+     * @param null   $fallback
+     *
+     * @return mixed|null
+     * @throws ArrayKeyNotFoundException
+     */
+    protected function getKey($key, $throwException = true, $fallback = null)
     {
-        $this->factory = new PaymentFactory(Shopware()->Container());
+        $item = $this->shopwareArrayEntity;
+
+        if (! isset($item[$key])) {
+            if (! $throwException) {
+                return $fallback;
+            }
+
+            throw new ArrayKeyNotFoundException($key, get_class($this));
+        }
+
+        return $item[$key];
     }
-
-    public function testPaypalInstance()
-    {
-        $this->assertInstanceOf(PaypalPayment::class, $this->factory->create(PaypalPayment::PAYMETHOD_IDENTIFIER));
-        $this->assertInstanceOf(PaypalPayment::class, $this->factory->create(PayPalTransaction::NAME));
-    }*/
 }

@@ -174,7 +174,7 @@ class CreditCardPayment extends Payment
     /**
      * @inheritdoc
      */
-    public function getConfigData()
+    public function getPaymentConfig()
     {
         $baseUrl = Shopware()->Config()->getByNamespace(
             'WirecardShopwareElasticEngine',

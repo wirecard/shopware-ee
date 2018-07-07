@@ -50,6 +50,7 @@ use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\Reservable;
 use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Data\OrderDetails;
 use WirecardShopwareElasticEngine\Models\OrderTransaction;
 use WirecardShopwareElasticEngine\Models\Transaction;
 use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
@@ -180,43 +181,48 @@ abstract class Payment implements PaymentInterface
         return $transaction;
     }
 
+    public function processPayment(OrderDetails $orderDetails, TransactionService $transactionService)
+    {
+        // TODO: Implement processPayment() method.
+    }
+
     /**
      * @inheritdoc
      */
-    public function processPayment(array $paymentData)
-    {
-        $transaction = $this->createTransaction($paymentData);
-
-        $transactionService = new TransactionService($this->config, Shopware()->PluginLogger());
-
-        $response = null;
-        if ($this->configData['transactionType'] === self::TRANSACTION_TYPE_AUTHORIZATION
-            && $transaction instanceof Reservable) {
-            $response = $transactionService->reserve($transaction);
-        } elseif ($this->configData['transactionType'] === self::TRANSACTION_TYPE_PURCHASE) {
-            $response = $transactionService->pay($transaction);
-        }
-
-        if ($response instanceof InteractionResponse) {
-            return [
-                'status'   => 'success',
-                'redirect' => $response->getRedirectUrl()
-            ];
-        }
-
-        if ($response instanceof FailureResponse) {
-            $errors = '';
-
-            foreach ($response->getStatusCollection()->getIterator() as $item) {
-                /** @var $item Status */
-                $errors .= $item->getDescription() . "\n";
-            }
-
-            Shopware()->PluginLogger()->error($errors);
-        }
-
-        return ['status' => 'error'];
-    }
+//    public function processPayment()
+//    {
+//        $transaction = $this->createTransaction($paymentData);
+//
+//        $transactionService = new TransactionService($this->config, Shopware()->PluginLogger());
+//
+//        $response = null;
+//        if ($this->configData['transactionType'] === self::TRANSACTION_TYPE_AUTHORIZATION
+//            && $transaction instanceof Reservable) {
+//            $response = $transactionService->reserve($transaction);
+//        } elseif ($this->configData['transactionType'] === self::TRANSACTION_TYPE_PURCHASE) {
+//            $response = $transactionService->pay($transaction);
+//        }
+//
+//        if ($response instanceof InteractionResponse) {
+//            return [
+//                'status'   => 'success',
+//                'redirect' => $response->getRedirectUrl()
+//            ];
+//        }
+//
+//        if ($response instanceof FailureResponse) {
+//            $errors = '';
+//
+//            foreach ($response->getStatusCollection()->getIterator() as $item) {
+//                /** @var $item Status */
+//                $errors .= $item->getDescription() . "\n";
+//            }
+//
+//            Shopware()->PluginLogger()->error($errors);
+//        }
+//
+//        return ['status' => 'error'];
+//    }
 
     public function processJsResponse($params, $return)
     {
@@ -227,26 +233,6 @@ abstract class Payment implements PaymentInterface
         $transactionService = new TransactionService($config);
 
         return $transactionService->processJsResponse($params, $return);
-    }
-
-    /**
-     * get payment settings
-     *
-     * @return array
-     */
-    public function getConfigData()
-    {
-        return [
-            'baseUrl'         => '',
-            'httpUser'        => '',
-            'httpPass'        => '',
-            'transactionMAID' => '',
-            'transactionKey'  => '',
-            'transactionType' => '',
-            'sendBasket'      => false,
-            'fraudPrevention' => false,
-            'descriptor'      => ''
-        ];
     }
 
     /**
@@ -360,115 +346,6 @@ abstract class Payment implements PaymentInterface
         $transaction->setShipping($shippingUser);
 
         return $transaction;
-    }
-
-    /**
-     * creates paymentSDK basket object
-     *
-     * @param WirecardTransaction $transaction
-     * @param array $cart
-     * @param string $currency
-     * @return Basket
-     */
-    protected function createBasket(WirecardTransaction $transaction, array $cart, $currency)
-    {
-        $basket = new Basket();
-        $basket->setVersion($transaction);
-
-        if (isset($cart['content'])) {
-            foreach ($cart['content'] as $item) {
-                $name        = $item['articlename'];
-                $sku         = $item['ordernumber'];
-                $description = $item['additional_details']['description'];
-                $taxRate     = floatval($item['tax_rate']);
-                $quantity    = $item['quantity'];
-
-                if (isset($item['additional_details'])) {
-                    if (isset($item['additional_details']['prices'])
-                        && count($item['additional_details']['prices']) === 1) {
-                        $price = $item['additional_details']['prices'][0]['price_numeric'];
-                    } else {
-                        $price = $item['additional_details']['price_numeric'];
-                    }
-                } else {
-                    $amountStr = $item['price'];
-                    $price     = floatval(str_replace(',', '.', $amountStr));
-                }
-                $amount = new Amount($price, $currency);
-
-                $taxStr = $item['tax'];
-                $taxStr = str_replace(',', '.', $taxStr);
-                $tax    = new Amount(floatval($taxStr) / $quantity, $currency);
-
-                $basketItem = new Item($name, $amount, $quantity);
-
-                $basketItem->setDescription($description);
-                $basketItem->setArticleNumber($sku);
-                $basketItem->setTaxRate($taxRate);
-                $basketItem->setTaxAmount($tax);
-
-                $basket->add($basketItem);
-            }
-        }
-
-        if (isset($cart["sShippingcostsWithTax"]) && $cart["sShippingcostsWithTax"]) {
-            $shippingAmount = new Amount($cart["sShippingcostsWithTax"], $currency);
-            $basketItem = new Item('Shipping', $shippingAmount, 1);
-
-            $basketItem->setDescription('Shipping');
-            $basketItem->setArticleNumber('shipping');
-
-            $shippingTaxValue = $cart["sShippingcostsWithTax"] - $cart['sShippingcostsNet'];
-            $shippingTax = new Amount($shippingTaxValue, $currency);
-            $basketItem->setTaxAmount($shippingTax);
-            $basketItem->setTaxRate($cart["sShippingcostsTax"]);
-            $basket->add($basketItem);
-        }
-
-        return $basket;
-    }
-
-    /**
-     * creates text representing basket
-     *
-     * @param array $cart
-     * @param string $currency
-     * @return string
-     */
-    protected function createBasketText(array $cart, $currency)
-    {
-        $basketString = '';
-
-        foreach ($cart['content'] as $item) {
-            $name = $item['articlename'];
-            $sku = $item['ordernumber'];
-            $taxRate = floatval($item['tax_rate']);
-            $quantity = $item['quantity'];
-
-            if (isset($item['additional_details'])) {
-                if (isset($item['additional_details']['prices'])
-                    && count($item['additional_details']['prices']) === 1) {
-                    $price = $item['additional_details']['prices'][0]['price_numeric'];
-                } else {
-                    $price = $item['additional_details']['price_numeric'];
-                }
-            } else {
-                $amountStr = $item['price'];
-                $price = floatval(str_replace(',', '.', $amountStr));
-            }
-
-            $itemLine = $name . ' - ' . $sku . ' - ' . $price . ' ' . $currency . ' - ' .
-                      $quantity . ' - ' . $taxRate . '%';
-            $basketString .= $itemLine . "\n";
-        }
-
-        if (isset($cart["sShippingcostsWithTax"]) && $cart["sShippingcostsWithTax"]) {
-            $shippingLine = 'Shipping - shipping - ' . $cart["sShippingcostsWithTax"] . ' ' . $currency . ' - '
-                            . $cart["sShippingcostsTax"] . '%';
-            $basketString .= $shippingLine;
-        }
-
-        return $basketString;
     }
 
     /**
