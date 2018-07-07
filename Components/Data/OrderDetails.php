@@ -32,8 +32,8 @@
 namespace WirecardShopwareElasticEngine\Components\Data;
 
 use Wirecard\PaymentSdk\Entity\Amount;
-use Wirecard\PaymentSdk\Entity\Basket;
 use Wirecard\PaymentSdk\Entity\Redirect;
+use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 
 class OrderDetails
@@ -49,7 +49,7 @@ class OrderDetails
     protected $user;
 
     /**
-     * @var Basket
+     * @var BasketMapper
      */
     protected $basket;
 
@@ -76,25 +76,24 @@ class OrderDetails
     /**
      * OrderDetails constructor.
      *
-     * @param Payment                             $payment
-     * @param array                               $user
-     * @param Basket                              $basket
-     * @param Amount                              $amount
-     * @param Redirect                            $redirect
+     * @param Payment      $payment
+     * @param array        $user
+     * @param BasketMapper $basketMapper
+     * @param Amount       $amount
+     * @param Redirect     $redirect
      */
     public function __construct(
         Payment $payment,
         // TODO: UserMapper
         array $user,
-        // TODO: BasketMapper
-        Basket $basket,
+        BasketMapper $basketMapper,
         Amount $amount,
         Redirect $redirect
     ) {
         $this->payment   = $payment;
         $this->user      = $user;
         $this->amount    = $amount;
-        $this->basket    = $basket;
+        $this->basket    = $basketMapper;
         $this->redirect  = $redirect;
     }
 
@@ -107,9 +106,9 @@ class OrderDetails
     }
 
     /**
-     * @return Basket
+     * @return BasketMapper
      */
-    public function getBasket()
+    public function getBasketMapper()
     {
         return $this->basket;
     }
