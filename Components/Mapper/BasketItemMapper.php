@@ -178,7 +178,7 @@ class BasketItemMapper
      */
     public function getPrice()
     {
-        $price = floatval(str_replace(',', '.', $this->getShopwareItem()[self::ITEM_PRICE]));
+        $price = floatval(str_replace(',', '.', $this->getKey(self::ITEM_PRICE)));
 
         if ($this->hasAdditionalDetails()) {
             $additionalDetails = $this->getAdditionalDetails();
