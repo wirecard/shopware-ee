@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Services;
+namespace WirecardShopwareElasticEngine\Components\Mapper;
 
 use Wirecard\PaymentSdk\Entity\Basket;
 use Wirecard\PaymentSdk\Transaction\Transaction;
