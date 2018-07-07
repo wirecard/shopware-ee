@@ -35,6 +35,7 @@ use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Data\OrderDetails;
+use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
 interface PaymentInterface
@@ -129,9 +130,9 @@ interface PaymentInterface
     public function getTransactionConfig();
 
     /**
-     * Returns payment specific configuration
+     * Returns payment specific configuration.
      *
-     * @return array
+     * @return PaymentConfig
      */
     public function getPaymentConfig();
 }
