@@ -33,6 +33,7 @@ namespace WirecardShopwareElasticEngine\Components\Mapper;
 
 use Wirecard\PaymentSdk\Entity\Basket;
 use Wirecard\PaymentSdk\Transaction\Transaction;
+use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Exception\InvalidBasketException;
 use WirecardShopwareElasticEngine\Exception\InvalidBasketItemException;
 
@@ -81,6 +82,7 @@ class BasketMapper
      *
      * @throws InvalidBasketException
      * @throws InvalidBasketItemException
+     * @throws ArrayKeyNotFoundException
      */
     public function __construct(array $shopwareBasket, $currency, \sArticles $articles, Transaction $transaction)
     {
@@ -118,6 +120,7 @@ class BasketMapper
     /**
      * @return string
      * @throws InvalidBasketItemException
+     * @throws ArrayKeyNotFoundException
      */
     public function getBasketText()
     {
@@ -151,6 +154,7 @@ class BasketMapper
      * @return Basket
      * @throws InvalidBasketException
      * @throws InvalidBasketItemException
+     * @throws ArrayKeyNotFoundException
      */
     protected function createWirecardBasket()
     {
@@ -175,6 +179,7 @@ class BasketMapper
      *
      * @return bool
      * @throws InvalidBasketItemException
+     * @throws ArrayKeyNotFoundException
      */
     private function validateBasket()
     {
