@@ -37,7 +37,7 @@ use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Exception\InvalidBasketException;
 use WirecardShopwareElasticEngine\Exception\InvalidBasketItemException;
 
-class BasketMapper extends Mapper
+class BasketMapper extends ArrayMapper
 {
     const BASKET_CONTENT = 'content';
     const ARTICLE_QUANTITY = 'quantity';
@@ -81,11 +81,11 @@ class BasketMapper extends Mapper
      */
     public function __construct(array $shopwareBasket, $currency, \sArticles $articles, Transaction $transaction)
     {
-        $this->shopwareArrayEntity = $shopwareBasket;
-        $this->currency            = $currency;
-        $this->articles            = $articles;
-        $this->transaction         = $transaction;
-        $this->wirecardBasket      = $this->createWirecardBasket();
+        $this->arrayEntity    = $shopwareBasket;
+        $this->currency       = $currency;
+        $this->articles       = $articles;
+        $this->transaction    = $transaction;
+        $this->wirecardBasket = $this->createWirecardBasket();
     }
 
     /**
@@ -93,7 +93,7 @@ class BasketMapper extends Mapper
      */
     public function getShopwareBasket()
     {
-        return $this->shopwareArrayEntity;
+        return $this->arrayEntity;
     }
 
     /**
@@ -106,10 +106,11 @@ class BasketMapper extends Mapper
 
     /**
      * @return array
+     * @throws ArrayKeyNotFoundException
      */
-    public function getContent()
+    protected function getShopwareBasketContent()
     {
-        return $this->getShopwareBasket()['basket'];
+        return $this->get(self::BASKET_CONTENT);
     }
 
     /**
@@ -123,7 +124,7 @@ class BasketMapper extends Mapper
         $currency     = $this->currency;
         $basketString = '';
 
-        foreach ($this->getContent() as $item) {
+        foreach ($this->getShopwareBasketContent() as $item) {
             $basketItem = new BasketItemMapper($item, $currency);
 
             $name        = $basketItem->getArticleName();
@@ -161,7 +162,7 @@ class BasketMapper extends Mapper
 
         $basket->setVersion($this->transaction);
 
-        foreach ($this->getContent() as $item) {
+        foreach ($this->getShopwareBasketContent() as $item) {
             $basketItem = new BasketItemMapper($item, $this->currency);
             $basket->add($basketItem->getWirecardItem());
         }

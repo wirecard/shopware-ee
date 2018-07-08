@@ -36,7 +36,7 @@ use Wirecard\PaymentSdk\Entity\Item;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Exception\InvalidBasketItemException;
 
-class BasketItemMapper extends Mapper
+class BasketItemMapper extends ArrayMapper
 {
     const ITEM_ARTICLE_NAME = 'articlename';
     const ITEM_ORDER_NUMBER = 'ordernumber';
@@ -70,9 +70,9 @@ class BasketItemMapper extends Mapper
      */
     public function __construct(array $shopwareItem, $currency)
     {
-        $this->shopwareArrayEntity = $shopwareItem;
-        $this->currency            = $currency;
-        $this->wirecardItem        = $this->createWirecardItem();
+        $this->arrayEntity  = $shopwareItem;
+        $this->currency     = $currency;
+        $this->wirecardItem = $this->createWirecardItem();
     }
 
     /**
@@ -80,7 +80,7 @@ class BasketItemMapper extends Mapper
      */
     public function getShopwareItem()
     {
-        return $this->shopwareArrayEntity;
+        return $this->arrayEntity;
     }
 
     /**
@@ -97,7 +97,7 @@ class BasketItemMapper extends Mapper
      */
     public function getArticleName()
     {
-        return $this->getKey(self::ITEM_ARTICLE_NAME);
+        return $this->get(self::ITEM_ARTICLE_NAME);
     }
 
     /**
@@ -106,7 +106,7 @@ class BasketItemMapper extends Mapper
      */
     public function getOrderNumber()
     {
-        return $this->getKey(self::ITEM_ORDER_NUMBER);
+        return $this->get(self::ITEM_ORDER_NUMBER);
     }
 
     /**
@@ -114,16 +114,15 @@ class BasketItemMapper extends Mapper
      */
     public function hasAdditionalDetails()
     {
-        return isset($this->getShopwareItem()[self::ITEM_ADDITIONAL_DETAILS]);
+        return $this->has(self::ITEM_ADDITIONAL_DETAILS);
     }
 
     /**
      * @return array
-     * @throws ArrayKeyNotFoundException
      */
     public function getAdditionalDetails()
     {
-        return $this->getKey(self::ITEM_ADDITIONAL_DETAILS, false, []);
+        return $this->getOptional(self::ITEM_ADDITIONAL_DETAILS, []);
     }
 
     /**
@@ -132,7 +131,7 @@ class BasketItemMapper extends Mapper
      */
     public function getTaxRate()
     {
-        return $this->getKey(self::ITEM_TAX_RATE);
+        return $this->get(self::ITEM_TAX_RATE);
     }
 
     /**
@@ -141,7 +140,7 @@ class BasketItemMapper extends Mapper
      */
     public function getTax()
     {
-        return $this->getKey(self::ITEM_TAX);
+        return $this->get(self::ITEM_TAX);
     }
 
     /**
@@ -150,12 +149,11 @@ class BasketItemMapper extends Mapper
      */
     public function getQuantity()
     {
-        return $this->getKey(self::ITEM_QUANTITY);
+        return $this->get(self::ITEM_QUANTITY);
     }
 
     /**
      * @return string
-     * @throws ArrayKeyNotFoundException
      */
     public function getDescription()
     {
@@ -173,7 +171,7 @@ class BasketItemMapper extends Mapper
      */
     public function getPrice()
     {
-        $price = floatval(str_replace(',', '.', $this->getKey(self::ITEM_PRICE)));
+        $price = floatval(str_replace(',', '.', $this->get(self::ITEM_PRICE)));
 
         if ($this->hasAdditionalDetails()) {
             $additionalDetails = $this->getAdditionalDetails();
