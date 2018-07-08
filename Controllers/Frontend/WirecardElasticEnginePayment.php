@@ -132,6 +132,13 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $response = $handler->execute();
     }
 
+    /**
+     * @param $action
+     * @param $method
+     *
+     * @return mixed
+     * @throws Exception
+     */
     private function getRedirectRoute($action, $method)
     {
         return $this->get('router')->assemble([

@@ -126,16 +126,5 @@ class PaypalPayment extends Payment
         $transaction = $this->getTransaction();
 
         $transaction->setOrderDetail($orderSummary->getBasketMapper()->getBasketText());
-
-        if ($this->getPaymentConfig()->hasFraudPrevention()) {
-            $transaction->setIpAddress($orderSummary->getRequest()->getClientIp());
-            $transaction->setAccountHolder($orderSummary->getUserMapper()->getWirecardBillingAccountHolder());
-            $transaction->setShipping($orderSummary->getUserMapper()->getWirecardShippingAccountHolder());
-            $transaction->setLocale($orderSummary->getUserMapper()->getLocale());
-        }
-
-        if ($this->getPaymentConfig()->sendDescriptor()) {
-            // ...
-        }
     }
 }

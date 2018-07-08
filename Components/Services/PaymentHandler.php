@@ -31,10 +31,13 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Wirecard\PaymentSdk\Transaction\Transaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
+use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 
 class PaymentHandler
 {
@@ -59,13 +62,30 @@ class PaymentHandler
     protected $logger;
 
     /**
-     * @param LoggerInterface $logger
+     * @var \Shopware_Components_Config
      */
-    public function __construct(LoggerInterface $logger)
+    protected $config;
+
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $em;
+
+    /**
+     * @param \Shopware_Components_Config $config
+     * @param EntityManagerInterface      $em
+     * @param LoggerInterface             $logger
+     */
+    public function __construct(\Shopware_Components_Config $config, EntityManagerInterface $em, LoggerInterface $logger)
     {
+        $this->config = $config;
+        $this->em     = $em;
         $this->logger = $logger;
     }
 
+    /**
+     * @throws ArrayKeyNotFoundException
+     */
     public function execute()
     {
         $transaction  = $this->getPayment()->getTransaction();
@@ -86,7 +106,11 @@ class PaymentHandler
             $transaction->setLocale($orderSummary->getUserMapper()->getLocale());
         }
 
-        $this->getPayment()->processPayment($orderSummary, $this->getTransactionService());
+        if ($this->getPayment()->getPaymentConfig()->sendDescriptor()) {
+            $transaction->setDescriptor($this->getDescriptor(null));
+        }
+
+        $this->getPayment()->processPayment($this->getOrderSummary(), $this->getTransactionService());
     }
 
     /**
@@ -135,5 +159,18 @@ class PaymentHandler
     public function getTransactionService()
     {
         return $this->transactionService;
+    }
+
+    /**
+     * Returns the descriptor sent to Wirecard. Change to your own needs.
+     *
+     * @param $orderNumber
+     *
+     * @return string
+     */
+    public function getDescriptor($orderNumber)
+    {
+        $shopName = $this->config->get('shopName');
+        return "${shopName} ${orderNumber}";
     }
 }
