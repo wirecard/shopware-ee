@@ -31,10 +31,6 @@
 
 namespace WirecardShopwareElasticEngine\Exception;
 
-class InvalidBasketException extends BasketException
+class BasketException extends \Exception
 {
-    public function __construct(array $basket)
-    {
-        parent::__construct("Invalid basket");
-    }
 }

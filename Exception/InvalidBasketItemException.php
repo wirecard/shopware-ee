@@ -31,7 +31,7 @@
 
 namespace WirecardShopwareElasticEngine\Exception;
 
-class InvalidBasketItemException extends \Exception
+class InvalidBasketItemException extends BasketException
 {
     public function __construct(array $item)
     {

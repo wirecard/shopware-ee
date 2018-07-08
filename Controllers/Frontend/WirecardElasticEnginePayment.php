@@ -53,8 +53,7 @@ use WirecardShopwareElasticEngine\Components\StatusCodes;
 use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
-use WirecardShopwareElasticEngine\Exception\InvalidBasketException;
-use WirecardShopwareElasticEngine\Exception\InvalidBasketItemException;
+use WirecardShopwareElasticEngine\Exception\BasketException;
 use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 use WirecardShopwareElasticEngine\Models\OrderTransaction;
@@ -83,6 +82,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * `PaymentHandler` service. Further action depends on the response from the handler.
      *
      * @throws UnknownPaymentException
+     * @throws ArrayKeyNotFoundException
      */
     public function gatewayAction()
     {
@@ -111,14 +111,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     $this->getRedirectRoute('failure', $payment->getName())
                 )
             );
-        } catch (\Exception $e) {
-            if ($e instanceof InvalidBasketException || $e instanceof InvalidBasketItemException) {
-                return $this->redirect([
-                    'controller'                          => 'checkout',
-                    'action'                              => 'cart',
-                    'wirecard_elastic_engine_update_cart' => 'true',
-                ]);
-            }
+        } catch (BasketException $e) {
+            return $this->redirect([
+                'controller'                          => 'checkout',
+                'action'                              => 'cart',
+                'wirecard_elastic_engine_update_cart' => 'true',
+            ]);
         }
 
         /** @var PaymentHandler $handler */
