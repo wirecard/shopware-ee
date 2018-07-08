@@ -82,9 +82,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * Gets payment from `PaymentFactory`, assembles the `OrderSummary` and executes the payment through the
      * `PaymentHandler` service. Further action depends on the response from the handler.
      *
-     * @throws ArrayKeyNotFoundException
-     * @throws InvalidBasketException
-     * @throws InvalidBasketItemException
      * @throws UnknownPaymentException
      */
     public function gatewayAction()
@@ -93,26 +90,36 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
         $payment        = $paymentFactory->create($this->getPaymentShortName());
 
-        $orderSummary = new OrderSummary(
-            $payment,
-            new UserMapper(
-                $this->getUser(),
-                $this->get('request')->getClientIp(),
-                $this->get('shopware_storefront.context_service')->getLocale()->getLocale()
-            ),
-            new BasketMapper(
-                $this->getBasket(),
-                $this->getCurrencyShortName(),
-                $this->get('shopware.api.article'),
-                $payment->getTransaction()
-            ),
-            new Amount($this->getAmount(), $this->getCurrencyShortName()),
-            new Redirect(
-                $this->getRedirectRoute('return', $payment->getName()),
-                $this->getRedirectRoute('cancel', $payment->getName()),
-                $this->getRedirectRoute('failure', $payment->getName())
-            )
-        );
+        try {
+            $orderSummary = new OrderSummary(
+                $payment,
+                new UserMapper(
+                    $this->getUser(),
+                    $this->get('request')->getClientIp(),
+                    $this->get('shopware_storefront.context_service')->getLocale()->getLocale()
+                ),
+                new BasketMapper(
+                    $this->getBasket(),
+                    $this->getCurrencyShortName(),
+                    $this->get('shopware.api.article'),
+                    $payment->getTransaction()
+                ),
+                new Amount($this->getAmount(), $this->getCurrencyShortName()),
+                new Redirect(
+                    $this->getRedirectRoute('return', $payment->getName()),
+                    $this->getRedirectRoute('cancel', $payment->getName()),
+                    $this->getRedirectRoute('failure', $payment->getName())
+                )
+            );
+        } catch (\Exception $e) {
+            if ($e instanceof InvalidBasketException || $e instanceof InvalidBasketItemException) {
+                return $this->redirect([
+                    'controller'                          => 'checkout',
+                    'action'                              => 'cart',
+                    'wirecard_elastic_engine_update_cart' => 'true',
+                ]);
+            }
+        }
 
         /** @var PaymentHandler $handler */
         $handler = $this->get('wirecard_elastic_engine.payment_handler');
