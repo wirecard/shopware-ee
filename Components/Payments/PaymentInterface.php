@@ -79,14 +79,6 @@ interface PaymentInterface
     public function processPayment(OrderDetails $orderDetails, TransactionService $transactionService);
 
     /**
-     * Creates Transaction entry and returns it
-     *
-     * @params string $basketSignature
-     * @return Transaction
-     */
-    public function createElasticEngineTransaction($basketSignature = null);
-
-    /**
      * @param array $request
      * @return Response
      */

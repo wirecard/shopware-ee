@@ -33,7 +33,9 @@ namespace WirecardShopwareElasticEngine\Components\Payments;
 
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
-use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
+use Wirecard\PaymentSdk\Transaction\Transaction;
+use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Data\OrderDetails;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
 
 class PaypalPayment extends Payment
@@ -126,17 +128,16 @@ class PaypalPayment extends Payment
         return $paymentConfig;
     }
 
-    /**
-     * @inheritdoc
-     */
-    protected function addPaymentSpecificData(WirecardTransaction $transaction, array $paymentData, array $configData)
+    public function processPayment(OrderDetails $orderDetails, TransactionService $transactionService)
     {
-        $orderDetail = $this->createBasketText($paymentData['basket'], $paymentData['currency']);
+        $transaction = $this->getTransaction();
 
-        if ($transaction instanceof PayPalTransaction) {
-            $transaction->setOrderDetail($orderDetail);
-        }
+        $transaction->setRedirect($orderDetails->getRedirect());
+        $transaction->setAmount($orderDetails->getAmount());
+        $transaction->setNotificationUrl(null);
+        $transaction->setAccountHolder($orderDetails->getUserMapper()->getWirecardBillingAccountHolder());
+        $transaction->setShipping($orderDetails->getUserMapper()->getWirecardShippingAccountHolder());
 
-        return $transaction;
+        $transaction->setOrderDetail($orderDetails->getBasketMapper()->getBasketText());
     }
 }

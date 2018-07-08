@@ -68,6 +68,7 @@ class PaymentHandler
 
     public function execute()
     {
+        $this->getPayment()->processPayment($this->getOrderDetails(), $this->getTransactionService());
     }
 
     /**

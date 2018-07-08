@@ -32,21 +32,30 @@
 use Doctrine\DBAL\DBALException;
 
 use Shopware\Components\CSRFWhitelistAware;
+use Shopware\Components\Routing\Router;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 
+use Wirecard\PaymentSdk\Entity\Amount;
+use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
 
 use WirecardShopwareElasticEngine\Components\Data\OrderDetails;
+use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
+use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
 use WirecardShopwareElasticEngine\Components\Services\PaymentHandler;
 use WirecardShopwareElasticEngine\Components\StatusCodes;
 use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
+use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
+use WirecardShopwareElasticEngine\Exception\InvalidBasketException;
+use WirecardShopwareElasticEngine\Exception\InvalidBasketItemException;
+use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 use WirecardShopwareElasticEngine\Models\OrderTransaction;
 
@@ -57,8 +66,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 {
     // @codingStandardsIgnoreEnd
 
+    const ROUTER_ACTION = 'action';
+    const ROUTER_METHOD = 'method';
+    const ROUTER_FORCE_SECURE = 'forceSecure';
+
     /**
-     * Forward to Wirecard Gateway
+     * Forward to Wirecard Gateway.
      */
     public function indexAction()
     {
@@ -66,7 +79,13 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     }
 
     /**
-     * Gateway to Wirecard
+     * Gets payment from `PaymentFactory`, assembles `OrderDetails` and executes the payment through the
+     * `PaymentHandler` service. Further action depends on the response from the handler.
+     *
+     * @throws ArrayKeyNotFoundException
+     * @throws InvalidBasketException
+     * @throws InvalidBasketItemException
+     * @throws UnknownPaymentException
      */
     public function gatewayAction()
     {
@@ -74,15 +93,23 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
         $payment        = $paymentFactory->create($this->getPaymentShortName());
 
-        $orderDetails    = $this->getPaymentData();
-
-        if (! $orderDetails->validateBasket()) {
-            return $this->redirect([
-                'controller'                          => 'checkout',
-                'action'                              => 'cart',
-                'wirecard_elastic_engine_update_cart' => 'true',
-            ]);
-        }
+        $orderDetails = new OrderDetails(
+            $payment,
+            new UserMapper($this->getUser()),
+            new BasketMapper(
+                $this->getBasket(),
+                $this->getCurrencyShortName(),
+                $this->get('shopware.api.article'),
+                $payment->getTransaction()
+            ),
+            new Amount($this->getAmount(), $this->getCurrencyShortName()),
+            new Redirect(
+                $this->getRedirectRoute('return', $payment->getName()),
+                $this->getRedirectRoute('cancel', $payment->getName()),
+                $this->getRedirectRoute('failure', $payment->getName())
+            ),
+            $this->get('request')
+        );
 
         /** @var PaymentHandler $handler */
         $handler = $this->get('wirecard_elastic_engine.payment_handler');
@@ -91,8 +118,16 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             new TransactionService($payment->getTransactionConfig(), $this->get('pluginlogger'))
         );
 
-        $status = $handler->execute();
+        $response = $handler->execute();
+    }
 
+    private function getRedirectRoute($action, $method)
+    {
+        return $this->get('router')->assemble([
+            self::ROUTER_ACTION       => $action,
+            self::ROUTER_METHOD       => $method,
+            self::ROUTER_FORCE_SECURE => true,
+        ]);
     }
 
     /**
@@ -101,25 +136,25 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function paypalAction()
     {
-//        if (!$this->validateBasket()) {
-//            return $this->redirect([
-//                'controller'                          => 'checkout',
-//                'action'                              => 'cart',
-//                'wirecard_elastic_engine_update_cart' => 'true',
-//            ]);
-//        }
-//
-//        $paymentData = $this->getPaymentData(PaypalPayment::PAYMETHOD_IDENTIFIER);
-//
-//        $paypal = new PaypalPayment();
-//
-//        $paymentProcess = $paypal->processPayment($paymentData);
-//
-//        if ($paymentProcess['status'] === 'success') {
-//            return $this->redirect($paymentProcess['redirect']);
-//        }
-//
-//        return $this->errorHandling(StatusCodes::ERROR_STARTING_PROCESS_FAILED);
+        //        if (!$this->validateBasket()) {
+        //            return $this->redirect([
+        //                'controller'                          => 'checkout',
+        //                'action'                              => 'cart',
+        //                'wirecard_elastic_engine_update_cart' => 'true',
+        //            ]);
+        //        }
+        //
+        //        $paymentData = $this->getPaymentData(PaypalPayment::PAYMETHOD_IDENTIFIER);
+        //
+        //        $paypal = new PaypalPayment();
+        //
+        //        $paymentProcess = $paypal->processPayment($paymentData);
+        //
+        //        if ($paymentProcess['status'] === 'success') {
+        //            return $this->redirect($paymentProcess['redirect']);
+        //        }
+        //
+        //        return $this->errorHandling(StatusCodes::ERROR_STARTING_PROCESS_FAILED);
     }
 
     /**
@@ -130,18 +165,18 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     {
         $params = $this->Request()->getParams();
 
-        if (!empty($params['parent_transaction_id']) &&
-            !empty($params['token_id'])) {
-            if (!empty($params['jsresponse']) && $params['jsresponse']) {
-                $router   = $this->Front()->Router();
+        if (! empty($params['parent_transaction_id'])
+            && ! empty($params['token_id'])) {
+            if (! empty($params['jsresponse']) && $params['jsresponse']) {
+                $router     = $this->Front()->Router();
                 $creditCard = new CreditCardPayment();
 
                 $response = $creditCard->processJsResponse(
                     $params,
                     $router->assemble([
-                        'action' => 'return',
-                        'method' => CreditCardPayment::PAYMETHOD_IDENTIFIER,
-                        'forceSecure' => true
+                        'action'      => 'return',
+                        'method'      => CreditCardPayment::PAYMETHOD_IDENTIFIER,
+                        'forceSecure' => true,
                     ])
                 );
 
@@ -156,25 +191,25 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 }
 
                 if ($status['type'] === 'success') {
-                    if (!empty($status['uniqueId'])) {
+                    if (! empty($status['uniqueId'])) {
                         $this->redirect([
                             'module'     => 'frontend',
                             'controller' => 'checkout',
                             'action'     => 'finish',
-                            'sUniqueID'  => $status['uniqueId']
+                            'sUniqueID'  => $status['uniqueId'],
                         ]);
                     } else {
                         $this->redirect([
                             'module'     => 'frontend',
                             'controller' => 'checkout',
-                            'action'     => 'finish'
+                            'action'     => 'finish',
                         ]);
                     }
                     return;
                 }
 
                 if ($status['type'] === 'error') {
-                    if (!empty($status['msg'])) {
+                    if (! empty($status['msg'])) {
                         $this->errorHandling($status['code'], $status['msg']);
                     } else {
                         $this->errorHandling($status['code']);
@@ -184,7 +219,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             }
         }
 
-        if (!$this->validateBasket()) {
+        if (! $this->validateBasket()) {
             return $this->redirect([
                 'controller'                          => 'checkout',
                 'action'                              => 'cart',
@@ -200,12 +235,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $this->View()->assign('wirecardUrl', $baseUrl);
 
         $paymentData = $this->getPaymentData(CreditCardPayment::PAYMETHOD_IDENTIFIER);
-        $creditCard = new CreditCardPayment();
+        $creditCard  = new CreditCardPayment();
         $requestData = $creditCard->getRequestDataForIframe($paymentData);
         $this->View()->assign('wirecardRequestData', $requestData);
         $rawRequestData = json_decode($requestData, true);
-        $requestId = $rawRequestData[TransactionService::REQUEST_ID];
-        if (!$creditCard->addTransactionRequestId($requestId)) {
+        $requestId      = $rawRequestData[TransactionService::REQUEST_ID];
+        if (! $creditCard->addTransactionRequestId($requestId)) {
             return $this->errorHandling(StatusCodes::ERROR_STARTING_PROCESS_FAILED);
         }
     }
@@ -221,20 +256,20 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     {
         $request = $this->Request()->getParams();
 
-        if (!isset($request['method'])) {
+        if (! isset($request['method'])) {
             return $this->errorHandling(StatusCodes::ERROR_NOT_A_VALID_METHOD);
         }
 
         $response = null;
         if ($request['method'] === PaypalPayment::PAYMETHOD_IDENTIFIER) {
-            $paypal = new PaypalPayment();
+            $paypal   = new PaypalPayment();
             $response = $paypal->getPaymentResponse($request);
         } elseif ($request['method'] === CreditCardPayment::PAYMETHOD_IDENTIFIER) {
             $creditCard = new CreditCardPayment();
-            $response = $creditCard->getPaymentResponse($request);
+            $response   = $creditCard->getPaymentResponse($request);
         }
 
-        if (!$response) {
+        if (! $response) {
             return $this->errorHandling(StatusCodes::ERROR_NOT_A_VALID_METHOD);
         }
 
@@ -254,7 +289,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                                                   ->getRepository(Transaction::class)
                                                   ->findOneBy(['id' => $wirecardOrderNumber]);
 
-            if (!$elasticEngineTransaction) {
+            if (! $elasticEngineTransaction) {
                 return $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER);
             }
 
@@ -264,9 +299,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $paymentStatus = intval($elasticEngineTransaction->getPaymentStatus());
 
             $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
-                              ->findOneBy(['transactionId' => $transactionId, 'parentTransactionId' => $transactionId]);
+                                          ->findOneBy([
+                                              'transactionId'       => $transactionId,
+                                              'parentTransactionId' => $transactionId,
+                                          ]);
 
-            if (!$orderTransaction) {
+            if (! $orderTransaction) {
                 $orderTransaction = new OrderTransaction();
                 $orderTransaction->setParentTransactionId($transactionId);
                 $orderTransaction->setTransactionId($transactionId);
@@ -276,7 +314,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
             $orderTransaction->setReturnResponse(serialize($response->getData()));
 
-            if (!$signature) {
+            if (! $signature) {
                 $signature = $elasticEngineTransaction->getBasketSignature();
             }
 
@@ -296,17 +334,17 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 } catch (DBALException $e) {
                     $this->container->get('pluginlogger')->info('duplicate entry on OrderTransaction');
                     $em = $this->container->get('models');
-                    if (!$em->isOpen()) {
+                    if (! $em->isOpen()) {
                         $em = $em->create(
                             $em->getConnection(),
                             $em->getConfiguration()
                         );
                     }
                     $orderTransaction = $em->getRepository(OrderTransaction::class)
-                                      ->findOneBy([
-                                          'transactionId' => $transactionId,
-                                          'parentTransactionId' => $transactionId
-                                      ]);
+                                           ->findOneBy([
+                                               'transactionId'       => $transactionId,
+                                               'parentTransactionId' => $transactionId,
+                                           ]);
                     if ($orderTransaction) {
                         $em->setReturnResponse(serialize($response->getData()));
                         $em->flush();
@@ -336,13 +374,13 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $orderTransaction->setOrderNumber($orderNumber);
                 Shopware()->Models()->flush();
                 try {
-                    if (!$orderTransaction->getId()) {
+                    if (! $orderTransaction->getId()) {
                         Shopware()->Models()->persist($orderTransaction);
                         Shopware()->Models()->flush();
                     }
                 } catch (DBALException $e) {
                     $em = $this->container->get('models');
-                    if (!$em->isOpen()) {
+                    if (! $em->isOpen()) {
                         $em = $em->create(
                             $em->getConnection(),
                             $em->getConfiguration()
@@ -350,10 +388,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     }
                     $this->container->get('pluginlogger')->info('duplicate entry on OrderTransaction');
                     $orderTransaction = $em->getRepository(OrderTransaction::class)
-                                      ->findOneBy([
-                                          'transactionId' => $transactionId,
-                                          'parentTransactionId' => $transactionId
-                                      ]);
+                                           ->findOneBy([
+                                               'transactionId'       => $transactionId,
+                                               'parentTransactionId' => $transactionId,
+                                           ]);
                     if ($orderTransaction) {
                         $orderTransaction->setReturnResponse(serialize($response->getData()));
                         $em->flush();
@@ -409,7 +447,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 'type'       => 'form',
                 'method'     => $response->getMethod(),
                 'formFields' => $response->getFormFields(),
-                'url'        => $response->getUrl()
+                'url'        => $response->getUrl(),
             ];
         } elseif ($response instanceof SuccessResponse) {
             $customFields          = $response->getCustomFields();
@@ -429,16 +467,16 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                                                       ->getRepository(Transaction::class)
                                                       ->findOneBy(['id' => $wirecardOrderNumber]);
             } catch (\Exception $e) {
-                $requestId = $response->getRequestId();
+                $requestId                = $response->getRequestId();
                 $elasticEngineTransaction = Shopware()->Models()
                                                       ->getRepository(Transaction::class)
                                                       ->findOneBy(['requestId' => $requestId]);
             }
 
-            if (!$elasticEngineTransaction) {
+            if (! $elasticEngineTransaction) {
                 return [
                     'type' => 'error',
-                    'code' => StatusCodes::ERROR_CRITICAL_NO_ORDER
+                    'code' => StatusCodes::ERROR_CRITICAL_NO_ORDER,
                 ];
             }
 
@@ -448,9 +486,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $paymentStatus = intval($elasticEngineTransaction->getPaymentStatus());
 
             $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
-                              ->findOneBy(['transactionId' => $transactionId, 'parentTransactionId' => $transactionId]);
+                                          ->findOneBy([
+                                              'transactionId'       => $transactionId,
+                                              'parentTransactionId' => $transactionId,
+                                          ]);
 
-            if (!$orderTransaction) {
+            if (! $orderTransaction) {
                 $orderTransaction = new OrderTransaction();
                 $orderTransaction->setParentTransactionId($transactionId);
                 $orderTransaction->setTransactionId($transactionId);
@@ -460,7 +501,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
             $orderTransaction->setReturnResponse(serialize($response->getData()));
 
-            if (!$signature) {
+            if (! $signature) {
                 $signature = $elasticEngineTransaction->getBasketSignature();
             }
 
@@ -482,17 +523,17 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 } catch (DBALException $e) {
                     $this->container->get('pluginlogger')->info('duplicate entry on OrderTransaction');
                     $em = $this->container->get('models');
-                    if (!$em->isOpen()) {
+                    if (! $em->isOpen()) {
                         $em = $em->create(
                             $em->getConnection(),
                             $em->getConfiguration()
                         );
                     }
                     $orderTransaction = $em->getRepository(OrderTransaction::class)
-                                      ->findOneBy([
-                                          'transactionId' => $transactionId,
-                                          'parentTransactionId' => $transactionId
-                                      ]);
+                                           ->findOneBy([
+                                               'transactionId'       => $transactionId,
+                                               'parentTransactionId' => $transactionId,
+                                           ]);
                     if ($orderTransaction) {
                         $orderTransaction->setReturnResponse(serialize($response->getData()));
                         $em->flush();
@@ -502,8 +543,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     }
                 }
                 return [
-                    'type'   => 'success',
-                    'uniqueId' => $transactionId
+                    'type'     => 'success',
+                    'uniqueId' => $transactionId,
                 ];
             }
 
@@ -521,13 +562,13 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 Shopware()->Models()->flush();
 
                 try {
-                    if (!$orderTransaction->getId()) {
+                    if (! $orderTransaction->getId()) {
                         Shopware()->Models()->persist($orderTransaction);
                         Shopware()->Models()->flush();
                     }
                 } catch (DBALException $e) {
                     $em = $this->container->get('models');
-                    if (!$em->isOpen()) {
+                    if (! $em->isOpen()) {
                         $em = $em->create(
                             $em->getConnection(),
                             $em->getConfiguration()
@@ -536,10 +577,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     $this->container->get('pluginlogger')->info('duplicate entry on OrderTransaction');
 
                     $orderTransaction = $em->getRepository(OrderTransaction::class)
-                                      ->findOneBy([
-                                          'transactionId' => $transactionId,
-                                          'parentTransactionId' => $transactionId
-                                      ]);
+                                           ->findOneBy([
+                                               'transactionId'       => $transactionId,
+                                               'parentTransactionId' => $transactionId,
+                                           ]);
                     if ($orderTransaction) {
                         $orderTransaction->setOrderNumber($orderNumber);
                         $orderTransaction->setReturnResponse(serialize($response->getData()));
@@ -550,13 +591,13 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     }
                 }
 
-                return [ 'type' => 'success' ];
+                return ['type' => 'success'];
             } catch (RuntimeException $e) {
                 $this->container->get('pluginlogger')->error($e->getMessage());
                 return [
                     'type' => 'error',
                     'code' => StatusCodes::ERROR_CRITICAL_NO_ORDER,
-                    'msg'  => $e->getMessage()
+                    'msg'  => $e->getMessage(),
                 ];
             }
         } elseif ($response instanceof FailureResponse) {
@@ -583,14 +624,14 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             return [
                 'type' => 'error',
                 'code' => StatusCodes::ERROR_CRITICAL_NO_ORDER,
-                'msg'  => $errorMessages
+                'msg'  => $errorMessages,
             ];
         }
 
         return [
             'type' => 'error',
             'code' => StatusCodes::ERROR_FAILURE_RESPONSE,
-            'msg'  => ''
+            'msg'  => '',
         ];
     }
 
@@ -604,9 +645,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
     /**
      * This method handles errors.
+     *
      * @see StatusCodes
      *
-     * @param int $code
+     * @param int    $code
      * @param string $message
      */
     protected function errorHandling($code, $message = "")
@@ -626,7 +668,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function notifyAction()
     {
-        $request = $this->Request()->getParams();
+        $request      = $this->Request()->getParams();
         $notification = file_get_contents("php://input");
 
         $this->container->get('pluginlogger')->info("Notification: " . $notification);
@@ -634,21 +676,21 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $response = null;
 
         if ($request['method'] === PaypalPayment::PAYMETHOD_IDENTIFIER) {
-            $paypal = new PaypalPayment();
+            $paypal   = new PaypalPayment();
             $response = $paypal->getPaymentNotification($notification);
         } elseif ($request['method'] === CreditCardPayment::PAYMETHOD_IDENTIFIER) {
             $creditCard = new CreditCardPayment();
-            $response = $creditCard->getPaymentNotification($notification);
+            $response   = $creditCard->getPaymentNotification($notification);
         }
 
-        if (!$response) {
+        if (! $response) {
             $this->container->get('pluginlogger')->error("notification called without response");
         }
 
         if ($response instanceof SuccessResponse) {
-            $transactionId   = $response->getTransactionId();
+            $transactionId         = $response->getTransactionId();
             $providerTransactionId = $response->getProviderTransactionId();
-            $transactionType = $response->getTransactionType();
+            $transactionType       = $response->getTransactionType();
 
             $wirecardOrderNumber = $response->findElement('order-number');
 
@@ -661,10 +703,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $elasticEngineTransaction = Shopware()->Models()
                                                   ->getRepository(Transaction::class)
                                                   ->findOneBy([
-                                                      'id' => $wirecardOrderNumber
+                                                      'id' => $wirecardOrderNumber,
                                                   ]);
 
-            if (!$elasticEngineTransaction) {
+            if (! $elasticEngineTransaction) {
                 $this->container->get('pluginlogger')->error("no Wirecard Transaction found for order");
                 exit();
             }
@@ -676,9 +718,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             Shopware()->Models()->flush();
 
             $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
-                              ->findOneBy(['transactionId' => $transactionId, 'parentTransactionId' => $transactionId]);
+                                          ->findOneBy([
+                                              'transactionId'       => $transactionId,
+                                              'parentTransactionId' => $transactionId,
+                                          ]);
 
-            if (!$orderTransaction) {
+            if (! $orderTransaction) {
                 $orderTransaction = new OrderTransaction();
                 $orderTransaction->setParentTransactionId($transactionId);
                 $orderTransaction->setTransactionId($transactionId);
@@ -691,8 +736,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             try {
                 $orderTransaction->setNotificationResponse(serialize($notificationResponse));
                 $orderTransaction->setTransactionType($transactionType === 'authorization' ?
-                                                      'authorization' :
-                                                      'purchase');
+                    'authorization' :
+                    'purchase');
                 $orderTransaction->setAmount($notificationResponse['requested-amount']);
                 $orderTransaction->setCurrency($notificationResponse['currency']);
                 Shopware()->Models()->persist($orderTransaction);
@@ -700,22 +745,22 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             } catch (DBALException $e) {
                 $em = $this->container->get('models');
                 $this->container->get('pluginlogger')->info('duplicate entry on OrderTransaction');
-                if (!$em->isOpen()) {
+                if (! $em->isOpen()) {
                     $em = $em->create(
                         $em->getConnection(),
                         $em->getConfiguration()
                     );
                 }
                 $orderTransaction = $em->getRepository(OrderTransaction::class)
-                                  ->findOneBy([
-                                      'transactionId' => $transactionId,
-                                      'parentTransactionId' => $transactionId
-                                  ]);
+                                       ->findOneBy([
+                                           'transactionId'       => $transactionId,
+                                           'parentTransactionId' => $transactionId,
+                                       ]);
                 if ($orderTransaction) {
                     $orderTransaction->setNotificationResponse(serialize($notificationResponse));
                     $orderTransaction->setTransactionType($transactionType === 'authorization' ?
-                                                          'authorization' :
-                                                          'purchase');
+                        'authorization' :
+                        'purchase');
                     $orderTransaction->setAmount($notificationResponse['requested-amount']);
                     $orderTransaction->setCurrency($notificationResponse['currency']);
                     $em->flush();
@@ -729,7 +774,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                                ->getRepository(Order::class)
                                ->findOneBy([
                                    'transactionId' => $transactionId,
-                                   'temporaryId'   => $transactionId
+                                   'temporaryId'   => $transactionId,
                                ]);
 
             if ($order) {
@@ -752,51 +797,54 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function notifyBackendAction()
     {
-        $request = $this->Request()->getParams();
+        $request      = $this->Request()->getParams();
         $notification = file_get_contents("php://input");
         $this->container->get('pluginlogger')->info('Notifiation: ' . $notification);
 
         $response = null;
         if ($request['method'] === PaypalPayment::PAYMETHOD_IDENTIFIER) {
-            $paypal = new PaypalPayment();
+            $paypal   = new PaypalPayment();
             $response = $paypal->getPaymentNotification($notification);
         } elseif ($request['method'] === CreditCardPayment::PAYMETHOD_IDENTIFIER) { // FIX notify not an xml
             $creditCard = new CreditCardPayment();
             $configData = $creditCard->getConfigData();
-            $config = $creditCard->getConfig($configData);
+            $config     = $creditCard->getConfig($configData);
             parse_str($notification, $array);
-            $mapper = new ResponseMapper($config);
+            $mapper   = new ResponseMapper($config);
             $response = $mapper->mapSeamlessResponse($array, "");
         }
 
-        if (!$response) {
+        if (! $response) {
             Shopware()->PluginLogger()->error("notification called without response");
         }
 
         if ($response instanceof SuccessResponse) {
-            $transactionId = $response->getTransactionId();
+            $transactionId         = $response->getTransactionId();
             $providerTransactionId = $response->getProviderTransactionId();
-            $transactionType = $response->getTransactionType();
-            $parentTransactionId = $response->getParentTransactionId() ?
-                                 $response->getParentTransactionId() :
-                                 $request['transaction'];
+            $transactionType       = $response->getTransactionType();
+            $parentTransactionId   = $response->getParentTransactionId() ?
+                $response->getParentTransactionId() :
+                $request['transaction'];
 
             $elasticEngineTransaction = Shopware()->Models()->getRepository(Transaction::class)
-                                      ->findOneBy(['transactionId' => $parentTransactionId]);
+                                                  ->findOneBy(['transactionId' => $parentTransactionId]);
 
-            $orderNumber = $elasticEngineTransaction->getOrderNumber();
+            $orderNumber          = $elasticEngineTransaction->getOrderNumber();
             $notificationResponse = $response->getData();
 
-            $defaultTimeZone =  date_default_timezone_get();
+            $defaultTimeZone = date_default_timezone_get();
             date_default_timezone_set('UTC');
             $date = new \DateTime($notificationResponse['completion-time-stamp']);
             $date->setTimeZone(new \DateTimeZone($defaultTimeZone));
 
-            $amount = $notificationResponse['requested-amount'];
+            $amount   = $notificationResponse['requested-amount'];
             $currency = $notificationResponse['currency'];
 
             $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
-                ->findOneBy(['transactionId' => $transactionId, 'parentTransactionId' => $parentTransactionId]);
+                                          ->findOneBy([
+                                              'transactionId'       => $transactionId,
+                                              'parentTransactionId' => $parentTransactionId,
+                                          ]);
 
             $paymentStatusId = 0;
 
@@ -815,7 +863,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             }
 
 
-            if (!$orderTransaction) {
+            if (! $orderTransaction) {
                 $orderTransaction = new OrderTransaction();
                 $orderTransaction->setOrderNumber($orderNumber);
                 $orderTransaction->setParentTransactionId($parentTransactionId);
@@ -833,7 +881,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 Shopware()->Models()->flush();
             } catch (DBALException $e) {
                 $em = $this->container->get('models');
-                if (!$em->isOpen()) {
+                if (! $em->isOpen()) {
                     $em = $em->create(
                         $em->getConnection(),
                         $em->getConfiguration()
@@ -841,10 +889,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 }
                 $this->container->get('pluginlogger')->info('duplicate entry on OrderTransaction');
                 $orderTransaction = $em->getRepository(OrderTransaction::class)
-                                  ->findOneBy([
-                                      'transactionId' => $transactionId,
-                                      'parentTransactionId' => $parentTransactionId
-                                  ]);
+                                       ->findOneBy([
+                                           'transactionId'       => $transactionId,
+                                           'parentTransactionId' => $parentTransactionId,
+                                       ]);
                 if ($orderTransaction) {
                     $orderTransaction->setNotificationResponse(serialize($notificationResponse));
                     $orderTransaction->setAmount($amount);

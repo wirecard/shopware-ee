@@ -75,8 +75,6 @@ abstract class Payment implements PaymentInterface
         $this->container = $container;
     }
 
-    private $configData = [];
-    private $config = null;
     private $orderNumber;
 
     /**
