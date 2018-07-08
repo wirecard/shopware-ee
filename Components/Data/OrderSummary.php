@@ -31,7 +31,6 @@
 
 namespace WirecardShopwareElasticEngine\Components\Data;
 
-use Symfony\Component\HttpFoundation\Request;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
@@ -39,7 +38,7 @@ use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 
-class OrderDetails
+class OrderSummary
 {
     /**
      * @var Payment
@@ -72,9 +71,9 @@ class OrderDetails
     protected $userMapper;
 
     /**
-     * @var Request
+     * @var string
      */
-    protected $request;
+    protected $descriptor;
 
 
     /**
@@ -85,22 +84,19 @@ class OrderDetails
      * @param BasketMapper     $basketMapper
      * @param Amount           $amount
      * @param Redirect         $redirect
-     * @param Request          $request
      */
     public function __construct(
         PaymentInterface $payment,
         UserMapper $userMapper,
         BasketMapper $basketMapper,
         Amount $amount,
-        Redirect $redirect,
-        Request $request
+        Redirect $redirect
     ) {
         $this->payment    = $payment;
         $this->userMapper = $userMapper;
         $this->amount     = $amount;
         $this->basket     = $basketMapper;
         $this->redirect   = $redirect;
-        $this->request    = $request;
     }
 
     /**
@@ -144,10 +140,15 @@ class OrderDetails
     }
 
     /**
-     * @return Request
+     * @param string $descriptor
      */
-    public function getRequest()
+    public function setDescriptor($descriptor)
     {
-        return $this->request;
+        $this->descriptor = $descriptor;
+    }
+
+    public function getDescriptor()
+    {
+        return $this->descriptor;
     }
 }
