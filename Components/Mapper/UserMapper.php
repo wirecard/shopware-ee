@@ -83,6 +83,7 @@ class UserMapper extends ArrayMapper
      * Returns a Wirecard AccountHolder object based on user data.
      *
      * @return AccountHolder
+     * @throws ArrayKeyNotFoundException
      */
     public function getWirecardBillingAccountHolder()
     {
@@ -117,6 +118,7 @@ class UserMapper extends ArrayMapper
      * Returns a Wirecard Address object based on the billing address.
      *
      * @return Address
+     * @throws ArrayKeyNotFoundException
      */
     public function getWirecardBillingAddress()
     {
