@@ -34,7 +34,9 @@ namespace WirecardShopwareElasticEngine\Components\Data;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
+use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
+use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 
 class OrderDetails
 {
@@ -44,19 +46,9 @@ class OrderDetails
     protected $payment;
 
     /**
-     * @var array
-     */
-    protected $user;
-
-    /**
      * @var BasketMapper
      */
     protected $basket;
-
-    /**
-     * @var float
-     */
-    protected $rawAmount;
 
     /**
      * @var Amount
@@ -74,35 +66,48 @@ class OrderDetails
     protected $redirect;
 
     /**
+     * @var UserMapper
+     */
+    protected $userMapper;
+
+
+    /**
      * OrderDetails constructor.
      *
-     * @param Payment      $payment
-     * @param array        $user
-     * @param BasketMapper $basketMapper
-     * @param Amount       $amount
-     * @param Redirect     $redirect
+     * @param PaymentInterface $payment
+     * @param UserMapper       $userMapper
+     * @param BasketMapper     $basketMapper
+     * @param Amount           $amount
+     * @param Redirect         $redirect
      */
     public function __construct(
-        Payment $payment,
-        // TODO: UserMapper
-        array $user,
+        PaymentInterface $payment,
+        UserMapper $userMapper,
         BasketMapper $basketMapper,
         Amount $amount,
         Redirect $redirect
     ) {
-        $this->payment   = $payment;
-        $this->user      = $user;
-        $this->amount    = $amount;
-        $this->basket    = $basketMapper;
-        $this->redirect  = $redirect;
+        $this->payment    = $payment;
+        $this->userMapper = $userMapper;
+        $this->amount     = $amount;
+        $this->basket     = $basketMapper;
+        $this->redirect   = $redirect;
     }
 
     /**
-     * @return array
+     * @return PaymentInterface
      */
-    public function getUser()
+    public function getPayment()
     {
-        return $this->user;
+        return $this->payment;
+    }
+
+    /**
+     * @return UserMapper
+     */
+    public function getUserMapper()
+    {
+        return $this->userMapper;
     }
 
     /**
@@ -119,14 +124,6 @@ class OrderDetails
     public function getAmount()
     {
         return $this->amount;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCurrency()
-    {
-        return $this->currency;
     }
 
     /**
