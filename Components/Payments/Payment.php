@@ -31,7 +31,10 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
+use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Entity\Amount;
@@ -50,7 +53,7 @@ use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\Reservable;
 use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Data\OrderDetails;
+use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Models\OrderTransaction;
 use WirecardShopwareElasticEngine\Models\Transaction;
 use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
@@ -59,21 +62,6 @@ abstract class Payment implements PaymentInterface
 {
     const TRANSACTION_TYPE_AUTHORIZATION = 'authorization';
     const TRANSACTION_TYPE_PURCHASE = 'purchase';
-
-    /**
-     * @var ContainerInterface
-     */
-    protected $container;
-
-    /**
-     * Payment constructor.
-     *
-     * @param ContainerInterface $container
-     */
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
-    }
 
     private $orderNumber;
 
@@ -129,7 +117,7 @@ abstract class Payment implements PaymentInterface
 
         $amount = new Amount($paymentData['amount'], $paymentData['currency']);
 
-        $redirectUrls = new Redirect($paymentData['returnUrl'], $paymentData['cancelUrl']);
+        $redirectUrls    = new Redirect($paymentData['returnUrl'], $paymentData['cancelUrl']);
         $notificationUrl = $paymentData['notifyUrl'];
 
         $transaction->setNotificationUrl($notificationUrl);
@@ -152,7 +140,7 @@ abstract class Payment implements PaymentInterface
             $locale = Shopware()->Locale()->getLanguage();
             if (strpos($locale, '@') !== false) {
                 $localeArr = explode('@', $locale);
-                $locale = $localeArr[0];
+                $locale    = $localeArr[0];
             }
             $transaction->setLocale($locale);
         }
@@ -179,48 +167,43 @@ abstract class Payment implements PaymentInterface
         return $transaction;
     }
 
-    public function processPayment(OrderDetails $orderDetails, TransactionService $transactionService)
-    {
-        // TODO: Implement processPayment() method.
-    }
-
     /**
      * @inheritdoc
      */
-//    public function processPayment()
-//    {
-//        $transaction = $this->createTransaction($paymentData);
-//
-//        $transactionService = new TransactionService($this->config, Shopware()->PluginLogger());
-//
-//        $response = null;
-//        if ($this->configData['transactionType'] === self::TRANSACTION_TYPE_AUTHORIZATION
-//            && $transaction instanceof Reservable) {
-//            $response = $transactionService->reserve($transaction);
-//        } elseif ($this->configData['transactionType'] === self::TRANSACTION_TYPE_PURCHASE) {
-//            $response = $transactionService->pay($transaction);
-//        }
-//
-//        if ($response instanceof InteractionResponse) {
-//            return [
-//                'status'   => 'success',
-//                'redirect' => $response->getRedirectUrl()
-//            ];
-//        }
-//
-//        if ($response instanceof FailureResponse) {
-//            $errors = '';
-//
-//            foreach ($response->getStatusCollection()->getIterator() as $item) {
-//                /** @var $item Status */
-//                $errors .= $item->getDescription() . "\n";
-//            }
-//
-//            Shopware()->PluginLogger()->error($errors);
-//        }
-//
-//        return ['status' => 'error'];
-//    }
+    //    public function processPayment()
+    //    {
+    //        $transaction = $this->createTransaction($paymentData);
+    //
+    //        $transactionService = new TransactionService($this->config, Shopware()->PluginLogger());
+    //
+    //        $response = null;
+    //        if ($this->configData['transactionType'] === self::TRANSACTION_TYPE_AUTHORIZATION
+    //            && $transaction instanceof Reservable) {
+    //            $response = $transactionService->reserve($transaction);
+    //        } elseif ($this->configData['transactionType'] === self::TRANSACTION_TYPE_PURCHASE) {
+    //            $response = $transactionService->pay($transaction);
+    //        }
+    //
+    //        if ($response instanceof InteractionResponse) {
+    //            return [
+    //                'status'   => 'success',
+    //                'redirect' => $response->getRedirectUrl()
+    //            ];
+    //        }
+    //
+    //        if ($response instanceof FailureResponse) {
+    //            $errors = '';
+    //
+    //            foreach ($response->getStatusCollection()->getIterator() as $item) {
+    //                /** @var $item Status */
+    //                $errors .= $item->getDescription() . "\n";
+    //            }
+    //
+    //            Shopware()->PluginLogger()->error($errors);
+    //        }
+    //
+    //        return ['status' => 'error'];
+    //    }
 
     public function processJsResponse($params, $return)
     {
@@ -236,7 +219,7 @@ abstract class Payment implements PaymentInterface
     /**
      * @inheritdoc
      */
-    public function getTransactionConfig()
+    public function getTransactionConfig(ParameterBagInterface $parameterBag, InstallerService $installerService)
     {
         $config = new Config(
             $this->getPaymentConfig()->getBaseUrl(),
@@ -245,105 +228,15 @@ abstract class Payment implements PaymentInterface
         );
 
         $config->setShopInfo(
-            $this->container->getParameter('kernel.name'),
-            $this->container->getParameter('shopware.release.version')
+            $parameterBag->get('kernel.name'),
+            $parameterBag->get('shopware.release.version')
         );
 
-        $plugin = $this->container->get('shopware_plugininstaller.plugin_manager')
-                                  ->getPluginByName(WirecardShopwareElasticEngine::NAME);
+        $plugin = $installerService->getPluginByName(WirecardShopwareElasticEngine::NAME);
 
         $config->setPluginInfo($plugin->getName(), $plugin->getVersion());
 
         return $config;
-    }
-
-    /**
-     * Adds consumer personal information, billing and shipping address to Transaction
-     *
-     * @param WirecardTransaction $transaction
-     * @param array $userData
-     * @return WirecardTransaction
-     */
-    protected function addConsumer(WirecardTransaction $transaction, array $userData)
-    {
-        $user = $userData['additional']['user'];
-        $transaction->setConsumerId($user['userID']);
-
-        $firstName = $user['firstname'];
-        $lastName = $user['lastname'];
-        $email = $user['email'];
-
-        $accountHolder = new AccountHolder();
-        $accountHolder->setFirstName($firstName);
-        $accountHolder->setLastName($lastName);
-        $accountHolder->setEmail($email);
-
-        if (isset($user['birthday']) && $user['birthday']) {
-            $birthDate = new \DateTime($user['birthday']);
-            $accountHolder->setDateOfBirth($birthDate);
-        }
-
-        $billingData = $userData['billingaddress'];
-
-        if ($billingData['phone']) {
-            $accountHolder->setPhone($billingData['phone']);
-        }
-
-        $country = $userData['additional']['country']['countryiso'];
-
-        // SDK doesn't support state yet
-        //
-        // if (isset($userData['additional']['state']) &&
-        //    isset($userData['additional']['state']['shortcode']) &&
-        //    $userData['additional']['state']['shortcode']) {
-        //    $country .= '-' .  $userData['additional']['state']['shortcode'];
-        // }
-
-        $city = $billingData['city'];
-        $street = $billingData['street'];
-        $zip = $billingData['zipcode'];
-
-        $billingAddress = new Address($country, $city, $street);
-        $billingAddress->setPostalCode($zip);
-        if ($billingData['additionalAddressLine1']) {
-            $billingAddress->setStreet2($billingData['additionalAddressLine1']);
-        }
-
-        $accountHolder->setAddress($billingAddress);
-
-        $shippingData = $userData['shippingaddress'];
-
-        $shippingUser = new AccountHolder();
-        $shippingUser->setFirstName($shippingData['firstname']);
-        $shippingUser->setLastName($shippingData['lastname']);
-        $shippingUser->setPhone($shippingData['phone']);
-
-        $shippingCountry = $userData['additional']['countryShipping']['countryiso'];
-        $shippingCity = $shippingData['city'];
-        $shippingStreet = $shippingData['street'];
-        $shippingZip = $shippingData['zipcode'];
-
-        // SDK doesn't support state yet
-        //
-        //if (isset($userData['additional']['stateShipping']) &&
-        //    isset($userData['additional']['stateShipping']['shortcode']) &&
-        //    $userData['additional']['stateShipping']['shortcode']) {
-        //    $shippingCountry .= '-' . $userData['additional']['stateShipping']['shortcode'];
-        //}
-
-        $shippingAddress = new Address($shippingCountry, $shippingCity, $shippingStreet);
-        $shippingAddress->setPostalCode($shippingZip);
-
-        if ($shippingData['additionalAddressLine1']) {
-            $shippingAddress->setStreet2($shippingData['additionalAddressLine1']);
-        }
-
-        $shippingUser->setAddress($shippingAddress);
-
-        $transaction->setAccountHolder($accountHolder);
-        $transaction->setShipping($shippingUser);
-
-        return $transaction;
     }
 
     /**
@@ -367,19 +260,20 @@ abstract class Payment implements PaymentInterface
      * adds request id to transaction model
      *
      * @params string $requestId
+     *
      * @return boolean
      */
     public function addTransactionRequestId($requestId)
     {
-        if (!$this->orderNumber) {
+        if (! $this->orderNumber) {
             return false;
         }
 
         $transactionModel = Shopware()->Models()
-            ->getRepository(Transaction::class)
-            ->findOneBy(['id' => $this->orderNumber]);
+                                      ->getRepository(Transaction::class)
+                                      ->findOneBy(['id' => $this->orderNumber]);
 
-        if (!$transactionModel) {
+        if (! $transactionModel) {
             return false;
         }
         $transactionModel->setRequestId($requestId);
@@ -395,6 +289,7 @@ abstract class Payment implements PaymentInterface
      * @param WirecardTransaction $transaction
      * @param array               $paymentData
      * @param array               $configData
+     *
      * @return WirecardTransaction
      */
     protected function addPaymentSpecificData(WirecardTransaction $transaction, array $paymentData, array $configData)
@@ -408,9 +303,9 @@ abstract class Payment implements PaymentInterface
     public function getPaymentResponse(array $request)
     {
         $configData = $this->getPaymentConfig();
-        $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
-        $service = new TransactionService($config);
-        $response = $service->handleResponse($request);
+        $config     = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
+        $service    = new TransactionService($config);
+        $response   = $service->handleResponse($request);
 
         return $response;
     }
@@ -420,9 +315,9 @@ abstract class Payment implements PaymentInterface
      */
     public function getPaymentNotification($request)
     {
-        $configData = $this->getConfigData();
-        $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
-        $service = new TransactionService($config);
+        $configData   = $this->getConfigData();
+        $config       = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
+        $service      = new TransactionService($config);
         $notification = $service->handleNotification($request);
 
         return $notification;
@@ -434,7 +329,7 @@ abstract class Payment implements PaymentInterface
     public function getBackendOperations($transactionId)
     {
         $configData = $this->getConfigData();
-        $config = $this->getConfig($configData);
+        $config     = $this->getConfig($configData);
 
         $transaction = $this->getTransaction();
         $transaction->setParentTransactionId($transactionId);
@@ -448,8 +343,8 @@ abstract class Payment implements PaymentInterface
      */
     public function processBackendOperationsForOrder($orderNumber, $operation, $amount = 0, $currency = '')
     {
-        if ($amount && !$currency) {
-            return [ 'success' => false, 'msg' => 'AmountWithoutCurrency'];
+        if ($amount && ! $currency) {
+            return ['success' => false, 'msg' => 'AmountWithoutCurrency'];
         }
 
         if ($operation === 'Refund') {
@@ -464,37 +359,38 @@ abstract class Payment implements PaymentInterface
             return $this->cancelOrder($orderNumber);
         }
 
-        return [ 'success' => false, 'msg' => 'InvalidOperation'];
+        return ['success' => false, 'msg' => 'InvalidOperation'];
     }
 
     /**
      * @param string $orderNumber
-     * @param float $amount
+     * @param float  $amount
      * @param string $currency
+     *
      * @return array
      */
     protected function refundForOrder($orderNumber, $amount = 0, $currency = '')
     {
         $elasticEngineTransaction = Shopware()->Models()->getRepository(Transaction::class)
-                                  ->findOneBy(['orderNumber' => $orderNumber]);
+                                              ->findOneBy(['orderNumber' => $orderNumber]);
 
         $parentTransactionId = $elasticEngineTransaction->getTransactionId();
-        if (!$elasticEngineTransaction) {
-            return [ 'success' => false, 'msg' => 'NoTransactionFound' ];
+        if (! $elasticEngineTransaction) {
+            return ['success' => false, 'msg' => 'NoTransactionFound'];
         }
 
         $configData = $this->getConfigData();
-        $config = $this->getConfig($configData);
+        $config     = $this->getConfig($configData);
 
         $transaction = $this->getTransaction();
         $transaction->setParentTransactionId($parentTransactionId);
         $notificationUrl = Shopware()->Front()->Router()->assemble([
-            'module' => 'frontend',
-            'controller' => 'WirecardElasticEnginePayment',
-            'action' => 'notifyBackend',
-            'method' => $this->getName(),
+            'module'      => 'frontend',
+            'controller'  => 'WirecardElasticEnginePayment',
+            'action'      => 'notifyBackend',
+            'method'      => $this->getName(),
             'transaction' => $parentTransactionId,
-            'forceSecure' => true
+            'forceSecure' => true,
         ]);
 
         $transaction->setNotificationUrl($notificationUrl);
@@ -509,21 +405,23 @@ abstract class Payment implements PaymentInterface
         try {
             $response = $transactionService->process($transaction, Operation::CANCEL);
         } catch (\Exception $exception) {
-            Shopware()->PluginLogger()->error('Processing refund failed: '  .
+            Shopware()->PluginLogger()->error('Processing refund failed: ' .
                                               get_class($exception) . ' ' .
                                               $exception->getMessage());
-            return [ 'success' => false, 'msg' => 'RefundFailed'];
+            return ['success' => false, 'msg' => 'RefundFailed'];
         }
 
         if ($response instanceof SuccessResponse) {
             Shopware()->PluginLogger()->info($response->getData());
-            $transactionId = $response->getTransactionId();
+            $transactionId         = $response->getTransactionId();
             $providerTransactionId = $response->getProviderTransactionId() ? $response->getProviderTransactionId() : '';
 
             $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
-                ->findOneBy(['transactionId' => $parentTransactionId, 'parentTransactionId' => $transactionId]);
+                                          ->findOneBy(['transactionId'       => $parentTransactionId,
+                                                       'parentTransactionId' => $transactionId,
+                                          ]);
 
-            if (!$orderTransaction) {
+            if (! $orderTransaction) {
                 $orderTransaction = new OrderTransaction();
                 $orderTransaction->setOrderNumber($orderNumber);
                 $orderTransaction->setParentTransactionId($parentTransactionId);
@@ -538,14 +436,16 @@ abstract class Payment implements PaymentInterface
             Shopware()->Models()->persist($orderTransaction);
             Shopware()->Models()->flush();
 
-            return [ 'success' => true, 'transactionId' => $response->getTransactionId() ];
+            return ['success' => true, 'transactionId' => $response->getTransactionId()];
         }
         if ($response instanceof FailureResponse) {
-            $rawData = $response->getData();
-            $transactionId = $rawData['transaction-id'];
+            $rawData          = $response->getData();
+            $transactionId    = $rawData['transaction-id'];
             $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
-                ->findOneBy(['transactionId' => $parentTransactionId, 'parentTransactionId' => $transactionId]);
-            if (!$orderTransaction) {
+                                          ->findOneBy(['transactionId'       => $parentTransactionId,
+                                                       'parentTransactionId' => $transactionId,
+                                          ]);
+            if (! $orderTransaction) {
                 $orderTransaction = new OrderTransaction();
                 $orderTransaction->setOrderNumber($orderNumber);
                 $orderTransaction->setParentTransactionId($parentTransactionId);
@@ -558,40 +458,41 @@ abstract class Payment implements PaymentInterface
 
             Shopware()->Models()->persist($orderTransaction);
             Shopware()->Models()->flush();
-            return [ 'success' => false, 'msg' => 'RefundFailed'];
+            return ['success' => false, 'msg' => 'RefundFailed'];
         }
 
-        return [ 'success' => false, 'msg' => 'RefundFailed'];
+        return ['success' => false, 'msg' => 'RefundFailed'];
     }
 
     /**
      * @param string $orderNumber
-     * @param float $amount
+     * @param float  $amount
      * @param string $currency
+     *
      * @return array
      */
     protected function captureForOrder($orderNumber, $amount = 0, $currency = '')
     {
         $elasticEngineTransaction = Shopware()->Models()->getRepository(Transaction::class)
-                                  ->findOneBy(['orderNumber' => $orderNumber]);
+                                              ->findOneBy(['orderNumber' => $orderNumber]);
 
         $parentTransactionId = $elasticEngineTransaction->getTransactionId();
-        if (!$elasticEngineTransaction) {
-            return [ 'success' => false, 'msg' => 'NoTransactionFound' ];
+        if (! $elasticEngineTransaction) {
+            return ['success' => false, 'msg' => 'NoTransactionFound'];
         }
 
         $configData = $this->getConfigData();
-        $config = $this->getConfig($configData);
+        $config     = $this->getConfig($configData);
 
         $transaction = $this->getTransaction();
         $transaction->setParentTransactionId($parentTransactionId);
         $notificationUrl = Shopware()->Front()->Router()->assemble([
-            'module' => 'frontend',
-            'controller' => 'WirecardElasticEnginePayment',
-            'action' => 'notifyBackend',
-            'method' => $this->getName(),
+            'module'      => 'frontend',
+            'controller'  => 'WirecardElasticEnginePayment',
+            'action'      => 'notifyBackend',
+            'method'      => $this->getName(),
             'transaction' => $parentTransactionId,
-            'forceSecure' => true
+            'forceSecure' => true,
         ]);
 
         $transaction->setNotificationUrl($notificationUrl);
@@ -607,18 +508,20 @@ abstract class Payment implements PaymentInterface
             $response = $transactionService->process($transaction, Operation::PAY);
         } catch (\Exception $exception) {
             Shopware()->PluginLogger()->error('Processing capture failed:' . $exception->getMessage());
-            return [ 'success' => false, 'msg' => 'CaptureFailed'];
+            return ['success' => false, 'msg' => 'CaptureFailed'];
         }
 
         if ($response instanceof SuccessResponse) {
             Shopware()->PluginLogger()->info($response->getData());
-            $transactionId = $response->getTransactionId();
+            $transactionId         = $response->getTransactionId();
             $providerTransactionId = $response->getProviderTransactionId() ? $response->getProviderTransactionId() : '';
 
             $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
-                ->findOneBy(['transactionId' => $parentTransactionId, 'parentTransactionId' => $transactionId]);
+                                          ->findOneBy(['transactionId'       => $parentTransactionId,
+                                                       'parentTransactionId' => $transactionId,
+                                          ]);
 
-            if (!$orderTransaction) {
+            if (! $orderTransaction) {
                 $orderTransaction = new OrderTransaction();
                 $orderTransaction->setOrderNumber($orderNumber);
                 $orderTransaction->setParentTransactionId($parentTransactionId);
@@ -633,14 +536,16 @@ abstract class Payment implements PaymentInterface
             Shopware()->Models()->persist($orderTransaction);
             Shopware()->Models()->flush();
 
-            return [ 'success' => true, 'transactionId' => $response->getTransactionId() ];
+            return ['success' => true, 'transactionId' => $response->getTransactionId()];
         }
         if ($response instanceof FailureResponse) {
-            $rawData = $response->getData();
-            $transactionId = $rawData['transaction-id'];
+            $rawData          = $response->getData();
+            $transactionId    = $rawData['transaction-id'];
             $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
-                ->findOneBy(['transactionId' => $parentTransactionId, 'parentTransactionId' => $transactionId]);
-            if (!$orderTransaction) {
+                                          ->findOneBy(['transactionId'       => $parentTransactionId,
+                                                       'parentTransactionId' => $transactionId,
+                                          ]);
+            if (! $orderTransaction) {
                 $orderTransaction = new OrderTransaction();
                 $orderTransaction->setOrderNumber($orderNumber);
                 $orderTransaction->setParentTransactionId($parentTransactionId);
@@ -653,38 +558,39 @@ abstract class Payment implements PaymentInterface
 
             Shopware()->Models()->persist($orderTransaction);
             Shopware()->Models()->flush();
-            return [ 'success' => false, 'msg' => 'CaptureFailed'];
+            return ['success' => false, 'msg' => 'CaptureFailed'];
         }
 
-        return [ 'success' => false, 'msg' => 'CaptureFailed'];
+        return ['success' => false, 'msg' => 'CaptureFailed'];
     }
 
     /**
      * @param string $orderNumber
+     *
      * @return array
      */
     protected function cancelOrder($orderNumber)
     {
         $elasticEngineTransaction = Shopware()->Models()->getRepository(Transaction::class)
-                                  ->findOneBy(['orderNumber' => $orderNumber]);
+                                              ->findOneBy(['orderNumber' => $orderNumber]);
 
         $parentTransactionId = $elasticEngineTransaction->getTransactionId();
-        if (!$elasticEngineTransaction) {
-            return [ 'success' => false, 'msg' => 'NoTransactionFound' ];
+        if (! $elasticEngineTransaction) {
+            return ['success' => false, 'msg' => 'NoTransactionFound'];
         }
 
         $configData = $this->getConfigData();
-        $config = $this->getConfig($configData);
+        $config     = $this->getConfig($configData);
 
         $transaction = $this->getTransaction();
         $transaction->setParentTransactionId($parentTransactionId);
         $notificationUrl = Shopware()->Front()->Router()->assemble([
-            'module' => 'frontend',
-            'controller' => 'WirecardElasticEnginePayment',
-            'action' => 'notifyBackend',
-            'method' => $this->getName(),
+            'module'      => 'frontend',
+            'controller'  => 'WirecardElasticEnginePayment',
+            'action'      => 'notifyBackend',
+            'method'      => $this->getName(),
             'transaction' => $parentTransactionId,
-            'forceSecure' => true
+            'forceSecure' => true,
         ]);
 
         $transaction->setNotificationUrl($notificationUrl);
@@ -695,18 +601,20 @@ abstract class Payment implements PaymentInterface
             $response = $transactionService->process($transaction, Operation::CANCEL);
         } catch (\Exception $exception) {
             Shopware()->PluginLogger()->error('Processing cancel failed:' . $exception->getMessage());
-            return [ 'success' => false, 'msg' => 'CancelFailed'];
+            return ['success' => false, 'msg' => 'CancelFailed'];
         }
 
         if ($response instanceof SuccessResponse) {
             Shopware()->PluginLogger()->info($response->getData());
-            $transactionId = $response->getTransactionId();
+            $transactionId         = $response->getTransactionId();
             $providerTransactionId = $response->getProviderTransactionId() ? $response->getProviderTransactionId() : '';
 
             $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
-                ->findOneBy(['transactionId' => $parentTransactionId, 'parentTransactionId' => $transactionId]);
+                                          ->findOneBy(['transactionId'       => $parentTransactionId,
+                                                       'parentTransactionId' => $transactionId,
+                                          ]);
 
-            if (!$orderTransaction) {
+            if (! $orderTransaction) {
                 $orderTransaction = new OrderTransaction();
                 $orderTransaction->setOrderNumber($orderNumber);
                 $orderTransaction->setParentTransactionId($parentTransactionId);
@@ -721,14 +629,16 @@ abstract class Payment implements PaymentInterface
             Shopware()->Models()->persist($orderTransaction);
             Shopware()->Models()->flush();
 
-            return [ 'success' => true, 'transactionId' => $response->getTransactionId() ];
+            return ['success' => true, 'transactionId' => $response->getTransactionId()];
         }
         if ($response instanceof FailureResponse) {
-            $rawData = $response->getData();
-            $transactionId = $rawData['transaction-id'];
+            $rawData          = $response->getData();
+            $transactionId    = $rawData['transaction-id'];
             $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
-                ->findOneBy(['transactionId' => $parentTransactionId, 'parentTransactionId' => $transactionId]);
-            if (!$orderTransaction) {
+                                          ->findOneBy(['transactionId'       => $parentTransactionId,
+                                                       'parentTransactionId' => $transactionId,
+                                          ]);
+            if (! $orderTransaction) {
                 $orderTransaction = new OrderTransaction();
                 $orderTransaction->setOrderNumber($orderNumber);
                 $orderTransaction->setParentTransactionId($parentTransactionId);
@@ -741,18 +651,20 @@ abstract class Payment implements PaymentInterface
 
             Shopware()->Models()->persist($orderTransaction);
             Shopware()->Models()->flush();
-            return [ 'success' => false, 'msg' => 'CancelFailed'];
+            return ['success' => false, 'msg' => 'CancelFailed'];
         }
 
-        return [ 'success' => false, 'msg' => 'CancelFailed'];
+        return ['success' => false, 'msg' => 'CancelFailed'];
     }
 
     /**
-     * @param $name
-     * @return mixed
+     * @param string $name
+     * @param string $prefix
+     *
+     * @return string
      */
-    protected function getPluginConfig($name)
+    protected function getPluginConfig($name, $prefix = 'wirecardElasticEngine')
     {
-        return $this->container->get('config')->getByNamespace(WirecardShopwareElasticEngine::NAME, $name);
+        return $this->container->get('config')->getByNamespace(WirecardShopwareElasticEngine::NAME, $prefix . $name);
     }
 }

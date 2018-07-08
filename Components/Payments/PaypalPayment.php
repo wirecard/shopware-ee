@@ -31,16 +31,20 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
+use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
-use Wirecard\PaymentSdk\Transaction\Transaction;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Data\OrderDetails;
+use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
 
 class PaypalPayment extends Payment
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_paypal';
+
+    /** @var PayPalTransaction */
+    private $transactionInstance;
 
     /**
      * @inheritdoc
@@ -71,15 +75,18 @@ class PaypalPayment extends Payment
      */
     public function getTransaction()
     {
-        return new PayPalTransaction();
+        if (! $this->transactionInstance) {
+            $this->transactionInstance = new PayPalTransaction();
+        }
+        return $this->transactionInstance;
     }
 
     /**
      * @inheritdoc
      */
-    public function getTransactionConfig()
+    public function getTransactionConfig(ParameterBagInterface $parameterBag, InstallerService $installerService)
     {
-        $config = parent::getTransactionConfig();
+        $config = parent::getTransactionConfig($parameterBag, $installerService);
         $config->add(new PaymentMethodConfig(
             PayPalTransaction::NAME,
             $this->getPaymentConfig()->getTransactionMAID(),
@@ -96,48 +103,39 @@ class PaypalPayment extends Payment
     public function getPaymentConfig()
     {
         $paymentConfig = new PaymentConfig(
-            $this->getPluginConfig('wirecardElasticEnginePaypalServer'),
-            $this->getPluginConfig('wirecardElasticEnginePaypalHttpUser'),
-            $this->getPluginConfig('wirecardElasticEnginePaypalHttpPassword')
+            $this->getPluginConfig('PaypalServer'),
+            $this->getPluginConfig('PaypalHttpUser'),
+            $this->getPluginConfig('PaypalHttpPassword')
         );
 
-        $paymentConfig->setTransactionMAID(
-            $this->getPluginConfig('wirecardElasticEnginePaypalMerchantId')
-        );
-
-        $paymentConfig->setTransactionSecret(
-            $this->getPluginConfig('wirecardElasticEnginePaypalSecret')
-        );
-
-        $paymentConfig->setTransactionType(
-            $this->getPluginConfig('wirecardElasticEnginePaypalTransactionType')
-        );
-
-        $paymentConfig->setSendBasket(
-            $this->getPluginConfig('wirecardElasticEnginePaypalSendBasket')
-        );
-
-        $paymentConfig->setFraudPrevention(
-            $this->getPluginConfig('wirecardElasticEnginePaypalFraudPrevention')
-        );
-
-        $paymentConfig->setSendDescriptor(
-            $this->getPluginConfig('wirecardElasticEnginePaypalDescriptor')
-        );
+        $paymentConfig->setTransactionMAID($this->getPluginConfig('PaypalMerchantId'));
+        $paymentConfig->setTransactionSecret($this->getPluginConfig('PaypalSecret'));
+        $paymentConfig->setTransactionType($this->getPluginConfig('PaypalTransactionType'));
+        $paymentConfig->setSendBasket($this->getPluginConfig('PaypalSendBasket'));
+        $paymentConfig->setFraudPrevention($this->getPluginConfig('PaypalFraudPrevention'));
+        $paymentConfig->setSendDescriptor($this->getPluginConfig('PaypalDescriptor'));
 
         return $paymentConfig;
     }
 
-    public function processPayment(OrderDetails $orderDetails, TransactionService $transactionService)
+    /**
+     * @inheritdoc
+     */
+    public function processPayment(OrderSummary $orderSummary, TransactionService $transactionService)
     {
         $transaction = $this->getTransaction();
 
-        $transaction->setRedirect($orderDetails->getRedirect());
-        $transaction->setAmount($orderDetails->getAmount());
-        $transaction->setNotificationUrl(null);
-        $transaction->setAccountHolder($orderDetails->getUserMapper()->getWirecardBillingAccountHolder());
-        $transaction->setShipping($orderDetails->getUserMapper()->getWirecardShippingAccountHolder());
+        $transaction->setOrderDetail($orderSummary->getBasketMapper()->getBasketText());
 
-        $transaction->setOrderDetail($orderDetails->getBasketMapper()->getBasketText());
+        if ($this->getPaymentConfig()->hasFraudPrevention()) {
+            $transaction->setIpAddress($orderSummary->getRequest()->getClientIp());
+            $transaction->setAccountHolder($orderSummary->getUserMapper()->getWirecardBillingAccountHolder());
+            $transaction->setShipping($orderSummary->getUserMapper()->getWirecardShippingAccountHolder());
+            $transaction->setLocale($orderSummary->getUserMapper()->getLocale());
+        }
+
+        if ($this->getPaymentConfig()->sendDescriptor()) {
+            // ...
+        }
     }
 }

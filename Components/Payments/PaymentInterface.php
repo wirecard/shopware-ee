@@ -31,12 +31,13 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
+use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Data\OrderDetails;
+use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
-use WirecardShopwareElasticEngine\Models\Transaction;
 
 interface PaymentInterface
 {
@@ -64,6 +65,7 @@ interface PaymentInterface
      * Start Transaction
      *
      * @param array $paymentData
+     *
      * @return \Wirecard\PaymentSdk\Transaction\Transaction
      */
     public function createTransaction(array $paymentData);
@@ -71,21 +73,23 @@ interface PaymentInterface
     /**
      * Start Transaction
      *
-     * @param OrderDetails       $orderDetails
+     * @param OrderSummary       $orderSummary
      * @param TransactionService $transactionService
      *
      * @return array
      */
-    public function processPayment(OrderDetails $orderDetails, TransactionService $transactionService);
+    public function processPayment(OrderSummary $orderSummary, TransactionService $transactionService);
 
     /**
      * @param array $request
+     *
      * @return Response
      */
     public function getPaymentResponse(array $request);
 
     /**
      * @param string $request
+     *
      * @return Response
      */
     public function getPaymentNotification($request);
@@ -94,6 +98,7 @@ interface PaymentInterface
      * Retrieve backend operations for specific transaction
      *
      * @param string $transactionId
+     *
      * @return array
      */
     public function getBackendOperations($transactionId);
@@ -101,25 +106,28 @@ interface PaymentInterface
     /**
      * Process backend operation
      *
-     * @param string $operation
      * @param string $orderNumber
-     * @param float $amount
+     * @param string $operation
+     * @param int    $amount
      */
     public function processBackendOperationsForOrder($orderNumber, $operation, $amount = 0);
 
     /**
-     * Returns payment specific transaction object
+     * Returns payment specific transaction object.
      *
      * @return \Wirecard\PaymentSdk\Transaction\Transaction
      */
     public function getTransaction();
 
     /**
-     * Returns transaction config
+     * Returns transaction config.
+     *
+     * @param ParameterBagInterface $parameterBag
+     * @param InstallerService      $installerService
      *
      * @return Config
      */
-    public function getTransactionConfig();
+    public function getTransactionConfig(ParameterBagInterface $parameterBag, InstallerService $installerService);
 
     /**
      * Returns payment specific configuration.

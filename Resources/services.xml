@@ -3,7 +3,7 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
-        <!-- Payment related -->
+        <!--
         <service id="wirecard_elastic_engine.payment_factory"
                  class="WirecardShopwareElasticEngine\Components\Services\PaymentFactory">
             <argument type="service" id="service_container"/>
@@ -17,6 +17,7 @@
                  class="WirecardShopwareElasticEngine\Components\Payments\PaypalPayment"
                  parent="wirecard_elastic_engine.payment">
         </service>
+        -->
         <service id="wirecard_elastic_engine.payment_handler"
                  class="WirecardShopwareElasticEngine\Components\Services\PaymentHandler">
             <argument type="service" id="pluginlogger"/>

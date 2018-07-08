@@ -42,10 +42,8 @@ use Shopware\Components\Plugin\Context\DeactivateContext;
 use Shopware\Components\Plugin\Context\InstallContext;
 use Shopware\Components\Plugin\Context\UninstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
-use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
-use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
-use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 
+use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
 use WirecardShopwareElasticEngine\Models\Transaction;
 use WirecardShopwareElasticEngine\Models\OrderTransaction;
 
@@ -89,12 +87,12 @@ class WirecardShopwareElasticEngine extends Plugin
     protected function updateDatabase()
     {
         $entityManager = $this->container->get('models');
-        $schemaTool = new SchemaTool($entityManager);
+        $schemaTool    = new SchemaTool($entityManager);
 
         $schemaTool->updateSchema(
             [
                 $entityManager->getClassMetadata(Transaction::class),
-                $entityManager->getClassMetadata(OrderTransaction::class)
+                $entityManager->getClassMetadata(OrderTransaction::class),
             ],
             true
         );
@@ -102,21 +100,11 @@ class WirecardShopwareElasticEngine extends Plugin
 
     protected function registerPayments()
     {
-        $installer = $this->container->get('shopware.plugin_payment_installer');
+        $installer      = $this->container->get('shopware.plugin_payment_installer');
+        $paymentFactory = new PaymentFactory();
 
-        foreach ($this->getSupportedPayments() as $payment) {
+        foreach ($paymentFactory->getSupportedPayments() as $payment) {
             $installer->createOrUpdate($payment->getName(), $payment->getPaymentOptions());
         }
-    }
-
-    /**
-     * @return PaymentInterface[]
-     */
-    protected function getSupportedPayments()
-    {
-        return [
-            //new CreditCardPayment(),
-            //new PaypalPayment()
-        ];
     }
 }

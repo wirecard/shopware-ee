@@ -43,7 +43,7 @@ use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
 
-use WirecardShopwareElasticEngine\Components\Data\OrderDetails;
+use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
 use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
@@ -79,7 +79,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     }
 
     /**
-     * Gets payment from `PaymentFactory`, assembles `OrderDetails` and executes the payment through the
+     * Gets payment from `PaymentFactory`, assembles the `OrderSummary` and executes the payment through the
      * `PaymentHandler` service. Further action depends on the response from the handler.
      *
      * @throws ArrayKeyNotFoundException
@@ -93,9 +93,13 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
         $payment        = $paymentFactory->create($this->getPaymentShortName());
 
-        $orderDetails = new OrderDetails(
+        $orderSummary = new OrderSummary(
             $payment,
-            new UserMapper($this->getUser()),
+            new UserMapper(
+                $this->getUser(),
+                $this->get('request')->getClientIp(),
+                $this->get('shopware_storefront.context_service')->getLocale()->getLocale()
+            ),
             new BasketMapper(
                 $this->getBasket(),
                 $this->getCurrencyShortName(),
@@ -107,15 +111,17 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $this->getRedirectRoute('return', $payment->getName()),
                 $this->getRedirectRoute('cancel', $payment->getName()),
                 $this->getRedirectRoute('failure', $payment->getName())
-            ),
-            $this->get('request')
+            )
         );
 
         /** @var PaymentHandler $handler */
         $handler = $this->get('wirecard_elastic_engine.payment_handler');
-        $handler->setOrderDetails($orderDetails);
+        $handler->setOrderSummary($orderSummary);
         $handler->setTransactionService(
-            new TransactionService($payment->getTransactionConfig(), $this->get('pluginlogger'))
+            new TransactionService($payment->getTransactionConfig(
+                $this->container->getParameterBag(),
+                $this->container->get('shopware.plugin_payment_installer')
+            ), $this->get('pluginlogger'))
         );
 
         $response = $handler->execute();
@@ -920,12 +926,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     /**
      * Important data of order for further processing in transaction get collected-
      *
-     * @return OrderDetails $paymentData
+     * @return OrderSummary $paymentData
      * @throws Exception
      */
     protected function getPaymentData()
     {
-        return new OrderDetails(
+        return new OrderSummary(
             null,
             $this->getUser(),
             $this->getBasket(),

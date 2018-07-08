@@ -33,7 +33,7 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 
 use Psr\Log\LoggerInterface;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Data\OrderDetails;
+use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 
 class PaymentHandler
@@ -44,9 +44,9 @@ class PaymentHandler
     protected $payment;
 
     /**
-     * @var OrderDetails
+     * @var OrderSummary
      */
-    protected $orderDetails;
+    protected $orderSummary;
 
     /**
      * @var TransactionService
@@ -68,7 +68,25 @@ class PaymentHandler
 
     public function execute()
     {
-        $this->getPayment()->processPayment($this->getOrderDetails(), $this->getTransactionService());
+        $transaction  = $this->getPayment()->getTransaction();
+        $orderSummary = $this->getOrderSummary();
+
+        $transaction->setRedirect($orderSummary->getRedirect());
+        $transaction->setAmount($orderSummary->getAmount());
+        $transaction->setNotificationUrl(null);
+
+        if ($this->getPayment()->getPaymentConfig()->sendBasket()) {
+            $transaction->setBasket($orderSummary->getBasketMapper()->getWirecardBasket());
+        }
+
+        if ($this->getPayment()->getPaymentConfig()->hasFraudPrevention()) {
+            $transaction->setIpAddress($orderSummary->getUserMapper()->getClientIp());
+            $transaction->setAccountHolder($orderSummary->getUserMapper()->getWirecardBillingAccountHolder());
+            $transaction->setShipping($orderSummary->getUserMapper()->getWirecardShippingAccountHolder());
+            $transaction->setLocale($orderSummary->getUserMapper()->getLocale());
+        }
+
+        $this->getPayment()->processPayment($orderSummary, $this->getTransactionService());
     }
 
     /**
@@ -88,19 +106,19 @@ class PaymentHandler
     }
 
     /**
-     * @param OrderDetails $orderDetails
+     * @param OrderSummary $orderSummary
      */
-    public function setOrderDetails(OrderDetails $orderDetails)
+    public function setOrderSummary(OrderSummary $orderSummary)
     {
-        $this->orderDetails = $orderDetails;
+        $this->orderSummary = $orderSummary;
     }
 
     /**
-     * @return mixed
+     * @return OrderSummary
      */
-    public function getOrderDetails()
+    public function getOrderSummary()
     {
-        return $this->getOrderDetails();
+        return $this->orderSummary;
     }
 
     /**
