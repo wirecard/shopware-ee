@@ -75,8 +75,11 @@ class PaymentHandler
      * @param EntityManagerInterface      $em
      * @param LoggerInterface             $logger
      */
-    public function __construct(\Shopware_Components_Config $config, EntityManagerInterface $em, LoggerInterface $logger)
-    {
+    public function __construct(
+        \Shopware_Components_Config $config,
+        EntityManagerInterface $em,
+        LoggerInterface $logger
+    ) {
         $this->config = $config;
         $this->em     = $em;
         $this->logger = $logger;
@@ -87,7 +90,7 @@ class PaymentHandler
      */
     public function execute()
     {
-        $transaction  = $this->getPayment()->getTransaction();
+        $transaction = $this->getPayment()->getTransaction();
         $orderSummary = $this->getOrderSummary();
 
         $transaction->setRedirect($orderSummary->getRedirect());
