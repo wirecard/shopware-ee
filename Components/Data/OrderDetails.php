@@ -31,6 +31,7 @@
 
 namespace WirecardShopwareElasticEngine\Components\Data;
 
+use Symfony\Component\HttpFoundation\Request;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
@@ -70,6 +71,11 @@ class OrderDetails
      */
     protected $userMapper;
 
+    /**
+     * @var Request
+     */
+    protected $request;
+
 
     /**
      * OrderDetails constructor.
@@ -79,19 +85,22 @@ class OrderDetails
      * @param BasketMapper     $basketMapper
      * @param Amount           $amount
      * @param Redirect         $redirect
+     * @param Request          $request
      */
     public function __construct(
         PaymentInterface $payment,
         UserMapper $userMapper,
         BasketMapper $basketMapper,
         Amount $amount,
-        Redirect $redirect
+        Redirect $redirect,
+        Request $request
     ) {
         $this->payment    = $payment;
         $this->userMapper = $userMapper;
         $this->amount     = $amount;
         $this->basket     = $basketMapper;
         $this->redirect   = $redirect;
+        $this->request    = $request;
     }
 
     /**
@@ -132,5 +141,13 @@ class OrderDetails
     public function getRedirect()
     {
         return $this->redirect;
+    }
+
+    /**
+     * @return Request
+     */
+    public function getRequest()
+    {
+        return $this->request;
     }
 }
