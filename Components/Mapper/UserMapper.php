@@ -62,13 +62,27 @@ class UserMapper extends ArrayMapper
     const USER_SHIPPING_ADDRESS_ADDITIONAL = 'additionalAddressLine1';
 
     /**
+     * @var string
+     */
+    protected $clientIp;
+
+    /**
+     * @var string
+     */
+    protected $locale;
+
+    /**
      * UserMapper constructor.
      *
      * @param array $shopwareUser
+     * @param       $clientIp
+     * @param       $locale
      */
-    public function __construct(array $shopwareUser)
+    public function __construct(array $shopwareUser, $clientIp, $locale)
     {
         $this->arrayEntity = $shopwareUser;
+        $this->clientIp    = $clientIp;
+        $this->locale      = $locale;
     }
 
     /**
@@ -373,5 +387,21 @@ class UserMapper extends ArrayMapper
     public function getShippingAddressAdditional()
     {
         return $this->getShippingAddressDetail(self::USER_SHIPPING_ADDRESS_ADDITIONAL);
+    }
+
+    /**
+     * @return string
+     */
+    public function getClientIp()
+    {
+        return $this->clientIp;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLocale()
+    {
+        return $this->locale;
     }
 }
