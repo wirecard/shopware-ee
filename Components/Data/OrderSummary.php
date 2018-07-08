@@ -70,11 +70,6 @@ class OrderSummary
      */
     protected $userMapper;
 
-    /**
-     * @var string
-     */
-    protected $descriptor;
-
 
     /**
      * OrderDetails constructor.
@@ -137,18 +132,5 @@ class OrderSummary
     public function getRedirect()
     {
         return $this->redirect;
-    }
-
-    /**
-     * @param string $descriptor
-     */
-    public function setDescriptor($descriptor)
-    {
-        $this->descriptor = $descriptor;
-    }
-
-    public function getDescriptor()
-    {
-        return $this->descriptor;
     }
 }
