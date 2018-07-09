@@ -29,5 +29,4 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-require_once __DIR__ . '/../../../../../tests/Functional/bootstrap.php';
-
+require_once (getenv('SHOPWARE_TESTS_BASEDIR') ?: __DIR__ . '/../../../../..') . '/tests/Functional/bootstrap.php';
