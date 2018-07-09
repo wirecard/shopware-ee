@@ -56,7 +56,7 @@ abstract class ModelTestCase extends \PHPUnit_Framework_TestCase
             throw new \Exception('Getter or setter not defined for ' . get_class($this->model) . ' (' . $property . ')');
         }
 
-        if($assertInitialNull) {
+        if ($assertInitialNull) {
             $this->assertNull($this->model->$getter());
         }
 

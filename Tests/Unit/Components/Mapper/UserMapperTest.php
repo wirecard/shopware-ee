@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Mapper;
+namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Mapper;
 
 use PHPUnit\Framework\TestCase;
 use Wirecard\PaymentSdk\Entity\AccountHolder;

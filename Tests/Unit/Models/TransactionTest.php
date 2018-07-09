@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Payments;
+namespace WirecardShopwareElasticEngine\Tests\Unit\Models;
 
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
