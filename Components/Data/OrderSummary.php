@@ -70,7 +70,6 @@ class OrderSummary
      */
     protected $userMapper;
 
-
     /**
      * OrderDetails constructor.
      *

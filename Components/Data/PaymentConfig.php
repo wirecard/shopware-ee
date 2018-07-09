@@ -33,7 +33,9 @@ namespace WirecardShopwareElasticEngine\Components\Data;
 
 class PaymentConfig
 {
-    /** @var string */
+    /**
+     * @var string
+     */
     protected $baseUrl;
 
     /**
@@ -79,9 +81,9 @@ class PaymentConfig
     /**
      * PaymentConfig constructor.
      *
-     * @param $baseUrl
-     * @param $httpUser
-     * @param $httpPassword
+     * @param string $baseUrl
+     * @param string $httpUser
+     * @param string $httpPassword
      */
     public function __construct($baseUrl, $httpUser, $httpPassword)
     {
@@ -115,7 +117,7 @@ class PaymentConfig
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getTransactionMAID()
     {
@@ -123,7 +125,7 @@ class PaymentConfig
     }
 
     /**
-     * @param $transactionMAID
+     * @param string $transactionMAID
      */
     public function setTransactionMAID($transactionMAID)
     {
@@ -131,7 +133,7 @@ class PaymentConfig
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getTransactionSecret()
     {
@@ -139,7 +141,7 @@ class PaymentConfig
     }
 
     /**
-     * @param $transactionSecret
+     * @param string $transactionSecret
      */
     public function setTransactionSecret($transactionSecret)
     {
@@ -147,7 +149,7 @@ class PaymentConfig
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getTransactionType()
     {
@@ -155,7 +157,7 @@ class PaymentConfig
     }
 
     /**
-     * @param $transactionType
+     * @param string $transactionType
      */
     public function setTransactionType($transactionType)
     {
@@ -163,7 +165,7 @@ class PaymentConfig
     }
 
     /**
-     * @return bool
+     * @return bool|null
      */
     public function sendBasket()
     {
@@ -171,7 +173,7 @@ class PaymentConfig
     }
 
     /**
-     * @param $sendBasket
+     * @param bool $sendBasket
      */
     public function setSendBasket($sendBasket)
     {
@@ -179,7 +181,7 @@ class PaymentConfig
     }
 
     /**
-     * @return bool
+     * @return bool|null
      */
     public function hasFraudPrevention()
     {
@@ -187,7 +189,7 @@ class PaymentConfig
     }
 
     /**
-     * @param $fraudPrevention
+     * @param bool $fraudPrevention
      */
     public function setFraudPrevention($fraudPrevention)
     {
@@ -195,7 +197,7 @@ class PaymentConfig
     }
 
     /**
-     * @return bool
+     * @return bool|null
      */
     public function sendDescriptor()
     {
@@ -203,7 +205,7 @@ class PaymentConfig
     }
 
     /**
-     * @param $sendDescriptor
+     * @param bool $sendDescriptor
      */
     public function setSendDescriptor($sendDescriptor)
     {
