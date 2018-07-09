@@ -29,35 +29,50 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Payments;
+namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Mapper;
 
-use Shopware\Components\Test\Plugin\TestCase;
+use PHPUnit\Framework\TestCase;
+use Wirecard\PaymentSdk\Entity\AccountHolder;
+use Wirecard\PaymentSdk\Entity\Address;
 use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
+use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 
 class UserMapperTest extends TestCase
 {
     protected $user = [
-        'billingaddress' => [
-            'city' => 'Footown',
-            'street' => 'Barstreet',
-            'zipcode' => 1337,
-            'additionalAddressLine1' => 'Hodor'
+        'firstname'       => 'First Name',
+        'lastname'        => 'Last Name',
+        'email'           => 'test@example.com',
+        'birthday'        => '1.1.1990',
+        'phone'           => '+43123456789',
+        'billingaddress'  => [
+            'city'                   => 'Footown',
+            'street'                 => 'Barstreet',
+            'zipcode'                => 1337,
+            'additionalAddressLine1' => 'Hodor',
         ],
         'shippingaddress' => [
-            'city' => 'Shippingfootown',
-            'street' => 'Shippingbarstreet',
-            'zipcode' => 2710,
-            'additionalAddressLine1' => 'Shodorpping'
+            'firstname'              => 'First Shipping',
+            'lastname'               => 'Last Shipping',
+            'phone'                  => '+43987654321',
+            'city'                   => 'Shippingfootown',
+            'street'                 => 'Shippingbarstreet',
+            'zipcode'                => 2710,
+            'additionalAddressLine1' => 'Shodorpping',
         ],
-        'additional' => [
+        'additional'      => [
             'countryShipping' => [
-                'countryiso' => 'DE'
+                'countryiso' => 'DE',
             ],
-            'country' => [
-                'countryiso' => 'AT'
-            ]
-        ]
+            'country'         => [
+                'countryiso' => 'AT',
+            ],
+        ],
     ];
+
+    protected $clientIp = '127.0.0.1';
+
+    protected $locale = 'de_DE';
 
     /**
      * @var UserMapper
@@ -66,27 +81,131 @@ class UserMapperTest extends TestCase
 
     public function setUp()
     {
-        $this->mapper = new UserMapper($this->user);
+        $this->mapper = new UserMapper($this->user, $this->clientIp, $this->locale);
+    }
+
+    public function testGetShopwareUser()
+    {
+        $this->assertEquals($this->user, $this->mapper->getShopwareUser());
+    }
+
+    public function testGetWirecardBillingAccountHolder()
+    {
+        $this->assertEquals('First Name', $this->mapper->getFirstName());
+        $this->assertEquals('Last Name', $this->mapper->getLastName());
+        $this->assertEquals('test@example.com', $this->mapper->getEmail());
+        $this->assertEquals('+43123456789', $this->mapper->getPhone());
+        $this->assertEquals(new \DateTime('1.1.1990'), $this->mapper->getBirthday());
+
+        $account = $this->mapper->getWirecardBillingAccountHolder();
+        $this->assertInstanceOf(AccountHolder::class, $account);
+        $this->assertEquals([
+            'first-name'    => $this->mapper->getFirstName(),
+            'last-name'     => $this->mapper->getLastName(),
+            'email'         => $this->mapper->getEmail(),
+            'date-of-birth' => $this->mapper->getBirthday()->format('d-m-Y'),
+            'phone'         => $this->mapper->getPhone(),
+            'address'       => [
+                'street1'     => 'Barstreet',
+                'city'        => 'Footown',
+                'country'     => 'AT',
+                'postal-code' => 1337,
+                'street2'     => 'Hodor',
+            ],
+        ], $account->mappedProperties());
+    }
+
+    public function testGetWirecardBillingAddress()
+    {
+        $address = $this->mapper->getWirecardBillingAddress();
+        $this->assertInstanceOf(Address::class, $address);
+        $this->assertEquals([
+            'street1'     => 'Barstreet',
+            'city'        => 'Footown',
+            'country'     => 'AT',
+            'postal-code' => 1337,
+            'street2'     => 'Hodor',
+        ], $address->mappedProperties());
+    }
+
+    public function testGetWirecardShippingAccountHolder()
+    {
+        $this->assertEquals('First Shipping', $this->mapper->getShippingFirstName());
+        $this->assertEquals('Last Shipping', $this->mapper->getShippingLastName());
+        $this->assertEquals('+43987654321', $this->mapper->getShippingPhone());
+
+        $account = $this->mapper->getWirecardShippingAccountHolder();
+        $this->assertInstanceOf(AccountHolder::class, $account);
+        $this->assertEquals([
+            'first-name' => $this->mapper->getShippingFirstName(),
+            'last-name'  => $this->mapper->getShippingLastName(),
+            'phone'      => $this->mapper->getShippingPhone(),
+            'address'    => [
+                'street1'     => 'Shippingbarstreet',
+                'city'        => 'Shippingfootown',
+                'country'     => 'DE',
+                'postal-code' => 2710,
+                'street2'     => 'Shodorpping',
+            ],
+        ], $account->mappedProperties());
+    }
+
+    public function testGetWirecardShippingAddress()
+    {
+        $address = $this->mapper->getWirecardShippingAddress();
+        $this->assertInstanceOf(Address::class, $address);
+        $this->assertEquals([
+            'street1'     => 'Shippingbarstreet',
+            'city'        => 'Shippingfootown',
+            'country'     => 'DE',
+            'postal-code' => 2710,
+            'street2'     => 'Shodorpping',
+        ], $address->mappedProperties());
+    }
+
+    public function testGetBillingAddress()
+    {
+        $this->assertEquals($this->user['billingaddress'], $this->mapper->getBillingAddress());
+
+        $this->expectException(ArrayKeyNotFoundException::class);
+        $mapper = new UserMapper([], '', '');
+        $mapper->getBillingAddress();
     }
 
     public function testGetBillingCity()
     {
         $this->assertEquals($this->user['billingaddress']['city'], $this->mapper->getBillingAddressCity());
+
+        $this->expectException(ArrayKeyNotFoundException::class);
+        $mapper = new UserMapper([], '', '');
+        $mapper->getBillingAddressCity();
     }
 
     public function testGetBillingStreet()
     {
         $this->assertEquals($this->user['billingaddress']['street'], $this->mapper->getBillingAddressStreet());
+
+        $this->expectException(ArrayKeyNotFoundException::class);
+        $mapper = new UserMapper([], '', '');
+        $mapper->getBillingAddressStreet();
     }
 
     public function testGetBillingZip()
     {
         $this->assertEquals($this->user['billingaddress']['zipcode'], $this->mapper->getBillingAddressZip());
+
+        $this->expectException(ArrayKeyNotFoundException::class);
+        $mapper = new UserMapper([], '', '');
+        $mapper->getBillingAddressZip();
     }
 
-    public function getBillingAdditionalAddress()
+    public function getBillingAddressAdditional()
     {
         $this->assertEquals($this->user['billingaddress']['additionalAddressLine1'], $this->mapper->getBillingAddressAdditional());
+
+        $this->expectException(ArrayKeyNotFoundException::class);
+        $mapper = new UserMapper([], '', '');
+        $mapper->getBillingAddressAdditional();
     }
 
     public function testGetCountryIso()
@@ -94,28 +213,63 @@ class UserMapperTest extends TestCase
         $this->assertEquals($this->user['additional']['country']['countryiso'], $this->mapper->getCountryIso());
     }
 
-    public function testGetShippingAddressCity()
+    public function testGetShippingAddress()
     {
         $this->assertEquals($this->user['shippingaddress']['city'], $this->mapper->getShippingAddressCity());
-    }
-
-    public function testGetShippingAddressStreet()
-    {
         $this->assertEquals($this->user['shippingaddress']['street'], $this->mapper->getShippingAddressStreet());
-    }
-
-    public function testGetShippingAddressZip()
-    {
         $this->assertEquals($this->user['shippingaddress']['zipcode'], $this->mapper->getShippingAddressZip());
-    }
-
-    public function testGetShippingAddressAdditional()
-    {
         $this->assertEquals($this->user['shippingaddress']['additionalAddressLine1'], $this->mapper->getShippingAddressAdditional());
+        $this->assertEquals($this->user['additional']['countryShipping']['countryiso'], $this->mapper->getShippingAddressCountryIso());
     }
 
-    public function testGetShippingAddressCountryIso()
+    public function testGetAdditional()
     {
-        $this->assertEquals($this->user['additional']['countryShipping']['countryiso'], $this->mapper->getShippingAddressCountryIso());
+        $this->assertEquals($this->user['additional'], $this->mapper->getAdditional());
+
+        $mapper = new UserMapper([], '', '');
+        $this->assertEquals([], $mapper->getAdditional());
+    }
+
+    public function testGetClientIp()
+    {
+        $this->assertEquals($this->clientIp, $this->mapper->getClientIp());
+    }
+
+    public function testGetLocale()
+    {
+        $this->assertEquals($this->locale, $this->mapper->getLocale());
+    }
+
+    public function testNullGetters()
+    {
+        $mapper = new UserMapper([], '', '');
+        $this->assertNull($mapper->getCountryIso());
+        $this->assertNull($mapper->getShippingAddressCity());
+        $this->assertNull($mapper->getShippingAddressStreet());
+        $this->assertNull($mapper->getShippingAddressZip());
+        $this->assertNull($mapper->getShippingAddressAdditional());
+        $this->assertNull($mapper->getShippingAddressCountryIso());
+
+        $mapper = new UserMapper([
+            'billingaddress'  => [],
+            'shippingaddress' => [],
+            'additional'      => [],
+        ], '', '');
+        $this->assertNull($mapper->getBillingAddressCity());
+        $this->assertNull($mapper->getBillingAddressStreet());
+        $this->assertNull($mapper->getBillingAddressZip());
+        $this->assertNull($mapper->getBillingAddressAdditional());
+        $this->assertNull($mapper->getCountryIso());
+        $this->assertNull($mapper->getShippingAddressCity());
+        $this->assertNull($mapper->getShippingAddressStreet());
+        $this->assertNull($mapper->getShippingAddressZip());
+        $this->assertNull($mapper->getShippingAddressAdditional());
+        $this->assertNull($mapper->getShippingAddressCountryIso());
+
+        $mapper = new UserMapper([
+            'additional' => ['countryShipping' => [], 'country' => []],
+        ], '', '');
+        $this->assertNull($mapper->getCountryIso());
+        $this->assertNull($mapper->getShippingAddressCountryIso());
     }
 }
