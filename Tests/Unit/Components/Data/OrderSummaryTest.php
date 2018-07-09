@@ -33,7 +33,9 @@ namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Data;
 
 use PHPUnit\Framework\TestCase;
 use Wirecard\PaymentSdk\Entity\Amount;
+use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
+use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
 use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
 use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
@@ -62,5 +64,49 @@ class OrderSummaryTest extends TestCase
         $this->assertSame($user, $order->getUserMapper());
         $this->assertSame($basket, $order->getBasketMapper());
         $this->assertSame($amount, $order->getAmount());
+    }
+
+    public function testToArray()
+    {
+        $paymentConfig = $this->createMock(PaymentConfig::class);
+        $paymentConfig->method('toArray')->willReturn(['paymentConfig']);
+
+        $transaction = $this->createMock(Transaction::class);
+        $transaction->method('mappedProperties')->willReturn(['transaction']);
+
+        /** @var PaymentInterface|\PHPUnit_Framework_MockObject_MockObject $payment */
+        $payment = $this->createMock(PaymentInterface::class);
+        $payment->method('getName')->willReturn('paymentName');
+        $payment->method('getPaymentConfig')->willReturn($paymentConfig);
+        $payment->method('getTransaction')->willReturn($transaction);
+
+        /** @var UserMapper|\PHPUnit_Framework_MockObject_MockObject $user */
+        $user = $this->createMock(UserMapper::class);
+        $user->method('toArray')->willReturn(['user']);
+
+        /** @var BasketMapper|\PHPUnit_Framework_MockObject_MockObject $basket */
+        $basket = $this->createMock(BasketMapper::class);
+        $basket->method('toArray')->willReturn(['basket']);
+
+        /** @var Amount|\PHPUnit_Framework_MockObject_MockObject $amount */
+        $amount = $this->createMock(Amount::class);
+        $amount->method('mappedProperties')->willReturn(['amount']);
+
+        $order = new OrderSummary(
+            $payment,
+            $user,
+            $basket,
+            $amount
+        );
+        $this->assertEquals([
+            'payment' => [
+                'name'          => 'paymentName',
+                'paymentConfig' => ['paymentConfig'],
+                'transaction'   => ['transaction'],
+            ],
+            'user'    => ['user'],
+            'basket'  => ['basket'],
+            'amount'  => ['amount'],
+        ], $order->toArray());
     }
 }

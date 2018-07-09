@@ -240,6 +240,36 @@ class UserMapperTest extends TestCase
         $this->assertEquals($this->locale, $this->mapper->getLocale());
     }
 
+    public function testToArray()
+    {
+        $this->assertEquals([
+            'firstName'                 => 'First Name',
+            'lastName'                  => 'Last Name',
+            'email'                     => 'test@example.com',
+            'birthday'                  => new \DateTime('1990-01-01'),
+            'phone'                     => '+43123456789',
+            'additional'                => [
+                'countryShipping' => ['countryiso' => 'DE'],
+                'country'         => ['countryiso' => 'AT'],
+            ],
+            'countryIso'                => 'AT',
+            'billingAddressCity'        => 'Footown',
+            'billingAddressStreet'      => 'Barstreet',
+            'billingAddressZip'         => 1337,
+            'billingAddressAdditional'  => 'Hodor',
+            'shippingFirstName'         => 'First Shipping',
+            'shippingLastName'          => 'Last Shipping',
+            'shippingPhone'             => '+43987654321',
+            'shippingCountryIso'        => 'DE',
+            'shippingAddressCity'       => 'Shippingfootown',
+            'shippingAddressStreet'     => 'Shippingbarstreet',
+            'shippingAddressZip'        => 2710,
+            'shippingAddressAdditional' => 'Shodorpping',
+            'clientIp'                  => '127.0.0.1',
+            'locale'                    => 'de_DE',
+        ], $this->mapper->toArray());
+    }
+
     public function testNullGetters()
     {
         $mapper = new UserMapper([], '', '');

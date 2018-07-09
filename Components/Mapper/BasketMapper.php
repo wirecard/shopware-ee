@@ -209,6 +209,7 @@ class BasketMapper extends ArrayMapper
 
     /**
      * @return array
+     * @throws ArrayKeyNotFoundException
      */
     public function toArray()
     {

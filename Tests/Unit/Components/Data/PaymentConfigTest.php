@@ -48,7 +48,7 @@ class PaymentConfigTest extends TestCase
 
     public function testOptionalValues()
     {
-        $config = new PaymentConfig('', '', '');
+        $config = new PaymentConfig('https://api-test.wirecard.com', 'foo', 'bar');
 
         $this->assertNull($config->getTransactionMAID());
         $this->assertNull($config->getTransactionSecret());
@@ -93,5 +93,16 @@ class PaymentConfigTest extends TestCase
         $this->assertFalse($config->hasFraudPrevention());
         $this->assertFalse($config->sendBasket());
         $this->assertFalse($config->sendDescriptor());
+
+        $this->assertEquals([
+            'baseUrl'         => 'https://api-test.wirecard.com',
+            'httpUser'        => 'foo',
+            'httpPassword'    => 'bar',
+            'transactionMAID' => 'a1a2a3a4-b1b2-c1c2-d1d2-e1e2e3e4e5e6',
+            'transactionType' => Payment::TRANSACTION_TYPE_PURCHASE,
+            'sendBasket'      => false,
+            'fraudPrevention' => false,
+            'sendDescriptor'  => false,
+        ], $config->toArray());
     }
 }

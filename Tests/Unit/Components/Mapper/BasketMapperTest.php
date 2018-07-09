@@ -113,6 +113,8 @@ class BasketMapperTest extends TestCase
             'Shipping - shipping - 10 EUR - 2',
         ]), $mapper->getBasketText());
         $this->assertInstanceOf(Basket::class, $mapper->getWirecardBasket());
+
+        $this->assertEquals(['content' => $basketArray['content']], $mapper->toArray());
     }
 
     public function testBasketArticleNotAvailable()
