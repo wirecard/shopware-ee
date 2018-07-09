@@ -34,15 +34,11 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Wirecard\PaymentSdk\Entity\Redirect;
-use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
-use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
-use WirecardShopwareElasticEngine\Components\Actions\FailureAction;
 use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
-use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Models\OrderNumberAssignment;
 
@@ -110,7 +106,7 @@ class PaymentHandler
                        ->getPayment()
                        ->processPayment($this->getOrderSummary(), $this->getTransactionService());
 
-        // todo: logging (OrderSummary)
+        $this->logger->debug('Payment processing execution', $this->getOrderSummary()->toArray());
 
         if ($action !== null) {
             return $action;
