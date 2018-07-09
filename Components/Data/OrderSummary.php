@@ -32,7 +32,6 @@
 namespace WirecardShopwareElasticEngine\Components\Data;
 
 use Wirecard\PaymentSdk\Entity\Amount;
-use Wirecard\PaymentSdk\Entity\Redirect;
 use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
 use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
@@ -61,11 +60,6 @@ class OrderSummary
     protected $currency;
 
     /**
-     * @var Redirect
-     */
-    protected $redirect;
-
-    /**
      * @var UserMapper
      */
     protected $userMapper;
@@ -77,20 +71,17 @@ class OrderSummary
      * @param UserMapper       $userMapper
      * @param BasketMapper     $basketMapper
      * @param Amount           $amount
-     * @param Redirect         $redirect
      */
     public function __construct(
         PaymentInterface $payment,
         UserMapper $userMapper,
         BasketMapper $basketMapper,
-        Amount $amount,
-        Redirect $redirect
+        Amount $amount
     ) {
         $this->payment    = $payment;
         $this->userMapper = $userMapper;
         $this->amount     = $amount;
         $this->basket     = $basketMapper;
-        $this->redirect   = $redirect;
     }
 
     /**
@@ -123,13 +114,5 @@ class OrderSummary
     public function getAmount()
     {
         return $this->amount;
-    }
-
-    /**
-     * @return Redirect
-     */
-    public function getRedirect()
-    {
-        return $this->redirect;
     }
 }
