@@ -76,7 +76,7 @@ class PaymentConfig
     /**
      * @var bool
      */
-    protected $descriptor;
+    protected $sendDescriptor;
 
     /**
      * PaymentConfig constructor.
@@ -165,11 +165,11 @@ class PaymentConfig
     }
 
     /**
-     * @return bool|null
+     * @return bool
      */
     public function sendBasket()
     {
-        return $this->sendBasket;
+        return (bool)$this->sendBasket;
     }
 
     /**
@@ -181,11 +181,11 @@ class PaymentConfig
     }
 
     /**
-     * @return bool|null
+     * @return bool
      */
     public function hasFraudPrevention()
     {
-        return $this->fraudPrevention;
+        return (bool)$this->fraudPrevention;
     }
 
     /**
@@ -197,11 +197,11 @@ class PaymentConfig
     }
 
     /**
-     * @return bool|null
+     * @return bool
      */
     public function sendDescriptor()
     {
-        return $this->descriptor;
+        return (bool)$this->sendDescriptor;
     }
 
     /**
@@ -209,6 +209,6 @@ class PaymentConfig
      */
     public function setSendDescriptor($sendDescriptor)
     {
-        $this->sendBasket = $sendDescriptor;
+        $this->sendDescriptor = $sendDescriptor;
     }
 }
