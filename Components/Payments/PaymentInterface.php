@@ -59,18 +59,35 @@ interface PaymentInterface
     public function getPosition();
 
     /**
+     * Returns the config (in form of an array) for registering payments in Shopware.
+     *
      * @return array
      */
     public function getPaymentOptions();
 
     /**
-     * Start Transaction
-     *
-     * @param array $paymentData
+     * Returns payment specific transaction object.
      *
      * @return \Wirecard\PaymentSdk\Transaction\Transaction
      */
-    public function createTransaction(array $paymentData);
+    public function getTransaction();
+
+    /**
+     * Returns transaction config.
+     *
+     * @param ParameterBagInterface $parameterBag
+     * @param InstallerService      $installerService
+     *
+     * @return Config
+     */
+    public function getTransactionConfig(ParameterBagInterface $parameterBag, InstallerService $installerService);
+
+    /**
+     * Returns payment specific configuration.
+     *
+     * @return PaymentConfig
+     */
+    public function getPaymentConfig();
 
     /**
      * Payment specific processing. This method either returns an `Action` (which is directly returned to the handler)
@@ -102,6 +119,15 @@ interface PaymentInterface
 //    public function getPaymentNotification($request);
 
     /**
+     * Start Transaction
+     *
+     * @param array $paymentData
+     *
+     * @return \Wirecard\PaymentSdk\Transaction\Transaction
+     */
+    public function createTransaction(array $paymentData);
+
+    /**
      * Retrieve backend operations for specific transaction
      *
      * @param string $transactionId
@@ -118,28 +144,4 @@ interface PaymentInterface
      * @param int    $amount
      */
     public function processBackendOperationsForOrder($orderNumber, $operation, $amount = 0);
-
-    /**
-     * Returns payment specific transaction object.
-     *
-     * @return \Wirecard\PaymentSdk\Transaction\Transaction
-     */
-    public function getTransaction();
-
-    /**
-     * Returns transaction config.
-     *
-     * @param ParameterBagInterface $parameterBag
-     * @param InstallerService      $installerService
-     *
-     * @return Config
-     */
-    public function getTransactionConfig(ParameterBagInterface $parameterBag, InstallerService $installerService);
-
-    /**
-     * Returns payment specific configuration.
-     *
-     * @return PaymentConfig
-     */
-    public function getPaymentConfig();
 }
