@@ -55,11 +55,6 @@ class OrderSummary
     protected $amount;
 
     /**
-     * @var string
-     */
-    protected $currency;
-
-    /**
      * @var UserMapper
      */
     protected $userMapper;
