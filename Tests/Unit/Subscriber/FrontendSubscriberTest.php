@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Data;
+namespace WirecardShopwareElasticEngine\Tests\Unit\Subscriber;
 
 use PHPUnit\Framework\TestCase;
 use WirecardShopwareElasticEngine\Subscriber\FrontendSubscriber;
