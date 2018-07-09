@@ -56,8 +56,8 @@ use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Exception\BasketException;
 use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
+use WirecardShopwareElasticEngine\Models\OrderNumberAssignment;
 use WirecardShopwareElasticEngine\Models\Transaction;
-use WirecardShopwareElasticEngine\Models\OrderTransaction;
 
 use Wirecard\PaymentSdk\Mapper\ResponseMapper;
 
@@ -470,12 +470,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 }
 
                 $elasticEngineTransaction = Shopware()->Models()
-                                                      ->getRepository(Transaction::class)
+                                                      ->getRepository(OrderNumberAssignment::class)
                                                       ->findOneBy(['id' => $wirecardOrderNumber]);
             } catch (\Exception $e) {
                 $requestId                = $response->getRequestId();
                 $elasticEngineTransaction = Shopware()->Models()
-                                                      ->getRepository(Transaction::class)
+                                                      ->getRepository(OrderNumberAssignment::class)
                                                       ->findOneBy(['requestId' => $requestId]);
             }
 
@@ -491,14 +491,14 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $elasticEngineTransaction->setReturnResponse(serialize($response->getData()));
             $paymentStatus = intval($elasticEngineTransaction->getPaymentStatus());
 
-            $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
+            $orderTransaction = Shopware()->Models()->getRepository(Transaction::class)
                                           ->findOneBy([
                                               'transactionId'       => $transactionId,
                                               'parentTransactionId' => $transactionId,
                                           ]);
 
             if (! $orderTransaction) {
-                $orderTransaction = new OrderTransaction();
+                $orderTransaction = new Transaction();
                 $orderTransaction->setParentTransactionId($transactionId);
                 $orderTransaction->setTransactionId($transactionId);
                 $orderTransaction->setProviderTransactionId($providerTransactionId);
@@ -535,7 +535,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                             $em->getConfiguration()
                         );
                     }
-                    $orderTransaction = $em->getRepository(OrderTransaction::class)
+                    $orderTransaction = $em->getRepository(Transaction::class)
                                            ->findOneBy([
                                                'transactionId'       => $transactionId,
                                                'parentTransactionId' => $transactionId,
@@ -582,7 +582,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     }
                     $this->container->get('pluginlogger')->info('duplicate entry on OrderTransaction');
 
-                    $orderTransaction = $em->getRepository(OrderTransaction::class)
+                    $orderTransaction = $em->getRepository(Transaction::class)
                                            ->findOneBy([
                                                'transactionId'       => $transactionId,
                                                'parentTransactionId' => $transactionId,
@@ -707,7 +707,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             }
 
             $elasticEngineTransaction = Shopware()->Models()
-                                                  ->getRepository(Transaction::class)
+                                                  ->getRepository(OrderNumberAssignment::class)
                                                   ->findOneBy([
                                                       'id' => $wirecardOrderNumber,
                                                   ]);
@@ -723,14 +723,14 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $elasticEngineTransaction->setPaymentStatus($paymentStatusId);
             Shopware()->Models()->flush();
 
-            $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
+            $orderTransaction = Shopware()->Models()->getRepository(Transaction::class)
                                           ->findOneBy([
                                               'transactionId'       => $transactionId,
                                               'parentTransactionId' => $transactionId,
                                           ]);
 
             if (! $orderTransaction) {
-                $orderTransaction = new OrderTransaction();
+                $orderTransaction = new Transaction();
                 $orderTransaction->setParentTransactionId($transactionId);
                 $orderTransaction->setTransactionId($transactionId);
                 $orderTransaction->setProviderTransactionId($providerTransactionId);
@@ -757,7 +757,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                         $em->getConfiguration()
                     );
                 }
-                $orderTransaction = $em->getRepository(OrderTransaction::class)
+                $orderTransaction = $em->getRepository(Transaction::class)
                                        ->findOneBy([
                                            'transactionId'       => $transactionId,
                                            'parentTransactionId' => $transactionId,
@@ -832,7 +832,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $response->getParentTransactionId() :
                 $request['transaction'];
 
-            $elasticEngineTransaction = Shopware()->Models()->getRepository(Transaction::class)
+            $elasticEngineTransaction = Shopware()->Models()->getRepository(OrderNumberAssignment::class)
                                                   ->findOneBy(['transactionId' => $parentTransactionId]);
 
             $orderNumber          = $elasticEngineTransaction->getOrderNumber();
@@ -846,7 +846,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $amount   = $notificationResponse['requested-amount'];
             $currency = $notificationResponse['currency'];
 
-            $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
+            $orderTransaction = Shopware()->Models()->getRepository(Transaction::class)
                                           ->findOneBy([
                                               'transactionId'       => $transactionId,
                                               'parentTransactionId' => $parentTransactionId,
@@ -870,7 +870,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
 
             if (! $orderTransaction) {
-                $orderTransaction = new OrderTransaction();
+                $orderTransaction = new Transaction();
                 $orderTransaction->setOrderNumber($orderNumber);
                 $orderTransaction->setParentTransactionId($parentTransactionId);
                 $orderTransaction->setTransactionId($transactionId);
@@ -894,7 +894,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     );
                 }
                 $this->container->get('pluginlogger')->info('duplicate entry on OrderTransaction');
-                $orderTransaction = $em->getRepository(OrderTransaction::class)
+                $orderTransaction = $em->getRepository(Transaction::class)
                                        ->findOneBy([
                                            'transactionId'       => $transactionId,
                                            'parentTransactionId' => $parentTransactionId,

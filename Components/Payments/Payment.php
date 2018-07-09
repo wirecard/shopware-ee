@@ -54,8 +54,8 @@ use Wirecard\PaymentSdk\Transaction\Reservable;
 use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
-use WirecardShopwareElasticEngine\Models\OrderTransaction;
 use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardShopwareElasticEngine\Models\OrderNumberAssignment;
 use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
 
 abstract class Payment implements PaymentInterface
@@ -206,7 +206,7 @@ abstract class Payment implements PaymentInterface
      */
     public function createElasticEngineTransaction($basketSignature = null)
     {
-        $transactionModel = new Transaction();
+        $transactionModel = new OrderNumberAssignment();
         if ($basketSignature) {
             $transactionModel->setBasketSignature($basketSignature);
         }
@@ -232,7 +232,7 @@ abstract class Payment implements PaymentInterface
         }
 
         $transactionModel = Shopware()->Models()
-                                      ->getRepository(Transaction::class)
+                                      ->getRepository(OrderNumberAssignment::class)
                                       ->findOneBy(['id' => $this->orderNumber]);
 
         if (! $transactionModel) {
@@ -319,7 +319,7 @@ abstract class Payment implements PaymentInterface
      */
     protected function refundForOrder($orderNumber, $amount = 0, $currency = '')
     {
-        $elasticEngineTransaction = Shopware()->Models()->getRepository(Transaction::class)
+        $elasticEngineTransaction = Shopware()->Models()->getRepository(OrderNumberAssignment::class)
                                               ->findOneBy(['orderNumber' => $orderNumber]);
 
         $parentTransactionId = $elasticEngineTransaction->getTransactionId();
@@ -364,13 +364,13 @@ abstract class Payment implements PaymentInterface
             $transactionId         = $response->getTransactionId();
             $providerTransactionId = $response->getProviderTransactionId() ? $response->getProviderTransactionId() : '';
 
-            $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
+            $orderTransaction = Shopware()->Models()->getRepository(Transaction::class)
                                           ->findOneBy(['transactionId'       => $parentTransactionId,
                                                        'parentTransactionId' => $transactionId,
                                           ]);
 
             if (! $orderTransaction) {
-                $orderTransaction = new OrderTransaction();
+                $orderTransaction = new Transaction();
                 $orderTransaction->setOrderNumber($orderNumber);
                 $orderTransaction->setParentTransactionId($parentTransactionId);
                 $orderTransaction->setTransactionId($transactionId);
@@ -389,12 +389,12 @@ abstract class Payment implements PaymentInterface
         if ($response instanceof FailureResponse) {
             $rawData          = $response->getData();
             $transactionId    = $rawData['transaction-id'];
-            $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
+            $orderTransaction = Shopware()->Models()->getRepository(Transaction::class)
                                           ->findOneBy(['transactionId'       => $parentTransactionId,
                                                        'parentTransactionId' => $transactionId,
                                           ]);
             if (! $orderTransaction) {
-                $orderTransaction = new OrderTransaction();
+                $orderTransaction = new Transaction();
                 $orderTransaction->setOrderNumber($orderNumber);
                 $orderTransaction->setParentTransactionId($parentTransactionId);
                 $orderTransaction->setTransactionId($transactionId);
@@ -421,7 +421,7 @@ abstract class Payment implements PaymentInterface
      */
     protected function captureForOrder($orderNumber, $amount = 0, $currency = '')
     {
-        $elasticEngineTransaction = Shopware()->Models()->getRepository(Transaction::class)
+        $elasticEngineTransaction = Shopware()->Models()->getRepository(OrderNumberAssignment::class)
                                               ->findOneBy(['orderNumber' => $orderNumber]);
 
         $parentTransactionId = $elasticEngineTransaction->getTransactionId();
@@ -464,13 +464,13 @@ abstract class Payment implements PaymentInterface
             $transactionId         = $response->getTransactionId();
             $providerTransactionId = $response->getProviderTransactionId() ? $response->getProviderTransactionId() : '';
 
-            $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
+            $orderTransaction = Shopware()->Models()->getRepository(Transaction::class)
                                           ->findOneBy(['transactionId'       => $parentTransactionId,
                                                        'parentTransactionId' => $transactionId,
                                           ]);
 
             if (! $orderTransaction) {
-                $orderTransaction = new OrderTransaction();
+                $orderTransaction = new Transaction();
                 $orderTransaction->setOrderNumber($orderNumber);
                 $orderTransaction->setParentTransactionId($parentTransactionId);
                 $orderTransaction->setTransactionId($transactionId);
@@ -489,12 +489,12 @@ abstract class Payment implements PaymentInterface
         if ($response instanceof FailureResponse) {
             $rawData          = $response->getData();
             $transactionId    = $rawData['transaction-id'];
-            $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
+            $orderTransaction = Shopware()->Models()->getRepository(Transaction::class)
                                           ->findOneBy(['transactionId'       => $parentTransactionId,
                                                        'parentTransactionId' => $transactionId,
                                           ]);
             if (! $orderTransaction) {
-                $orderTransaction = new OrderTransaction();
+                $orderTransaction = new Transaction();
                 $orderTransaction->setOrderNumber($orderNumber);
                 $orderTransaction->setParentTransactionId($parentTransactionId);
                 $orderTransaction->setTransactionId($transactionId);
@@ -519,7 +519,7 @@ abstract class Payment implements PaymentInterface
      */
     protected function cancelOrder($orderNumber)
     {
-        $elasticEngineTransaction = Shopware()->Models()->getRepository(Transaction::class)
+        $elasticEngineTransaction = Shopware()->Models()->getRepository(OrderNumberAssignment::class)
                                               ->findOneBy(['orderNumber' => $orderNumber]);
 
         $parentTransactionId = $elasticEngineTransaction->getTransactionId();
@@ -557,13 +557,13 @@ abstract class Payment implements PaymentInterface
             $transactionId         = $response->getTransactionId();
             $providerTransactionId = $response->getProviderTransactionId() ? $response->getProviderTransactionId() : '';
 
-            $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
+            $orderTransaction = Shopware()->Models()->getRepository(Transaction::class)
                                           ->findOneBy(['transactionId'       => $parentTransactionId,
                                                        'parentTransactionId' => $transactionId,
                                           ]);
 
             if (! $orderTransaction) {
-                $orderTransaction = new OrderTransaction();
+                $orderTransaction = new Transaction();
                 $orderTransaction->setOrderNumber($orderNumber);
                 $orderTransaction->setParentTransactionId($parentTransactionId);
                 $orderTransaction->setTransactionId($transactionId);
@@ -582,12 +582,12 @@ abstract class Payment implements PaymentInterface
         if ($response instanceof FailureResponse) {
             $rawData          = $response->getData();
             $transactionId    = $rawData['transaction-id'];
-            $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
+            $orderTransaction = Shopware()->Models()->getRepository(Transaction::class)
                                           ->findOneBy(['transactionId'       => $parentTransactionId,
                                                        'parentTransactionId' => $transactionId,
                                           ]);
             if (! $orderTransaction) {
-                $orderTransaction = new OrderTransaction();
+                $orderTransaction = new Transaction();
                 $orderTransaction->setOrderNumber($orderNumber);
                 $orderTransaction->setParentTransactionId($parentTransactionId);
                 $orderTransaction->setTransactionId($transactionId);
