@@ -31,21 +31,19 @@
 
 namespace WirecardShopwareElasticEngine\Tests\Unit\Models;
 
-use Shopware\Models\Order\Order;
-use WirecardShopwareElasticEngine\Components\Payments\Payment;
-use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardShopwareElasticEngine\Models\OrderNumberAssignment;
 use WirecardShopwareElasticEngine\Tests\Unit\ModelTestCase;
 
-class OrderTransactionTest extends ModelTestCase
+class OrderNumberAssignmentTest extends ModelTestCase
 {
     /**
-     * @var Transaction
+     * @var OrderNumberAssignment
      */
     protected $model;
 
     public function getModel()
     {
-        return new Transaction();
+        return new OrderNumberAssignment();
     }
 
     public function testGetId()
@@ -53,34 +51,11 @@ class OrderTransactionTest extends ModelTestCase
         $this->assertNull($this->model->getId());
     }
 
-    public function testSettersAndGetters()
+    public function testGettersAndSetters()
     {
-        $this->assertGetterAndSetter('orderNumber', 1337);
-        $this->assertGetterAndSetter('order', new Order());
-        $this->assertGetterAndSetter('parentTransactionId', '6832b2f0-792b-4161-9f9a-f2916f7aae8e');
-        $this->assertGetterAndSetter('transactionType', Payment::TRANSACTION_TYPE_PURCHASE);
+        $this->assertGetterAndSetter('orderNumber', 42);
         $this->assertGetterAndSetter('transactionId', '6832b2f0-792b-4161-9f9a-f2916f7aae8e');
-        $this->assertGetterAndSetter('providerTransactionId', '6832b2f0-792b-4161-9f9a-f2916f7aae8e');
-        $this->assertGetterAndSetter('amount', 42.42);
-        $this->assertGetterAndSetter('currency', 'USD');
-
-        $returnResponse = [
-            'transaction-id' => '6832b2f0-792b-4161-9f9a-f2916f7aae8e',
-            'request-id'     => 'db2616a7bc7d140ec4e20117c8582a54',
-        ];
-
-        $this->assertGetterAndSetter('returnResponse', serialize($returnResponse));
-
-        $notificationResponse = [
-            'transaction-id' => '1bd5e7cb-552d-4a31-b72c-dfac4ec30130',
-            'request-id'     => 'de4cf94fd467aa5c4a5590d4490ff855',
-        ];
-
-        $this->assertGetterAndSetter('notificationResponse', serialize($notificationResponse));
-    }
-
-    public function testCreatedAt()
-    {
-        $this->assertGetterAndSetter('createdAt', new \DateTime());
+        $this->assertGetterAndSetter('basketSignature', '0fc30f3d8823f331f59b08f7d9942700451f6d5d2a360e67a4023ac740f9e421');
+        $this->assertGetterAndSetter('requestId', '693715a8071485c44fe4a5d8c1114e697555f84ca7daded7e3d314e0815aec01');
     }
 }
