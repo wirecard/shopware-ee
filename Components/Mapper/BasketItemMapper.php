@@ -217,7 +217,7 @@ class BasketItemMapper extends ArrayMapper
         $wirecardItem->setTaxRate($taxRate);
         $wirecardItem->setTaxAmount($taxAmount);
 
-        return $this->wirecardItem;
+        return $wirecardItem;
     }
 
     /**
