@@ -33,18 +33,21 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Wirecard\PaymentSdk\Entity\Redirect;
+use Wirecard\PaymentSdk\Response\FailureResponse;
+use Wirecard\PaymentSdk\Response\InteractionResponse;
+use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Actions\Action;
+use WirecardShopwareElasticEngine\Components\Actions\FailureAction;
+use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
+use WirecardShopwareElasticEngine\Models\Transaction;
 
 class PaymentHandler
 {
-    /**
-     * @var Payment
-     */
-    protected $payment;
-
     /**
      * @var OrderSummary
      */
@@ -86,49 +89,86 @@ class PaymentHandler
     }
 
     /**
+     * @param Redirect $redirect
+     * @param string   $notificationUrl
+     *
+     * @return Action
      * @throws ArrayKeyNotFoundException
      */
-    public function execute()
+    public function execute(Redirect $redirect, $notificationUrl)
     {
-        $transaction = $this->getPayment()->getTransaction();
+        $this->prepareTransaction($redirect, $notificationUrl);
+
+        $transaction = $this->getOrderSummary()->getPayment()->getTransaction();
+
+        $action = $this->getOrderSummary()
+                       ->getPayment()
+                       ->processPayment($this->getOrderSummary(), $this->getTransactionService());
+
+        // todo: logging (OrderSummary)
+
+        if ($action !== null) {
+            return $action;
+        }
+
+        $transactionService = $this->getTransactionService();
+        $response           = $transactionService->process(
+            $transaction,
+            $this->getOrderSummary()->getPayment()->getPaymentConfig()->getTransactionType()
+        );
+
+        switch (true) {
+            case $response instanceof InteractionResponse:
+                return new RedirectAction($response->getRedirectUrl());
+
+            default:
+                // todo: throw exception
+                return null;
+        }
+    }
+
+    /**
+     * Prepares the transaction for being sent to Wirecard by adding specific (e.g. amount) and optional (e.g. fraud
+     * prevention data) data to the `Transaction` object of the payment.
+     *
+     * @param Redirect $redirect
+     * @param string   $notificationUrl
+     *
+     * @throws ArrayKeyNotFoundException
+     */
+    private function prepareTransaction(Redirect $redirect, $notificationUrl)
+    {
         $orderSummary = $this->getOrderSummary();
+        $transaction  = $orderSummary->getPayment()->getTransaction();
 
-        $transaction->setRedirect($orderSummary->getRedirect());
+        $transaction->setRedirect($redirect);
         $transaction->setAmount($orderSummary->getAmount());
-        $transaction->setNotificationUrl(null);
+        $transaction->setNotificationUrl($notificationUrl);
 
-        if ($this->getPayment()->getPaymentConfig()->sendBasket()) {
+        if ($orderSummary->getPayment()->getPaymentConfig()->sendBasket()) {
             $transaction->setBasket($orderSummary->getBasketMapper()->getWirecardBasket());
         }
 
-        if ($this->getPayment()->getPaymentConfig()->hasFraudPrevention()) {
+        if ($orderSummary->getPayment()->getPaymentConfig()->hasFraudPrevention()) {
             $transaction->setIpAddress($orderSummary->getUserMapper()->getClientIp());
             $transaction->setAccountHolder($orderSummary->getUserMapper()->getWirecardBillingAccountHolder());
             $transaction->setShipping($orderSummary->getUserMapper()->getWirecardShippingAccountHolder());
             $transaction->setLocale($orderSummary->getUserMapper()->getLocale());
         }
 
-        if ($this->getPayment()->getPaymentConfig()->sendDescriptor()) {
+        if ($orderSummary->getPayment()->getPaymentConfig()->sendDescriptor()) {
             $transaction->setDescriptor($this->getDescriptor(null));
         }
-
-        $this->getPayment()->processPayment($this->getOrderSummary(), $this->getTransactionService());
     }
 
-    /**
-     * @param Payment $payment
-     */
-    public function setPayment(Payment $payment)
+    private function createTransactionEntity()
     {
-        $this->payment = $payment;
-    }
+        $transaction = new Transaction();
 
-    /**
-     * @return Payment
-     */
-    public function getPayment()
-    {
-        return $this->payment;
+        $this->em->persist($transaction);
+        $this->em->flush();
+
+        return $transaction;
     }
 
     /**

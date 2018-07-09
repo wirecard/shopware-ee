@@ -36,8 +36,10 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
+use WirecardShopwareElasticEngine\Components\Services\PaymentHandler;
 
 interface PaymentInterface
 {
@@ -71,12 +73,17 @@ interface PaymentInterface
     public function createTransaction(array $paymentData);
 
     /**
-     * Start Transaction
+     * Payment specific processing. This method either returns an `Action` (which is directly returned to the handler)
+     * or `null`. Returning `null` leads to the handler executing the transaction via the `TransactionService`. In case
+     * of returning an `Action` execution of the transaction (via the `TransactionService`) probably needs to get
+     * called manually within this method.
+     *
+     * @see PaymentHandler
      *
      * @param OrderSummary       $orderSummary
      * @param TransactionService $transactionService
      *
-     * @return array
+     * @return Action|null
      */
     public function processPayment(OrderSummary $orderSummary, TransactionService $transactionService);
 
@@ -85,14 +92,14 @@ interface PaymentInterface
      *
      * @return Response
      */
-    public function getPaymentResponse(array $request);
+//    public function getPaymentResponse(array $request);
 
     /**
      * @param string $request
      *
      * @return Response
      */
-    public function getPaymentNotification($request);
+//    public function getPaymentNotification($request);
 
     /**
      * Retrieve backend operations for specific transaction
@@ -135,4 +142,9 @@ interface PaymentInterface
      * @return PaymentConfig
      */
     public function getPaymentConfig();
+
+    /**
+     * @return string
+     */
+    public function getTransactionOperation();
 }

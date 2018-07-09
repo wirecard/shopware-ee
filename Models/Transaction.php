@@ -57,13 +57,6 @@ class Transaction extends ModelEntity
     private $orderNumber;
 
     /**
-     * @var Order
-     * @ORM\OneToOne(targetEntity="Shopware\Models\Order\Order")
-     * @ORM\JoinColumn(name="order_number", referencedColumnName="ordernumber")
-     */
-    private $order;
-
-    /**
      * @var string
      * @ORM\Column(name="transaction_id", type="string", nullable=true)
      */
@@ -74,18 +67,6 @@ class Transaction extends ModelEntity
      * @ORM\Column(name="provider_transaction_id", type="string", nullable=true)
      */
     private $providerTransactionId;
-
-    /**
-     * @var string
-     * @ORM\Column(name="return_response", type="text", nullable=true)
-     */
-    private $returnResponse;
-
-    /**
-     * @var string
-     * @ORM\Column(name="notification_response", type="text", nullable=true)
-     */
-    private $notificationResponse;
 
     /**
      * @var string
@@ -130,22 +111,6 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return Order|null
-     */
-    public function getOrder()
-    {
-        return $this->order;
-    }
-
-    /**
-     * @param Order $order
-     */
-    public function setOrder(Order $order)
-    {
-        $this->order = $order;
-    }
-
-    /**
      * @return string|null
      */
     public function getTransactionId()
@@ -180,38 +145,6 @@ class Transaction extends ModelEntity
     /**
      * @return string|null
      */
-    public function getReturnResponse()
-    {
-        return $this->returnResponse;
-    }
-
-    /**
-     * @param $returnResponse
-     */
-    public function setReturnResponse($returnResponse)
-    {
-        $this->returnResponse = $returnResponse;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getNotificationResponse()
-    {
-        return $this->notificationResponse;
-    }
-
-    /**
-     * @param string $notificationResponse
-     */
-    public function setNotificationResponse($notificationResponse)
-    {
-        $this->notificationResponse = $notificationResponse;
-    }
-
-    /**
-     * @return string|null
-     */
     public function getPaymentStatus()
     {
         return $this->paymentStatus;
@@ -232,7 +165,7 @@ class Transaction extends ModelEntity
     {
         return $this->basketSignature;
     }
-    
+
     /**
      * @param string $basketSignature
      */
@@ -248,7 +181,7 @@ class Transaction extends ModelEntity
     {
         return $this->requestId;
     }
-    
+
     /**
      * @param string $requestId
      */
