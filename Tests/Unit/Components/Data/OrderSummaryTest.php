@@ -29,107 +29,43 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Data;
+namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Data;
 
+use PHPUnit\Framework\TestCase;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
+use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
 use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
-use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 
-class OrderSummary
+class OrderSummaryTest extends TestCase
 {
-    /**
-     * @var Payment
-     */
-    protected $payment;
-
-    /**
-     * @var BasketMapper
-     */
-    protected $basket;
-
-    /**
-     * @var Amount
-     */
-    protected $amount;
-
-    /**
-     * @var string
-     */
-    protected $currency;
-
-    /**
-     * @var Redirect
-     */
-    protected $redirect;
-
-    /**
-     * @var UserMapper
-     */
-    protected $userMapper;
-
-    /**
-     * OrderDetails constructor.
-     *
-     * @param PaymentInterface $payment
-     * @param UserMapper       $userMapper
-     * @param BasketMapper     $basketMapper
-     * @param Amount           $amount
-     * @param Redirect         $redirect
-     */
-    public function __construct(
-        PaymentInterface $payment,
-        UserMapper $userMapper,
-        BasketMapper $basketMapper,
-        Amount $amount,
-        Redirect $redirect
-    ) {
-        $this->payment    = $payment;
-        $this->userMapper = $userMapper;
-        $this->amount     = $amount;
-        $this->basket     = $basketMapper;
-        $this->redirect   = $redirect;
-    }
-
-    /**
-     * @return PaymentInterface
-     */
-    public function getPayment()
+    public function testOrderSummary()
     {
-        return $this->payment;
-    }
+        /** @var PaymentInterface|\PHPUnit_Framework_MockObject_MockObject $payment */
+        $payment = $this->createMock(PaymentInterface::class);
+        /** @var UserMapper|\PHPUnit_Framework_MockObject_MockObject $user */
+        $user = $this->createMock(UserMapper::class);
+        /** @var BasketMapper|\PHPUnit_Framework_MockObject_MockObject $basket */
+        $basket = $this->createMock(BasketMapper::class);
+        /** @var Amount|\PHPUnit_Framework_MockObject_MockObject $amount */
+        $amount = $this->createMock(Amount::class);
+        /** @var Redirect|\PHPUnit_Framework_MockObject_MockObject $redirect */
+        $redirect = $this->createMock(Redirect::class);
 
-    /**
-     * @return UserMapper
-     */
-    public function getUserMapper()
-    {
-        return $this->userMapper;
-    }
+        $order = new OrderSummary(
+            $payment,
+            $user,
+            $basket,
+            $amount,
+            $redirect
+        );
 
-    /**
-     * @return BasketMapper
-     */
-    public function getBasketMapper()
-    {
-        return $this->basket;
-    }
-
-    /**
-     * @return Amount
-     */
-    public function getAmount()
-    {
-        return $this->amount;
-    }
-
-    /**
-     * @return Redirect
-     */
-    public function getRedirect()
-    {
-        return $this->redirect;
+        $this->assertSame($payment, $order->getPayment());
+        $this->assertSame($user, $order->getUserMapper());
+        $this->assertSame($basket, $order->getBasketMapper());
+        $this->assertSame($amount, $order->getAmount());
+        $this->assertSame($redirect, $order->getRedirect());
     }
 }

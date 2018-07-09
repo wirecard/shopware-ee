@@ -33,7 +33,7 @@ namespace WirecardShopwareElasticEngine\Components\Mapper;
 
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 
-class ArrayMapper
+abstract class ArrayMapper
 {
     /**
      * @var array
@@ -43,26 +43,23 @@ class ArrayMapper
     /**
      * Returns a key from an array. If the key doesn't exist an exception is thrown.
      *
-     * @param        $key
+     * @param string $key
      *
-     * @return mixed|null
+     * @return mixed
      * @throws ArrayKeyNotFoundException
      */
     protected function get($key)
     {
-        $item = $this->arrayEntity;
-
-        if (! isset($item[$key])) {
+        if (! isset($this->arrayEntity[$key])) {
             throw new ArrayKeyNotFoundException($key, get_class($this));
         }
-
-        return $item[$key];
+        return $this->arrayEntity[$key];
     }
 
     /**
      * Returns if an array key exists.
      *
-     * @param $key
+     * @param string $key
      *
      * @return bool
      */
@@ -74,19 +71,16 @@ class ArrayMapper
     /**
      * Returns a key from an array. If the key doesn't exist the fallback value is returned.
      *
-     * @param      $key
-     * @param null $fallback
+     * @param string $key
+     * @param null   $fallback
      *
      * @return mixed|null
      */
     protected function getOptional($key, $fallback = null)
     {
-        $item = $this->arrayEntity;
-
-        if (! isset($item[$key])) {
+        if (! isset($this->arrayEntity[$key])) {
             return $fallback;
         }
-
-        return $item[$key];
+        return $this->arrayEntity[$key];
     }
 }
