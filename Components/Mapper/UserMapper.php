@@ -75,8 +75,8 @@ class UserMapper extends ArrayMapper
      * UserMapper constructor.
      *
      * @param array $shopwareUser
-     * @param       $clientIp
-     * @param       $locale
+     * @param string $clientIp
+     * @param string $locale
      */
     public function __construct(array $shopwareUser, $clientIp, $locale)
     {
@@ -122,7 +122,7 @@ class UserMapper extends ArrayMapper
         $shippingAccountHolder = new AccountHolder();
         $shippingAccountHolder->setFirstName($this->getShippingFirstName());
         $shippingAccountHolder->setLastName($this->getShippingLastName());
-        $shippingAccountHolder->setPhone($this->getPhone());
+        $shippingAccountHolder->setPhone($this->getShippingPhone());
         $shippingAccountHolder->setAddress($this->getWirecardShippingAddress());
 
         return $shippingAccountHolder;
@@ -215,10 +215,10 @@ class UserMapper extends ArrayMapper
     /**
      * @param $detail
      *
-     * @return string
+     * @return string|null
      * @throws ArrayKeyNotFoundException
      */
-    public function getBillingAddressDetail($detail)
+    private function getBillingAddressDetail($detail)
     {
         $billingAddress = $this->getBillingAddress();
 
@@ -226,7 +226,7 @@ class UserMapper extends ArrayMapper
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getPhone()
     {
@@ -242,7 +242,7 @@ class UserMapper extends ArrayMapper
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getCountryIso()
     {
@@ -260,7 +260,7 @@ class UserMapper extends ArrayMapper
     }
 
     /**
-     * @return string
+     * @return string|null
      * @throws ArrayKeyNotFoundException
      */
     public function getBillingAddressCity()
@@ -269,7 +269,7 @@ class UserMapper extends ArrayMapper
     }
 
     /**
-     * @return string
+     * @return string|null
      * @throws ArrayKeyNotFoundException
      */
     public function getBillingAddressStreet()
@@ -278,7 +278,7 @@ class UserMapper extends ArrayMapper
     }
 
     /**
-     * @return string
+     * @return string|null
      * @throws ArrayKeyNotFoundException
      */
     public function getBillingAddressZip()
@@ -287,7 +287,7 @@ class UserMapper extends ArrayMapper
     }
 
     /**
-     * @return string
+     * @return string|null
      * @throws ArrayKeyNotFoundException
      */
     public function getBillingAddressAdditional()
@@ -306,9 +306,9 @@ class UserMapper extends ArrayMapper
     /**
      * @param $detail
      *
-     * @return string
+     * @return string|null
      */
-    public function getShippingAddressDetail($detail)
+    private function getShippingAddressDetail($detail)
     {
         $shippingAddress = $this->getShippingAddress();
 
@@ -340,7 +340,7 @@ class UserMapper extends ArrayMapper
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getShippingAddressCountryIso()
     {
@@ -358,7 +358,7 @@ class UserMapper extends ArrayMapper
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getShippingAddressCity()
     {
@@ -366,7 +366,7 @@ class UserMapper extends ArrayMapper
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getShippingAddressStreet()
     {
@@ -374,7 +374,7 @@ class UserMapper extends ArrayMapper
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getShippingAddressZip()
     {
@@ -382,7 +382,7 @@ class UserMapper extends ArrayMapper
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getShippingAddressAdditional()
     {
