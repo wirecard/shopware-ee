@@ -2,6 +2,178 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/config.xsd">
     <elements>
+
+        <!-- Credit Card -->
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCardServer</name>
+            <label lang="de">[Credit Card] Wirecard Server Url</label>
+            <label lang="en">[Credit Card] Wirecard Server Url</label>
+            <value>https://api-test.wirecard.com</value>
+            <description lang="de">Wirecard Basis Url (z.B. http://api-test.wirecard.com)</description>
+            <description lang="en">Wirecard Base Url (e.g. http://api-test.wirecard.com)</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCardHttpUser</name>
+            <label lang="de">[Credit Card] HTTP Benutzer</label>
+            <label lang="en">[Credit Card] HTTP User</label>
+            <value>70000-APITEST-AP</value>
+            <description lang="de">HTTP Benutzer</description>
+            <description lang="en">HTTP User</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCardHttpPassword</name>
+            <label lang="de">[Credit Card] HTTP Passwort</label>
+            <label lang="en">[Credit Card] HTTP Password</label>
+            <value>qD2wzQ_hrc!8</value>
+            <description lang="de">HTTP Passwort</description>
+            <description lang="en">HTTP Password</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCardMerchantId</name>
+            <label lang="de">[Credit Card] Händler ID</label>
+            <label lang="en">[Credit Card] Merchant ID</label>
+            <value>53f2895a-e4de-4e82-a813-0d87a10e55e6</value>
+            <description lang="de">Eindeutige Händler-ID Ihres Wirecard Konto</description>
+            <description lang="en">Unique merchant account id to Wirecard</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCardSecret</name>
+            <label lang="de">[Credit Card] Geheimschlüssel</label>
+            <label lang="en">[Credit Card] Secret Key</label>
+            <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
+            <description lang="de">Geheimschlüssel für die digitale Signatur</description>
+            <description lang="en">Secret key for digital signature</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCard3dsMerchantId</name>
+            <label lang="de">[Credit Card] 3DS Händler ID</label>
+            <label lang="en">[Credit Card] 3DS Merchant ID</label>
+            <value>508b8896-b37d-4614-845c-26bf8bf2c948</value>
+            <description lang="de">Eindeutige 3DS Händler-ID Ihres Wirecard Konto. Leer lassen oder "null" eintragen, um 3DS zu deaktivieren.</description>
+            <description lang="en">Unique 3DS merchant account id to Wirecard. Keep empty or write "null", to deactivate 3DS.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCard3dsSecret</name>
+            <label lang="de">[Credit Card] 3DS Geheimschlüssel</label>
+            <label lang="en">[Credit Card] 3DS Secret Key</label>
+            <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
+            <description lang="de">3DS Geheimschlüssel für die digitale Signatur</description>
+            <description lang="en">3DS Secret key for digital signature</description>
+        </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEngineCreditCardTestApi</name>
+            <label lang="de">[Credit Card] Konfiguration testen</label>
+            <label lang="en">[Credit Card] Test settings</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    var url = document.location.pathname + 'wirecardTransactions/testSettings',
+        btn = button,
+        panel = button.up('panel'),
+        formFields = panel.query('[isFormField]'),
+        values = {};
+
+    Ext.Array.each(formFields, function(el, i) {
+        var val = el.getSubmitValue();
+        values[el.elementName] = val;
+    });
+
+    values['method'] = 'CreditCard';
+
+    Ext.Ajax.request({
+        url: url,
+        params: values,
+        success: function (response) {
+            var data = Ext.decode(response.responseText);
+
+            if ( data.status == 'success' ) {
+                text = '<span style=\"color: green;font-weight: bold;\">Test successfull</span>';
+            } else {
+                text = '<span style=\"color: red;font-weight: bold;\">Test failed</span>';
+                if ( data.msg ) {
+                    text += '<br>' + data.msg;
+                }
+            }
+            Shopware.Notification.createStickyGrowlMessage({
+                title: "Wirecard Credit Card test",
+                text: text,
+                width: 440,
+                log: false,
+            });
+        }
+    })
+}
+                    ]]>
+                </handler>
+            </options>
+        </element>
+        <element type="select" scope="shop">
+            <name>wirecardElasticEngineCreditCardTransactionType</name>
+            <label lang="de">[Credit Card] Transaktionsart</label>
+            <label lang="en">[Credit Card] Transaction Type</label>
+            <value>purchase</value>
+            <store>
+                <option>
+                    <value>reserve</value>
+                    <label lang="de">Authorisierung</label>
+                    <label lang="en">Authorization</label>
+                </option>
+                <option>
+                    <value>pay</value>
+                    <label lang="de">Purchase</label>
+                    <label lang="en">Purchase</label>
+                </option>
+            </store>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCard3dsOnly</name>
+            <label lang="de">[Credit Card] 3DS-Pflicht Betrag</label>
+            <label lang="en">[Credit Card] 3DS only amount</label>
+            <value>300</value>
+            <description lang="de">Ab diesem Betrag wird die Benutzung von 3DS erzwungen</description>
+            <description lang="en">This amount forces usage of 3DS</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCard3dsOnlyCurrency</name>
+            <label lang="de">[Credit Card] 3DS-Pflicht Betrag Währung</label>
+            <label lang="en">[Credit Card] 3DS only amount currency</label>
+            <value></value>
+            <description lang="de">Leer lassen für Standardwährung.</description>
+            <description lang="en">Keep empty for default currency.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCard3dsAttempt</name>
+            <label lang="de">[Credit Card] 3DS-Versuch Betrag</label>
+            <label lang="en">[Credit Card] 3DS attempt amount</label>
+            <value>100</value>
+            <description lang="de">Ab diesem Betrag wird 3DS versucht zu verwenden.</description>
+            <description lang="en">This amount attemps usage of 3DS.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineCreditCard3dsAttemptCurrency</name>
+            <label lang="de">[Credit Card] 3DS-Pflicht Betrag Währung</label>
+            <label lang="en">[Credit Card] 3DS only amount currency</label>
+            <value></value>
+            <description lang="de">Leer lassen für Standardwährung.</description>
+            <description lang="en">Keep empty for default currency.</description>
+        </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEngineCreditCard3dsDescription</name>
+            <label lang="de">[Credit Card] Erklärung zu 3DS</label>
+            <label lang="en">[Credit Card] Description about 3DS</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    window.open('https://raw.githubusercontent.com/wiki/wirecard/woocommerce-ee/img/creditcard-ssl-3d-new.png','_blank');
+}
+                    ]]>
+                </handler>
+            </options>
+        </element>
+        <!-- Credit Card End -->
+        <!-- PayPal -->
         <element type="text" scope="shop">
             <name>wirecardElasticEnginePaypalServer</name>
             <label lang="de">[PayPal] Wirecard Server Url</label>
@@ -27,7 +199,7 @@
             <description lang="en">HTTP Password</description>
         </element>
         <element type="text" scope="shop">
-            <name>wirecardElasticEnginePaypalMerchandId</name>
+            <name>wirecardElasticEnginePaypalMerchantId</name>
             <label lang="de">[PayPal] Händler ID</label>
             <label lang="en">[PayPal] Merchant ID</label>
             <value>2a0e9351-24ed-4110-9a1b-fd0fee6bec26</value>
@@ -97,14 +269,14 @@ function (button) {
             <value>purchase</value>
             <store>
                 <option>
-                    <value>authorization</value>
-                    <label lang="de">Authorizieren</label>
-                    <label lang="en">authorization</label>
+                    <value>reserve</value>
+                    <label lang="de">Authorisierung</label>
+                    <label lang="en">Authorization</label>
                 </option>
                 <option>
-                    <value>purchase</value>
-                    <label lang="de">direkt bezahlen</label>
-                    <label lang="en">purchase</label>
+                    <value>pay</value>
+                    <label lang="de">Purchase</label>
+                    <label lang="en">Purchase</label>
                 </option>
             </store>
         </element>
@@ -132,173 +304,6 @@ function (button) {
             <description lang="de">Sende Beschreibung</description>
             <description lang="en">Send descriptor</description>
         </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCardServer</name>
-            <label lang="de">[Credit Card] Wirecard Server Url</label>
-            <label lang="en">[Credit Card] Wirecard Server Url</label>
-            <value>https://api-test.wirecard.com</value>
-            <description lang="de">Wirecard Basis Url (z.B. http://api-test.wirecard.com)</description>
-            <description lang="en">Wirecard Base Url (e.g. http://api-test.wirecard.com)</description>
-        </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCardHttpUser</name>
-            <label lang="de">[Credit Card] HTTP Benutzer</label>
-            <label lang="en">[Credit Card] HTTP User</label>
-            <value>70000-APITEST-AP</value>
-            <description lang="de">HTTP Benutzer</description>
-            <description lang="en">HTTP User</description>
-        </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCardHttpPassword</name>
-            <label lang="de">[Credit Card] HTTP Passwort</label>
-            <label lang="en">[Credit Card] HTTP Password</label>
-            <value>qD2wzQ_hrc!8</value>
-            <description lang="de">HTTP Passwort</description>
-            <description lang="en">HTTP Password</description>
-        </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCardMerchandId</name>
-            <label lang="de">[Credit Card] Händler ID</label>
-            <label lang="en">[Credit Card] Merchant ID</label>
-            <value>53f2895a-e4de-4e82-a813-0d87a10e55e6</value>
-            <description lang="de">Eindeutige Händler-ID Ihres Wirecard Konto</description>
-            <description lang="en">Unique merchant account id to Wirecard</description>
-        </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCardSecret</name>
-            <label lang="de">[Credit Card] Geheimschlüssel</label>
-            <label lang="en">[Credit Card] Secret Key</label>
-            <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
-            <description lang="de">Geheimschlüssel für die digitale Signatur</description>
-            <description lang="en">Secret key for digital signature</description>
-        </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCard3dsMerchandId</name>
-            <label lang="de">[Credit Card] 3DS Händler ID</label>
-            <label lang="en">[Credit Card] 3DS Merchant ID</label>
-            <value>508b8896-b37d-4614-845c-26bf8bf2c948</value>
-            <description lang="de">Eindeutige 3DS Händler-ID Ihres Wirecard Konto. Leer lassen oder "null" eintrgen , um 3DS zu deaktiviern.</description>
-            <description lang="en">Unique 3DS merchant account id to Wirecard. Keep empty or write "null", to deactivate 3DS.</description>
-        </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCard3dsSecret</name>
-            <label lang="de">[Credit Card] 3DS Geheimschlüssel</label>
-            <label lang="en">[Credit Card] 3DS Secret Key</label>
-            <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
-            <description lang="de">3DS Geheimschlüssel für die digitale Signatur</description>
-            <description lang="en">3DS Secret key for digital signature</description>
-        </element>
-        <element type="button" scope="shop">
-            <name>wirecardElasticEngineCreditCardTestApi</name>
-            <label lang="de">[Credit Card] Konfiguration testen</label>
-            <label lang="en">[Credit Card] Test settings</label>
-            <options>
-                <handler>
-                    <![CDATA[
-function (button) {
-    var url = document.location.pathname + 'wirecardTransactions/testSettings',
-        btn = button,
-        panel = button.up('panel'),
-        formFields = panel.query('[isFormField]'),
-        values = {};
-
-    Ext.Array.each(formFields, function(el, i) {
-        var val = el.getSubmitValue();
-        values[el.elementName] = val;
-    });
-
-    values['method'] = 'CreditCard';
-
-    Ext.Ajax.request({
-        url: url,
-        params: values,
-        success: function (response) {
-            var data = Ext.decode(response.responseText);
-
-            if ( data.status == 'success' ) {
-                text = '<span style=\"color: green;font-weight: bold;\">Test successfull</span>';
-            } else {
-                text = '<span style=\"color: red;font-weight: bold;\">Test failed</span>';
-                if ( data.msg ) {
-                    text += '<br>' + data.msg;
-                }
-            }
-            Shopware.Notification.createStickyGrowlMessage({
-                title: "Wirecard Credit Card test",
-                text: text,
-                width: 440,
-                log: false,
-            });
-        }
-    })
-}
-                    ]]>
-                </handler>
-            </options>
-        </element>
-        <element type="select" scope="shop">
-            <name>wirecardElasticEngineCreditCardTransactionType</name>
-            <label lang="de">[Credit Card] Transaktionsart</label>
-            <label lang="en">[Credit Card] Transaction Type</label>
-            <value>purchase</value>
-            <store>
-                <option>
-                    <value>authorization</value>
-                    <label lang="de">Authorizieren</label>
-                    <label lang="en">authorization</label>
-                </option>
-                <option>
-                    <value>purchase</value>
-                    <label lang="de">direkt bezahlen</label>
-                    <label lang="en">purchase</label>
-                </option>
-            </store>
-        </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCard3dsOnly</name>
-            <label lang="de">[Credit Card] 3DS-Pflicht Betrag</label>
-            <label lang="en">[Credit Card] 3DS only amount</label>
-            <value>300</value>
-            <description lang="de">Ab diesem Betrag wird die Benutzung von 3DS erzwungen.</description>
-            <description lang="en">This amount forces usage of 3DS</description>
-        </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCard3dsOnlyCurrency</name>
-            <label lang="de">[Credit Card] 3DS-Pflicht Betrag Währung</label>
-            <label lang="en">[Credit Card] 3DS only amount currency</label>
-            <value></value>
-            <description lang="de">Leer lassen für Standardwährung,</description>
-            <description lang="en">Keep empty for default currency.</description>
-        </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCard3dsAttempt</name>
-            <label lang="de">[Credit Card] 3DS-Versuch Betrag</label>
-            <label lang="en">[Credit Card] 3DS attempt amount</label>
-            <value>100</value>
-            <description lang="de">Ab diesem Betrag wird 3DS versucht zu verwenden.</description>
-            <description lang="en">This amount attemps usage of 3DS</description>
-        </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCard3dsAttemptCurrency</name>
-            <label lang="de">[Credit Card] 3DS-Pflicht Betrag Währung</label>
-            <label lang="en">[Credit Card] 3DS only amount currency</label>
-            <value></value>
-            <description lang="de">Leer lassen für Standardwährung.</description>
-            <description lang="en">Keep empty for default currency.</description>
-        </element>
-        <element type="button" scope="shop">
-            <name>wirecardElasticEngineCreditCard3dsDescription</name>
-            <label lang="de">[Credit Card] Erklärung zu 3DS</label>
-            <label lang="en">[Credit Card] Description about 3DS</label>
-            <options>
-                <handler>
-                    <![CDATA[
-function (button) {
-    window.open('https://raw.githubusercontent.com/wiki/wirecard/woocommerce-ee/img/creditcard-ssl-3d-new.png','_blank');
-}
-                    ]]>
-                </handler>
-            </options>
-        </element>
+        <!-- PayPal End -->
     </elements>
 </config>
