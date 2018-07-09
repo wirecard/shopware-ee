@@ -32,8 +32,6 @@
 namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Data;
 
 use PHPUnit\Framework\TestCase;
-use WirecardShopwareElasticEngine\Components\Actions\Action;
-use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
 use WirecardShopwareElasticEngine\Subscriber\ExtendOrder;
 
 class ExtendOrderTest extends TestCase
@@ -47,23 +45,20 @@ class ExtendOrderTest extends TestCase
 
     public function testIndexAction()
     {
-        /** @var \Enlight_View_Default|\PHPUnit_Framework_MockObject_MockObject $request */
         $view = $this->createMock(\Enlight_View_Default::class);
         $view->expects($this->once())->method('addTemplateDir')->with('fooDir/Resources/views');
         $view->expects($this->once())->method('extendsTemplate')->with('backend/wirecard_extend_order/app.js');
 
-        /** @var \Enlight_Controller_Request_Request|\PHPUnit_Framework_MockObject_MockObject $request */
         $request = $this->createMock(\Enlight_Controller_Request_Request::class);
         $request->method('getActionName')->willReturn('index');
 
-        /** @var \Enlight_Controller_Action|\PHPUnit_Framework_MockObject_MockObject $controller */
         $controller = $this->createMock(\Enlight_Controller_Action::class);
-        $controller->expects($this->once())->method('View')->willReturn($view);
-        $controller->expects($this->once())->method('Request')->willReturn($request);
+        $controller->expects($this->atLeastOnce())->method('View')->willReturn($view);
+        $controller->expects($this->atLeastOnce())->method('Request')->willReturn($request);
 
         /** @var \Enlight_Controller_ActionEventArgs|\PHPUnit_Framework_MockObject_MockObject $args */
         $args = $this->createMock(\Enlight_Controller_ActionEventArgs::class);
-        $args->expects($this->once())->method('getSubject')->willReturn($controller);
+        $args->expects($this->atLeastOnce())->method('getSubject')->willReturn($controller);
 
         $subscriber = new ExtendOrder('fooDir');
         $subscriber->onOrderPostDispatch($args);
@@ -71,26 +66,19 @@ class ExtendOrderTest extends TestCase
 
     public function testLoadAction()
     {
-        $this->assertEquals([
-            'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch',
-        ], ExtendOrder::getSubscribedEvents());
-
-        /** @var \Enlight_View_Default|\PHPUnit_Framework_MockObject_MockObject $request */
         $view = $this->createMock(\Enlight_View_Default::class);
         $view->expects($this->once())->method('extendsTemplate')->with('backend/wirecard_extend_order/view/detail/window.js');
 
-        /** @var \Enlight_Controller_Request_Request|\PHPUnit_Framework_MockObject_MockObject $request */
         $request = $this->createMock(\Enlight_Controller_Request_Request::class);
         $request->method('getActionName')->willReturn('load');
 
-        /** @var \Enlight_Controller_Action|\PHPUnit_Framework_MockObject_MockObject $controller */
         $controller = $this->createMock(\Enlight_Controller_Action::class);
-        $controller->expects($this->once())->method('View')->willReturn($view);
-        $controller->expects($this->once())->method('Request')->willReturn($request);
+        $controller->expects($this->atLeastOnce())->method('View')->willReturn($view);
+        $controller->expects($this->atLeastOnce())->method('Request')->willReturn($request);
 
         /** @var \Enlight_Controller_ActionEventArgs|\PHPUnit_Framework_MockObject_MockObject $args */
         $args = $this->createMock(\Enlight_Controller_ActionEventArgs::class);
-        $args->expects($this->once())->method('getSubject')->willReturn($controller);
+        $args->expects($this->atLeastOnce())->method('getSubject')->willReturn($controller);
 
         $subscriber = new ExtendOrder('');
         $subscriber->onOrderPostDispatch($args);
@@ -98,26 +86,19 @@ class ExtendOrderTest extends TestCase
 
     public function testOtherAction()
     {
-        $this->assertEquals([
-            'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch',
-        ], ExtendOrder::getSubscribedEvents());
-
-        /** @var \Enlight_View_Default|\PHPUnit_Framework_MockObject_MockObject $request */
         $view = $this->createMock(\Enlight_View_Default::class);
         $view->expects($this->never())->method('extendsTemplate');
 
-        /** @var \Enlight_Controller_Request_Request|\PHPUnit_Framework_MockObject_MockObject $request */
         $request = $this->createMock(\Enlight_Controller_Request_Request::class);
         $request->method('getActionName')->willReturn('foobar');
 
-        /** @var \Enlight_Controller_Action|\PHPUnit_Framework_MockObject_MockObject $controller */
         $controller = $this->createMock(\Enlight_Controller_Action::class);
-        $controller->expects($this->once())->method('View')->willReturn($view);
-        $controller->expects($this->once())->method('Request')->willReturn($request);
+        $controller->expects($this->atLeastOnce())->method('View')->willReturn($view);
+        $controller->expects($this->atLeastOnce())->method('Request')->willReturn($request);
 
         /** @var \Enlight_Controller_ActionEventArgs|\PHPUnit_Framework_MockObject_MockObject $args */
         $args = $this->createMock(\Enlight_Controller_ActionEventArgs::class);
-        $args->expects($this->once())->method('getSubject')->willReturn($controller);
+        $args->expects($this->atLeastOnce())->method('getSubject')->willReturn($controller);
 
         $subscriber = new ExtendOrder('');
         $subscriber->onOrderPostDispatch($args);
