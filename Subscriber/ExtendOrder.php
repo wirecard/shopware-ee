@@ -38,11 +38,11 @@ class ExtendOrder implements SubscriberInterface
 
         $view->addTemplateDir($this->pluginDirectory . '/Resources/views');
 
-        if ($request->getActionName() == 'index') {
+        if ($request->getActionName() === 'index') {
             $view->extendsTemplate('backend/wirecard_extend_order/app.js');
         }
 
-        if ($request->getActionName() == 'load') {
+        if ($request->getActionName() === 'load') {
             $view->extendsTemplate('backend/wirecard_extend_order/view/detail/window.js');
         }
     }

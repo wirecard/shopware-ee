@@ -59,12 +59,12 @@ abstract class PaymentTestCase extends \PHPUnit_Framework_TestCase
      */
     protected function assertArraysAreSimilar(array $expected, array $actual)
     {
-        if(count(array_diff_assoc($expected, $actual))) {
+        if (count(array_diff_assoc($expected, $actual))) {
             return false;
         }
 
-        foreach($expected as $key => $value) {
-            if($value !== $actual[$key]) {
+        foreach ($expected as $key => $value) {
+            if ($value !== $actual[$key]) {
                 return false;
             }
         }

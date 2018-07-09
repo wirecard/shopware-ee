@@ -62,7 +62,7 @@ class BasketItemMapper extends ArrayMapper
     /**
      * BasketItemMapper constructor.
      *
-     * @param array  $shopwareItem
+     * @param array $shopwareItem
      * @param string $currency
      *
      * @throws InvalidBasketItemException
@@ -174,13 +174,16 @@ class BasketItemMapper extends ArrayMapper
         $price = floatval(str_replace(',', '.', $this->get(self::ITEM_PRICE)));
 
         if ($this->hasAdditionalDetails()) {
-            $additionalDetails = $this->getAdditionalDetails();
-            $price             = $additionalDetails[self::ITEM_ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC];
+            $details = $this->getAdditionalDetails();
+            if (isset($details[self::ITEM_ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC])) {
+                $price = $details[self::ITEM_ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC];
+            }
 
-            if (isset($additionalDetails[self::ITEM_ADDITIONAL_DETAILS_PRICES])
-                && count($additionalDetails[self::ITEM_ADDITIONAL_DETAILS_PRICES]) === 1) {
-                $prices = $additionalDetails[self::ITEM_ADDITIONAL_DETAILS_PRICES][0];
-                $price  = $prices[self::ITEM_ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC];
+            if (isset($details[self::ITEM_ADDITIONAL_DETAILS_PRICES]) && count($details[self::ITEM_ADDITIONAL_DETAILS_PRICES]) === 1) {
+                $prices = $details[self::ITEM_ADDITIONAL_DETAILS_PRICES];
+                if (isset($prices[0][self::ITEM_ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC])) {
+                    $price = $prices[0][self::ITEM_ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC];
+                }
             }
         }
 
@@ -217,7 +220,7 @@ class BasketItemMapper extends ArrayMapper
         $wirecardItem->setTaxRate($taxRate);
         $wirecardItem->setTaxAmount($taxAmount);
 
-        return $this->wirecardItem;
+        return $wirecardItem;
     }
 
     /**

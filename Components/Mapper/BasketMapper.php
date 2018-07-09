@@ -70,9 +70,9 @@ class BasketMapper extends ArrayMapper
     /**
      * BasketMapper constructor.
      *
-     * @param array       $shopwareBasket
-     * @param string      $currency
-     * @param \sArticles  $articles
+     * @param array $shopwareBasket
+     * @param string $currency
+     * @param \sArticles $articles
      * @param Transaction $transaction
      *
      * @throws InvalidBasketException
@@ -114,34 +114,36 @@ class BasketMapper extends ArrayMapper
     }
 
     /**
+     * Creates a basket summary text (newline separated list of items) based on the given shopware basket.
+     *
      * @return string
      * @throws InvalidBasketItemException
      * @throws ArrayKeyNotFoundException
      */
     public function getBasketText()
     {
-        $basket       = $this->getShopwareBasket();
-        $currency     = $this->currency;
-        $basketString = '';
+        $basket   = $this->getShopwareBasket();
+        $currency = $this->currency;
+        $lines    = [];
 
         foreach ($this->getShopwareBasketContent() as $item) {
             $basketItem = new BasketItemMapper($item, $currency);
 
             $name        = $basketItem->getArticleName();
             $orderNumber = $basketItem->getOrderNumber();
-            $taxRate     = $basketItem->getTaxRate();
-            $quantity    = $basketItem->getQuantity();
             $price       = $basketItem->getPrice();
+            $quantity    = $basketItem->getQuantity();
+            $taxRate     = $basketItem->getTaxRate();
 
-            $basketString .= "${name}-${orderNumber}-${price}-${currency}-${quantity}-${taxRate}%\n";
+            $lines[] = "${name} - ${orderNumber} - ${price} - ${currency} - ${quantity} - ${taxRate}%";
         }
 
         if (! empty($basket[self::BASKET_SHIPPING_COSTS_WITH_TAX]) && isset($basket[self::BASKET_SHIPPING_COSTS_TAX])) {
-            $basketString .= "Shipping - shipping - ${basket[self::BASKET_SHIPPING_COSTS_WITH_TAX]} " .
-                             "${currency} - ${basket[self::BASKET_SHIPPING_COSTS_TAX]}";
+            $lines[] = "Shipping - shipping - ${basket[self::BASKET_SHIPPING_COSTS_WITH_TAX]} " .
+                       "${currency} - ${basket[self::BASKET_SHIPPING_COSTS_TAX]}";
         }
 
-        return $basketString;
+        return implode("\n", $lines);
     }
 
     /**

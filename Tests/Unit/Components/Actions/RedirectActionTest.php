@@ -29,12 +29,18 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit;
+namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Data;
 
-class DefaultTest extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+use WirecardShopwareElasticEngine\Components\Actions\Action;
+use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
+
+class RedirectActionTest extends TestCase
 {
-    public function testDefault()
+    public function testInstance()
     {
-        $this->assertEquals(3, 3);
+        $redirect = new RedirectAction('https://www.redirect-example.de');
+        $this->assertInstanceOf(Action::class, $redirect);
+        $this->assertEquals('https://www.redirect-example.de', $redirect->getUrl());
     }
 }

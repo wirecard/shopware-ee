@@ -29,28 +29,42 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Payments;
+namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Services;
 
 use Shopware\Components\Test\Plugin\TestCase;
-use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
+use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
+use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
 
 class PaymentFactoryTest extends TestCase
 {
     /**
      * @var PaymentFactory
      */
-    /*protected $factory;
+    protected $factory;
 
     public function setUp()
     {
-        $this->factory = new PaymentFactory(Shopware()->Container());
+        $this->factory = new PaymentFactory();
     }
 
     public function testPaypalInstance()
     {
         $this->assertInstanceOf(PaypalPayment::class, $this->factory->create(PaypalPayment::PAYMETHOD_IDENTIFIER));
-        $this->assertInstanceOf(PaypalPayment::class, $this->factory->create(PayPalTransaction::NAME));
-    }*/
+    }
+
+    public function testGetSupportedPayments()
+    {
+        $payments = $this->factory->getSupportedPayments();
+        foreach ($payments as $payment) {
+            $this->assertInstanceOf(PaymentInterface::class, $payment);
+        }
+    }
+
+    public function testUnknownPaymentException()
+    {
+        $this->expectException(UnknownPaymentException::class);
+        $this->factory->create('foobar');
+    }
 }

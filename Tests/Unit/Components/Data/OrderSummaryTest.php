@@ -29,11 +29,10 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Data;
+namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Data;
 
 use PHPUnit\Framework\TestCase;
 use Wirecard\PaymentSdk\Entity\Amount;
-use Wirecard\PaymentSdk\Entity\Redirect;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
 use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
@@ -51,21 +50,17 @@ class OrderSummaryTest extends TestCase
         $basket = $this->createMock(BasketMapper::class);
         /** @var Amount|\PHPUnit_Framework_MockObject_MockObject $amount */
         $amount = $this->createMock(Amount::class);
-        /** @var Redirect|\PHPUnit_Framework_MockObject_MockObject $redirect */
-        $redirect = $this->createMock(Redirect::class);
 
         $order = new OrderSummary(
             $payment,
             $user,
             $basket,
-            $amount,
-            $redirect
+            $amount
         );
 
         $this->assertSame($payment, $order->getPayment());
         $this->assertSame($user, $order->getUserMapper());
         $this->assertSame($basket, $order->getBasketMapper());
         $this->assertSame($amount, $order->getAmount());
-        $this->assertSame($redirect, $order->getRedirect());
     }
 }

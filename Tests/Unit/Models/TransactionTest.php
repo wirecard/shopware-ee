@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Payments;
+namespace WirecardShopwareElasticEngine\Tests\Unit\Models;
 
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
@@ -56,26 +56,10 @@ class TransactionTest extends ModelTestCase
     public function testGettersAndSetters()
     {
         $this->assertGetterAndSetter('orderNumber', 42);
-        $this->assertGetterAndSetter('order', new Order());
         $this->assertGetterAndSetter('transactionId', '6832b2f0-792b-4161-9f9a-f2916f7aae8e');
         $this->assertGetterAndSetter('providerTransactionId', '14B82779CX007053E');
         $this->assertGetterAndSetter('paymentStatus', Status::PAYMENT_STATE_RESERVED);
-        $this->assertGetterAndSetter('basketSignature',
-            '0fc30f3d8823f331f59b08f7d9942700451f6d5d2a360e67a4023ac740f9e421');
+        $this->assertGetterAndSetter('basketSignature', '0fc30f3d8823f331f59b08f7d9942700451f6d5d2a360e67a4023ac740f9e421');
         $this->assertGetterAndSetter('requestId', '693715a8071485c44fe4a5d8c1114e697555f84ca7daded7e3d314e0815aec01');
-
-        $returnResponse = [
-            'transaction-id' => '1bd5e7cb-552d-4a31-b72c-dfac4ec30130',
-            'request-id'     => 'de4cf94fd467aa5c4a5590d4490ff855',
-        ];
-
-        $this->model->setReturnResponse(serialize($returnResponse));
-
-        $notificationResponse = [
-            'transaction-id' => '6832b2f0-792b-4161-9f9a-f2916f7aae8e',
-            'request-id'     => 'db2616a7bc7d140ec4e20117c8582a54',
-        ];
-
-        $this->model->setNotificationResponse(serialize($notificationResponse));
     }
 }
