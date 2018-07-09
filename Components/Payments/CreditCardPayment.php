@@ -38,6 +38,7 @@ use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
 use Wirecard\PaymentSdk\Transaction\Reservable;
 use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 
 class CreditCardPayment extends Payment
 {
@@ -289,5 +290,9 @@ class CreditCardPayment extends Payment
             $transactionType,
             Shopware()->Locale()->getLanguage()
         );
+    }
+
+    public function processPayment(OrderSummary $orderSummary, TransactionService $transactionService)
+    {
     }
 }
