@@ -12,7 +12,7 @@ class ExtendOrder implements SubscriberInterface
     private $pluginDirectory;
 
     /**
-     * @param $pluginDirectory
+     * @param string $pluginDirectory
      */
     public function __construct($pluginDirectory)
     {
@@ -25,11 +25,11 @@ class ExtendOrder implements SubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch'
+            'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch',
         ];
     }
 
-    public function onOrderPostDispatch(\Enlight_Event_EventArgs $args)
+    public function onOrderPostDispatch(\Enlight_Controller_ActionEventArgs $args)
     {
         $controller = $args->getSubject();
 
