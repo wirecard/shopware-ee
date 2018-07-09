@@ -88,7 +88,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     public function gatewayAction()
     {
         /** @var PaymentFactory $paymentFactory */
-        $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
+        $paymentFactory = new PaymentFactory();
         $payment        = $paymentFactory->create($this->getPaymentShortName());
 
         try {
@@ -96,7 +96,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $payment,
                 new UserMapper(
                     $this->getUser(),
-                    $this->get('request')->getClientIp(),
+                    $this->Request()->getClientIp(),
                     $this->get('shopware_storefront.context_service')->getLocale()->getLocale()
                 ),
                 new BasketMapper(
@@ -160,7 +160,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
     public function returnAction()
     {
-
+        exit('ja');
     }
 
     /**
