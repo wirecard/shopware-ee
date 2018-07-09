@@ -167,44 +167,6 @@ abstract class Payment implements PaymentInterface
         return $transaction;
     }
 
-    /**
-     * @inheritdoc
-     */
-    //    public function processPayment()
-    //    {
-    //        $transaction = $this->createTransaction($paymentData);
-    //
-    //        $transactionService = new TransactionService($this->config, Shopware()->PluginLogger());
-    //
-    //        $response = null;
-    //        if ($this->configData['transactionType'] === self::TRANSACTION_TYPE_AUTHORIZATION
-    //            && $transaction instanceof Reservable) {
-    //            $response = $transactionService->reserve($transaction);
-    //        } elseif ($this->configData['transactionType'] === self::TRANSACTION_TYPE_PURCHASE) {
-    //            $response = $transactionService->pay($transaction);
-    //        }
-    //
-    //        if ($response instanceof InteractionResponse) {
-    //            return [
-    //                'status'   => 'success',
-    //                'redirect' => $response->getRedirectUrl()
-    //            ];
-    //        }
-    //
-    //        if ($response instanceof FailureResponse) {
-    //            $errors = '';
-    //
-    //            foreach ($response->getStatusCollection()->getIterator() as $item) {
-    //                /** @var $item Status */
-    //                $errors .= $item->getDescription() . "\n";
-    //            }
-    //
-    //            Shopware()->PluginLogger()->error($errors);
-    //        }
-    //
-    //        return ['status' => 'error'];
-    //    }
-
     public function processJsResponse($params, $return)
     {
         $configData = $this->getConfigData();
@@ -281,20 +243,6 @@ abstract class Payment implements PaymentInterface
         Shopware()->Models()->flush();
 
         return true;
-    }
-
-    /**
-     * Extra Options for payments are added here
-     *
-     * @param WirecardTransaction $transaction
-     * @param array               $paymentData
-     * @param array               $configData
-     *
-     * @return WirecardTransaction
-     */
-    protected function addPaymentSpecificData(WirecardTransaction $transaction, array $paymentData, array $configData)
-    {
-        return $transaction;
     }
 
     /**
