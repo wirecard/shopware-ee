@@ -211,4 +211,21 @@ class PaymentConfig
     {
         $this->sendDescriptor = $sendDescriptor;
     }
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
+            'baseUrl'         => $this->getBaseUrl(),
+            'httpUser'        => $this->getHttpUser(),
+            'httpPassword'    => $this->getHttpPassword(),
+            'transactionMAID' => $this->getTransactionMAID(),
+            'transactionType' => $this->getTransactionType(),
+            'sendBasket'      => $this->sendBasket(),
+            'fraudPrevention' => $this->hasFraudPrevention(),
+            'sendDescriptor'  => $this->sendDescriptor(),
+        ];
+    }
 }

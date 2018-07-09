@@ -36,8 +36,8 @@ use Shopware\Models\Order\Order;
 
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Models\OrderTransaction;
 use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardShopwareElasticEngine\Models\OrderNumberAssignment;
 
 use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
@@ -111,7 +111,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
 
         $builder = $this->getManager()->createQueryBuilder();
         $builder->select('transaction')
-                ->from(Transaction::class, 'transaction')
+                ->from(OrderNumberAssignment::class, 'transaction')
                 ->where('transaction.orderNumber = :orderNumber')
                 ->setParameter('orderNumber', $orderNumber);
 
@@ -124,7 +124,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
 
         $historyBuilder = $this->getManager()->createQueryBuilder();
         $historyBuilder->select('orderTransaction')
-            ->from(OrderTransaction::class, 'orderTransaction')
+            ->from(Transaction::class, 'orderTransaction')
             ->where('orderTransaction.parentTransactionId = :parentTransactionId')
             ->setParameter('parentTransactionId', $transactionData[0]['transactionId']);
 
@@ -208,7 +208,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
             $number = $current['number'];
             $builder = $this->getManager()->createQueryBuilder();
             $builder->select(['wirecardTransactions'])
-                ->from(Transaction::class, 'wirecardTransactions')
+                ->from(OrderNumberAssignment::class, 'wirecardTransactions')
                 ->where('wirecardTransactions.orderNumber = :orderNumber')
                 ->setParameter('orderNumber', $number);
             $elasticEngineTransactions = $builder->getQuery()->getArrayResult();

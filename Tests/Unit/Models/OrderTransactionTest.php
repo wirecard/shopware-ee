@@ -33,19 +33,19 @@ namespace WirecardShopwareElasticEngine\Tests\Unit\Models;
 
 use Shopware\Models\Order\Order;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
-use WirecardShopwareElasticEngine\Models\OrderTransaction;
+use WirecardShopwareElasticEngine\Models\Transaction;
 use WirecardShopwareElasticEngine\Tests\Unit\ModelTestCase;
 
 class OrderTransactionTest extends ModelTestCase
 {
     /**
-     * @var OrderTransaction
+     * @var Transaction
      */
     protected $model;
 
     public function getModel()
     {
-        return new OrderTransaction();
+        return new Transaction();
     }
 
     public function testGetId()

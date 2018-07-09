@@ -47,7 +47,7 @@ class OrderSummary
     /**
      * @var BasketMapper
      */
-    protected $basket;
+    protected $basketMapper;
 
     /**
      * @var Amount
@@ -73,10 +73,10 @@ class OrderSummary
         BasketMapper $basketMapper,
         Amount $amount
     ) {
-        $this->payment    = $payment;
-        $this->userMapper = $userMapper;
-        $this->amount     = $amount;
-        $this->basket     = $basketMapper;
+        $this->payment      = $payment;
+        $this->userMapper   = $userMapper;
+        $this->amount       = $amount;
+        $this->basketMapper = $basketMapper;
     }
 
     /**
@@ -100,7 +100,7 @@ class OrderSummary
      */
     public function getBasketMapper()
     {
-        return $this->basket;
+        return $this->basketMapper;
     }
 
     /**
@@ -109,5 +109,22 @@ class OrderSummary
     public function getAmount()
     {
         return $this->amount;
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
+            'payment' => [
+                'name'          => $this->getPayment()->getName(),
+                'paymentConfig' => $this->getPayment()->getPaymentConfig()->toArray(),
+                'transaction'   => $this->getPayment()->getTransaction()->mappedProperties(),
+            ],
+            'user'    => $this->getUserMapper()->toArray(),
+            'basket'  => $this->getBasketMapper()->toArray(),
+            'amount'  => $this->getAmount()->mappedProperties(),
+        ];
     }
 }

@@ -44,8 +44,8 @@ use Shopware\Components\Plugin\Context\UninstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
 
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
+use WirecardShopwareElasticEngine\Models\OrderNumberAssignment;
 use WirecardShopwareElasticEngine\Models\Transaction;
-use WirecardShopwareElasticEngine\Models\OrderTransaction;
 
 use Doctrine\ORM\Tools\SchemaTool;
 
@@ -91,8 +91,8 @@ class WirecardShopwareElasticEngine extends Plugin
 
         $schemaTool->updateSchema(
             [
+                $entityManager->getClassMetadata(OrderNumberAssignment::class),
                 $entityManager->getClassMetadata(Transaction::class),
-                $entityManager->getClassMetadata(OrderTransaction::class),
             ],
             true
         );

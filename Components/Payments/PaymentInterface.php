@@ -142,9 +142,4 @@ interface PaymentInterface
      * @return PaymentConfig
      */
     public function getPaymentConfig();
-
-    /**
-     * @return string
-     */
-    public function getTransactionOperation();
 }

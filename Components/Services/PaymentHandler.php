@@ -34,17 +34,13 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Wirecard\PaymentSdk\Entity\Redirect;
-use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
-use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
-use WirecardShopwareElasticEngine\Components\Actions\FailureAction;
 use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
-use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
-use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardShopwareElasticEngine\Models\OrderNumberAssignment;
 
 class PaymentHandler
 {
@@ -72,6 +68,11 @@ class PaymentHandler
      * @var EntityManagerInterface
      */
     protected $em;
+
+    /**
+     * @var OrderNumberAssignment
+     */
+    protected $orderNumberAssignment;
 
     /**
      * @param \Shopware_Components_Config $config
@@ -105,7 +106,7 @@ class PaymentHandler
                        ->getPayment()
                        ->processPayment($this->getOrderSummary(), $this->getTransactionService());
 
-        // todo: logging (OrderSummary)
+        $this->logger->debug('Payment processing execution', $this->getOrderSummary()->toArray());
 
         if ($action !== null) {
             return $action;
@@ -138,12 +139,15 @@ class PaymentHandler
      */
     private function prepareTransaction(Redirect $redirect, $notificationUrl)
     {
-        $orderSummary = $this->getOrderSummary();
-        $transaction  = $orderSummary->getPayment()->getTransaction();
+        $this->createOrderNumberAssignment();
+
+        $orderSummary          = $this->getOrderSummary();
+        $transaction           = $orderSummary->getPayment()->getTransaction();
 
         $transaction->setRedirect($redirect);
         $transaction->setAmount($orderSummary->getAmount());
         $transaction->setNotificationUrl($notificationUrl);
+        $transaction->setOrderNumber($this->orderNumberAssignment->getId());
 
         if ($orderSummary->getPayment()->getPaymentConfig()->sendBasket()) {
             $transaction->setBasket($orderSummary->getBasketMapper()->getWirecardBasket());
@@ -157,18 +161,21 @@ class PaymentHandler
         }
 
         if ($orderSummary->getPayment()->getPaymentConfig()->sendDescriptor()) {
-            $transaction->setDescriptor($this->getDescriptor(null));
+            $transaction->setDescriptor($this->getDescriptor($this->orderNumberAssignment->getId()));
         }
     }
 
-    private function createTransactionEntity()
+    /**
+     * Creates an order number assignment.
+     */
+    private function createOrderNumberAssignment()
     {
-        $transaction = new Transaction();
+        $orderNumberAssignment = new OrderNumberAssignment();
 
-        $this->em->persist($transaction);
+        $this->em->persist($orderNumberAssignment);
         $this->em->flush();
 
-        return $transaction;
+        $this->orderNumberAssignment = $orderNumberAssignment;
     }
 
     /**

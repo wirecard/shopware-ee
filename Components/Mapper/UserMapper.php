@@ -404,4 +404,34 @@ class UserMapper extends ArrayMapper
     {
         return $this->locale;
     }
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
+            'firstName'                 => $this->getFirstName(),
+            'lastName'                  => $this->getLastName(),
+            'email'                     => $this->getEmail(),
+            'birthday'                  => $this->getBirthday(),
+            'phone'                     => $this->getPhone(),
+            'additional'                => $this->getAdditional(),
+            'countryIso'                => $this->getCountryIso(),
+            'billingAddressCity'        => $this->getBillingAddressCity(),
+            'billingAddressStreet'      => $this->getBillingAddressStreet(),
+            'billingAddressZip'         => $this->getBillingAddressZip(),
+            'billingAddressAdditional'  => $this->getBillingAddressAdditional(),
+            'shippingFirstName'         => $this->getShippingFirstName(),
+            'shippingLastName'          => $this->getShippingLastName(),
+            'shippingPhone'             => $this->getShippingPhone(),
+            'shippingCountryIso'        => $this->getShippingAddressCountryIso(),
+            'shippingAddressCity'       => $this->getShippingAddressCity(),
+            'shippingAddressStreet'     => $this->getShippingAddressStreet(),
+            'shippingAddressZip'        => $this->getShippingAddressZip(),
+            'shippingAddressAdditional' => $this->getShippingAddressAdditional(),
+            'clientIp'                  => $this->getClientIp(),
+            'locale'                    => $this->getLocale(),
+        ];
+    }
 }

@@ -206,4 +206,14 @@ class BasketMapper extends ArrayMapper
 
         return true;
     }
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
+            'content' => $this->getShopwareBasketContent()
+        ];
+    }
 }

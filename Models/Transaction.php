@@ -37,7 +37,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="wirecard_elastic_engine_transactions")
+ * @ORM\Table(name="wirecard_elastic_engine_transaction")
  */
 class Transaction extends ModelEntity
 {
@@ -57,8 +57,21 @@ class Transaction extends ModelEntity
     private $orderNumber;
 
     /**
+     * @var Order
+     * @ORM\ManyToOne(targetEntity="Shopware\Models\Order\Order")
+     * @ORM\JoinColumn(name="order_number", referencedColumnName="ordernumber")
+     */
+    private $order;
+
+    /**
      * @var string
-     * @ORM\Column(name="transaction_id", type="string", nullable=true)
+     * @ORM\Column(name="parent_transaction_id", type="string", nullable=false)
+     */
+    private $parentTransactionId;
+
+    /**
+     * @var string
+     * @ORM\Column(name="transaction_id", type="string", nullable=false, unique=true)
      */
     private $transactionId;
 
@@ -70,21 +83,39 @@ class Transaction extends ModelEntity
 
     /**
      * @var string
-     * @ORM\Column(name="payment_status", type="string", nullable=true)
+     * @ORM\Column(name="transaction_type", type="string", nullable=true)
      */
-    private $paymentStatus;
+    private $transactionType;
+
+    /**
+     * @var float
+     * @ORM\Column(name="amount", type="float", nullable=true)
+     */
+    private $amount;
 
     /**
      * @var string
-     * @ORM\Column(name="basket_signature", type="string", nullable=true)
+     * @ORM\Column(name="currency", type="string", nullable=true)
      */
-    private $basketSignature;
+    private $currency;
 
     /**
      * @var string
-     * @ORM\Column(name="request_id", type="string", nullable=true)
+     * @ORM\Column(name="return_response", type="text", nullable=true)
      */
-    private $requestId;
+    private $returnResponse;
+
+    /**
+     * @var string
+     * @ORM\Column(name="notification_response", type="text", nullable=true)
+     */
+    private $notificationResponse;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(name="created_at", type="datetime", nullable=false)
+     */
+    private $createdAt;
 
     /**
      * @return int
@@ -95,7 +126,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string|null
+     * @return string
      */
     public function getOrderNumber()
     {
@@ -111,7 +142,40 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string|null
+     * @return Order
+     */
+    public function getOrder()
+    {
+        return $this->order;
+    }
+
+    /**
+     * @param Order $order
+     */
+    public function setOrder($order)
+    {
+        $this->order = $order;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getParentTransactionId()
+    {
+        return $this->parentTransactionId;
+    }
+
+    /**
+     * @param string $parentTransactionId
+     */
+    public function setParentTransactionId($parentTransactionId)
+    {
+        $this->parentTransactionId = $parentTransactionId;
+    }
+
+    /**
+     * @return string
      */
     public function getTransactionId()
     {
@@ -127,7 +191,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string|null
+     * @return string
      */
     public function getProviderTransactionId()
     {
@@ -135,7 +199,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param $providerTransactionId
+     * @param string $providerTransactionId
      */
     public function setProviderTransactionId($providerTransactionId)
     {
@@ -143,50 +207,98 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string|null
+     * @return string
      */
-    public function getPaymentStatus()
+    public function getTransactionType()
     {
-        return $this->paymentStatus;
+        return $this->transactionType;
     }
 
     /**
-     * @param string $paymentStatus
+     * @param string $transactionType
      */
-    public function setPaymentStatus($paymentStatus)
+    public function setTransactionType($transactionType)
     {
-        $this->paymentStatus = $paymentStatus;
+        $this->transactionType = $transactionType;
     }
 
     /**
-     * @return string|null
+     * @return float
      */
-    public function getBasketSignature()
+    public function getAmount()
     {
-        return $this->basketSignature;
+        return $this->amount;
     }
 
     /**
-     * @param string $basketSignature
+     * @param float $amount
      */
-    public function setBasketSignature($basketSignature)
+    public function setAmount($amount)
     {
-        $this->basketSignature = $basketSignature;
+        $this->amount = $amount;
     }
 
     /**
-     * @return string|null
+     * @return string
      */
-    public function getRequestId()
+    public function getCurrency()
     {
-        return $this->requestId;
+        return $this->currency;
     }
 
     /**
-     * @param string $requestId
+     * @param string $currency
      */
-    public function setRequestId($requestId)
+    public function setCurrency($currency)
     {
-        $this->requestId = $requestId;
+        $this->currency = $currency;
+    }
+
+    /**
+     * @return string
+     */
+    public function getReturnResponse()
+    {
+        return $this->returnResponse;
+    }
+
+    /**
+     * @param string $returnResponse
+     */
+    public function setReturnResponse($returnResponse)
+    {
+        $this->returnResponse = $returnResponse;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNotificationResponse()
+    {
+        return $this->notificationResponse;
+    }
+
+    /**
+     * @param string $notificationResponse
+     */
+    public function setNotificationResponse($notificationResponse)
+    {
+        $this->notificationResponse = $notificationResponse;
+    }
+
+    /**
+     * @param \DateTime
+     */
+    public function setCreatedAt(\DateTime $createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
     }
 }
