@@ -154,17 +154,16 @@ class BasketItemMapper extends ArrayMapper
         $price = floatval(str_replace(',', '.', $this->get(self::PRICE)));
 
         $details = $this->getOptional(self::DETAILS);
-        if (! $details) {
-            return $price;
-        }
-        if (isset($details[self::DETAILS_PRICES]) && count($details[self::DETAILS_PRICES]) === 1) {
-            $prices = $details[self::DETAILS_PRICES];
-            if (isset($prices[0][self::DETAILS_PRICES_PRICE_NUMERIC])) {
-                return $prices[0][self::DETAILS_PRICES_PRICE_NUMERIC];
+        if ($details) {
+            if (isset($details[self::DETAILS_PRICES]) && count($details[self::DETAILS_PRICES]) === 1) {
+                $prices = $details[self::DETAILS_PRICES];
+                if (isset($prices[0][self::DETAILS_PRICES_PRICE_NUMERIC])) {
+                    return $prices[0][self::DETAILS_PRICES_PRICE_NUMERIC];
+                }
             }
-        }
-        if (isset($details[self::DETAILS_PRICES_PRICE_NUMERIC])) {
-            return $details[self::DETAILS_PRICES_PRICE_NUMERIC];
+            if (isset($details[self::DETAILS_PRICES_PRICE_NUMERIC])) {
+                return $details[self::DETAILS_PRICES_PRICE_NUMERIC];
+            }
         }
         return $price;
     }

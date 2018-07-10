@@ -79,9 +79,11 @@ class BasketMapper extends ArrayMapper
      * @param \sArticles $articles
      * @param Transaction $transaction
      *
+     * @throws ArrayKeyNotFoundException
      * @throws InvalidBasketException
      * @throws InvalidBasketItemException
-     * @throws ArrayKeyNotFoundException
+     * @throws NotAvailableBasketException
+     * @throws OutOfStockBasketException
      */
     public function __construct(array $shopwareBasket, $currency, \sArticles $articles, Transaction $transaction)
     {
@@ -165,6 +167,8 @@ class BasketMapper extends ArrayMapper
         $this->validateBasket();
 
         $basket = new Basket();
+        // This seems wrong, because setVersion should get a string, not an object.
+        // But according to the PaymentSDK developer it's correct.
         $basket->setVersion($this->transaction);
 
         foreach ($this->getShopwareBasketContent() as $item) {
@@ -172,21 +176,17 @@ class BasketMapper extends ArrayMapper
             $basket->add($basketItem->getWirecardItem());
         }
 
-        if (! empty($this->getShopwareBasket()[self::SHIPPING_COSTS_WITH_TAX])) {
-            $shippingAmount = new Amount(
-                $this->getShopwareBasket()[self::SHIPPING_COSTS_WITH_TAX],
-                $this->currency
-            );
+        $shippingCosts = $this->getOptional(self::SHIPPING_COSTS_WITH_TAX);
+        if ($shippingCosts) {
+            $shippingAmount = new Amount($shippingCosts, $this->currency);
 
-            $shippingTaxValue = $this->getShopwareBasket()[self::SHIPPING_COSTS_WITH_TAX]
-                                - $this->getShopwareBasket()[self::SHIPPING_COSTS_NET];
-            $shippingTax      = new Amount($shippingTaxValue, $this->currency);
+            $shippingTaxValue = $shippingCosts - $this->getOptional(self::SHIPPING_COSTS_NET, 0.0);
 
             $basketItem = new Item('Shipping', $shippingAmount, 1);
             $basketItem->setDescription('Shipping');
             $basketItem->setArticleNumber('shipping');
-            $basketItem->setTaxAmount($shippingTax);
-            $basketItem->setTaxRate($this->getShopwareBasket()[self::SHIPPING_COSTS_TAX]);
+            $basketItem->setTaxAmount(new Amount($shippingTaxValue, $this->currency));
+            $basketItem->setTaxRate($this->getOptional(self::SHIPPING_COSTS_TAX, 0.0));
 
             $basket->add($basketItem);
         }

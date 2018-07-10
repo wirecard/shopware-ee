@@ -146,6 +146,49 @@ class BasketMapperTest extends TestCase
                     'article-number' => 10,
                     'tax-rate'       => 20,
                 ],
+                [
+                    'name'           => 'Shipping',
+                    'quantity'       => 1,
+                    'amount'         => ['currency' => 'USD', 'value' => 10.0],
+                    'description'    => 'Shipping',
+                    'article-number' => 'shipping',
+                    'tax-rate'       => 2,
+                ],
+            ],
+        ], $mapper->getWirecardBasket()->mappedProperties());
+        $this->assertEquals($basketArray, $mapper->toArray());
+    }
+
+    public function testBasketShipping()
+    {
+        /** @var \sArticles|\PHPUnit_Framework_MockObject_MockObject $articles */
+        $articles = $this->createMock(\sArticles::class);
+        /** @var Transaction|\PHPUnit_Framework_MockObject_MockObject $transaction */
+        $transaction = $this->createMock(Transaction::class);
+
+        // sShippingcostsNet has no effect here. See comment in BasketMapper::createWirecardBasket
+        $basketArray = [
+            'content'               => [],
+            'sShippingcostsWithTax' => 10,
+            'sShippingcostsNet'     => 5,
+            'sShippingcostsTax'     => 2,
+        ];
+        $mapper      = new BasketMapper($basketArray, 'USD', $articles, $transaction);
+        $this->assertEquals($basketArray, $mapper->getShopwareBasket());
+        $this->assertEquals(implode("\n", [
+            'Shipping - shipping - 10 USD - 2',
+        ]), $mapper->getBasketText());
+        $this->assertInstanceOf(Basket::class, $mapper->getWirecardBasket());
+        $this->assertEquals([
+            'order-item' => [
+                [
+                    'name'           => 'Shipping',
+                    'quantity'       => 1,
+                    'amount'         => ['currency' => 'USD', 'value' => 10.0],
+                    'description'    => 'Shipping',
+                    'article-number' => 'shipping',
+                    'tax-rate'       => 2,
+                ],
             ],
         ], $mapper->getWirecardBasket()->mappedProperties());
         $this->assertEquals($basketArray, $mapper->toArray());
