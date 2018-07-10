@@ -32,7 +32,6 @@
 use Doctrine\DBAL\DBALException;
 
 use Shopware\Components\CSRFWhitelistAware;
-use Shopware\Components\Routing\Router;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 
@@ -50,10 +49,10 @@ use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
 use WirecardShopwareElasticEngine\Components\Services\PaymentHandler;
+use WirecardShopwareElasticEngine\Components\Services\ReturnHandler;
 use WirecardShopwareElasticEngine\Components\StatusCodes;
 use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
-use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Exception\BasketException;
 use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
 use WirecardShopwareElasticEngine\Models\OrderNumberAssignment;
@@ -149,9 +148,42 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         ]);
     }
 
+    /**
+     * @throws UnknownPaymentException
+     */
     public function returnAction()
     {
-        exit('ja');
+        $request = $this->Request();
+
+        /** @var PaymentFactory $paymentFactory */
+        $paymentFactory = new PaymentFactory($this->get('config'));
+        $payment        = $paymentFactory->create($request->getParam('method'));
+
+        $transactionService = new TransactionService($payment->getTransactionConfig(
+            $this->container->getParameterBag(),
+            $this->container->get('shopware_plugininstaller.plugin_manager')
+        ));
+        $response           = $transactionService->handleResponse($request->getParams());
+
+        $returnHandler = new ReturnHandler($this);
+        $action        = $returnHandler->execute($response);
+
+        switch (true) {
+            case $action instanceof RedirectAction:
+                return $this->redirect($action->getUrl());
+        }
+
+        // todo: error handling
+    }
+
+    /**
+     * @internal
+     * @param string $signature
+     * @return ArrayObject
+     */
+    public function loadBasketFromSignature($signature)
+    {
+        return parent::loadBasketFromSignature($signature);
     }
 
     /**
@@ -912,26 +944,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             }
         }
         exit();
-    }
-
-    /**
-     * Important data of order for further processing in transaction get collected-
-     *
-     * @return OrderSummary $paymentData
-     * @throws Exception
-     */
-    protected function getPaymentData()
-    {
-        return new OrderSummary(
-            null,
-            $this->getUser(),
-            $this->getBasket(),
-            new Amount($this->getAmount(), $this->getCurrencyShortName()),
-            $this->getCurrencyShortName(),
-            $this->Front()->Router(),
-            $this->Request(),
-            $this->container
-        );
     }
 
     /**
