@@ -71,14 +71,9 @@ class PaymentHandler
     protected $em;
 
     /**
-     * @var OrderNumberAssignment
-     */
-    protected $orderNumberAssignment;
-
-    /**
      * @param \Shopware_Components_Config $config
-     * @param EntityManagerInterface      $em
-     * @param LoggerInterface             $logger
+     * @param EntityManagerInterface $em
+     * @param LoggerInterface $logger
      */
     public function __construct(
         \Shopware_Components_Config $config,
@@ -91,34 +86,38 @@ class PaymentHandler
     }
 
     /**
+     * @param OrderSummary $orderSummary
+     * @param TransactionService $transactionService
      * @param Redirect $redirect
-     * @param string   $notificationUrl
+     * @param string $notificationUrl
      *
      * @return Action
      * @throws ArrayKeyNotFoundException
      */
-    public function execute(Redirect $redirect, $notificationUrl)
-    {
-        $this->prepareTransaction($redirect, $notificationUrl);
+    public function execute(
+        OrderSummary $orderSummary,
+        TransactionService $transactionService,
+        Redirect $redirect,
+        $notificationUrl
+    ) {
+        $this->prepareTransaction($orderSummary, $redirect, $notificationUrl);
 
-        $transaction = $this->getOrderSummary()->getPayment()->getTransaction();
+        $payment     = $orderSummary->getPayment();
+        $transaction = $payment->getTransaction();
 
-        $action = $this->getOrderSummary()
-                       ->getPayment()
-                       ->processPayment($this->getOrderSummary(), $this->getTransactionService());
+        $action = $payment->processPayment($orderSummary, $transactionService);
 
         if ($action !== null) {
             return $action;
         }
 
-        $transactionService = $this->getTransactionService();
-        $response           = $transactionService->process(
+        $response = $transactionService->process(
             $transaction,
-            $this->getOrderSummary()->getPayment()->getPaymentConfig()->getTransactionType()
+            $payment->getPaymentConfig()->getTransactionType()
         );
 
         $this->logger->debug('Payment processing execution', [
-            'summary'  => $this->getOrderSummary()->toArray(),
+            'summary'  => $orderSummary->toArray(),
             'response' => $response,
         ]);
 
@@ -140,37 +139,38 @@ class PaymentHandler
      * Prepares the transaction for being sent to Wirecard by adding specific (e.g. amount) and optional (e.g. fraud
      * prevention data) data to the `Transaction` object of the payment.
      *
+     * @param OrderSummary $orderSummary
      * @param Redirect $redirect
-     * @param string   $notificationUrl
+     * @param string $notificationUrl
      *
      * @throws ArrayKeyNotFoundException
      */
-    private function prepareTransaction(Redirect $redirect, $notificationUrl)
+    private function prepareTransaction(OrderSummary $orderSummary, Redirect $redirect, $notificationUrl)
     {
-        $this->createOrderNumberAssignment();
+        $orderNumberAssignment = $this->createOrderNumberAssignment();
 
-        $orderSummary          = $this->getOrderSummary();
-        $transaction           = $orderSummary->getPayment()->getTransaction();
+        $payment       = $orderSummary->getPayment();
+        $paymentConfig = $orderSummary->getPayment()->getPaymentConfig();
+        $transaction   = $payment->getTransaction();
 
         $transaction->setRedirect($redirect);
         $transaction->setAmount($orderSummary->getAmount());
         $transaction->setNotificationUrl($notificationUrl);
-        $transaction->setOrderNumber($this->orderNumberAssignment->getId());
+        $transaction->setOrderNumber($orderNumberAssignment->getId());
 
-        if ($orderSummary->getPayment()->getPaymentConfig()->sendBasket()) {
+        if ($paymentConfig->sendBasket()) {
             $transaction->setBasket($orderSummary->getBasketMapper()->getWirecardBasket());
         }
 
-        if ($orderSummary->getPayment()->getPaymentConfig()->hasFraudPrevention()) {
+        if ($paymentConfig->hasFraudPrevention()) {
             $transaction->setIpAddress($orderSummary->getUserMapper()->getClientIp());
             $transaction->setAccountHolder($orderSummary->getUserMapper()->getWirecardBillingAccountHolder());
             $transaction->setShipping($orderSummary->getUserMapper()->getWirecardShippingAccountHolder());
             $transaction->setLocale($orderSummary->getUserMapper()->getLocale());
         }
 
-        if ($orderSummary->getPayment()->getPaymentConfig()->sendDescriptor()
-            && ! in_array(getenv('SHOPWARE_ENV'), ['dev', 'development'])) {
-            $transaction->setDescriptor($this->getDescriptor($this->orderNumberAssignment->getId()));
+        if ($paymentConfig->sendDescriptor() && ! in_array(getenv('SHOPWARE_ENV'), ['dev', 'development'])) {
+            $transaction->setDescriptor($this->getDescriptor($orderNumberAssignment->getId()));
         }
     }
 
@@ -184,39 +184,7 @@ class PaymentHandler
         $this->em->persist($orderNumberAssignment);
         $this->em->flush();
 
-        $this->orderNumberAssignment = $orderNumberAssignment;
-    }
-
-    /**
-     * @param OrderSummary $orderSummary
-     */
-    public function setOrderSummary(OrderSummary $orderSummary)
-    {
-        $this->orderSummary = $orderSummary;
-    }
-
-    /**
-     * @return OrderSummary
-     */
-    public function getOrderSummary()
-    {
-        return $this->orderSummary;
-    }
-
-    /**
-     * @param TransactionService $transactionService
-     */
-    public function setTransactionService(TransactionService $transactionService)
-    {
-        $this->transactionService = $transactionService;
-    }
-
-    /**
-     * @return TransactionService
-     */
-    public function getTransactionService()
-    {
-        return $this->transactionService;
+        return $orderNumberAssignment;
     }
 
     /**
@@ -228,7 +196,7 @@ class PaymentHandler
      *
      * @return string
      */
-    public function getDescriptor($orderNumber)
+    protected function getDescriptor($orderNumber)
     {
         $shopName = $this->config->get('shopName');
         return "${shopName} ${orderNumber}";
