@@ -75,18 +75,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function indexAction()
     {
-        return $this->forward('gateway');
-    }
-
-    /**
-     * Gets payment from `PaymentFactory`, assembles the `OrderSummary` and executes the payment through the
-     * `PaymentHandler` service. Further action depends on the response from the handler.
-     *
-     * @throws UnknownPaymentException
-     * @throws ArrayKeyNotFoundException
-     */
-    public function gatewayAction()
-    {
         /** @var PaymentFactory $paymentFactory */
         $paymentFactory = new PaymentFactory($this->get('config'));
         $payment        = $paymentFactory->create($this->getPaymentShortName());
