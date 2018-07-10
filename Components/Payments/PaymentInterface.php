@@ -125,7 +125,7 @@ interface PaymentInterface
      *
      * @return \Wirecard\PaymentSdk\Transaction\Transaction
      */
-    public function createTransaction(array $paymentData);
+//    public function createTransaction(array $paymentData);
 
     /**
      * Retrieve backend operations for specific transaction
@@ -134,7 +134,7 @@ interface PaymentInterface
      *
      * @return array
      */
-    public function getBackendOperations($transactionId);
+//    public function getBackendOperations($transactionId);
 
     /**
      * Process backend operation
@@ -143,5 +143,5 @@ interface PaymentInterface
      * @param string $operation
      * @param int    $amount
      */
-    public function processBackendOperationsForOrder($orderNumber, $operation, $amount = 0);
+//    public function processBackendOperationsForOrder($orderNumber, $operation, $amount = 0);
 }

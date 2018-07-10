@@ -41,7 +41,6 @@ use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
-use WirecardShopwareElasticEngine\Models\OrderNumberAssignment;
 
 class PaymentHandler
 {
@@ -147,8 +146,6 @@ class PaymentHandler
      */
     private function prepareTransaction(OrderSummary $orderSummary, Redirect $redirect, $notificationUrl)
     {
-        $orderNumberAssignment = $this->createOrderNumberAssignment();
-
         $payment       = $orderSummary->getPayment();
         $paymentConfig = $payment->getPaymentConfig();
         $transaction   = $payment->getTransaction();
@@ -156,7 +153,7 @@ class PaymentHandler
         $transaction->setRedirect($redirect);
         $transaction->setAmount($orderSummary->getAmount());
         $transaction->setNotificationUrl($notificationUrl);
-        $transaction->setOrderNumber($orderNumberAssignment->getId());
+        $transaction->setOrderNumber($orderSummary->getOrderNumber());
 
         if ($paymentConfig->sendBasket()) {
             $transaction->setBasket($orderSummary->getBasketMapper()->getWirecardBasket());
@@ -170,21 +167,8 @@ class PaymentHandler
         }
 
         if ($paymentConfig->sendDescriptor() && ! in_array(getenv('SHOPWARE_ENV'), ['dev', 'development'])) {
-            $transaction->setDescriptor($this->getDescriptor($orderNumberAssignment->getId()));
+            $transaction->setDescriptor($this->getDescriptor($orderSummary->getOrderNumber()));
         }
-    }
-
-    /**
-     * Creates an order number assignment.
-     */
-    private function createOrderNumberAssignment()
-    {
-        $orderNumberAssignment = new OrderNumberAssignment();
-
-        $this->em->persist($orderNumberAssignment);
-        $this->em->flush();
-
-        return $orderNumberAssignment;
     }
 
     /**

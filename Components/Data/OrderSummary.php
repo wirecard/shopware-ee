@@ -40,6 +40,11 @@ use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 class OrderSummary
 {
     /**
+     * @var int
+     */
+    protected $orderNumber;
+
+    /**
      * @var Payment
      */
     protected $payment;
@@ -62,17 +67,20 @@ class OrderSummary
     /**
      * OrderDetails constructor.
      *
+     * @param int              $orderNumber
      * @param PaymentInterface $payment
      * @param UserMapper       $userMapper
      * @param BasketMapper     $basketMapper
      * @param Amount           $amount
      */
     public function __construct(
+        $orderNumber,
         PaymentInterface $payment,
         UserMapper $userMapper,
         BasketMapper $basketMapper,
         Amount $amount
     ) {
+        $this->orderNumber  = $orderNumber;
         $this->payment      = $payment;
         $this->userMapper   = $userMapper;
         $this->amount       = $amount;
@@ -112,20 +120,29 @@ class OrderSummary
     }
 
     /**
+     * @return int
+     */
+    public function getOrderNumber()
+    {
+        return $this->orderNumber;
+    }
+
+    /**
      * @return array
      * @throws \WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException
      */
     public function toArray()
     {
         return [
-            'payment' => [
+            'orderNumber' => $this->getOrderNumber(),
+            'payment'     => [
                 'name'          => $this->getPayment()->getName(),
                 'paymentConfig' => $this->getPayment()->getPaymentConfig()->toArray(),
                 'transaction'   => $this->getPayment()->getTransaction()->mappedProperties(),
             ],
-            'user'    => $this->getUserMapper()->toArray(),
-            'basket'  => $this->getBasketMapper()->toArray(),
-            'amount'  => $this->getAmount()->mappedProperties(),
+            'user'        => $this->getUserMapper()->toArray(),
+            'basket'      => $this->getBasketMapper()->toArray(),
+            'amount'      => $this->getAmount()->mappedProperties(),
         ];
     }
 }

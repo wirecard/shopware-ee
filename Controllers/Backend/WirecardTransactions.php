@@ -37,7 +37,6 @@ use Shopware\Models\Order\Order;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Models\Transaction;
-use WirecardShopwareElasticEngine\Models\OrderNumberAssignment;
 
 use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;

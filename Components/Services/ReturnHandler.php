@@ -34,22 +34,14 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Shopware\Models\Order\Order;
-use Shopware\Models\Order\Status;
-use Shopware_Controllers_Frontend_Payment;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
-use WirecardShopwareElasticEngine\Models\OrderNumberAssignment;
 
 class ReturnHandler
 {
-    /**
-     * @var Shopware_Controllers_Frontend_Payment
-     */
-    protected $controller;
-
     /**
      * @var EntityManagerInterface
      */
@@ -60,11 +52,10 @@ class ReturnHandler
      */
     protected $logger;
 
-    public function __construct(Shopware_Controllers_Frontend_Payment $controller)
+    public function __construct(EntityManagerInterface $em, LoggerInterface $logger)
     {
-        $this->controller = $controller;
-        $this->em         = $controller->getModelManager();
-        $this->logger     = $controller->get('logger');
+        $this->em     = $em;
+        $this->logger = $logger;
     }
 
     /**
@@ -91,37 +82,16 @@ class ReturnHandler
     {
         $transactionId   = $response->getTransactionId();
         $paymentUniqueId = $response->getProviderTransactionId();
-
-        // This is actually NOT the order number but the ID of our generated OrderNumberAssignment!
-        $orderNumberAssignmentId = $response->findElement('order-number');
-
-        $orderNumberAssignment = $this->em
-            ->getRepository(OrderNumberAssignment::class)
-            ->find($orderNumberAssignmentId);
-
-        if (! $orderNumberAssignment) {
-            // todo: error handling
-        }
-
-        $orderNumberAssignment->setTransactionId($transactionId);
-        $orderNumberAssignment->setProviderTransactionId($paymentUniqueId);
+        $orderNumber     = $response->findElement('order-number');
 
         $order = $this->em
             ->getRepository(Order::class)
             ->findOneBy([
-                'transactionId' => $transactionId,
-                'temporaryId'   => $paymentUniqueId,
-                'status'        => Status::ORDER_STATE_CANCELLED,
+                'number' => $orderNumber,
             ]);
 
-        if ($order) {
-            $this->em->flush();
-            return new RedirectAction($this->controller->get('router')->assemble([
-                'module'     => 'frontend',
-                'controller' => 'checkout',
-                'action'     => 'finish',
-                'sUniqueID'  => $paymentUniqueId,
-            ]));
+        if (! $order) {
+            // todo: error handling
         }
 
         return new RedirectAction(null);
