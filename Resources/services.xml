@@ -37,5 +37,9 @@
             <argument>%wirecard_shopware_elastic_engine.plugin_dir%</argument>
             <tag name="shopware.event_subscriber"/>
         </service>
+        <service id="wirecard_elastic_engine.subscriber.order_send_mail"
+                 class="WirecardShopwareElasticEngine\Subscriber\OrderSubscriber">
+            <tag name="shopware.event_subscriber"/>
+        </service>
     </services>
 </container>

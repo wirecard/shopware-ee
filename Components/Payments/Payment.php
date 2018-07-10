@@ -39,6 +39,8 @@ use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
 
 abstract class Payment implements PaymentInterface
 {
+    const ACTION = 'WirecardElasticEnginePayment';
+
     const TRANSACTION_TYPE_AUTHORIZATION = 'authorization';
     const TRANSACTION_TYPE_PURCHASE = 'purchase';
 
@@ -86,7 +88,7 @@ abstract class Payment implements PaymentInterface
         return [
             'name'                  => $this->getName(),
             'description'           => $this->getLabel(),
-            'action'                => 'WirecardElasticEnginePayment',
+            'action'                => self::ACTION,
             'active'                => 0,
             'position'              => $this->getPosition(),
             'additionalDescription' => '',
