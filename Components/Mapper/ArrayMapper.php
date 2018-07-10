@@ -51,7 +51,7 @@ abstract class ArrayMapper
     protected function get($key)
     {
         if (! isset($this->arrayEntity[$key])) {
-            throw new ArrayKeyNotFoundException($key, get_class($this));
+            throw new ArrayKeyNotFoundException($key, get_class($this), $this->arrayEntity);
         }
         return $this->arrayEntity[$key];
     }

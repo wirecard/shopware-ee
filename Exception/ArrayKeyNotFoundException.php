@@ -33,8 +33,8 @@ namespace WirecardShopwareElasticEngine\Exception;
 
 class ArrayKeyNotFoundException extends \Exception
 {
-    public function __construct($key, $className)
+    public function __construct($key, $className, array $arrayEntity)
     {
-        parent::__construct("Array key (${key}) not found in ${className}");
+        parent::__construct("Array key (${key}) not found in ${className}: " . var_export($arrayEntity, true));
     }
 }
