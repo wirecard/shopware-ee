@@ -32,6 +32,7 @@
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Shopware_Components_Config;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -181,12 +182,16 @@ abstract class Payment implements PaymentInterface
     /**
      * @inheritdoc
      */
-    public function getTransactionConfig(ParameterBagInterface $parameterBag, InstallerService $installerService)
+    public function getTransactionConfig(
+        Shopware_Components_Config $config,
+        ParameterBagInterface $parameterBag,
+        InstallerService $installerService
+    )
     {
         $config = new Config(
-            $this->getPaymentConfig()->getBaseUrl(),
-            $this->getPaymentConfig()->getHttpUser(),
-            $this->getPaymentConfig()->getHttpPassword()
+            $this->getPaymentConfig($config)->getBaseUrl(),
+            $this->getPaymentConfig($config)->getHttpUser(),
+            $this->getPaymentConfig($config)->getHttpPassword()
         );
 
         $config->setShopInfo(
@@ -606,13 +611,14 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
-     * @param string $name
-     * @param string $prefix
+     * @param Shopware_Components_Config $config
+     * @param string                     $name
+     * @param string                     $prefix
      *
      * @return string
      */
-    protected function getPluginConfig($name, $prefix = 'wirecardElasticEngine')
+    protected function getPluginConfig(Shopware_Components_Config $config, $name, $prefix = 'wirecardElasticEngine')
     {
-        return $this->container->get('config')->getByNamespace(WirecardShopwareElasticEngine::NAME, $prefix . $name);
+        return $config->getByNamespace(WirecardShopwareElasticEngine::NAME, $prefix . $name);
     }
 }

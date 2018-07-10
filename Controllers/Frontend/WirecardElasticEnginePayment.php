@@ -97,12 +97,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 new UserMapper(
                     $this->getUser(),
                     $this->Request()->getClientIp(),
-                    $this->get('shopware_storefront.context_service')->getLocale()->getLocale()
+                    $this->get('shop')->getLocale()->getLocale()
                 ),
                 new BasketMapper(
                     $this->getBasket(),
                     $this->getCurrencyShortName(),
-                    $this->get('shopware.api.article'),
+                    $this->get('modules')->getModule('Articles'),
                     $payment->getTransaction()
                 ),
                 new Amount($this->getAmount(), $this->getCurrencyShortName())
@@ -120,8 +120,9 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $handler->setOrderSummary($orderSummary);
         $handler->setTransactionService(
             new TransactionService($payment->getTransactionConfig(
+                $this->container->get('config'),
                 $this->container->getParameterBag(),
-                $this->container->get('shopware.plugin_payment_installer')
+                $this->container->get('shopware_plugininstaller.plugin_manager')
             ), $this->get('pluginlogger'))
         );
 

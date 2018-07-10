@@ -115,7 +115,7 @@ class PaymentHandler
         $transactionService = $this->getTransactionService();
         $response           = $transactionService->process(
             $transaction,
-            $this->getOrderSummary()->getPayment()->getPaymentConfig()->getTransactionType()
+            $this->getOrderSummary()->getPayment()->getPaymentConfig($this->config)->getTransactionType()
         );
 
         switch (true) {
@@ -149,18 +149,18 @@ class PaymentHandler
         $transaction->setNotificationUrl($notificationUrl);
         $transaction->setOrderNumber($this->orderNumberAssignment->getId());
 
-        if ($orderSummary->getPayment()->getPaymentConfig()->sendBasket()) {
+        if ($orderSummary->getPayment()->getPaymentConfig($this->config)->sendBasket()) {
             $transaction->setBasket($orderSummary->getBasketMapper()->getWirecardBasket());
         }
 
-        if ($orderSummary->getPayment()->getPaymentConfig()->hasFraudPrevention()) {
+        if ($orderSummary->getPayment()->getPaymentConfig($this->config)->hasFraudPrevention()) {
             $transaction->setIpAddress($orderSummary->getUserMapper()->getClientIp());
             $transaction->setAccountHolder($orderSummary->getUserMapper()->getWirecardBillingAccountHolder());
             $transaction->setShipping($orderSummary->getUserMapper()->getWirecardShippingAccountHolder());
             $transaction->setLocale($orderSummary->getUserMapper()->getLocale());
         }
 
-        if ($orderSummary->getPayment()->getPaymentConfig()->sendDescriptor()) {
+        if ($orderSummary->getPayment()->getPaymentConfig($this->config)->sendDescriptor()) {
             $transaction->setDescriptor($this->getDescriptor($this->orderNumberAssignment->getId()));
         }
     }
