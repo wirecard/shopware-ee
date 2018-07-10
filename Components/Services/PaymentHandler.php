@@ -107,7 +107,6 @@ class PaymentHandler
                        ->getPayment()
                        ->processPayment($this->getOrderSummary(), $this->getTransactionService());
 
-
         if ($action !== null) {
             return $action;
         }
