@@ -36,13 +36,14 @@ use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Exception\InvalidBasketException;
 use WirecardShopwareElasticEngine\Exception\InvalidBasketItemException;
+use WirecardShopwareElasticEngine\Exception\NotAvailableBasketException;
+use WirecardShopwareElasticEngine\Exception\OutOfStockBasketException;
 
 class BasketMapper extends ArrayMapper
 {
-    const BASKET_CONTENT = 'content';
-    const ARTICLE_QUANTITY = 'quantity';
-    const BASKET_SHIPPING_COSTS_WITH_TAX = 'sShippingcostsWithTax';
-    const BASKET_SHIPPING_COSTS_TAX = 'sShippingcostsTax';
+    const CONTENT = 'content';
+    const SHIPPING_COSTS_WITH_TAX = 'sShippingcostsWithTax';
+    const SHIPPING_COSTS_TAX = 'sShippingcostsTax';
     const ARTICLE_IS_AVAILABLE = 'isAvailable';
     const ARTICLE_LAST_STOCK = 'laststock';
     const ARTICLE_IN_STOCK = 'instock';
@@ -110,7 +111,7 @@ class BasketMapper extends ArrayMapper
      */
     protected function getShopwareBasketContent()
     {
-        return $this->get(self::BASKET_CONTENT);
+        return $this->get(self::CONTENT);
     }
 
     /**
@@ -138,9 +139,9 @@ class BasketMapper extends ArrayMapper
             $lines[] = "${name} - ${articleNumber} - ${price} - ${currency} - ${quantity} - ${taxRate}%";
         }
 
-        if (! empty($basket[self::BASKET_SHIPPING_COSTS_WITH_TAX]) && isset($basket[self::BASKET_SHIPPING_COSTS_TAX])) {
-            $lines[] = "Shipping - shipping - ${basket[self::BASKET_SHIPPING_COSTS_WITH_TAX]} " .
-                       "${currency} - ${basket[self::BASKET_SHIPPING_COSTS_TAX]}";
+        if (! empty($basket[self::SHIPPING_COSTS_WITH_TAX]) && isset($basket[self::SHIPPING_COSTS_TAX])) {
+            $lines[] = "Shipping - shipping - ${basket[self::SHIPPING_COSTS_WITH_TAX]} " .
+                       "${currency} - ${basket[self::SHIPPING_COSTS_TAX]}";
         }
 
         return implode("\n", $lines);
@@ -153,15 +154,14 @@ class BasketMapper extends ArrayMapper
      * @throws InvalidBasketException
      * @throws InvalidBasketItemException
      * @throws ArrayKeyNotFoundException
+     * @throws OutOfStockBasketException
+     * @throws NotAvailableBasketException
      */
     protected function createWirecardBasket()
     {
-        if (! $this->validateBasket()) {
-            throw new InvalidBasketException($this->getShopwareBasket());
-        }
+        $this->validateBasket();
 
         $basket = new Basket();
-
         $basket->setVersion($this->transaction);
 
         foreach ($this->getShopwareBasketContent() as $item) {
@@ -175,36 +175,36 @@ class BasketMapper extends ArrayMapper
     /**
      * Validates the given shopware basket.
      *
-     * @return bool
      * @throws InvalidBasketItemException
      * @throws ArrayKeyNotFoundException
+     * @throws OutOfStockBasketException
+     * @throws InvalidBasketException
+     * @throws NotAvailableBasketException
      */
     private function validateBasket()
     {
         $basket = $this->getShopwareBasket();
 
-        if (! isset($basket[self::BASKET_CONTENT])) {
-            return false;
+        if (! isset($basket[self::CONTENT])) {
+            throw new InvalidBasketException($this);
         }
 
-        foreach ($basket[self::BASKET_CONTENT] as $item) {
+        foreach ($basket[self::CONTENT] as $item) {
             $basketItem = new BasketItemMapper($item, $this->currency);
-
-            $article = $this->articles->sGetProductByOrdernumber($basketItem->getArticleNumber());
+            $article    = $this->articles->sGetProductByOrdernumber($basketItem->getArticleNumber());
 
             if (! $article) {
                 // Some items (extra charges, ...) might have an order number but no article.
                 continue;
             }
 
-            if (! $article[self::ARTICLE_IS_AVAILABLE]
-                || ($article[self::ARTICLE_LAST_STOCK]
-                    && intval($item[self::ARTICLE_QUANTITY]) > $article[self::ARTICLE_IN_STOCK])) {
-                return false;
+            if (! $article[self::ARTICLE_IS_AVAILABLE]) {
+                throw new NotAvailableBasketException($article, $basketItem, $this);
+            }
+            if ($article[self::ARTICLE_LAST_STOCK] && intval($basketItem->getQuantity()) > $article[self::ARTICLE_IN_STOCK]) {
+                throw new OutOfStockBasketException($article, $basketItem, $this);
             }
         }
-
-        return true;
     }
 
     /**

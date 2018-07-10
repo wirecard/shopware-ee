@@ -37,30 +37,30 @@ use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 
 class UserMapper extends ArrayMapper
 {
-    const USER_FIRST_NAME = 'firstname';
-    const USER_LAST_NAME = 'lastname';
-    const USER_EMAIL = 'email';
-    const USER_BIRTHDAY = 'birthday';
-    const USER_BILLING_ADDRESS = 'billingaddress';
-    const USER_PHONE = 'phone';
-    const USER_ADDITIONAL = 'additional';
-    const USER_ADDITIONAL_USER = 'user';
-    const USER_ADDITIONAL_COUNTRY = 'country';
-    const USER_ADDITIONAL_COUNTRY_ISO = 'countryiso';
-    const USER_SHIPPING_ADDRESS_FIRST_NAME = 'firstname';
-    const USER_SHIPPING_ADDRESS_LAST_NAME = 'lastname';
-    const USER_SHIPPING_ADDRESS_PHONE = 'phone';
-    const USER_BILLING_ADDRESS_CITY = 'city';
-    const USER_BILLING_ADDRESS_STREET = 'street';
-    const USER_BILLING_ADDRESS_ADDITIONAL = 'additionalAddressLine1';
-    const USER_SHIPPING_ADDRESS = 'shippingaddress';
-    const USER_BILLING_ADDRESS_ZIP = 'zipcode';
-    const USER_ADDITIONAL_COUNTRY_SHIPPING = 'countryShipping';
-    const USER_ADDITIONAL_COUNTRY_SHIPPING_COUNTRY_ISO = 'countryiso';
-    const USER_SHIPPING_ADDRESS_CITY = 'city';
-    const USER_SHIPPING_ADDRESS_STREET = 'street';
-    const USER_SHIPPING_ADDRESS_ZIP = 'zipcode';
-    const USER_SHIPPING_ADDRESS_ADDITIONAL = 'additionalAddressLine1';
+    const FIRST_NAME = 'firstname';
+    const LAST_NAME = 'lastname';
+    const EMAIL = 'email';
+    const BIRTHDAY = 'birthday';
+    const BILLING_ADDRESS = 'billingaddress';
+    const PHONE = 'phone';
+    const ADDITIONAL = 'additional';
+    const ADDITIONAL_USER = 'user';
+    const ADDITIONAL_COUNTRY = 'country';
+    const ADDITIONAL_COUNTRY_ISO = 'countryiso';
+    const SHIPPING_ADDRESS_FIRST_NAME = 'firstname';
+    const SHIPPING_ADDRESS_LAST_NAME = 'lastname';
+    const SHIPPING_ADDRESS_PHONE = 'phone';
+    const BILLING_ADDRESS_CITY = 'city';
+    const BILLING_ADDRESS_STREET = 'street';
+    const BILLING_ADDRESS_ADDITIONAL = 'additionalAddressLine1';
+    const SHIPPING_ADDRESS = 'shippingaddress';
+    const BILLING_ADDRESS_ZIP = 'zipcode';
+    const ADDITIONAL_COUNTRY_SHIPPING = 'countryShipping';
+    const ADDITIONAL_COUNTRY_SHIPPING_COUNTRY_ISO = 'countryiso';
+    const SHIPPING_ADDRESS_CITY = 'city';
+    const SHIPPING_ADDRESS_STREET = 'street';
+    const SHIPPING_ADDRESS_ZIP = 'zipcode';
+    const SHIPPING_ADDRESS_ADDITIONAL = 'additionalAddressLine1';
 
     /**
      * @var string
@@ -106,7 +106,10 @@ class UserMapper extends ArrayMapper
         $billingAccountHolder->setFirstName($this->getFirstName());
         $billingAccountHolder->setLastName($this->getLastName());
         $billingAccountHolder->setEmail($this->getEmail());
-        $billingAccountHolder->setDateOfBirth($this->getBirthday());
+        $birthday = $this->getBirthday();
+        if ($birthday) {
+            $billingAccountHolder->setDateOfBirth($birthday);
+        }
         $billingAccountHolder->setPhone($this->getPhone());
         $billingAccountHolder->setAddress($this->getWirecardBillingAddress());
 
@@ -142,7 +145,6 @@ class UserMapper extends ArrayMapper
             $this->getBillingAddressCity(),
             $this->getBillingAddressStreet()
         );
-
         $billingAddress->setPostalCode($this->getBillingAddressZip());
         $billingAddress->setStreet2($this->getBillingAddressAdditional());
 
@@ -161,7 +163,6 @@ class UserMapper extends ArrayMapper
             $this->getShippingAddressCity(),
             $this->getShippingAddressStreet()
         );
-
         $shippingAddress->setPostalCode($this->getShippingAddressZip());
         $shippingAddress->setStreet2($this->getShippingAddressAdditional());
 
@@ -174,7 +175,7 @@ class UserMapper extends ArrayMapper
      */
     public function getFirstName()
     {
-        return $this->getAdditionalUserDetail(self::USER_FIRST_NAME);
+        return $this->get([self::ADDITIONAL, self::ADDITIONAL_USER, self::FIRST_NAME]);
     }
 
     /**
@@ -183,7 +184,7 @@ class UserMapper extends ArrayMapper
      */
     public function getLastName()
     {
-        return $this->getAdditionalUserDetail(self::USER_LAST_NAME);
+        return $this->get([self::ADDITIONAL, self::ADDITIONAL_USER, self::LAST_NAME]);
     }
 
     /**
@@ -192,16 +193,16 @@ class UserMapper extends ArrayMapper
      */
     public function getEmail()
     {
-        return $this->getAdditionalUserDetail(self::USER_EMAIL);
+        return $this->get([self::ADDITIONAL, self::ADDITIONAL_USER, self::EMAIL]);
     }
 
     /**
-     * @return \DateTime
-     * @throws ArrayKeyNotFoundException
+     * @return \DateTime|null
      */
     public function getBirthday()
     {
-        return new \DateTime($this->getAdditionalUserDetailOptional(self::USER_BIRTHDAY));
+        $birthday = $this->getOptional([self::ADDITIONAL, self::ADDITIONAL_USER, self::BIRTHDAY]);
+        return $birthday ? new \DateTime($birthday) : null;
     }
 
     /**
@@ -210,20 +211,7 @@ class UserMapper extends ArrayMapper
      */
     public function getBillingAddress()
     {
-        return $this->get(self::USER_BILLING_ADDRESS);
-    }
-
-    /**
-     * @param $detail
-     *
-     * @return string|null
-     * @throws ArrayKeyNotFoundException
-     */
-    private function getBillingAddressDetail($detail)
-    {
-        $billingAddress = $this->getBillingAddress();
-
-        return isset($billingAddress[$detail]) ? $billingAddress[$detail] : null;
+        return $this->get(self::BILLING_ADDRESS);
     }
 
     /**
@@ -231,66 +219,7 @@ class UserMapper extends ArrayMapper
      */
     public function getPhone()
     {
-        return $this->getOptional(self::USER_PHONE);
-    }
-
-    /**
-     * @return array
-     * @throws ArrayKeyNotFoundException
-     */
-    public function getAdditional()
-    {
-        return $this->get(self::USER_ADDITIONAL);
-    }
-
-    /**
-     * @param $detail
-     *
-     * @return mixed
-     * @throws ArrayKeyNotFoundException
-     */
-    public function getAdditionalDetail($detail)
-    {
-        if (! isset($this->getAdditional()[$detail])) {
-            throw new ArrayKeyNotFoundException("additional.${detail}", get_class($this), $this->getAdditional());
-        }
-
-        return $this->getAdditional()[$detail];
-    }
-
-    /**
-     * @param string $detail
-     *
-     * @return string
-     * @throws ArrayKeyNotFoundException
-     */
-    public function getAdditionalUserDetail($detail)
-    {
-        $userAdditionalDetails = $this->getAdditionalDetail(self::USER_ADDITIONAL_USER);
-
-        if (! isset($userAdditionalDetails[$detail])) {
-            throw new ArrayKeyNotFoundException("additional.user.${detail}", get_class($this), $userAdditionalDetails);
-        }
-
-        return $userAdditionalDetails[$detail];
-    }
-
-    /**
-     * @param string $detail
-     * @param mixed  $fallback
-     *
-     * @return null
-     * @throws ArrayKeyNotFoundException
-     */
-    public function getAdditionalUserDetailOptional($detail, $fallback = null)
-    {
-        $userAdditionalDetails = $this->getAdditionalDetail(self::USER_ADDITIONAL_USER);
-
-        if (! isset($userAdditionalDetails[$detail])) {
-            return $fallback;
-        }
-
-        return $userAdditionalDetails[$detail];
+        return $this->getOptional([self::BILLING_ADDRESS, self::PHONE]);
     }
 
     /**
@@ -298,17 +227,7 @@ class UserMapper extends ArrayMapper
      */
     public function getCountryIso()
     {
-        $additional = $this->getAdditional();
-
-        if (isset(
-            $additional,
-            $additional[self::USER_ADDITIONAL_COUNTRY],
-            $additional[self::USER_ADDITIONAL_COUNTRY][self::USER_ADDITIONAL_COUNTRY_ISO]
-        )) {
-            return $additional[self::USER_ADDITIONAL_COUNTRY][self::USER_ADDITIONAL_COUNTRY_ISO];
-        }
-
-        return null;
+        return $this->getOptional([self::ADDITIONAL, self::ADDITIONAL_COUNTRY, self::ADDITIONAL_COUNTRY_ISO]);
     }
 
     /**
@@ -317,7 +236,8 @@ class UserMapper extends ArrayMapper
      */
     public function getBillingAddressCity()
     {
-        return $this->getBillingAddressDetail(self::USER_BILLING_ADDRESS_CITY);
+        $address = $this->getBillingAddress();
+        return isset($address[self::BILLING_ADDRESS_CITY]) ? $address[self::BILLING_ADDRESS_CITY] : null;
     }
 
     /**
@@ -326,7 +246,8 @@ class UserMapper extends ArrayMapper
      */
     public function getBillingAddressStreet()
     {
-        return $this->getBillingAddressDetail(self::USER_BILLING_ADDRESS_STREET);
+        $address = $this->getBillingAddress();
+        return isset($address[self::BILLING_ADDRESS_STREET]) ? $address[self::BILLING_ADDRESS_STREET] : null;
     }
 
     /**
@@ -335,7 +256,8 @@ class UserMapper extends ArrayMapper
      */
     public function getBillingAddressZip()
     {
-        return $this->getBillingAddressDetail(self::USER_BILLING_ADDRESS_ZIP);
+        $address = $this->getBillingAddress();
+        return isset($address[self::BILLING_ADDRESS_ZIP]) ? $address[self::BILLING_ADDRESS_ZIP] : null;
     }
 
     /**
@@ -344,7 +266,8 @@ class UserMapper extends ArrayMapper
      */
     public function getBillingAddressAdditional()
     {
-        return $this->getBillingAddressDetail(self::USER_BILLING_ADDRESS_ADDITIONAL);
+        $address = $this->getBillingAddress();
+        return isset($address[self::BILLING_ADDRESS_ADDITIONAL]) ? $address[self::BILLING_ADDRESS_ADDITIONAL] : null;
     }
 
     /**
@@ -352,43 +275,31 @@ class UserMapper extends ArrayMapper
      */
     public function getShippingAddress()
     {
-        return $this->getOptional(self::USER_SHIPPING_ADDRESS, []);
+        return $this->getOptional(self::SHIPPING_ADDRESS, []);
     }
 
     /**
-     * @param $detail
-     *
      * @return string|null
-     */
-    private function getShippingAddressDetail($detail)
-    {
-        $shippingAddress = $this->getShippingAddress();
-
-        return isset($shippingAddress[$detail]) ? $shippingAddress[$detail] : null;
-    }
-
-    /**
-     * @return string
      */
     public function getShippingFirstName()
     {
-        return $this->getShippingAddressDetail(self::USER_SHIPPING_ADDRESS_FIRST_NAME);
+        return $this->getOptional([self::SHIPPING_ADDRESS, self::SHIPPING_ADDRESS_FIRST_NAME]);
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getShippingLastName()
     {
-        return $this->getShippingAddressDetail(self::USER_SHIPPING_ADDRESS_LAST_NAME);
+        return $this->getOptional([self::SHIPPING_ADDRESS, self::SHIPPING_ADDRESS_LAST_NAME]);
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getShippingPhone()
     {
-        return $this->getShippingAddressDetail(self::USER_SHIPPING_ADDRESS_PHONE);
+        return $this->getOptional([self::SHIPPING_ADDRESS, self::SHIPPING_ADDRESS_PHONE]);
     }
 
     /**
@@ -396,17 +307,7 @@ class UserMapper extends ArrayMapper
      */
     public function getShippingAddressCountryIso()
     {
-        $additional = $this->getAdditional();
-
-        if (isset(
-            $additional,
-            $additional[self::USER_ADDITIONAL_COUNTRY_SHIPPING],
-            $additional[self::USER_ADDITIONAL_COUNTRY_SHIPPING][self::USER_ADDITIONAL_COUNTRY_SHIPPING_COUNTRY_ISO]
-        )) {
-            return $additional[self::USER_ADDITIONAL_COUNTRY_SHIPPING][self::USER_ADDITIONAL_COUNTRY_SHIPPING_COUNTRY_ISO];
-        }
-
-        return null;
+        return $this->getOptional([self::ADDITIONAL, self::ADDITIONAL_COUNTRY_SHIPPING, self::ADDITIONAL_COUNTRY_SHIPPING_COUNTRY_ISO]);
     }
 
     /**
@@ -414,7 +315,7 @@ class UserMapper extends ArrayMapper
      */
     public function getShippingAddressCity()
     {
-        return $this->getShippingAddressDetail(self::USER_SHIPPING_ADDRESS_CITY);
+        return $this->getOptional([self::SHIPPING_ADDRESS, self::SHIPPING_ADDRESS_CITY]);
     }
 
     /**
@@ -422,7 +323,7 @@ class UserMapper extends ArrayMapper
      */
     public function getShippingAddressStreet()
     {
-        return $this->getShippingAddressDetail(self::USER_SHIPPING_ADDRESS_STREET);
+        return $this->getOptional([self::SHIPPING_ADDRESS, self::SHIPPING_ADDRESS_STREET]);
     }
 
     /**
@@ -430,7 +331,7 @@ class UserMapper extends ArrayMapper
      */
     public function getShippingAddressZip()
     {
-        return $this->getShippingAddressDetail(self::USER_SHIPPING_ADDRESS_ZIP);
+        return $this->getOptional([self::SHIPPING_ADDRESS, self::SHIPPING_ADDRESS_ZIP]);
     }
 
     /**
@@ -438,7 +339,7 @@ class UserMapper extends ArrayMapper
      */
     public function getShippingAddressAdditional()
     {
-        return $this->getShippingAddressDetail(self::USER_SHIPPING_ADDRESS_ADDITIONAL);
+        return $this->getOptional([self::SHIPPING_ADDRESS, self::SHIPPING_ADDRESS_ADDITIONAL]);
     }
 
     /**
@@ -469,7 +370,6 @@ class UserMapper extends ArrayMapper
             'email'                     => $this->getEmail(),
             'birthday'                  => $this->getBirthday(),
             'phone'                     => $this->getPhone(),
-            'additional'                => $this->getAdditional(),
             'countryIso'                => $this->getCountryIso(),
             'billingAddressCity'        => $this->getBillingAddressCity(),
             'billingAddressStreet'      => $this->getBillingAddressStreet(),

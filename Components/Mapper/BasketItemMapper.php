@@ -38,16 +38,16 @@ use WirecardShopwareElasticEngine\Exception\InvalidBasketItemException;
 
 class BasketItemMapper extends ArrayMapper
 {
-    const ITEM_ARTICLE_NAME = 'articlename';
-    const ITEM_ORDER_NUMBER = 'ordernumber';
-    const ITEM_ADDITIONAL_DETAILS = 'additional_details';
-    const ITEM_ADDITIONAL_DETAILS_DESCRIPTION = 'description';
-    const ITEM_ADDITIONAL_DETAILS_PRICES = 'prices';
-    const ITEM_ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC = 'price_numeric';
-    const ITEM_TAX = 'tax';
-    const ITEM_TAX_RATE = 'tax_rate';
-    const ITEM_QUANTITY = 'quantity';
-    const ITEM_PRICE = 'price';
+    const ARTICLE_NAME = 'articlename';
+    const ORDER_NUMBER = 'ordernumber';
+    const ADDITIONAL_DETAILS = 'additional_details';
+    const ADDITIONAL_DETAILS_DESCRIPTION = 'description';
+    const ADDITIONAL_DETAILS_PRICES = 'prices';
+    const ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC = 'price_numeric';
+    const TAX = 'tax';
+    const TAX_RATE = 'tax_rate';
+    const QUANTITY = 'quantity';
+    const PRICE = 'price';
 
     /**
      * @var Item
@@ -97,7 +97,7 @@ class BasketItemMapper extends ArrayMapper
      */
     public function getArticleName()
     {
-        return $this->get(self::ITEM_ARTICLE_NAME);
+        return $this->get(self::ARTICLE_NAME);
     }
 
     /**
@@ -107,23 +107,7 @@ class BasketItemMapper extends ArrayMapper
      */
     public function getArticleNumber()
     {
-        return $this->get(self::ITEM_ORDER_NUMBER);
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasAdditionalDetails()
-    {
-        return $this->has(self::ITEM_ADDITIONAL_DETAILS);
-    }
-
-    /**
-     * @return array
-     */
-    public function getAdditionalDetails()
-    {
-        return $this->getOptional(self::ITEM_ADDITIONAL_DETAILS, []);
+        return $this->get(self::ORDER_NUMBER);
     }
 
     /**
@@ -132,7 +116,7 @@ class BasketItemMapper extends ArrayMapper
      */
     public function getTaxRate()
     {
-        return $this->get(self::ITEM_TAX_RATE);
+        return $this->get(self::TAX_RATE);
     }
 
     /**
@@ -141,7 +125,7 @@ class BasketItemMapper extends ArrayMapper
      */
     public function getTax()
     {
-        return $this->get(self::ITEM_TAX);
+        return $this->get(self::TAX);
     }
 
     /**
@@ -150,7 +134,7 @@ class BasketItemMapper extends ArrayMapper
      */
     public function getQuantity()
     {
-        return $this->get(self::ITEM_QUANTITY);
+        return $this->get(self::QUANTITY);
     }
 
     /**
@@ -158,12 +142,7 @@ class BasketItemMapper extends ArrayMapper
      */
     public function getDescription()
     {
-        if (! $this->hasAdditionalDetails()
-            || ! isset($this->getAdditionalDetails()[self::ITEM_ADDITIONAL_DETAILS_DESCRIPTION])) {
-            return '';
-        }
-
-        return $this->getAdditionalDetails()[self::ITEM_ADDITIONAL_DETAILS_DESCRIPTION];
+        return $this->getOptional([self::ADDITIONAL_DETAILS, self::ADDITIONAL_DETAILS_DESCRIPTION], '');
     }
 
     /**
@@ -172,18 +151,18 @@ class BasketItemMapper extends ArrayMapper
      */
     public function getPrice()
     {
-        $price = floatval(str_replace(',', '.', $this->get(self::ITEM_PRICE)));
+        $price = floatval(str_replace(',', '.', $this->get(self::PRICE)));
 
-        if ($this->hasAdditionalDetails()) {
-            $details = $this->getAdditionalDetails();
-            if (isset($details[self::ITEM_ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC])) {
-                $price = $details[self::ITEM_ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC];
+        $details = $this->getOptional(self::ADDITIONAL_DETAILS);
+        if ($details) {
+            if (isset($details[self::ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC])) {
+                $price = $details[self::ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC];
             }
 
-            if (isset($details[self::ITEM_ADDITIONAL_DETAILS_PRICES]) && count($details[self::ITEM_ADDITIONAL_DETAILS_PRICES]) === 1) {
-                $prices = $details[self::ITEM_ADDITIONAL_DETAILS_PRICES];
-                if (isset($prices[0][self::ITEM_ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC])) {
-                    $price = $prices[0][self::ITEM_ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC];
+            if (isset($details[self::ADDITIONAL_DETAILS_PRICES]) && count($details[self::ADDITIONAL_DETAILS_PRICES]) === 1) {
+                $prices = $details[self::ADDITIONAL_DETAILS_PRICES];
+                if (isset($prices[0][self::ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC])) {
+                    $price = $prices[0][self::ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC];
                 }
             }
         }
@@ -200,12 +179,10 @@ class BasketItemMapper extends ArrayMapper
      */
     protected function createWirecardItem()
     {
-        if (! $this->validateItem()) {
-            throw new InvalidBasketItemException($this->getShopwareItem());
-        }
+        $this->validateItem();
 
-        $tax         = str_replace(',', '.', $this->getTax());
-        $quantity    = $this->getQuantity();
+        $tax      = str_replace(',', '.', $this->getTax());
+        $quantity = $this->getQuantity();
 
         $amount    = new Amount($this->getPrice(), $this->currency);
         $taxAmount = new Amount(floatval($tax) / $quantity, $this->currency);
@@ -222,21 +199,19 @@ class BasketItemMapper extends ArrayMapper
     /**
      * Validates the shopware array item.
      *
-     * @return bool
+     * @throws InvalidBasketItemException
      */
     private function validateItem()
     {
         $item = $this->getShopwareItem();
         if (! isset(
-            $item[self::ITEM_ARTICLE_NAME],
-            $item[self::ITEM_ORDER_NUMBER],
-            $item[self::ITEM_TAX],
-            $item[self::ITEM_QUANTITY],
-            $item[self::ITEM_PRICE]
+            $item[self::ARTICLE_NAME],
+            $item[self::ORDER_NUMBER],
+            $item[self::TAX],
+            $item[self::QUANTITY],
+            $item[self::PRICE]
         )) {
-            return false;
+            throw new InvalidBasketItemException($this);
         }
-
-        return true;
     }
 }

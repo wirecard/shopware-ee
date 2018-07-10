@@ -32,11 +32,12 @@
 namespace WirecardShopwareElasticEngine\Exception;
 
 use WirecardShopwareElasticEngine\Components\Mapper\BasketItemMapper;
+use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
 
-class InvalidBasketItemException extends BasketException
+class NotAvailableBasketException extends BasketException
 {
-    public function __construct(BasketItemMapper $item)
+    public function __construct(array $article, BasketItemMapper $item, BasketMapper $basket)
     {
-        parent::__construct("Invalid basket item");
+        parent::__construct("Article '{$item->getArticleName()}' ({$item->getArticleNumber()}) is not available");
     }
 }

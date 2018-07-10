@@ -36,6 +36,8 @@ use Wirecard\PaymentSdk\Entity\Basket;
 use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
 use WirecardShopwareElasticEngine\Exception\InvalidBasketException;
+use WirecardShopwareElasticEngine\Exception\NotAvailableBasketException;
+use WirecardShopwareElasticEngine\Exception\OutOfStockBasketException;
 
 class BasketMapperTest extends TestCase
 {
@@ -159,7 +161,7 @@ class BasketMapperTest extends TestCase
         /** @var Transaction|\PHPUnit_Framework_MockObject_MockObject $transaction */
         $transaction = $this->createMock(Transaction::class);
 
-        $this->expectException(InvalidBasketException::class);
+        $this->expectException(NotAvailableBasketException::class);
         new BasketMapper([
             'content' => [
                 [
@@ -186,7 +188,7 @@ class BasketMapperTest extends TestCase
         /** @var Transaction|\PHPUnit_Framework_MockObject_MockObject $transaction */
         $transaction = $this->createMock(Transaction::class);
 
-        $this->expectException(InvalidBasketException::class);
+        $this->expectException(OutOfStockBasketException::class);
         new BasketMapper([
             'content' => [
                 [
