@@ -93,7 +93,7 @@ class Transaction extends ModelEntity
 
     /**
      * @var array
-     * @ORM\Column(name="return_response", type="array", nullable=true)
+     * @ORM\Column(name="response", type="array", nullable=true)
      */
     private $response;
 
