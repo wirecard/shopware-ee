@@ -32,8 +32,8 @@
 namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Services;
 
 use Doctrine\ORM\EntityManagerInterface;
+use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Shopware\Components\Test\Plugin\TestCase;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Transaction\Transaction;
@@ -49,22 +49,22 @@ use WirecardShopwareElasticEngine\Components\Services\PaymentHandler;
 
 class PaymentHandlerTest extends TestCase
 {
-    /** @var \Shopware_Components_Config|\PHPUnit_Framework_MockObject_MockObject $config */
+    /** @var \Shopware_Components_Config|\PHPUnit_Framework_MockObject_MockObject */
     private $config;
 
-    /** @var EntityManagerInterface|\PHPUnit_Framework_MockObject_MockObject $em */
+    /** @var EntityManagerInterface|\PHPUnit_Framework_MockObject_MockObject */
     private $em;
 
-    /** @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject $logger */
+    /** @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject */
     private $logger;
 
-    /** @var OrderSummary|\PHPUnit_Framework_MockObject_MockObject $orderSummary */
+    /** @var OrderSummary|\PHPUnit_Framework_MockObject_MockObject */
     private $orderSummary;
 
-    /** @var TransactionService|\PHPUnit_Framework_MockObject_MockObject $transactionService */
+    /** @var TransactionService|\PHPUnit_Framework_MockObject_MockObject */
     private $transactionService;
 
-    /** @var Redirect|\PHPUnit_Framework_MockObject_MockObject $redirect */
+    /** @var Redirect|\PHPUnit_Framework_MockObject_MockObject */
     private $redirect;
 
     /** @var PaymentHandler */

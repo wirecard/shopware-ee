@@ -31,7 +31,7 @@
 
 namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Services;
 
-use Shopware\Components\Test\Plugin\TestCase;
+use PHPUnit\Framework\TestCase;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
