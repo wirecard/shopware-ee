@@ -98,7 +98,7 @@ class BasketMapperTest extends TestCase
                 ],
             ],
         ], $mapper->getWirecardBasket()->mappedProperties());
-        $this->assertEquals(['content' => $basketArray['content']], $mapper->toArray());
+        $this->assertEquals($basketArray, $mapper->toArray());
     }
 
     public function testBasketWithShipping()
@@ -146,7 +146,7 @@ class BasketMapperTest extends TestCase
                 ],
             ],
         ], $mapper->getWirecardBasket()->mappedProperties());
-        $this->assertEquals(['content' => $basketArray['content']], $mapper->toArray());
+        $this->assertEquals($basketArray, $mapper->toArray());
     }
 
     public function testBasketArticleNotAvailable()

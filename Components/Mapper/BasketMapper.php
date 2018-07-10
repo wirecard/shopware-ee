@@ -209,12 +209,9 @@ class BasketMapper extends ArrayMapper
 
     /**
      * @return array
-     * @throws ArrayKeyNotFoundException
      */
     public function toArray()
     {
-        return [
-            'content' => $this->getShopwareBasketContent(),
-        ];
+        return $this->getShopwareBasket();
     }
 }
