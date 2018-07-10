@@ -32,12 +32,11 @@
 namespace WirecardShopwareElasticEngine\Models;
 
 use Shopware\Components\Model\ModelEntity;
-use Shopware\Models\Order\Order;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="wirecard_elastic_engine_transaction")
+ * @ORM\Table(name="wirecard_elastic_engine_transactions")
  */
 class Transaction extends ModelEntity
 {
@@ -52,26 +51,19 @@ class Transaction extends ModelEntity
 
     /**
      * @var string
-     * @ORM\Column(name="order_number", type="string", nullable=true)
+     * @ORM\Column(name="order_number", type="string", nullable=false)
      */
     private $orderNumber;
 
     /**
-     * @var Order
-     * @ORM\ManyToOne(targetEntity="Shopware\Models\Order\Order")
-     * @ORM\JoinColumn(name="order_number", referencedColumnName="ordernumber")
-     */
-    private $order;
-
-    /**
      * @var string
-     * @ORM\Column(name="parent_transaction_id", type="string", nullable=false)
+     * @ORM\Column(name="parent_transaction_id", type="string", nullable=true)
      */
     private $parentTransactionId;
 
     /**
      * @var string
-     * @ORM\Column(name="transaction_id", type="string", nullable=false, unique=true)
+     * @ORM\Column(name="transaction_id", type="string", nullable=false)
      */
     private $transactionId;
 
@@ -103,13 +95,7 @@ class Transaction extends ModelEntity
      * @var array
      * @ORM\Column(name="return_response", type="array", nullable=true)
      */
-    private $returnResponse;
-
-    /**
-     * @var array
-     * @ORM\Column(name="notification_response", type="array", nullable=true)
-     */
-    private $notificationResponse;
+    private $response;
 
     /**
      * @var \DateTime
@@ -118,7 +104,7 @@ class Transaction extends ModelEntity
     private $createdAt;
 
     /**
-     * @return int
+     * @return int|null
      */
     public function getId()
     {
@@ -142,24 +128,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return Order
-     */
-    public function getOrder()
-    {
-        return $this->order;
-    }
-
-    /**
-     * @param Order $order
-     */
-    public function setOrder($order)
-    {
-        $this->order = $order;
-    }
-
-
-    /**
-     * @return string
+     * @return string|null
      */
     public function getParentTransactionId()
     {
@@ -169,7 +138,7 @@ class Transaction extends ModelEntity
     /**
      * @param string $parentTransactionId
      */
-    public function setParentTransactionId($parentTransactionId)
+    public function setParentTransactionId($parentTransactionId = null)
     {
         $this->parentTransactionId = $parentTransactionId;
     }
@@ -191,7 +160,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getProviderTransactionId()
     {
@@ -201,7 +170,7 @@ class Transaction extends ModelEntity
     /**
      * @param string $providerTransactionId
      */
-    public function setProviderTransactionId($providerTransactionId)
+    public function setProviderTransactionId($providerTransactionId = null)
     {
         $this->providerTransactionId = $providerTransactionId;
     }
@@ -223,7 +192,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return float
+     * @return float|null
      */
     public function getAmount()
     {
@@ -233,13 +202,13 @@ class Transaction extends ModelEntity
     /**
      * @param float $amount
      */
-    public function setAmount($amount)
+    public function setAmount($amount = null)
     {
         $this->amount = $amount;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getCurrency()
     {
@@ -249,7 +218,7 @@ class Transaction extends ModelEntity
     /**
      * @param string $currency
      */
-    public function setCurrency($currency)
+    public function setCurrency($currency = null)
     {
         $this->currency = $currency;
     }
@@ -257,33 +226,17 @@ class Transaction extends ModelEntity
     /**
      * @return array
      */
-    public function getReturnResponse()
+    public function getResponse()
     {
-        return $this->returnResponse;
+        return $this->response;
     }
 
     /**
-     * @param string $returnResponse
+     * @param array $response
      */
-    public function setReturnResponse($returnResponse)
+    public function setResponse(array $response)
     {
-        $this->returnResponse = $returnResponse;
-    }
-
-    /**
-     * @return array
-     */
-    public function getNotificationResponse()
-    {
-        return $this->notificationResponse;
-    }
-
-    /**
-     * @param string $notificationResponse
-     */
-    public function setNotificationResponse($notificationResponse)
-    {
-        $this->notificationResponse = $notificationResponse;
+        $this->response = $response;
     }
 
     /**

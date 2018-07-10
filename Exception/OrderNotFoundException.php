@@ -29,32 +29,12 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components;
+namespace WirecardShopwareElasticEngine\Exception;
 
-class StatusCodes
+class OrderNotFoundException extends \Exception
 {
-    /**
-     * User canceled payment
-     */
-    const CANCELED_BY_USER = 1;
-
-    /**
-     * Payment couldn't get started
-     */
-    const ERROR_STARTING_PROCESS_FAILED = 2;
-
-    /**
-     * Paymethod does not exist
-     */
-    const ERROR_NOT_A_VALID_METHOD = 3;
-
-    /**
-     * Payment got rejected
-     */
-    const ERROR_FAILURE_RESPONSE = 4;
-
-    /**
-     * Critical error - order could not get saved
-     */
-    const ERROR_CRITICAL_NO_ORDER = 5;
+    public function __construct($orderNumber, $transactionId)
+    {
+        parent::__construct("Order (No '${orderNumber}') not found (Transaction ID: '${transactionId}')");
+    }
 }

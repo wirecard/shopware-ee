@@ -29,36 +29,23 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-use Doctrine\DBAL\DBALException;
-
 use Shopware\Components\CSRFWhitelistAware;
-use Shopware\Models\Order\Order;
-use Shopware\Models\Order\Status;
-
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
-use Wirecard\PaymentSdk\Response\FormInteractionResponse;
-use Wirecard\PaymentSdk\Response\FailureResponse;
-use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
-
+use WirecardShopwareElasticEngine\Components\Actions\Action;
+use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
 use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
-use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
 use WirecardShopwareElasticEngine\Components\Services\PaymentHandler;
 use WirecardShopwareElasticEngine\Components\Services\ReturnHandler;
-use WirecardShopwareElasticEngine\Components\StatusCodes;
-use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
-use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Exception\BasketException;
+use WirecardShopwareElasticEngine\Exception\UnknownActionException;
 use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
-use WirecardShopwareElasticEngine\Models\Transaction;
-
-use Wirecard\PaymentSdk\Mapper\ResponseMapper;
 
 // @codingStandardsIgnoreStart
 class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopware_Controllers_Frontend_Payment implements CSRFWhitelistAware
@@ -73,8 +60,9 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * Gets payment from `PaymentFactory`, assembles the `OrderSummary` and executes the payment through the
      * `PaymentHandler` service. Further action depends on the response from the handler.
      *
-     * @throws UnknownPaymentException
      * @throws ArrayKeyNotFoundException
+     * @throws UnknownActionException
+     * @throws UnknownPaymentException
      */
     public function indexAction()
     {
@@ -82,7 +70,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         // mail here is disabled through the `OrderSubscriber`.
         // The transactionId will later be overwritten by the return respectively the notify action.
         $basketSignature = $this->persistBasket();
-        $this->saveOrder($basketSignature, $basketSignature, null, false);
+        $orderNumber     = $this->saveOrder($basketSignature, $basketSignature, null, false);
 
         /** @var PaymentFactory $paymentFactory */
         $paymentFactory = new PaymentFactory($this->get('config'));
@@ -90,7 +78,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         try {
             $orderSummary = new OrderSummary(
-                $this->getOrderNumber(),
+                $orderNumber,
                 $payment,
                 new UserMapper(
                     $this->getUser(),
@@ -131,31 +119,16 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $this->getRoute('notify', $payment->getName())
         );
 
-        switch (true) {
-            case $action instanceof RedirectAction:
-                return $this->redirect($action->getUrl());
-        }
-
-        // todo: throw exception
+        return $this->handleAction($action);
     }
 
     /**
-     * @param $action
-     * @param $method
+     * After paying the user gets redirected to this action, where the `ReturnHandler` takes care about what to do
+     * next (e.g. redirecting to the "Thank you" page, rendering templates, ...).
      *
-     * @return string
-     * @throws Exception
-     */
-    private function getRoute($action, $method)
-    {
-        return $this->get('router')->assemble([
-            self::ROUTER_ACTION       => $action,
-            self::ROUTER_METHOD       => $method,
-            self::ROUTER_FORCE_SECURE => true,
-        ]);
-    }
-
-    /**
+     * @see ReturnHandler
+     *
+     * @throws UnknownActionException
      * @throws UnknownPaymentException
      */
     public function returnAction()
@@ -172,17 +145,42 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         ));
         $response           = $transactionService->handleResponse($request->getParams());
 
-        exit(var_dump($response));
-
-        $returnHandler = new ReturnHandler($this->getModelManager(), $this->get('pluginlogger'));
+        $returnHandler = new ReturnHandler($this->get('router'), $this->getModelManager(), $this->get('pluginlogger'));
         $action        = $returnHandler->execute($response);
 
-        switch (true) {
-            case $action instanceof RedirectAction:
-                return $this->redirect($action->getUrl());
+        return $this->handleAction($action);
+    }
+
+    /**
+     * @param Action $action
+     */
+    protected function handleAction(Action $action)
+    {
+        if ($action instanceof RedirectAction) {
+            return $this->redirect($action->getUrl());
         }
 
-        // todo: error handling
+        if ($action instanceof ErrorAction) {
+            return $this->handleError($action->getCode(), $action->getMessage());
+        }
+
+        throw new UnknownActionException(get_class($action));
+    }
+
+    /**
+     * @param $action
+     * @param $method
+     *
+     * @return string
+     * @throws Exception
+     */
+    private function getRoute($action, $method)
+    {
+        return $this->get('router')->assemble([
+            self::ROUTER_ACTION       => $action,
+            self::ROUTER_METHOD       => $method,
+            self::ROUTER_FORCE_SECURE => true,
+        ]);
     }
 
     /**
@@ -272,198 +270,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 //            return $this->errorHandling(StatusCodes::ERROR_STARTING_PROCESS_FAILED);
 //        }
 //    }
-
-    /**
-     * After paying user gets redirected to this action.
-     * The order gets saved (if not already existing through notification).
-     * Required parameter:
-     *  (string) method
-     *  Wirecard\PaymentSdk\Response
-     */
-    //    public function returnAction()
-    //    {
-    //        $request = $this->Request()->getParams();
-    //
-    //        if (! isset($request['method'])) {
-    //            return $this->errorHandling(StatusCodes::ERROR_NOT_A_VALID_METHOD);
-    //        }
-    //
-    //        $response = null;
-    //        if ($request['method'] === PaypalPayment::PAYMETHOD_IDENTIFIER) {
-    //            $paypal   = new PaypalPayment();
-    //            $response = $paypal->getPaymentResponse($request);
-    //        } elseif ($request['method'] === CreditCardPayment::PAYMETHOD_IDENTIFIER) {
-    //            $creditCard = new CreditCardPayment();
-    //            $response   = $creditCard->getPaymentResponse($request);
-    //        }
-    //
-    //        if (! $response) {
-    //            return $this->errorHandling(StatusCodes::ERROR_NOT_A_VALID_METHOD);
-    //        }
-    //
-    //        if ($response instanceof SuccessResponse) {
-    //            $customFields          = $response->getCustomFields();
-    //            $transactionId         = $response->getTransactionId();
-    //            $providerTransactionId = $response->getProviderTransactionId();
-    //            $signature             = $customFields->get('signature');
-    //
-    //            $wirecardOrderNumber = $response->findElement('order-number');
-    //            if ((getenv('SHOPWARE_ENV') === 'dev' || getenv('SHOPWARE_ENV') === 'development')
-    //                && strpos($wirecardOrderNumber, '-') >= 0) {
-    //                $wirecardOrderNumber = explode('-', $wirecardOrderNumber)[1];
-    //            }
-    //
-    //            $elasticEngineTransaction = Shopware()->Models()
-    //                                                  ->getRepository(Transaction::class)
-    //                                                  ->findOneBy(['id' => $wirecardOrderNumber]);
-    //
-    //            if (! $elasticEngineTransaction) {
-    //                return $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER);
-    //            }
-    //
-    //            $elasticEngineTransaction->setTransactionId($transactionId);
-    //            $elasticEngineTransaction->setProviderTransactionId($providerTransactionId);
-    //            $elasticEngineTransaction->setReturnResponse(serialize($response->getData()));
-    //            $paymentStatus = intval($elasticEngineTransaction->getPaymentStatus());
-    //
-    //            $orderTransaction = Shopware()->Models()->getRepository(OrderTransaction::class)
-    //                                          ->findOneBy([
-    //                                              'transactionId'       => $transactionId,
-    //                                              'parentTransactionId' => $transactionId,
-    //                                          ]);
-    //
-    //            if (! $orderTransaction) {
-    //                $orderTransaction = new OrderTransaction();
-    //                $orderTransaction->setParentTransactionId($transactionId);
-    //                $orderTransaction->setTransactionId($transactionId);
-    //                $orderTransaction->setProviderTransactionId($providerTransactionId);
-    //                $orderTransaction->setCreatedAt(new \DateTime('now'));
-    //            }
-    //
-    //            $orderTransaction->setReturnResponse(serialize($response->getData()));
-    //
-    //            if (! $signature) {
-    //                $signature = $elasticEngineTransaction->getBasketSignature();
-    //            }
-    //
-    //            $order = Shopware()->Models()
-    //                               ->getRepository(Order::class)
-    //                               ->findOneBy([
-    //                                   'transactionId' => $transactionId,
-    //                                   'temporaryId'   => $transactionId,
-    //                                   'status'        => -1,
-    //                               ]);
-    //
-    //            if ($order) {
-    //                Shopware()->Models()->flush();
-    //                try {
-    //                    Shopware()->Models()->persist($orderTransaction);
-    //                    Shopware()->Models()->flush();
-    //                } catch (DBALException $e) {
-    //                    $this->container->get('pluginlogger')->info('duplicate entry on OrderTransaction');
-    //                    $em = $this->container->get('models');
-    //                    if (! $em->isOpen()) {
-    //                        $em = $em->create(
-    //                            $em->getConnection(),
-    //                            $em->getConfiguration()
-    //                        );
-    //                    }
-    //                    $orderTransaction = $em->getRepository(OrderTransaction::class)
-    //                                           ->findOneBy([
-    //                                               'transactionId'       => $transactionId,
-    //                                               'parentTransactionId' => $transactionId,
-    //                                           ]);
-    //                    if ($orderTransaction) {
-    //                        $em->setReturnResponse(serialize($response->getData()));
-    //                        $em->flush();
-    //                    } else {
-    //                        $this->container->get('pluginlogger')->error($e->getMessage());
-    //                        return $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER, $e->getMessage());
-    //                    }
-    //                }
-    //                return $this->redirect([
-    //                    'module'     => 'frontend',
-    //                    'controller' => 'checkout',
-    //                    'action'     => 'finish',
-    //                    'sUniqueID'  => $transactionId,
-    //                ]);
-    //            }
-    //
-    //            try {
-    //                $this->loadBasketFromSignature($signature);
-    //
-    //                if ($paymentStatus) {
-    //                    $orderNumber = $this->saveOrder($transactionId, $transactionId, $paymentStatus);
-    //                } else {
-    //                    $orderNumber = $this->saveOrder($transactionId, $transactionId);
-    //                }
-    //
-    //                $elasticEngineTransaction->setOrderNumber($orderNumber);
-    //                $orderTransaction->setOrderNumber($orderNumber);
-    //                Shopware()->Models()->flush();
-    //                try {
-    //                    if (! $orderTransaction->getId()) {
-    //                        Shopware()->Models()->persist($orderTransaction);
-    //                        Shopware()->Models()->flush();
-    //                    }
-    //                } catch (DBALException $e) {
-    //                    $em = $this->container->get('models');
-    //                    if (! $em->isOpen()) {
-    //                        $em = $em->create(
-    //                            $em->getConnection(),
-    //                            $em->getConfiguration()
-    //                        );
-    //                    }
-    //                    $this->container->get('pluginlogger')->info('duplicate entry on OrderTransaction');
-    //                    $orderTransaction = $em->getRepository(OrderTransaction::class)
-    //                                           ->findOneBy([
-    //                                               'transactionId'       => $transactionId,
-    //                                               'parentTransactionId' => $transactionId,
-    //                                           ]);
-    //                    if ($orderTransaction) {
-    //                        $orderTransaction->setReturnResponse(serialize($response->getData()));
-    //                        $em->flush();
-    //                    } else {
-    //                        $this->container->get('pluginlogger')->error($e->getMessage());
-    //                        return $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER, $e->getMessage());
-    //                    }
-    //                }
-    //
-    //                return $this->redirect([
-    //                    'module'     => 'frontend',
-    //                    'controller' => 'checkout',
-    //                    'action'     => 'finish',
-    //                ]);
-    //            } catch (RuntimeException $e) {
-    //                $this->container->get('pluginlogger')->error($e->getMessage());
-    //                return $this->errorHandling(StatusCodes::ERROR_CRITICAL_NO_ORDER, $e->getMessage());
-    //            }
-    //        } elseif ($response instanceof FailureResponse) {
-    //            $this->container->get('pluginlogger')->error(
-    //                sprintf(
-    //                    'Response validation status: %s',
-    //                    $response->isValidSignature() ? 'true' : 'false'
-    //                )
-    //            );
-    //
-    //            $errorMessages = "";
-    //
-    //            foreach ($response->getStatusCollection() as $status) {
-    //                /** @var \Wirecard\PaymentSdk\Entity\Status $status */
-    //                $severity      = ucfirst($status->getSeverity());
-    //                $code          = $status->getCode();
-    //                $description   = $status->getDescription();
-    //                $errorMessage  = sprintf('%s with code %s and message "%s" occurred.', $severity, $code, $description);
-    //                $errorMessages .= $errorMessage . '<br>';
-    //
-    //                $this->container->get('pluginlogger')->error($errorMessage);
-    //            }
-    //
-    //            return $this->errorHandling(StatusCodes::ERROR_FAILURE_RESPONSE, $errorMessages);
-    //        }
-    //
-    //        return $this->errorHandling(StatusCodes::ERROR_FAILURE_RESPONSE);
-    //    }
 
     /**
      * Handles responses for iframe payments
@@ -668,20 +474,16 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function cancelAction()
     {
-        $this->errorHandling(StatusCodes::CANCELED_BY_USER);
+        return $this->handleError(ErrorAction::PAYMENT_CANCELED, 'Payment canceled by user');
     }
 
     /**
-     * This method handles errors.
-     *
-     * @see StatusCodes
-     *
-     * @param int $code
+     * @param int    $code
      * @param string $message
      */
-    protected function errorHandling($code, $message = "")
+    protected function handleError($code, $message = "")
     {
-        $this->redirect([
+        return $this->redirect([
             'controller'                         => 'checkout',
             'action'                             => 'shippingPayment',
             'wirecard_elastic_engine_error_code' => $code,

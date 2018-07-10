@@ -33,14 +33,19 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Order\Order;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
+use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
+use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
+use WirecardShopwareElasticEngine\Exception\ParentTransactionNotFoundException;
+use WirecardShopwareElasticEngine\Models\Transaction;
 
-class ReturnHandler
+class ReturnHandler extends Handler
 {
     /**
      * @var EntityManagerInterface
@@ -52,8 +57,14 @@ class ReturnHandler
      */
     protected $logger;
 
-    public function __construct(EntityManagerInterface $em, LoggerInterface $logger)
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    public function __construct(RouterInterface $router, EntityManagerInterface $em, LoggerInterface $logger)
     {
+        $this->router = $router;
         $this->em     = $em;
         $this->logger = $logger;
     }
@@ -80,9 +91,9 @@ class ReturnHandler
      */
     protected function handleSuccess(SuccessResponse $response)
     {
-        $transactionId   = $response->getTransactionId();
-        $paymentUniqueId = $response->getProviderTransactionId();
-        $orderNumber     = $response->findElement('order-number');
+        $transactionId       = $response->getTransactionId();
+        $parentTransactionId = $response->getParentTransactionId();
+        $orderNumber         = $this->getOrderNumberFromResponse($response);
 
         $order = $this->em
             ->getRepository(Order::class)
@@ -91,10 +102,41 @@ class ReturnHandler
             ]);
 
         if (! $order) {
-            // todo: error handling
+            throw new OrderNotFoundException($orderNumber, $transactionId);
         }
 
-        return new RedirectAction(null);
+        // TemporaryID is set to the order number, since the returned `RedirectAction` will contain this ID
+        // as `sUniqueID` to get information about what order has been processed and show proper information.
+        $order->setTemporaryId($orderNumber);
+
+        $parentTransaction = $this->em
+            ->getRepository(Transaction::class)
+            ->findOneBy([
+                'transactionId' => $response->getParentTransactionId(),
+            ]);
+
+        if (! $parentTransaction) {
+            throw new ParentTransactionNotFoundException($parentTransactionId, $transactionId);
+        }
+
+        $transaction = new Transaction();
+        $transaction->setTransactionId($response->getTransactionId());
+        $transaction->setProviderTransactionId($response->getProviderTransactionId());
+        $transaction->setCurrency($response->getRequestedAmount()->getCurrency());
+        $transaction->setAmount($response->getRequestedAmount()->getValue());
+        $transaction->setTransactionType($response->getTransactionType());
+        $transaction->setResponse($response->getData());
+        $transaction->setCreatedAt(new \DateTime());
+
+        $this->em->persist($transaction);
+        $this->em->flush();
+
+        return new RedirectAction($this->router->assemble([
+            'module'     => 'frontend',
+            'controller' => 'checkout',
+            'action'     => 'finish',
+            'sUniqueID'  => $order->getTemporaryId()
+        ]));
     }
 
     /**
@@ -103,6 +145,8 @@ class ReturnHandler
      */
     protected function handleFailure(FailureResponse $response)
     {
-        return new RedirectAction(null);
+        $this->logger->error('Return handling failed', $response->getData());
+
+        return new ErrorAction(ErrorAction::FAILURE_RESPONSE, 'Failure response');
     }
 }
