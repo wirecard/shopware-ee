@@ -71,7 +71,11 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     const ROUTER_FORCE_SECURE = 'forceSecure';
 
     /**
-     * Forward to Wirecard Gateway.
+     * Gets payment from `PaymentFactory`, assembles the `OrderSummary` and executes the payment through the
+     * `PaymentHandler` service. Further action depends on the response from the handler.
+     *
+     * @throws UnknownPaymentException
+     * @throws ArrayKeyNotFoundException
      */
     public function indexAction()
     {
