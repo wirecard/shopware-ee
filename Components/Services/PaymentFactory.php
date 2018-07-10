@@ -31,8 +31,6 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
@@ -40,6 +38,16 @@ use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
 
 class PaymentFactory
 {
+    /**
+     * @var \Shopware_Components_Config
+     */
+    protected $shopwareConfig;
+
+    public function __construct(\Shopware_Components_Config $shopwareConfig)
+    {
+        $this->shopwareConfig = $shopwareConfig;
+    }
+
     /**
      * @param string $paymentName
      *
@@ -50,7 +58,7 @@ class PaymentFactory
     {
         switch ($paymentName) {
             case PaypalPayment::PAYMETHOD_IDENTIFIER:
-                return new PaypalPayment();
+                return new PaypalPayment($this->shopwareConfig);
         }
 
         throw new UnknownPaymentException($paymentName);

@@ -34,6 +34,7 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Wirecard\PaymentSdk\Entity\Redirect;
+use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
@@ -106,7 +107,6 @@ class PaymentHandler
                        ->getPayment()
                        ->processPayment($this->getOrderSummary(), $this->getTransactionService());
 
-        $this->logger->debug('Payment processing execution', $this->getOrderSummary()->toArray());
 
         if ($action !== null) {
             return $action;
@@ -115,12 +115,21 @@ class PaymentHandler
         $transactionService = $this->getTransactionService();
         $response           = $transactionService->process(
             $transaction,
-            $this->getOrderSummary()->getPayment()->getPaymentConfig($this->config)->getTransactionType()
+            $this->getOrderSummary()->getPayment()->getPaymentConfig()->getTransactionType()
         );
+
+        $this->logger->debug('Payment processing execution', [
+            'summary'  => $this->getOrderSummary()->toArray(),
+            'response' => $response,
+        ]);
 
         switch (true) {
             case $response instanceof InteractionResponse:
                 return new RedirectAction($response->getRedirectUrl());
+
+            case $response instanceof FailureResponse:
+                // todo: handle failure
+                exit();
 
             default:
                 // todo: throw exception
@@ -149,18 +158,19 @@ class PaymentHandler
         $transaction->setNotificationUrl($notificationUrl);
         $transaction->setOrderNumber($this->orderNumberAssignment->getId());
 
-        if ($orderSummary->getPayment()->getPaymentConfig($this->config)->sendBasket()) {
+        if ($orderSummary->getPayment()->getPaymentConfig()->sendBasket()) {
             $transaction->setBasket($orderSummary->getBasketMapper()->getWirecardBasket());
         }
 
-        if ($orderSummary->getPayment()->getPaymentConfig($this->config)->hasFraudPrevention()) {
+        if ($orderSummary->getPayment()->getPaymentConfig()->hasFraudPrevention()) {
             $transaction->setIpAddress($orderSummary->getUserMapper()->getClientIp());
             $transaction->setAccountHolder($orderSummary->getUserMapper()->getWirecardBillingAccountHolder());
             $transaction->setShipping($orderSummary->getUserMapper()->getWirecardShippingAccountHolder());
             $transaction->setLocale($orderSummary->getUserMapper()->getLocale());
         }
 
-        if ($orderSummary->getPayment()->getPaymentConfig($this->config)->sendDescriptor()) {
+        if ($orderSummary->getPayment()->getPaymentConfig()->sendDescriptor()
+            && ! in_array(getenv('SHOPWARE_ENV'), ['dev', 'development'])) {
             $transaction->setDescriptor($this->getDescriptor($this->orderNumberAssignment->getId()));
         }
     }
@@ -212,6 +222,8 @@ class PaymentHandler
 
     /**
      * Returns the descriptor sent to Wirecard. Change to your own needs.
+     * Keep in mind that the descriptor is ignored when shopware runs in development mode (see SHOPWARE_ENV of your
+     * `.htaccess` or your apache configuration).
      *
      * @param $orderNumber
      *

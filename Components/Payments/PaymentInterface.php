@@ -32,7 +32,6 @@
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
-use Shopware_Components_Config;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Response\Response;
@@ -76,25 +75,19 @@ interface PaymentInterface
     /**
      * Returns transaction config.
      *
-     * @param Shopware_Components_Config $config
-     * @param ParameterBagInterface      $parameterBag
-     * @param InstallerService           $installerService
+     * @param ParameterBagInterface $parameterBag
+     * @param InstallerService      $installerService
      *
      * @return Config
      */
-    public function getTransactionConfig(
-        Shopware_Components_Config $config,
-        ParameterBagInterface $parameterBag,
-        InstallerService $installerService
-    );
+    public function getTransactionConfig(ParameterBagInterface $parameterBag, InstallerService $installerService);
 
     /**
      * Returns payment specific configuration.
      *
-     * @param Shopware_Components_Config $config
      * @return PaymentConfig
      */
-    public function getPaymentConfig(Shopware_Components_Config $config);
+    public function getPaymentConfig();
 
     /**
      * Payment specific processing. This method either returns an `Action` (which is directly returned to the handler)

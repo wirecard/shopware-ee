@@ -33,28 +33,17 @@ namespace WirecardShopwareElasticEngine\Components\Payments;
 
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware_Components_Config;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\ParameterBag;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Entity\Amount;
-use Wirecard\PaymentSdk\Entity\Basket;
 use Wirecard\PaymentSdk\Entity\CustomField;
 use Wirecard\PaymentSdk\Entity\CustomFieldCollection;
-use Wirecard\PaymentSdk\Entity\Item;
-use Wirecard\PaymentSdk\Entity\AccountHolder;
-use Wirecard\PaymentSdk\Entity\Address;
 use Wirecard\PaymentSdk\Entity\Redirect;
-use Wirecard\PaymentSdk\Entity\Status;
-use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Transaction\Operation;
-use Wirecard\PaymentSdk\Transaction\Reservable;
-use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Models\Transaction;
 use WirecardShopwareElasticEngine\Models\OrderNumberAssignment;
 use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
@@ -65,6 +54,16 @@ abstract class Payment implements PaymentInterface
     const TRANSACTION_TYPE_PURCHASE = 'purchase';
 
     private $orderNumber;
+
+    /**
+     * @var Shopware_Components_Config
+     */
+    protected $shopwareConfig;
+
+    public function __construct(Shopware_Components_Config $shopwareConfig)
+    {
+        $this->shopwareConfig = $shopwareConfig;
+    }
 
     /**
      * @inheritdoc
@@ -182,16 +181,12 @@ abstract class Payment implements PaymentInterface
     /**
      * @inheritdoc
      */
-    public function getTransactionConfig(
-        Shopware_Components_Config $config,
-        ParameterBagInterface $parameterBag,
-        InstallerService $installerService
-    )
+    public function getTransactionConfig(ParameterBagInterface $parameterBag, InstallerService $installerService)
     {
         $config = new Config(
-            $this->getPaymentConfig($config)->getBaseUrl(),
-            $this->getPaymentConfig($config)->getHttpUser(),
-            $this->getPaymentConfig($config)->getHttpPassword()
+            $this->getPaymentConfig()->getBaseUrl(),
+            $this->getPaymentConfig()->getHttpUser(),
+            $this->getPaymentConfig()->getHttpPassword()
         );
 
         $config->setShopInfo(
@@ -611,14 +606,13 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
-     * @param Shopware_Components_Config $config
      * @param string                     $name
      * @param string                     $prefix
      *
      * @return string
      */
-    protected function getPluginConfig(Shopware_Components_Config $config, $name, $prefix = 'wirecardElasticEngine')
+    protected function getPluginConfig($name, $prefix = 'wirecardElasticEngine')
     {
-        return $config->getByNamespace(WirecardShopwareElasticEngine::NAME, $prefix . $name);
+        return $this->shopwareConfig->getByNamespace(WirecardShopwareElasticEngine::NAME, $prefix . $name);
     }
 }

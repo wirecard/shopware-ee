@@ -88,7 +88,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     public function gatewayAction()
     {
         /** @var PaymentFactory $paymentFactory */
-        $paymentFactory = new PaymentFactory();
+        $paymentFactory = new PaymentFactory($this->get('config'));
         $payment        = $paymentFactory->create($this->getPaymentShortName());
 
         try {
@@ -120,7 +120,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $handler->setOrderSummary($orderSummary);
         $handler->setTransactionService(
             new TransactionService($payment->getTransactionConfig(
-                $this->container->get('config'),
                 $this->container->getParameterBag(),
                 $this->container->get('shopware_plugininstaller.plugin_manager')
             ), $this->get('pluginlogger'))
