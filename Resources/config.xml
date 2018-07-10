@@ -112,7 +112,7 @@ function (button) {
             <name>wirecardElasticEngineCreditCardTransactionType</name>
             <label lang="de">[Credit Card] Transaktionsart</label>
             <label lang="en">[Credit Card] Transaction Type</label>
-            <value>purchase</value>
+            <value>pay</value>
             <store>
                 <option>
                     <value>reserve</value>
@@ -266,7 +266,7 @@ function (button) {
             <name>wirecardElasticEnginePaypalTransactionType</name>
             <label lang="de">[PayPal] Transaktionsart</label>
             <label lang="en">[PayPal] Transaction Type</label>
-            <value>purchase</value>
+            <value>pay</value>
             <store>
                 <option>
                     <value>reserve</value>
