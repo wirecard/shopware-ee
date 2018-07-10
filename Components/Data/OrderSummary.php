@@ -113,6 +113,7 @@ class OrderSummary
 
     /**
      * @return array
+     * @throws \WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException
      */
     public function toArray()
     {

@@ -56,8 +56,8 @@ class BasketMapperTest extends TestCase
                 [
                     'articlename' => 'foo',
                     'ordernumber' => 10,
-                    'tax'         => 200,
-                    'tax_rate'    => 20,
+                    'tax'         => 150,
+                    'tax_rate'    => 15,
                     'quantity'    => 1,
                     'price'       => 1000,
                 ],
@@ -74,10 +74,31 @@ class BasketMapperTest extends TestCase
         $mapper      = new BasketMapper($basketArray, 'EUR', $articles, $transaction);
         $this->assertEquals($basketArray, $mapper->getShopwareBasket());
         $this->assertEquals(implode("\n", [
-            'foo - 10 - 1000 - EUR - 1 - 20%',
+            'foo - 10 - 1000 - EUR - 1 - 15%',
             'bar - 11 - 500 - EUR - 2 - 20%',
         ]), $mapper->getBasketText());
         $this->assertInstanceOf(Basket::class, $mapper->getWirecardBasket());
+        $this->assertEquals([
+            'order-item' => [
+                [
+                    'name'           => 'foo',
+                    'quantity'       => 1,
+                    'amount'         => ['currency' => 'EUR', 'value' => 1000.0],
+                    'description'    => '',
+                    'article-number' => 10,
+                    'tax-rate'       => 15,
+                ],
+                [
+                    'name'           => 'bar',
+                    'quantity'       => 2,
+                    'amount'         => ['currency' => 'EUR', 'value' => 500.0],
+                    'description'    => '',
+                    'article-number' => 11,
+                    'tax-rate'       => 20,
+                ],
+            ],
+        ], $mapper->getWirecardBasket()->mappedProperties());
+        $this->assertEquals($basketArray, $mapper->toArray());
     }
 
     public function testBasketWithShipping()
@@ -106,15 +127,26 @@ class BasketMapperTest extends TestCase
             'sShippingcostsWithTax' => 10,
             'sShippingcostsTax'     => 2,
         ];
-        $mapper      = new BasketMapper($basketArray, 'EUR', $articles, $transaction);
+        $mapper      = new BasketMapper($basketArray, 'USD', $articles, $transaction);
         $this->assertEquals($basketArray, $mapper->getShopwareBasket());
         $this->assertEquals(implode("\n", [
-            'foo - 10 - 1000 - EUR - 1 - 20%',
-            'Shipping - shipping - 10 EUR - 2',
+            'foo - 10 - 1000 - USD - 1 - 20%',
+            'Shipping - shipping - 10 USD - 2',
         ]), $mapper->getBasketText());
         $this->assertInstanceOf(Basket::class, $mapper->getWirecardBasket());
-
-        $this->assertEquals(['basket' => $basketArray], $mapper->toArray());
+        $this->assertEquals([
+            'order-item' => [
+                [
+                    'name'           => 'foo',
+                    'quantity'       => 1,
+                    'amount'         => ['currency' => 'USD', 'value' => 1000.0],
+                    'description'    => '',
+                    'article-number' => 10,
+                    'tax-rate'       => 20,
+                ],
+            ],
+        ], $mapper->getWirecardBasket()->mappedProperties());
+        $this->assertEquals($basketArray, $mapper->toArray());
     }
 
     public function testBasketArticleNotAvailable()
