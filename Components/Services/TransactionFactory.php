@@ -53,7 +53,7 @@ class TransactionFactory
     }
 
     /**
-     * @param          $orderNumber
+     * @param int      $orderNumber
      * @param Response $response
      *
      * @return Transaction
