@@ -84,13 +84,17 @@ class PaypalPayment extends Payment
     /**
      * @inheritdoc
      */
-    public function getTransactionConfig(ParameterBagInterface $parameterBag, InstallerService $installerService)
+    public function getTransactionConfig(
+        \Shopware_Components_Config $shopwareConfig,
+        ParameterBagInterface $parameterBag,
+        InstallerService $installerService
+    )
     {
-        $config = parent::getTransactionConfig($parameterBag, $installerService);
+        $config = parent::getTransactionConfig($shopwareConfig, $parameterBag, $installerService);
         $config->add(new PaymentMethodConfig(
             PayPalTransaction::NAME,
-            $this->getPaymentConfig()->getTransactionMAID(),
-            $this->getPaymentConfig()->getTransactionSecret()
+            $this->getPaymentConfig($shopwareConfig)->getTransactionMAID(),
+            $this->getPaymentConfig($shopwareConfig)->getTransactionSecret()
         ));
 
         return $config;
@@ -100,20 +104,20 @@ class PaypalPayment extends Payment
     /**
      * @inheritdoc
      */
-    public function getPaymentConfig()
+    public function getPaymentConfig(\Shopware_Components_Config $config)
     {
         $paymentConfig = new PaymentConfig(
-            $this->getPluginConfig('PaypalServer'),
-            $this->getPluginConfig('PaypalHttpUser'),
-            $this->getPluginConfig('PaypalHttpPassword')
+            $this->getPluginConfig($config, 'PaypalServer'),
+            $this->getPluginConfig($config, 'PaypalHttpUser'),
+            $this->getPluginConfig($config, 'PaypalHttpPassword')
         );
 
-        $paymentConfig->setTransactionMAID($this->getPluginConfig('PaypalMerchantId'));
-        $paymentConfig->setTransactionSecret($this->getPluginConfig('PaypalSecret'));
-        $paymentConfig->setTransactionType($this->getPluginConfig('PaypalTransactionType'));
-        $paymentConfig->setSendBasket($this->getPluginConfig('PaypalSendBasket'));
-        $paymentConfig->setFraudPrevention($this->getPluginConfig('PaypalFraudPrevention'));
-        $paymentConfig->setSendDescriptor($this->getPluginConfig('PaypalDescriptor'));
+        $paymentConfig->setTransactionMAID($this->getPluginConfig($config, 'PaypalMerchantId'));
+        $paymentConfig->setTransactionSecret($this->getPluginConfig($config, 'PaypalSecret'));
+        $paymentConfig->setTransactionType($this->getPluginConfig($config, 'PaypalTransactionType'));
+        $paymentConfig->setSendBasket($this->getPluginConfig($config, 'PaypalSendBasket'));
+        $paymentConfig->setFraudPrevention($this->getPluginConfig($config, 'PaypalFraudPrevention'));
+        $paymentConfig->setSendDescriptor($this->getPluginConfig($config, 'PaypalDescriptor'));
 
         return $paymentConfig;
     }
