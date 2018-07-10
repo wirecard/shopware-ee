@@ -31,7 +31,9 @@
 
 namespace WirecardShopwareElasticEngine\Components\Mapper;
 
+use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Basket;
+use Wirecard\PaymentSdk\Entity\Item;
 use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Exception\InvalidBasketException;
@@ -44,6 +46,7 @@ class BasketMapper extends ArrayMapper
     const CONTENT = 'content';
     const SHIPPING_COSTS_WITH_TAX = 'sShippingcostsWithTax';
     const SHIPPING_COSTS_TAX = 'sShippingcostsTax';
+    const SHIPPING_COSTS_NET = 'sShippingcostsNet';
     const ARTICLE_IS_AVAILABLE = 'isAvailable';
     const ARTICLE_LAST_STOCK = 'laststock';
     const ARTICLE_IN_STOCK = 'instock';
@@ -167,6 +170,25 @@ class BasketMapper extends ArrayMapper
         foreach ($this->getShopwareBasketContent() as $item) {
             $basketItem = new BasketItemMapper($item, $this->currency);
             $basket->add($basketItem->getWirecardItem());
+        }
+
+        if (! empty($this->getShopwareBasket()[self::SHIPPING_COSTS_WITH_TAX])) {
+            $shippingAmount = new Amount(
+                $this->getShopwareBasket()[self::SHIPPING_COSTS_WITH_TAX],
+                $this->currency
+            );
+
+            $shippingTaxValue = $this->getShopwareBasket()[self::SHIPPING_COSTS_WITH_TAX]
+                                - $this->getShopwareBasket()[self::SHIPPING_COSTS_NET];
+            $shippingTax = new Amount($shippingTaxValue, $this->currency);
+
+            $basketItem = new Item('Shipping', $shippingAmount, 1);
+            $basketItem->setDescription('Shipping');
+            $basketItem->setArticleNumber('shipping');
+            $basketItem->setTaxAmount($shippingTax);
+            $basketItem->setTaxRate($this->getShopwareBasket()[self::SHIPPING_COSTS_TAX]);
+
+            $basket->add($basketItem);
         }
 
         return $basket;
