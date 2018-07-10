@@ -60,7 +60,6 @@ class BasketItemMapperTest extends TestCase
         $this->assertEquals('foo', $mapper->getArticleName());
         $this->assertEquals(1, $mapper->getQuantity());
         $this->assertEquals('foobar', $mapper->getDescription());
-        $this->assertEquals(['description' => 'foobar'], $mapper->getAdditionalDetails());
         $this->assertEquals(10, $mapper->getArticleNumber());
         $this->assertEquals(1000, $mapper->getPrice());
         $this->assertEquals(200, $mapper->getTax());

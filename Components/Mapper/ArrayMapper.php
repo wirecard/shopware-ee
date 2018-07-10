@@ -43,44 +43,62 @@ abstract class ArrayMapper
     /**
      * Returns a key from an array. If the key doesn't exist an exception is thrown.
      *
-     * @param string $key
+     * @param string|array $keys
      *
      * @return mixed
      * @throws ArrayKeyNotFoundException
      */
-    protected function get($key)
+    protected function get($keys)
     {
-        if (! isset($this->arrayEntity[$key])) {
-            throw new ArrayKeyNotFoundException($key, get_class($this), $this->arrayEntity);
+        $keys  = (array)$keys;
+        $value = $this->arrayEntity;
+        foreach ($keys as $key) {
+            if (! is_array($value) || ! isset($value[$key])) {
+                throw new ArrayKeyNotFoundException(implode('.', $keys), get_class($this), $this->arrayEntity);
+            }
+            $value = $value[$key];
         }
-        return $this->arrayEntity[$key];
+        return $value;
     }
 
     /**
      * Returns if an array key exists.
      *
-     * @param string $key
+     * @param string|array $keys
      *
      * @return bool
      */
-    protected function has($key)
+    protected function has($keys)
     {
-        return array_key_exists($key, $this->arrayEntity);
+        $keys  = (array)$keys;
+        $value = $this->arrayEntity;
+        foreach ($keys as $key) {
+            if (! is_array($value) || ! array_key_exists($key, $value)) {
+                return false;
+            }
+            $value = $value[$key];
+        }
+        return true;
     }
 
     /**
      * Returns a key from an array. If the key doesn't exist the fallback value is returned.
      *
-     * @param string $key
-     * @param null   $fallback
+     * @param string|array $keys
+     * @param null $fallback
      *
      * @return mixed|null
      */
-    protected function getOptional($key, $fallback = null)
+    protected function getOptional($keys, $fallback = null)
     {
-        if (! isset($this->arrayEntity[$key])) {
-            return $fallback;
+        $keys  = (array)$keys;
+        $value = $this->arrayEntity;
+        foreach ($keys as $key) {
+            if (! is_array($value) || ! isset($value[$key])) {
+                return $fallback;
+            }
+            $value = $value[$key];
         }
-        return $this->arrayEntity[$key];
+        return $value;
     }
 }
