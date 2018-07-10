@@ -129,13 +129,13 @@ class BasketMapper extends ArrayMapper
         foreach ($this->getShopwareBasketContent() as $item) {
             $basketItem = new BasketItemMapper($item, $currency);
 
-            $name        = $basketItem->getArticleName();
-            $orderNumber = $basketItem->getOrderNumber();
-            $price       = $basketItem->getPrice();
-            $quantity    = $basketItem->getQuantity();
-            $taxRate     = $basketItem->getTaxRate();
+            $name          = $basketItem->getArticleName();
+            $articleNumber = $basketItem->getArticleNumber();
+            $price         = $basketItem->getPrice();
+            $quantity      = $basketItem->getQuantity();
+            $taxRate       = $basketItem->getTaxRate();
 
-            $lines[] = "${name} - ${orderNumber} - ${price} - ${currency} - ${quantity} - ${taxRate}%";
+            $lines[] = "${name} - ${articleNumber} - ${price} - ${currency} - ${quantity} - ${taxRate}%";
         }
 
         if (! empty($basket[self::BASKET_SHIPPING_COSTS_WITH_TAX]) && isset($basket[self::BASKET_SHIPPING_COSTS_TAX])) {
@@ -190,7 +190,7 @@ class BasketMapper extends ArrayMapper
         foreach ($basket[self::BASKET_CONTENT] as $item) {
             $basketItem = new BasketItemMapper($item, $this->currency);
 
-            $article = $this->articles->sGetProductByOrdernumber($basketItem->getOrderNumber());
+            $article = $this->articles->sGetProductByOrdernumber($basketItem->getArticleNumber());
 
             if (! $article) {
                 // Some items (extra charges, ...) might have an order number but no article.
@@ -214,7 +214,7 @@ class BasketMapper extends ArrayMapper
     public function toArray()
     {
         return [
-            'content' => $this->getShopwareBasketContent()
+            'content' => $this->getShopwareBasketContent(),
         ];
     }
 }

@@ -101,10 +101,11 @@ class BasketItemMapper extends ArrayMapper
     }
 
     /**
+     * The shopware basket item "ordernumber" is actually the article-number/sku
      * @return string
      * @throws ArrayKeyNotFoundException
      */
-    public function getOrderNumber()
+    public function getArticleNumber()
     {
         return $this->get(self::ITEM_ORDER_NUMBER);
     }
@@ -203,21 +204,16 @@ class BasketItemMapper extends ArrayMapper
             throw new InvalidBasketItemException($this->getShopwareItem());
         }
 
-        $name        = $this->getArticleName();
-        $orderNumber = $this->getOrderNumber();
-        $description = $this->getDescription();
         $tax         = str_replace(',', '.', $this->getTax());
-        $taxRate     = $this->getTaxRate();
         $quantity    = $this->getQuantity();
-        $price       = $this->getPrice();
 
-        $amount    = new Amount($price, $this->currency);
+        $amount    = new Amount($this->getPrice(), $this->currency);
         $taxAmount = new Amount(floatval($tax) / $quantity, $this->currency);
 
-        $wirecardItem = new Item($name, $amount, $quantity);
-        $wirecardItem->setArticleNumber($orderNumber);
-        $wirecardItem->setDescription($description);
-        $wirecardItem->setTaxRate($taxRate);
+        $wirecardItem = new Item($this->getArticleName(), $amount, $quantity);
+        $wirecardItem->setArticleNumber($this->getArticleNumber());
+        $wirecardItem->setDescription($this->getDescription());
+        $wirecardItem->setTaxRate($this->getTaxRate());
         $wirecardItem->setTaxAmount($taxAmount);
 
         return $wirecardItem;
