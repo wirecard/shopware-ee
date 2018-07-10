@@ -114,7 +114,7 @@ class BasketMapperTest extends TestCase
         ]), $mapper->getBasketText());
         $this->assertInstanceOf(Basket::class, $mapper->getWirecardBasket());
 
-        $this->assertEquals(['content' => $basketArray['content']], $mapper->toArray());
+        $this->assertEquals(['basket' => $basketArray], $mapper->toArray());
     }
 
     public function testBasketArticleNotAvailable()
