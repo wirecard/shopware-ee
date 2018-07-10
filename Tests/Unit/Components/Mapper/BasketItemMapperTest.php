@@ -61,10 +61,19 @@ class BasketItemMapperTest extends TestCase
         $this->assertEquals(1, $mapper->getQuantity());
         $this->assertEquals('foobar', $mapper->getDescription());
         $this->assertEquals(['description' => 'foobar'], $mapper->getAdditionalDetails());
-        $this->assertEquals(10, $mapper->getOrderNumber());
+        $this->assertEquals(10, $mapper->getArticleNumber());
         $this->assertEquals(1000, $mapper->getPrice());
         $this->assertEquals(200, $mapper->getTax());
         $this->assertEquals(20, $mapper->getTaxRate());
+
+        $this->assertEquals([
+            'name'           => 'foo',
+            'quantity'       => 1,
+            'amount'         => ['currency' => 'EUR', 'value' => 1000.0],
+            'description'    => 'foobar',
+            'article-number' => 10,
+            'tax-rate'       => 20,
+        ], $item->mappedProperties());
     }
 
     public function testBasketPrices()
@@ -80,6 +89,14 @@ class BasketItemMapperTest extends TestCase
 
         $mapper = new BasketItemMapper($itemArray, 'EUR');
         $this->assertEquals(1000.50, $mapper->getPrice());
+        $this->assertEquals([
+            'name'           => 'foo',
+            'quantity'       => 1,
+            'amount'         => ['currency' => 'EUR', 'value' => 1000.5],
+            'description'    => '',
+            'article-number' => 10,
+            'tax-rate'       => 20,
+        ], $mapper->getWirecardItem()->mappedProperties());
 
         $itemArray['additional_details'] = [
             'description'   => 'foobar',
@@ -88,11 +105,27 @@ class BasketItemMapperTest extends TestCase
 
         $mapper = new BasketItemMapper($itemArray, 'EUR');
         $this->assertEquals(1000.51, $mapper->getPrice());
+        $this->assertEquals([
+            'name'           => 'foo',
+            'quantity'       => 1,
+            'amount'         => ['currency' => 'EUR', 'value' => 1000.51],
+            'description'    => 'foobar',
+            'article-number' => 10,
+            'tax-rate'       => 20,
+        ], $mapper->getWirecardItem()->mappedProperties());
 
         $itemArray['additional_details']['prices'] = [['price_numeric' => 1000.52]];
 
-        $mapper = new BasketItemMapper($itemArray, 'EUR');
+        $mapper = new BasketItemMapper($itemArray, 'USD');
         $this->assertEquals(1000.52, $mapper->getPrice());
+        $this->assertEquals([
+            'name'           => 'foo',
+            'quantity'       => 1,
+            'amount'         => ['currency' => 'USD', 'value' => 1000.52],
+            'description'    => 'foobar',
+            'article-number' => 10,
+            'tax-rate'       => 20,
+        ], $mapper->getWirecardItem()->mappedProperties());
     }
 
     public function testInvalidBasketItemException()
