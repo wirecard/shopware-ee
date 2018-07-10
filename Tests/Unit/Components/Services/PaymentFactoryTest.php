@@ -46,7 +46,10 @@ class PaymentFactoryTest extends TestCase
 
     public function setUp()
     {
-        $this->factory = new PaymentFactory();
+        /** @var \Shopware_Components_Config|\PHPUnit_Framework_MockObject_MockObject $config */
+        $config = $this->createMock(\Shopware_Components_Config::class);
+
+        $this->factory = new PaymentFactory($config);
     }
 
     public function testPaypalInstance()
