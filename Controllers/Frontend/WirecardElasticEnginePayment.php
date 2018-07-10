@@ -73,7 +73,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $orderNumber     = $this->saveOrder($basketSignature, $basketSignature, null, false);
 
         /** @var PaymentFactory $paymentFactory */
-        $paymentFactory = new PaymentFactory($this->get('config'));
+        $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
         $payment        = $paymentFactory->create($this->getPaymentShortName());
 
         try {
