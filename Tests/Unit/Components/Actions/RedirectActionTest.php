@@ -39,8 +39,8 @@ class RedirectActionTest extends TestCase
 {
     public function testInstance()
     {
-        $redirect = new RedirectAction('https://www.redirect-example.de');
+        $redirect = new RedirectAction('https://localhost/redirect');
         $this->assertInstanceOf(Action::class, $redirect);
-        $this->assertEquals('https://www.redirect-example.de', $redirect->getUrl());
+        $this->assertEquals('https://localhost/redirect', $redirect->getUrl());
     }
 }
