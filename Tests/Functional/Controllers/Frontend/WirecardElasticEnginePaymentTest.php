@@ -33,8 +33,6 @@ namespace WirecardShopwareElasticEngine\Tests\Functional\Controllers\Frontend;
 
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 
-require_once __DIR__ . '/../../../../Controllers/Frontend/WirecardElasticEnginePayment.php';
-
 class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_TestCase
 {
     const USER_AGENT = 'Mozilla/5.0 (Android; Tablet; rv:14.0) Gecko/14.0 Firefox/14.0';
