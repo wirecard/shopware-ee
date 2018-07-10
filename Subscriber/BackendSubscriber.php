@@ -4,7 +4,7 @@ namespace WirecardShopwareElasticEngine\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
 
-class ExtendOrder implements SubscriberInterface
+class BackendSubscriber implements SubscriberInterface
 {
     /**
      * @var string

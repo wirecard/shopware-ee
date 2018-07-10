@@ -20,8 +20,8 @@
         -->
         <service id="wirecard_elastic_engine.payment_handler"
                  class="WirecardShopwareElasticEngine\Components\Services\PaymentHandler">
-            <argument type="service" id="config" />
-            <argument type="service" id="models" />
+            <argument type="service" id="config"/>
+            <argument type="service" id="models"/>
             <argument type="service" id="pluginlogger"/>
         </service>
 
@@ -32,8 +32,8 @@
             <argument type="service" id="template"/>
             <tag name="shopware.event_subscriber"/>
         </service>
-        <service id="wirecard_elastic_engine.subscriber.templates"
-                 class="WirecardShopwareElasticEngine\Subscriber\ExtendOrder">
+        <service id="wirecard_elastic_engine.subscriber.backend"
+                 class="WirecardShopwareElasticEngine\Subscriber\BackendSubscriber">
             <argument>%wirecard_shopware_elastic_engine.plugin_dir%</argument>
             <tag name="shopware.event_subscriber"/>
         </service>

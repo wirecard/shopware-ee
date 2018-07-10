@@ -32,15 +32,15 @@
 namespace WirecardShopwareElasticEngine\Tests\Unit\Subscriber;
 
 use PHPUnit\Framework\TestCase;
-use WirecardShopwareElasticEngine\Subscriber\ExtendOrder;
+use WirecardShopwareElasticEngine\Subscriber\BackendSubscriber;
 
-class ExtendOrderTest extends TestCase
+class BackendSubscriberTest extends TestCase
 {
     public function testSubscribedEvents()
     {
         $this->assertEquals([
             'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch',
-        ], ExtendOrder::getSubscribedEvents());
+        ], BackendSubscriber::getSubscribedEvents());
     }
 
     public function testIndexAction()
@@ -60,14 +60,15 @@ class ExtendOrderTest extends TestCase
         $args = $this->createMock(\Enlight_Controller_ActionEventArgs::class);
         $args->expects($this->atLeastOnce())->method('getSubject')->willReturn($controller);
 
-        $subscriber = new ExtendOrder('fooDir');
+        $subscriber = new BackendSubscriber('fooDir');
         $subscriber->onOrderPostDispatch($args);
     }
 
     public function testLoadAction()
     {
         $view = $this->createMock(\Enlight_View_Default::class);
-        $view->expects($this->once())->method('extendsTemplate')->with('backend/wirecard_extend_order/view/detail/window.js');
+        $view->expects($this->once())->method('extendsTemplate')
+             ->with('backend/wirecard_extend_order/view/detail/window.js');
 
         $request = $this->createMock(\Enlight_Controller_Request_Request::class);
         $request->method('getActionName')->willReturn('load');
@@ -80,7 +81,7 @@ class ExtendOrderTest extends TestCase
         $args = $this->createMock(\Enlight_Controller_ActionEventArgs::class);
         $args->expects($this->atLeastOnce())->method('getSubject')->willReturn($controller);
 
-        $subscriber = new ExtendOrder('');
+        $subscriber = new BackendSubscriber('');
         $subscriber->onOrderPostDispatch($args);
     }
 
@@ -100,7 +101,7 @@ class ExtendOrderTest extends TestCase
         $args = $this->createMock(\Enlight_Controller_ActionEventArgs::class);
         $args->expects($this->atLeastOnce())->method('getSubject')->willReturn($controller);
 
-        $subscriber = new ExtendOrder('');
+        $subscriber = new BackendSubscriber('');
         $subscriber->onOrderPostDispatch($args);
     }
 }
