@@ -100,14 +100,14 @@ class Transaction extends ModelEntity
     private $currency;
 
     /**
-     * @var string
-     * @ORM\Column(name="return_response", type="text", nullable=true)
+     * @var array
+     * @ORM\Column(name="return_response", type="array", nullable=true)
      */
     private $returnResponse;
 
     /**
-     * @var string
-     * @ORM\Column(name="notification_response", type="text", nullable=true)
+     * @var array
+     * @ORM\Column(name="notification_response", type="array", nullable=true)
      */
     private $notificationResponse;
 
@@ -255,7 +255,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string
+     * @return array
      */
     public function getReturnResponse()
     {
@@ -271,7 +271,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string
+     * @return array
      */
     public function getNotificationResponse()
     {
