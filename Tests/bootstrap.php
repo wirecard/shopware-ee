@@ -29,36 +29,4 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Services;
-
-use Shopware\Components\Test\Plugin\TestCase;
-
-class WirecardElasticEnginePayment extends TestCase
-{
-    /** @var \Enlight_Controller_Request_Request */
-    private $request;
-
-    /** @var \Enlight_Controller_Response_Response */
-    private $response;
-
-    /** @var \Shopware_Controllers_Frontend_WirecardElasticEnginePayment */
-    private $controller;
-
-    public function setUp()
-    {
-        $this->request  = $this->createMock(\Enlight_Controller_Request_Request::class);
-        $this->response = $this->createMock(\Enlight_Controller_Response_Response::class);
-
-        $this->controller = new \Shopware_Controllers_Frontend_WirecardElasticEnginePayment(
-            $this->request,
-            $this->response
-        );
-    }
-
-    public function testIndexAction()
-    {
-        //$this->request->
-
-        $this->controller->indexAction();
-    }
-}
+require_once (getenv('SHOPWARE_TESTS_BASEDIR') ?: __DIR__ . '/../../../..') . '/tests/Functional/bootstrap.php';
