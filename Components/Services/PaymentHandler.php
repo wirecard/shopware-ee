@@ -150,7 +150,7 @@ class PaymentHandler
         $orderNumberAssignment = $this->createOrderNumberAssignment();
 
         $payment       = $orderSummary->getPayment();
-        $paymentConfig = $orderSummary->getPayment()->getPaymentConfig();
+        $paymentConfig = $payment->getPaymentConfig();
         $transaction   = $payment->getTransaction();
 
         $transaction->setRedirect($redirect);
