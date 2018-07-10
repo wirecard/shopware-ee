@@ -54,12 +54,14 @@ class OrderSummaryTest extends TestCase
         $amount = $this->createMock(Amount::class);
 
         $order = new OrderSummary(
+            20001,
             $payment,
             $user,
             $basket,
             $amount
         );
 
+        $this->assertSame(20001, $order->getOrderNumber());
         $this->assertSame($payment, $order->getPayment());
         $this->assertSame($user, $order->getUserMapper());
         $this->assertSame($basket, $order->getBasketMapper());
@@ -93,20 +95,22 @@ class OrderSummaryTest extends TestCase
         $amount->method('mappedProperties')->willReturn(['amount']);
 
         $order = new OrderSummary(
+            20000,
             $payment,
             $user,
             $basket,
             $amount
         );
         $this->assertEquals([
-            'payment' => [
+            'orderNumber' => 20000,
+            'payment'     => [
                 'name'          => 'paymentName',
                 'paymentConfig' => ['paymentConfig'],
                 'transaction'   => ['transaction'],
             ],
-            'user'    => ['user'],
-            'basket'  => ['basket'],
-            'amount'  => ['amount'],
+            'user'        => ['user'],
+            'basket'      => ['basket'],
+            'amount'      => ['amount'],
         ], $order->toArray());
     }
 }
