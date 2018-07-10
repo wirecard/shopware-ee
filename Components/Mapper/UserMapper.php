@@ -44,6 +44,7 @@ class UserMapper extends ArrayMapper
     const USER_BILLING_ADDRESS = 'billingaddress';
     const USER_PHONE = 'phone';
     const USER_ADDITIONAL = 'additional';
+    const USER_ADDITIONAL_USER = 'user';
     const USER_ADDITIONAL_COUNTRY = 'country';
     const USER_ADDITIONAL_COUNTRY_ISO = 'countryiso';
     const USER_SHIPPING_ADDRESS_FIRST_NAME = 'firstname';
@@ -173,7 +174,7 @@ class UserMapper extends ArrayMapper
      */
     public function getFirstName()
     {
-        return $this->getAdditionalDetail(self::USER_FIRST_NAME);
+        return $this->getAdditionalUserDetail(self::USER_FIRST_NAME);
     }
 
     /**
@@ -182,7 +183,7 @@ class UserMapper extends ArrayMapper
      */
     public function getLastName()
     {
-        return $this->getAdditionalDetail(self::USER_LAST_NAME);
+        return $this->getAdditionalUserDetail(self::USER_LAST_NAME);
     }
 
     /**
@@ -191,7 +192,7 @@ class UserMapper extends ArrayMapper
      */
     public function getEmail()
     {
-        return $this->getAdditionalDetail(self::USER_EMAIL);
+        return $this->getAdditionalUserDetail(self::USER_EMAIL);
     }
 
     /**
@@ -200,7 +201,7 @@ class UserMapper extends ArrayMapper
      */
     public function getBirthday()
     {
-        return new \DateTime($this->getAdditionalDetail(self::USER_BIRTHDAY));
+        return new \DateTime($this->getAdditionalUserDetailOptional(self::USER_BIRTHDAY));
     }
 
     /**
@@ -234,7 +235,7 @@ class UserMapper extends ArrayMapper
     }
 
     /**
-     * @return mixed
+     * @return array
      * @throws ArrayKeyNotFoundException
      */
     public function getAdditional()
@@ -245,16 +246,51 @@ class UserMapper extends ArrayMapper
     /**
      * @param $detail
      *
-     * @return string
+     * @return mixed
      * @throws ArrayKeyNotFoundException
      */
     public function getAdditionalDetail($detail)
     {
         if (! isset($this->getAdditional()[$detail])) {
-            throw new ArrayKeyNotFoundException('additional' . $detail, get_class($this), $this->arrayEntity);
+            throw new ArrayKeyNotFoundException("additional.${detail}", get_class($this), $this->getAdditional());
         }
 
         return $this->getAdditional()[$detail];
+    }
+
+    /**
+     * @param string $detail
+     *
+     * @return string
+     * @throws ArrayKeyNotFoundException
+     */
+    public function getAdditionalUserDetail($detail)
+    {
+        $userAdditionalDetails = $this->getAdditionalDetail(self::USER_ADDITIONAL_USER);
+
+        if (! isset($userAdditionalDetails[$detail])) {
+            throw new ArrayKeyNotFoundException("additional.user.${detail}", get_class($this), $userAdditionalDetails);
+        }
+
+        return $userAdditionalDetails[$detail];
+    }
+
+    /**
+     * @param string $detail
+     * @param mixed  $fallback
+     *
+     * @return null
+     * @throws ArrayKeyNotFoundException
+     */
+    public function getAdditionalUserDetailOptional($detail, $fallback = null)
+    {
+        $userAdditionalDetails = $this->getAdditionalDetail(self::USER_ADDITIONAL_USER);
+
+        if (! isset($userAdditionalDetails[$detail])) {
+            return $fallback;
+        }
+
+        return $userAdditionalDetails[$detail];
     }
 
     /**
