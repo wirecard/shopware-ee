@@ -307,7 +307,11 @@ class UserMapper extends ArrayMapper
      */
     public function getShippingAddressCountryIso()
     {
-        return $this->getOptional([self::ADDITIONAL, self::ADDITIONAL_COUNTRY_SHIPPING, self::ADDITIONAL_COUNTRY_SHIPPING_COUNTRY_ISO]);
+        return $this->getOptional([
+            self::ADDITIONAL,
+            self::ADDITIONAL_COUNTRY_SHIPPING,
+            self::ADDITIONAL_COUNTRY_SHIPPING_COUNTRY_ISO,
+        ]);
     }
 
     /**

@@ -40,10 +40,10 @@ class BasketItemMapper extends ArrayMapper
 {
     const ARTICLE_NAME = 'articlename';
     const ORDER_NUMBER = 'ordernumber';
-    const ADDITIONAL_DETAILS = 'additional_details';
-    const ADDITIONAL_DETAILS_DESCRIPTION = 'description';
-    const ADDITIONAL_DETAILS_PRICES = 'prices';
-    const ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC = 'price_numeric';
+    const DETAILS = 'additional_details';
+    const DETAILS_DESCRIPTION = 'description';
+    const DETAILS_PRICES = 'prices';
+    const DETAILS_PRICES_PRICE_NUMERIC = 'price_numeric';
     const TAX = 'tax';
     const TAX_RATE = 'tax_rate';
     const QUANTITY = 'quantity';
@@ -134,7 +134,7 @@ class BasketItemMapper extends ArrayMapper
      */
     public function getQuantity()
     {
-        return $this->get(self::QUANTITY);
+        return intval($this->get(self::QUANTITY));
     }
 
     /**
@@ -142,7 +142,7 @@ class BasketItemMapper extends ArrayMapper
      */
     public function getDescription()
     {
-        return $this->getOptional([self::ADDITIONAL_DETAILS, self::ADDITIONAL_DETAILS_DESCRIPTION], '');
+        return $this->getOptional([self::DETAILS, self::DETAILS_DESCRIPTION], '');
     }
 
     /**
@@ -153,20 +153,19 @@ class BasketItemMapper extends ArrayMapper
     {
         $price = floatval(str_replace(',', '.', $this->get(self::PRICE)));
 
-        $details = $this->getOptional(self::ADDITIONAL_DETAILS);
-        if ($details) {
-            if (isset($details[self::ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC])) {
-                $price = $details[self::ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC];
-            }
-
-            if (isset($details[self::ADDITIONAL_DETAILS_PRICES]) && count($details[self::ADDITIONAL_DETAILS_PRICES]) === 1) {
-                $prices = $details[self::ADDITIONAL_DETAILS_PRICES];
-                if (isset($prices[0][self::ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC])) {
-                    $price = $prices[0][self::ADDITIONAL_DETAILS_PRICES_PRICE_NUMERIC];
-                }
+        $details = $this->getOptional(self::DETAILS);
+        if (! $details) {
+            return $price;
+        }
+        if (isset($details[self::DETAILS_PRICES]) && count($details[self::DETAILS_PRICES]) === 1) {
+            $prices = $details[self::DETAILS_PRICES];
+            if (isset($prices[0][self::DETAILS_PRICES_PRICE_NUMERIC])) {
+                return $prices[0][self::DETAILS_PRICES_PRICE_NUMERIC];
             }
         }
-
+        if (isset($details[self::DETAILS_PRICES_PRICE_NUMERIC])) {
+            return $details[self::DETAILS_PRICES_PRICE_NUMERIC];
+        }
         return $price;
     }
 
