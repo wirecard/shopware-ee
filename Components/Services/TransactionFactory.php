@@ -63,9 +63,16 @@ class TransactionFactory
     {
         $transaction = new Transaction();
         $transaction->setOrderNumber($orderNumber);
+        $transaction->setType($type);
+        $transaction->setCreatedAt(new \DateTime());
+
+        $transaction->setRequestId($response->getRequestId());
+        $transaction->setTransactionType($response->getTransactionType());
+        $transaction->setResponse($response->getData());
 
         if ($response instanceof SuccessResponse) {
             $transaction->setTransactionId($response->getTransactionId());
+            $transaction->setParentTransactionId($response->getParentTransactionId());
             $transaction->setProviderTransactionId($response->getProviderTransactionId());
         } elseif ($response instanceof InteractionResponse) {
             $transaction->setTransactionId($response->getTransactionId());
@@ -75,11 +82,6 @@ class TransactionFactory
             $transaction->setCurrency($response->getRequestedAmount()->getCurrency());
             $transaction->setAmount($response->getRequestedAmount()->getValue());
         }
-
-        $transaction->setTransactionType($response->getTransactionType());
-        $transaction->setType($type);
-        $transaction->setResponse($response->getData());
-        $transaction->setCreatedAt(new \DateTime());
 
         $this->em->persist($transaction);
         $this->em->flush();
