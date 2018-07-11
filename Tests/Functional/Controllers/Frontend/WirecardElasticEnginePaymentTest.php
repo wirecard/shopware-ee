@@ -39,16 +39,34 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
 
     public function testIndexAction()
     {
-        $this->markTestIncomplete();
-        
         $this->reset();
         $this->Request()->setMethod('GET');
         $this->Request()->setHeader('User-Agent', self::USER_AGENT);
-        //$this->Request()->setParam('sQuantity', 5);
 
         $orderVariables              = new \ArrayObject();
         $orderVariables['sBasket']   = [
-            'content'          => [],
+            'content'          => [
+                [
+                    'articlename' => 'Foo',
+                    'id'          => 1,
+                    'articleID'   => 1,
+                    'ordernumber' => 1,
+                    'tax'         => 10,
+                    'tax_rate'    => 20,
+                    'quantity'    => 1,
+                    'price'       => 50,
+                ],
+                [
+                    'articlename' => 'Bar',
+                    'id'          => 2,
+                    'articleID'   => 2,
+                    'ordernumber' => 2,
+                    'tax'         => 10,
+                    'tax_rate'    => 20,
+                    'quantity'    => 1,
+                    'price'       => 50,
+                ],
+            ],
             'AmountNetNumeric' => 100.0,
             'sAmount'          => 100.0,
             'sAmountTax'       => 20.0,
@@ -79,6 +97,11 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
         Shopware()->Session()['sOrderVariables'] = $orderVariables;
 
         $response = $this->dispatch('/WirecardElasticEnginePayment');
-        var_dump($response);
+        
+        $this->assertTrue($response->isRedirect());
+        $this->assertEquals(302, $response->getHttpResponseCode());
+        $locationHeader = $response->getHeaders()[0];
+        $this->assertEquals('Location', $locationHeader['name']);
+        $this->assertContains('sandbox.paypal.com', $locationHeader['value']);
     }
 }
