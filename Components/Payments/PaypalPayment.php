@@ -32,6 +32,7 @@
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
@@ -84,9 +85,13 @@ class PaypalPayment extends Payment
     /**
      * @inheritdoc
      */
-    public function getTransactionConfig(ParameterBagInterface $parameterBag, InstallerService $installerService)
+    public function getTransactionConfig(
+        Shop $shop,
+        ParameterBagInterface $parameterBag,
+        InstallerService $installerService
+    )
     {
-        $config = parent::getTransactionConfig($parameterBag, $installerService);
+        $config = parent::getTransactionConfig($shop, $parameterBag, $installerService);
         $config->add(new PaymentMethodConfig(
             PayPalTransaction::NAME,
             $this->getPaymentConfig()->getTransactionMAID(),

@@ -31,21 +31,21 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
-use Wirecard\PaymentSdk\Config\Config;
+use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Shopware\Models\Shop\Shop;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\CreditCardConfig;
-use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
-use Wirecard\PaymentSdk\Transaction\Reservable;
-use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
+use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
 
 class CreditCardPayment extends Payment
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_credit_card';
 
-    private $creditCardConfig;
-    private $paymentConfig;
+    /** @var CreditCardTransaction */
+    private $transactionInstance;
 
     /**
      * @inheritdoc
@@ -63,105 +63,12 @@ class CreditCardPayment extends Payment
         return self::PAYMETHOD_IDENTIFIER;
     }
 
+    /**
+     * @return int
+     */
     public function getPosition()
     {
         return 0;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getConfig(array $configData)
-    {
-        $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
-
-        $creditCardConfig = new CreditCardConfig();
-
-        if ($configData['transactionMAID'] !== '' &&
-            $configData['transactionKey'] !== 'null') {
-            $creditCardConfig->setSSLCredentials(
-                $configData['transactionMAID'],
-                $configData['transactionKey']
-            );
-        }
-
-        if ($configData['transaction3dsMAID'] !== '' &&
-            $configData['transaction3dsMAID'] !== 'null') {
-            $creditCardConfig->setThreeDCredentials(
-                $configData['transaction3dsMAID'],
-                $configData['transaction3dsKey']
-            );
-        }
-
-        $threeDsOnly = $configData['3dsOnly'];
-        $threeDsOnlyCurrency = $configData['3dsOnlyCurrency'];
-        $threeDsAttempt = $configData['3dsAttempt'];
-        $threeDsAttemptCurrency = $configData['3dsAttemptCurrency'];
-        $shop = Shopware()->Container()->get('shop');
-
-        if ($shop) {
-            if ($threeDsOnlyCurrency) {
-                if ($shop->getCurrency()->getCurrency() !== $threeDsOnlyCurrency) {
-                    foreach ($shop->getCurrencies() as $currency) {
-                        if ($currency->getCurrency() === $threeDsOnlyCurrency) {
-                            $factorOld = $currency->getFactor();
-                            $threeDsOnly /= $factorOld;
-                            $factorNew = $shop->getCurrency()->getFactor();
-                            $threeDsOnly *= $factorNew;
-                            break;
-                        }
-                    }
-                }
-            } else {
-                if (!$shop->getCurrency()->getDefault()) {
-                    $factor = $shop->getCurrency()->getFactor();
-                    $threeDsOnly *= $factor;
-                }
-            }
-
-            if ($threeDsAttemptCurrency) {
-                if ($shop->getCurrency()->getCurrency() !== $threeDsAttemptCurrency) {
-                    foreach ($shop->getCurrencies() as $currency) {
-                        if ($currency->getCurrency() === $threeDsAttemptCurrency) {
-                            $factorOld = $currency->getFactor();
-                            $threeDsAttempt /= $factorOld;
-                            $factorNew = $shop->getCurrency()->getFactor();
-                            $threeDsAttempt *= $factorNew;
-                            break;
-                        }
-                    }
-                }
-            } else {
-                if (!$shop->getCurrency()->getDefault()) {
-                    $factor = $shop->getCurrency()->getFactor();
-                    $threeDsAttempt *= $factor;
-                }
-            }
-
-            $currency = $shop->getCurrency()->getCurrency();
-
-            $creditCardConfig->addSslMaxLimit(
-                new Amount(
-                    $threeDsOnly,
-                    $currency
-                )
-            );
-
-            $creditCardConfig->addThreeDMinLimit(
-                new Amount(
-                    $threeDsAttempt,
-                    $currency
-                )
-            );
-        }
-
-        $this->creditCardConfig = $creditCardConfig;
-
-        $config->add($this->creditCardConfig);
-
-        $this->paymentConfig = $config;
-
-        return $this->paymentConfig;
     }
 
     /**
@@ -169,7 +76,42 @@ class CreditCardPayment extends Payment
      */
     public function getTransaction()
     {
-        return new CreditCardTransaction();
+        if (! $this->transactionInstance) {
+            $this->transactionInstance = new CreditCardTransaction();
+        }
+        return $this->transactionInstance;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getTransactionConfig(
+        Shop $shop,
+        ParameterBagInterface $parameterBag,
+        InstallerService $installerService
+    )
+    {
+        $transactionConfig = parent::getTransactionConfig($shop, $parameterBag, $installerService);
+        $paymentConfig     = $this->getPaymentConfig();
+        $creditCardConfig  = new CreditCardConfig();
+
+        if ($paymentConfig->getTransactionMAID() !== 'null') {
+            $creditCardConfig->setSSLCredentials(
+                $paymentConfig->getTransactionMAID(),
+                $paymentConfig->getTransactionSecret()
+            );
+        }
+
+        if ($paymentConfig->getThreeDMAID() !== 'null') {
+            $creditCardConfig->setThreeDCredentials(
+                $paymentConfig->getThreeDMAID(),
+                $paymentConfig->getThreeDSecret()
+            );
+        }
+
+        // todo: currency conversion
+
+        return $transactionConfig;
     }
 
     /**
@@ -177,89 +119,24 @@ class CreditCardPayment extends Payment
      */
     public function getPaymentConfig()
     {
-        $baseUrl = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEngineCreditCardServer'
-        );
-        $httpUser = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEngineCreditCardHttpUser'
-        );
-        $httpPass = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEngineCreditCardHttpPassword'
+        $paymentConfig = new PaymentConfig(
+            $this->getPluginConfig('CreditCardServer'),
+            $this->getPluginConfig('CreditCardHttpUser'),
+            $this->getPluginConfig('CreditCardHttpPassword')
         );
 
-        $creditCardMAID = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEngineCreditCardMerchandId'
-        );
+        $paymentConfig->setTransactionMAID($this->getPluginConfig('CreditCardMerchantId'));
+        $paymentConfig->setTransactionSecret($this->getPluginConfig('CreditCardSecret'));
+        $paymentConfig->setTransactionType($this->getPluginConfig('CreditCardTransactionType'));
 
-        $creditCardKey = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEngineCreditCardSecret'
-        );
+        $paymentConfig->setThreeDMAID($this->getPluginConfig('CreditCardThreeDMAID'));
+        $paymentConfig->setThreeDSecret($this->getPluginConfig('CreditCardThreeDSecret'));
+        $paymentConfig->setThreeDSslMaxLimit($this->getPluginConfig('CreditCardThreeDSslMaxLimit'));
+        $paymentConfig->setThreeDSslMaxLimitCurrency($this->getPluginConfig('CreditCardThreeDSslMaxLimitCurrency'));
+        $paymentConfig->setThreeDMinLimit($this->getPluginConfig('CreditCardThreeDMinLimit'));
+        $paymentConfig->setThreeDMinLimitCurrency($this->getPluginConfig('CreditCardThreeDMinLimitCurrency'));
 
-        $creditCard3dsMAID = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEngineCreditCard3dsMerchandId'
-        );
-
-        $creditCard3dsKey = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEngineCreditCard3dsSecret'
-        );
-
-        $transactionType = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEngineCreditCardTransactionType'
-        );
-
-        $threeDsOnly = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEngineCreditCard3dsOnly'
-        );
-
-        $threeDsOnlyCurrency = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEngineCreditCard3dsOnlyCurrency'
-        );
-
-        $threeDsAttempt = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEngineCreditCard3dsAttempt'
-        );
-
-        $threeDsAttemptCurrency = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEngineCreditCard3dsAttemptCurrency'
-        );
-
-        return array_merge(parent::getConfigData(), [
-            'baseUrl'            => $baseUrl,
-            'httpUser'           => $httpUser,
-            'httpPass'           => $httpPass,
-            'transactionMAID'    => $creditCardMAID,
-            'transactionKey'     => $creditCardKey,
-            'transaction3dsMAID' => $creditCard3dsMAID,
-            'transaction3dsKey'  => $creditCard3dsKey,
-            'transactionType'    => $transactionType,
-            '3dsOnly'            => $threeDsOnly,
-            '3dsOnlyCurrency'    => $threeDsOnlyCurrency,
-            '3dsAttempt'         => $threeDsAttempt,
-            '3dsAttemptCurrency' => $threeDsAttemptCurrency
-         ]);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function addPaymentSpecificData(WirecardTransaction $transaction, array $paymentData, array $configData)
-    {
-        if ($transaction instanceof CreditCardTransaction) {
-            $transaction->setTermUrl($paymentData['returnUrl']);
-        }
-        return $transaction;
+        return $paymentConfig;
     }
 
     /**
@@ -268,31 +145,37 @@ class CreditCardPayment extends Payment
      * @param array $paymentData
      * @return string
      */
-    public function getRequestDataForIframe(array $paymentData)
-    {
-        $transaction = $this->createTransaction($paymentData);
+    //    public function getRequestDataForIframe(array $paymentData)
+    //    {
+    //        $transaction = $this->createTransaction($paymentData);
+    //
+    //        $configData = $this->getConfigData();
+    //        if ($transaction instanceof CreditCardTransaction) {
+    //            $transaction->setConfig($this->creditCardConfig);
+    //        }
+    //
+    //        $transactionType = WirecardTransaction::TYPE_PURCHASE;
+    //        if ($configData['transactionType'] === parent::TRANSACTION_TYPE_AUTHORIZATION
+    //            && $transaction instanceof Reservable) {
+    //            $transactionType = WirecardTransaction::TYPE_AUTHORIZATION;
+    //        }
+    //
+    //        $transactionService = new TransactionService($this->paymentConfig, Shopware()->PluginLogger());
+    //
+    //        return $transactionService->getCreditCardUiWithData(
+    //            $transaction,
+    //            $transactionType,
+    //            Shopware()->Locale()->getLanguage()
+    //        );
+    //    }
 
-        $configData = $this->getConfigData();
-        if ($transaction instanceof CreditCardTransaction) {
-            $transaction->setConfig($this->creditCardConfig);
-        }
-
-        $transactionType = WirecardTransaction::TYPE_PURCHASE;
-        if ($configData['transactionType'] === parent::TRANSACTION_TYPE_AUTHORIZATION
-            && $transaction instanceof Reservable) {
-            $transactionType = WirecardTransaction::TYPE_AUTHORIZATION;
-        }
-
-        $transactionService = new TransactionService($this->paymentConfig, Shopware()->PluginLogger());
-
-        return $transactionService->getCreditCardUiWithData(
-            $transaction,
-            $transactionType,
-            Shopware()->Locale()->getLanguage()
-        );
-    }
-
+    /**
+     * @inheritdoc
+     */
     public function processPayment(OrderSummary $orderSummary, TransactionService $transactionService)
     {
+        $transaction = $this->getTransaction();
+
+        $transaction->setTermUrl(null);
     }
 }

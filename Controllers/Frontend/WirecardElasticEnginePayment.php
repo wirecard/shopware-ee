@@ -31,6 +31,7 @@
 
 use Shopware\Components\CSRFWhitelistAware;
 use Shopware\Models\Order\Status;
+use Shopware\Models\Shop\Shop;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\TransactionService;
@@ -90,7 +91,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 new UserMapper(
                     $this->getUser(),
                     $this->Request()->getClientIp(),
-                    $this->get('shop')->getLocale()->getLocale()
+                    $this->getModelManager()->getRepository(Shop::class)
+                                            ->getActiveDefault()
+                                            ->getLocale()
+                                            ->getLocale()
                 ),
                 new BasketMapper(
                     $this->getBasket(),
@@ -115,6 +119,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $action = $handler->execute(
             $orderSummary,
             new TransactionService($payment->getTransactionConfig(
+                $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
                 $this->container->getParameterBag(),
                 $this->container->get('shopware_plugininstaller.plugin_manager')
             ), $this->get('pluginlogger')),
@@ -147,6 +152,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $payment        = $paymentFactory->create($request->getParam('method'));
 
         $transactionService = new TransactionService($payment->getTransactionConfig(
+            $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
             $this->container->getParameterBag(),
             $this->container->get('shopware_plugininstaller.plugin_manager')
         ));
@@ -174,6 +180,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $payment        = $paymentFactory->create($request->getParam('method'));
 
         $transactionService = new TransactionService($payment->getTransactionConfig(
+            $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
             $this->container->getParameterBag(),
             $this->container->get('shopware_plugininstaller.plugin_manager')
         ));

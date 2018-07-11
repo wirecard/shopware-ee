@@ -32,9 +32,9 @@
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
-use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
@@ -75,12 +75,17 @@ interface PaymentInterface
     /**
      * Returns transaction config.
      *
+     * @param Shop $shop
      * @param ParameterBagInterface $parameterBag
-     * @param InstallerService      $installerService
+     * @param InstallerService $installerService
      *
      * @return Config
      */
-    public function getTransactionConfig(ParameterBagInterface $parameterBag, InstallerService $installerService);
+    public function getTransactionConfig(
+        Shop $shop,
+        ParameterBagInterface $parameterBag,
+        InstallerService $installerService
+    );
 
     /**
      * Returns payment specific configuration.
@@ -103,20 +108,6 @@ interface PaymentInterface
      * @return Action|null
      */
     public function processPayment(OrderSummary $orderSummary, TransactionService $transactionService);
-
-    /**
-     * @param array $request
-     *
-     * @return Response
-     */
-//    public function getPaymentResponse(array $request);
-
-    /**
-     * @param string $request
-     *
-     * @return Response
-     */
-//    public function getPaymentNotification($request);
 
     /**
      * Start Transaction

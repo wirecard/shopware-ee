@@ -32,6 +32,7 @@
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Shopware\Models\Shop\Shop;
 use Shopware_Components_Config;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
@@ -43,8 +44,6 @@ abstract class Payment implements PaymentInterface
 
     const TRANSACTION_TYPE_AUTHORIZATION = 'authorization';
     const TRANSACTION_TYPE_PURCHASE = 'purchase';
-
-    private $orderNumber;
 
     /**
      * @var Shopware_Components_Config
@@ -95,69 +94,6 @@ abstract class Payment implements PaymentInterface
         ];
     }
 
-    /**
-     * @inheritdoc
-     */
-//    public function createTransaction(array $paymentData)
-//    {
-//        $configData = $this->getPaymentConfig();
-//
-//        $config = $this->getTransactionConfig($configData);
-//
-//        $transaction = $this->getTransaction();
-//
-//        $amount = new Amount($paymentData['amount'], $paymentData['currency']);
-//
-//        $redirectUrls    = new Redirect($paymentData['returnUrl'], $paymentData['cancelUrl']);
-//        $notificationUrl = $paymentData['notifyUrl'];
-//
-//        $transaction->setNotificationUrl($notificationUrl);
-//        $transaction->setRedirect($redirectUrls);
-//        $transaction->setAmount($amount);
-//
-//        $customFields = new CustomFieldCollection();
-//        $customFields->add(new CustomField('signature', $paymentData['signature']));
-//        $transaction->setCustomFields($customFields);
-//
-//        if ($configData['sendBasket']) {
-//            $basket = $this->createBasket($transaction, $paymentData['basket'], $paymentData['currency']);
-//            $transaction->setBasket($basket);
-//        }
-//
-//        if ($configData['fraudPrevention']) {
-//            $this->addConsumer($transaction, $paymentData['user']);
-//            $transaction->setIpAddress($paymentData['ipAddr']);
-//
-//            $locale = Shopware()->Locale()->getLanguage();
-//            if (strpos($locale, '@') !== false) {
-//                $localeArr = explode('@', $locale);
-//                $locale    = $localeArr[0];
-//            }
-//            $transaction->setLocale($locale);
-//        }
-//
-//        $elasticEngineTransaction = $this->createElasticEngineTransaction($paymentData['signature']);
-//        $orderNumber              = $elasticEngineTransaction->getId();
-//
-//        if (getenv('SHOPWARE_ENV') === 'dev' || getenv('SHOPWARE_ENV') === 'development') {
-//            $orderNumber = uniqid() . '-' . $orderNumber;
-//        }
-//
-//        $transaction->setOrderNumber($orderNumber);
-//
-//        if ($configData['descriptor']) {
-//            //
-//            // Change descriptor value here!
-//            //
-//            $descriptor = Shopware()->Config()->get('shopName') . ' ' . $orderNumber;
-//            $transaction->setDescriptor($descriptor);
-//        }
-//
-//        $this->addPaymentSpecificData($transaction, $paymentData, $configData);
-//
-//        return $transaction;
-//    }
-
 //    public function processJsResponse($params, $return)
 //    {
 //        $configData = $this->getConfigData();
@@ -172,7 +108,11 @@ abstract class Payment implements PaymentInterface
     /**
      * @inheritdoc
      */
-    public function getTransactionConfig(ParameterBagInterface $parameterBag, InstallerService $installerService)
+    public function getTransactionConfig(
+        Shop $shop,
+        ParameterBagInterface $parameterBag,
+        InstallerService $installerService
+    )
     {
         $config = new Config(
             $this->getPaymentConfig()->getBaseUrl(),
