@@ -107,6 +107,7 @@ class NotificationHandler extends Handler
             ]);
 
         if (! $order) {
+            // todo: throw things
             $this->logger->error("Order (${orderNumber}) in notification not found", $notification->getData());
             die();
         }
@@ -131,6 +132,7 @@ class NotificationHandler extends Handler
 
         switch($notification->getTransactionType()) {
             case \Wirecard\PaymentSdk\Transaction\Transaction::TYPE_DEBIT:
+            case \Wirecard\PaymentSdk\Transaction\Transaction::TYPE_PURCHASE:
                 $orderState = Status::PAYMENT_STATE_COMPLETELY_PAID;
                 break;
 

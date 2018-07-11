@@ -31,6 +31,7 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
+use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
@@ -59,6 +60,9 @@ class PaymentFactory
         switch ($paymentName) {
             case PaypalPayment::PAYMETHOD_IDENTIFIER:
                 return new PaypalPayment($this->shopwareConfig);
+
+            case CreditCardPayment::PAYMETHOD_IDENTIFIER:
+                return new CreditCardPayment($this->shopwareConfig);
         }
 
         throw new UnknownPaymentException($paymentName);
@@ -71,7 +75,8 @@ class PaymentFactory
     public function getSupportedPayments()
     {
         return [
-            $this->create(PaypalPayment::PAYMETHOD_IDENTIFIER)
+            $this->create(PaypalPayment::PAYMETHOD_IDENTIFIER),
+            $this->create(CreditCardPayment::PAYMETHOD_IDENTIFIER)
         ];
     }
 }

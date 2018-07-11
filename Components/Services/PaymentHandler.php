@@ -77,40 +77,43 @@ class PaymentHandler extends Handler
 
     /**
      * @param \Shopware_Components_Config $config
-     * @param EntityManagerInterface $em
-     * @param LoggerInterface $logger
+     * @param EntityManagerInterface      $em
+     * @param LoggerInterface             $logger
      */
     public function __construct(
         \Shopware_Components_Config $config,
         EntityManagerInterface $em,
         LoggerInterface $logger
     ) {
-        $this->config = $config;
-        $this->em     = $em;
-        $this->logger = $logger;
+        $this->config  = $config;
+        $this->em      = $em;
+        $this->logger  = $logger;
     }
 
     /**
-     * @param OrderSummary $orderSummary
-     * @param TransactionService $transactionService
-     * @param Redirect $redirect
-     * @param string $notificationUrl
+     * @param OrderSummary                        $orderSummary
+     * @param TransactionService                  $transactionService
+     * @param Redirect                            $redirect
+     * @param string                              $notificationUrl
+     * @param \Enlight_Controller_Request_Request $request
      *
      * @return Action
      * @throws ArrayKeyNotFoundException
+     * @throws OrderNotFoundException
      */
     public function execute(
         OrderSummary $orderSummary,
         TransactionService $transactionService,
         Redirect $redirect,
-        $notificationUrl
+        $notificationUrl,
+        \Enlight_Controller_Request_Request $request
     ) {
         $this->prepareTransaction($orderSummary, $redirect, $notificationUrl);
 
         $payment     = $orderSummary->getPayment();
         $transaction = $payment->getTransaction();
 
-        $action = $payment->processPayment($orderSummary, $transactionService);
+        $action = $payment->processPayment($orderSummary, $transactionService, $redirect, $request);
 
         if ($action !== null) {
             return $action;

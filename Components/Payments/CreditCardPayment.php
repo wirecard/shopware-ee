@@ -35,8 +35,10 @@ use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\CreditCardConfig;
+use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
 
@@ -109,6 +111,9 @@ class CreditCardPayment extends Payment
             );
         }
 
+        $transactionConfig->add($creditCardConfig);
+        $this->getTransaction()->setConfig($creditCardConfig);
+
         // todo: currency conversion
 
         return $transactionConfig;
@@ -140,42 +145,26 @@ class CreditCardPayment extends Payment
     }
 
     /**
-     * Get request data as json string
-     *
-     * @param array $paymentData
-     * @return string
-     */
-    //    public function getRequestDataForIframe(array $paymentData)
-    //    {
-    //        $transaction = $this->createTransaction($paymentData);
-    //
-    //        $configData = $this->getConfigData();
-    //        if ($transaction instanceof CreditCardTransaction) {
-    //            $transaction->setConfig($this->creditCardConfig);
-    //        }
-    //
-    //        $transactionType = WirecardTransaction::TYPE_PURCHASE;
-    //        if ($configData['transactionType'] === parent::TRANSACTION_TYPE_AUTHORIZATION
-    //            && $transaction instanceof Reservable) {
-    //            $transactionType = WirecardTransaction::TYPE_AUTHORIZATION;
-    //        }
-    //
-    //        $transactionService = new TransactionService($this->paymentConfig, Shopware()->PluginLogger());
-    //
-    //        return $transactionService->getCreditCardUiWithData(
-    //            $transaction,
-    //            $transactionType,
-    //            Shopware()->Locale()->getLanguage()
-    //        );
-    //    }
-
-    /**
      * @inheritdoc
      */
-    public function processPayment(OrderSummary $orderSummary, TransactionService $transactionService)
+    public function processPayment(
+        OrderSummary $orderSummary,
+        TransactionService $transactionService,
+        Redirect $redirect,
+        \Enlight_Controller_Request_Request $request
+    )
     {
         $transaction = $this->getTransaction();
+        $transaction->setTermUrl($redirect->getSuccessUrl());
 
-        $transaction->setTermUrl(null);
+        $response = $transactionService->getCreditCardUiWithData(
+            $transaction,
+            $orderSummary->getPayment()->getPaymentConfig()->getTransactionType()
+        );
+
+        return new ViewAction('credit_card.tpl', [
+            'wirecardUrl'         => $orderSummary->getPayment()->getPaymentConfig()->getBaseUrl(),
+            'wirecardRequestData' => $response,
+        ]);
     }
 }

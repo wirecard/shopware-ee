@@ -35,6 +35,7 @@ use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
+use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
@@ -102,12 +103,19 @@ interface PaymentInterface
      *
      * @see PaymentHandler
      *
-     * @param OrderSummary       $orderSummary
-     * @param TransactionService $transactionService
+     * @param OrderSummary                        $orderSummary
+     * @param TransactionService                  $transactionService
+     * @param Redirect                            $redirect
+     * @param \Enlight_Controller_Request_Request $request
      *
      * @return Action|null
      */
-    public function processPayment(OrderSummary $orderSummary, TransactionService $transactionService);
+    public function processPayment(
+        OrderSummary $orderSummary,
+        TransactionService $transactionService,
+        Redirect $redirect,
+        \Enlight_Controller_Request_Request $request
+    );
 
     /**
      * Start Transaction

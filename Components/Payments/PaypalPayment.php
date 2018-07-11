@@ -35,6 +35,7 @@ use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
+use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
@@ -126,7 +127,12 @@ class PaypalPayment extends Payment
     /**
      * @inheritdoc
      */
-    public function processPayment(OrderSummary $orderSummary, TransactionService $transactionService)
+    public function processPayment(
+        OrderSummary $orderSummary,
+        TransactionService $transactionService,
+        Redirect $redirect,
+        \Enlight_Controller_Request_Request $request
+    )
     {
         $transaction = $this->getTransaction();
 

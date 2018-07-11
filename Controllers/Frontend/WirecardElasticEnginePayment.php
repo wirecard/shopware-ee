@@ -38,6 +38,7 @@ use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
+use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
 use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
@@ -128,7 +129,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $this->getRoute('cancel', $payment->getName()),
                 $this->getRoute('failure', $payment->getName())
             ),
-            $this->getRoute('notify', $payment->getName())
+            $this->getRoute('notify', $payment->getName()),
+            $this->Request()
         );
 
         return $this->handleAction($action);
@@ -203,11 +205,25 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     protected function handleAction(Action $action)
     {
         if ($action instanceof RedirectAction) {
-            return $this->redirect($action->getUrl());
+            $this->redirect($action->getUrl());
+            return;
         }
 
         if ($action instanceof ErrorAction) {
-            return $this->handleError($action->getCode(), $action->getMessage());
+            $this->handleError($action->getCode(), $action->getMessage());
+            return;
+        }
+
+        if ($action instanceof ViewAction) {
+            if ($action->getTemplate() !== null) {
+                $this->View()->loadTemplate(
+                    'frontend/wirecard_elastic_engine_payment/' . $action->getTemplate()
+                );
+            }
+            foreach ($action->getAssignments() as $key => $value) {
+                $this->View()->assign($key, $value);
+            }
+            return;
         }
 
         throw new UnknownActionException(get_class($action));
