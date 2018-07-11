@@ -148,7 +148,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * @throws UnknownActionException
      * @throws UnknownPaymentException
      * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
-     * @throws \WirecardShopwareElasticEngine\Exception\ParentTransactionNotFoundException
      */
     public function returnAction()
     {
@@ -176,6 +175,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * by the `ReturnHandler`.
      *
      * @throws UnknownPaymentException
+     * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
+     * @throws \WirecardShopwareElasticEngine\Exception\ParentTransactionNotFoundException
      */
     public function notifyAction()
     {
@@ -254,6 +255,14 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     }
 
     /**
+     * User gets redirected to this action after canceling payment.
+     */
+    public function failureAction()
+    {
+        return $this->handleError(ErrorAction::FAILURE_RESPONSE, 'Failure response');
+    }
+
+    /**
      * @param int    $code
      * @param string $message
      *
@@ -274,6 +283,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function getWhitelistedCSRFActions()
     {
-        return ['return', 'notify', 'notifyBackend'];
+        return ['return', 'notify', 'failure', 'notifyBackend'];
     }
 }
