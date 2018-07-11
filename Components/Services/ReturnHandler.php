@@ -36,11 +36,13 @@ use Psr\Log\LoggerInterface;
 use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Order\Order;
 use Wirecard\PaymentSdk\Response\FailureResponse;
-use Wirecard\PaymentSdk\Response\Response;
+use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
+use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
+use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
 use WirecardShopwareElasticEngine\Exception\ParentTransactionNotFoundException;
 use WirecardShopwareElasticEngine\Models\Transaction;
@@ -70,14 +72,33 @@ class ReturnHandler extends Handler
     }
 
     /**
-     * @param Response $response
+     * @param int                                 $orderNumber
+     * @param Payment                             $payment
+     * @param TransactionService                  $transactionService
+     * @param \Enlight_Controller_Request_Request $request
      * @return Action
+     * @throws OrderNotFoundException
+     * @throws ParentTransactionNotFoundException
      */
-    public function execute(Response $response)
+    public function execute(
+        $orderNumber,
+        Payment $payment,
+        TransactionService $transactionService,
+        \Enlight_Controller_Request_Request $request
+    )
     {
+        $response = $payment->processReturn($transactionService, $request, $this->router);
+
+        if (! $response) {
+            $response = $transactionService->handleResponse($request->getParams());
+        }
+
         switch (true) {
+            case $response instanceof FormInteractionResponse:
+                return $this->handleInteraction($response);
+
             case $response instanceof SuccessResponse:
-                return $this->handleSuccess($response);
+                return $this->handleSuccess($orderNumber, $response);
 
             case $response instanceof FailureResponse:
             default:
@@ -86,14 +107,31 @@ class ReturnHandler extends Handler
     }
 
     /**
+     * @param FormInteractionResponse $response
+     * @return RedirectAction
+     */
+    protected function handleInteraction(FormInteractionResponse $response)
+    {
+        return new RedirectAction($this->router->assemble([
+            'type'       => 'form',
+            'method'     => $response->getMethod(),
+            'formFields' => $response->getFormFields(),
+            'url'        => $response->getUrl(),
+        ]));
+    }
+
+    /**
+     * @param                 $orderNumber
      * @param SuccessResponse $response
      * @return Action
+     * @throws OrderNotFoundException
+     * @throws ParentTransactionNotFoundException
      */
-    protected function handleSuccess(SuccessResponse $response)
+    protected function handleSuccess($orderNumber, SuccessResponse $response)
     {
         $transactionId       = $response->getTransactionId();
         $parentTransactionId = $response->getParentTransactionId();
-        $orderNumber         = $this->getOrderNumberFromResponse($response);
+//        $orderNumber         = $this->getOrderNumberFromResponse($response);
 
         $order = $this->em
             ->getRepository(Order::class)

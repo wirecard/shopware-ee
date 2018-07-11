@@ -24,7 +24,7 @@
             </div>
         {else}
             <div class="content content--checkout">
-                <form id="credit-card--form" method="post">
+                <form id="credit-card--form" method="post" action="{$url}">
                     <div id="credit-card--iframe-div" style="width: 100%; height: 550px;"></div>
                     <button class="btn is--primary is--large right is--icon-right" type="submit">Senden</button>
                 </form>

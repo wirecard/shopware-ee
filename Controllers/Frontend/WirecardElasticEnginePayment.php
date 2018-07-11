@@ -158,10 +158,9 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $this->container->getParameterBag(),
             $this->container->get('shopware_plugininstaller.plugin_manager')
         ));
-        $response           = $transactionService->handleResponse($request->getParams());
 
         $returnHandler = new ReturnHandler($this->get('router'), $this->getModelManager(), $this->get('pluginlogger'));
-        $action        = $returnHandler->execute($response);
+        $action        = $returnHandler->execute($this->getOrderNumber(), $payment, $transactionService, $request);
 
         return $this->handleAction($action);
     }

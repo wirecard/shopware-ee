@@ -7,6 +7,10 @@
                  class="WirecardShopwareElasticEngine\Components\Services\PaymentFactory">
             <argument type="service" id="config"/>
         </service>
+        <service id="wirecard_elastic_engine.transaction_factory"
+                 class="WirecardShopwareElasticEngine\Components\Services\TransactionFactory">
+            <argument type="service" id="models"/>
+        </service>
         <!--
         <service id="wirecard_elastic_engine.payment"
                  class="WirecardShopwareElasticEngine\Components\Payments\Payment"
@@ -21,8 +25,10 @@
         <service id="wirecard_elastic_engine.payment_handler"
                  class="WirecardShopwareElasticEngine\Components\Services\PaymentHandler">
             <argument type="service" id="config"/>
+            <argument type="service" id="wirecard_elastic_engine.transaction_factory"/>
             <argument type="service" id="models"/>
             <argument type="service" id="pluginlogger"/>
+            <argument type="service" id="router"/>
         </service>
 
         <!-- Subscriber -->

@@ -32,10 +32,15 @@
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Shopware\Components\Routing\Router;
+use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Shop\Shop;
 use Shopware_Components_Config;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use UnknownTransactionTypeException;
 use Wirecard\PaymentSdk\Config\Config;
+use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
+use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
 
 abstract class Payment implements PaymentInterface
@@ -44,6 +49,7 @@ abstract class Payment implements PaymentInterface
 
     const TRANSACTION_TYPE_AUTHORIZATION = 'authorization';
     const TRANSACTION_TYPE_PURCHASE = 'purchase';
+    const TRANSACTION_TYPE_UNKNOWN = 'unknown';
 
     /**
      * @var Shopware_Components_Config
@@ -94,16 +100,23 @@ abstract class Payment implements PaymentInterface
         ];
     }
 
-//    public function processJsResponse($params, $return)
-//    {
-//        $configData = $this->getConfigData();
-//
-//        $config = $this->getConfig($configData);
-//
-//        $transactionService = new TransactionService($config);
-//
-//        return $transactionService->processJsResponse($params, $return);
-//    }
+    /**
+     * @return string
+     */
+    public function getTransactionType()
+    {
+        $type = $this->getPaymentConfig()->getTransactionType();
+
+        switch ($type) {
+            case 'pay':
+                return Payment::TRANSACTION_TYPE_PURCHASE;
+
+            case 'reserve':
+                return Payment::TRANSACTION_TYPE_AUTHORIZATION;
+        }
+
+        throw new UnknownTransactionTypeException($type);
+    }
 
     /**
      * @inheritdoc
@@ -130,6 +143,17 @@ abstract class Payment implements PaymentInterface
         $config->setPluginInfo($plugin->getName(), $plugin->getVersion());
 
         return $config;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function processReturn(
+        TransactionService $transactionService,
+        \Enlight_Controller_Request_Request $request,
+        RouterInterface $router
+    ) {
+        return null;
     }
 
     /**

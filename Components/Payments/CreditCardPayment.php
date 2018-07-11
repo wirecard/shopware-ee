@@ -31,17 +31,26 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
+use Psr\Log\LoggerInterface;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Shopware\Components\Routing\Router;
+use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\CreditCardConfig;
+use Wirecard\PaymentSdk\Entity\CustomField;
+use Wirecard\PaymentSdk\Entity\CustomFieldCollection;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
+use Wirecard\PaymentSdk\Response\InteractionResponse;
+use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
+use WirecardShopwareElasticEngine\Components\Services\ReturnHandler;
 
 class CreditCardPayment extends Payment
 {
@@ -94,7 +103,8 @@ class CreditCardPayment extends Payment
         Shop $shop,
         ParameterBagInterface $parameterBag,
         InstallerService $installerService
-    ) {
+    )
+    {
         $transactionConfig = parent::getTransactionConfig($shop, $parameterBag, $installerService);
         $paymentConfig     = $this->getPaymentConfig();
         $creditCardConfig  = new CreditCardConfig();
@@ -199,20 +209,52 @@ class CreditCardPayment extends Payment
     public function processPayment(
         OrderSummary $orderSummary,
         TransactionService $transactionService,
+        Shop $shop,
         Redirect $redirect,
-        \Enlight_Controller_Request_Request $request
+        \Enlight_Controller_Request_Request $request,
+        RouterInterface $router
     ) {
         $transaction = $this->getTransaction();
         $transaction->setTermUrl($redirect->getSuccessUrl());
 
-        $response = $transactionService->getCreditCardUiWithData(
+        $requestData = $transactionService->getCreditCardUiWithData(
             $transaction,
-            $orderSummary->getPayment()->getPaymentConfig()->getTransactionType()
+            $orderSummary->getPayment()->getTransactionType(),
+            $shop->getLocale()->getLocale()
         );
+
+//        $requestJson = json_decode($requestData, true);
+//        $requestId   = $requestJson[TransactionService::REQUEST_ID];
 
         return new ViewAction('credit_card.tpl', [
             'wirecardUrl'         => $orderSummary->getPayment()->getPaymentConfig()->getBaseUrl(),
-            'wirecardRequestData' => $response,
+            'wirecardRequestData' => $requestData,
+            'url'                 => $router->assemble([
+                'action' => 'return',
+                'method' => CreditCardPayment::PAYMETHOD_IDENTIFIER,
+            ]),
         ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function processReturn(
+        TransactionService $transactionService,
+        \Enlight_Controller_Request_Request $request,
+        RouterInterface $router
+    ) {
+        $params = $request->getParams();
+        if (! empty($params['parent_transaction_id'])
+            && ! empty($params['token_id'])
+            && ! empty($params['jsresponse'])
+        ) {
+            return $transactionService->processJsResponse($request->getParams(), $router->assemble([
+                'action' => 'return',
+                'method' => CreditCardPayment::PAYMETHOD_IDENTIFIER,
+            ]));
+        }
+
+        return null;
     }
 }

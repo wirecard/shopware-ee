@@ -32,10 +32,13 @@
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Shopware\Components\Routing\Router;
+use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Entity\Redirect;
+use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
@@ -74,6 +77,13 @@ interface PaymentInterface
     public function getTransaction();
 
     /**
+     * Returns the transaction type from `getPaymentOptions`.
+     *
+     * @return string
+     */
+    public function getTransactionType();
+
+    /**
      * Returns transaction config.
      *
      * @param Shop $shop
@@ -105,16 +115,33 @@ interface PaymentInterface
      *
      * @param OrderSummary                        $orderSummary
      * @param TransactionService                  $transactionService
+     * @param Shop                                $shop
      * @param Redirect                            $redirect
      * @param \Enlight_Controller_Request_Request $request
+     * @param RouterInterface                     $router
      *
      * @return Action|null
      */
     public function processPayment(
         OrderSummary $orderSummary,
         TransactionService $transactionService,
+        Shop $shop,
         Redirect $redirect,
-        \Enlight_Controller_Request_Request $request
+        \Enlight_Controller_Request_Request $request,
+        RouterInterface $router
+    );
+
+    /**
+     * @param TransactionService                  $transactionService
+     * @param \Enlight_Controller_Request_Request $request
+     * @param RouterInterface                     $router
+     *
+     * @return Response
+     */
+    public function processReturn(
+        TransactionService $transactionService,
+        \Enlight_Controller_Request_Request $request,
+        RouterInterface $router
     );
 
     /**

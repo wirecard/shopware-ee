@@ -33,7 +33,9 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Order\Order;
+use Shopware\Models\Shop\Shop;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
@@ -76,18 +78,34 @@ class PaymentHandler extends Handler
     protected $em;
 
     /**
+     * @var \Enlight_Controller_Router
+     */
+    protected $router;
+
+    /**
+     * @var TransactionFactory
+     */
+    protected $transactionFactory;
+
+    /**
      * @param \Shopware_Components_Config $config
+     * @param TransactionFactory          $transactionFactory
      * @param EntityManagerInterface      $em
      * @param LoggerInterface             $logger
+     * @param RouterInterface             $router
      */
     public function __construct(
         \Shopware_Components_Config $config,
+        TransactionFactory $transactionFactory,
         EntityManagerInterface $em,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        RouterInterface $router
     ) {
-        $this->config  = $config;
-        $this->em      = $em;
-        $this->logger  = $logger;
+        $this->config             = $config;
+        $this->transactionFactory = $transactionFactory;
+        $this->em                 = $em;
+        $this->logger             = $logger;
+        $this->router             = $router;
     }
 
     /**
@@ -113,7 +131,14 @@ class PaymentHandler extends Handler
         $payment     = $orderSummary->getPayment();
         $transaction = $payment->getTransaction();
 
-        $action = $payment->processPayment($orderSummary, $transactionService, $redirect, $request);
+        $action = $payment->processPayment(
+            $orderSummary,
+            $transactionService,
+            $this->em->getRepository(Shop::class)->getActiveDefault(),
+            $redirect,
+            $request,
+            $this->router
+        );
 
         if ($action !== null) {
             return $action;
@@ -133,7 +158,7 @@ class PaymentHandler extends Handler
             case $response instanceof SuccessResponse:
             case $response instanceof InteractionResponse:
                 $this->updateOrder($response->getTransactionId(), $orderSummary);
-                $this->createTransaction($response, $orderSummary);
+                $this->transactionFactory->create($orderSummary->getOrderNumber(), $response);
 
                 return new RedirectAction($response->getRedirectUrl());
 
@@ -168,31 +193,6 @@ class PaymentHandler extends Handler
 
         $order->setTransactionId($transactionId);
 
-        $this->em->flush();
-    }
-
-    /**
-     * Creates a new transaction with available data from our response and order summary.
-     *
-     * @param Response     $response
-     * @param OrderSummary $orderSummary
-     */
-    private function createTransaction(Response $response, OrderSummary $orderSummary)
-    {
-        $transaction = new Transaction();
-
-        if ($response instanceof SuccessResponse || $response instanceof InteractionResponse) {
-            $transaction->setTransactionId($response->getTransactionId());
-        }
-
-        $transaction->setOrderNumber($orderSummary->getOrderNumber());
-        $transaction->setResponse($response->getData());
-        $transaction->setAmount($orderSummary->getAmount()->getValue());
-        $transaction->setCurrency($orderSummary->getAmount()->getCurrency());
-        $transaction->setTransactionType($orderSummary->getPayment()->getPaymentConfig()->getTransactionType());
-        $transaction->setCreatedAt(new \DateTime());
-
-        $this->em->persist($transaction);
         $this->em->flush();
     }
 

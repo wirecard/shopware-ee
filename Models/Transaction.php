@@ -40,6 +40,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Transaction extends ModelEntity
 {
+    // todo: type
+
     /**
      * @var int
      *

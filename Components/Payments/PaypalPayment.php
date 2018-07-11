@@ -32,6 +32,7 @@
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
@@ -130,8 +131,10 @@ class PaypalPayment extends Payment
     public function processPayment(
         OrderSummary $orderSummary,
         TransactionService $transactionService,
+        Shop $shop,
         Redirect $redirect,
-        \Enlight_Controller_Request_Request $request
+        \Enlight_Controller_Request_Request $request,
+        RouterInterface $router
     )
     {
         $transaction = $this->getTransaction();
