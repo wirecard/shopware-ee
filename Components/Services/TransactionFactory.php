@@ -55,10 +55,11 @@ class TransactionFactory
     /**
      * @param int      $orderNumber
      * @param Response $response
+     * @param string   $type
      *
      * @return Transaction
      */
-    public function create($orderNumber, Response $response)
+    public function create($orderNumber, Response $response, $type = null)
     {
         $transaction = new Transaction();
         $transaction->setOrderNumber($orderNumber);
@@ -74,6 +75,7 @@ class TransactionFactory
         $transaction->setAmount($response->getRequestedAmount()->getValue());
         $transaction->setTransactionType($response->getTransactionType());
         $transaction->setResponse($response->getData());
+        $transaction->setType($type);
         $transaction->setCreatedAt(new \DateTime());
 
         $this->em->persist($transaction);

@@ -72,7 +72,6 @@ class ReturnHandler extends Handler
     }
 
     /**
-     * @param int                                 $orderNumber
      * @param Payment                             $payment
      * @param TransactionService                  $transactionService
      * @param \Enlight_Controller_Request_Request $request
@@ -81,7 +80,6 @@ class ReturnHandler extends Handler
      * @throws ParentTransactionNotFoundException
      */
     public function execute(
-        $orderNumber,
         Payment $payment,
         TransactionService $transactionService,
         \Enlight_Controller_Request_Request $request
@@ -98,7 +96,7 @@ class ReturnHandler extends Handler
                 return $this->handleInteraction($response);
 
             case $response instanceof SuccessResponse:
-                return $this->handleSuccess($orderNumber, $response);
+                return $this->handleSuccess($response);
 
             case $response instanceof FailureResponse:
             default:
@@ -121,17 +119,16 @@ class ReturnHandler extends Handler
     }
 
     /**
-     * @param                 $orderNumber
      * @param SuccessResponse $response
      * @return Action
      * @throws OrderNotFoundException
      * @throws ParentTransactionNotFoundException
      */
-    protected function handleSuccess($orderNumber, SuccessResponse $response)
+    protected function handleSuccess(SuccessResponse $response)
     {
         $transactionId       = $response->getTransactionId();
         $parentTransactionId = $response->getParentTransactionId();
-//        $orderNumber         = $this->getOrderNumberFromResponse($response);
+        $orderNumber         = $this->getOrderNumberFromResponse($response);
 
         $order = $this->em
             ->getRepository(Order::class)

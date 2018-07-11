@@ -32,7 +32,6 @@
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
-use Shopware\Components\Routing\Router;
 use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;

@@ -39,6 +39,8 @@ use Shopware\Models\Order\Status;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
+use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
+use WirecardShopwareElasticEngine\Exception\ParentTransactionNotFoundException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
 class NotificationHandler extends Handler
@@ -58,31 +60,26 @@ class NotificationHandler extends Handler
      */
     protected $router;
 
-    /**
-     * @var \sOrder
-     */
-    protected $shopwareOrder;
 
     public function __construct(
-        \sOrder $shopwareOrder,
         RouterInterface $router,
         EntityManagerInterface $em,
         LoggerInterface $logger
     ) {
-        $this->shopwareOrder = $shopwareOrder;
         $this->router        = $router;
         $this->em            = $em;
         $this->logger        = $logger;
     }
 
     /**
+     * @param \sOrder  $shopwareOrder
      * @param Response $notification
      */
-    public function execute(Response $notification)
+    public function execute(\sOrder $shopwareOrder, Response $notification)
     {
         switch (true) {
             case $notification instanceof SuccessResponse:
-                return $this->handleSuccess($notification);
+                return $this->handleSuccess($shopwareOrder, $notification);
 
             case $notification instanceof FailureResponse:
             default:
@@ -91,9 +88,10 @@ class NotificationHandler extends Handler
     }
 
     /**
+     * @param \sOrder         $shopwareOrder
      * @param SuccessResponse $notification
      */
-    protected function handleSuccess(SuccessResponse $notification)
+    protected function handleSuccess(\sOrder $shopwareOrder, SuccessResponse $notification)
     {
         $parentTransactionId = $notification->getParentTransactionId();
         $orderNumber         = $this->getOrderNumberFromResponse($notification);
@@ -107,9 +105,8 @@ class NotificationHandler extends Handler
             ]);
 
         if (! $order) {
-            // todo: throw things
             $this->logger->error("Order (${orderNumber}) in notification not found", $notification->getData());
-            die();
+            throw new OrderNotFoundException($orderNumber, $notification->getTransactionId());
         }
 
         $parentTransaction = $this->em
@@ -120,14 +117,17 @@ class NotificationHandler extends Handler
 
         if (! $parentTransaction) {
             $this->logger->error("Parent transaction in notification not found", $notification->getData());
-            die();
+            throw new ParentTransactionNotFoundException(
+                $notification->getParentTransactionId(),
+                $notification->getTransactionId()
+            );
         }
 
         $transactionFactory = new TransactionFactory($this->em);
         $transactionFactory->create($orderNumber, $notification);
 
         if ($order->getPaymentStatus() !== Status::PAYMENT_STATE_OPEN) {
-            die();
+            return ;
         }
 
         switch($notification->getTransactionType()) {
@@ -145,9 +145,7 @@ class NotificationHandler extends Handler
                 break;
         }
 
-        $this->shopwareOrder->setPaymentStatus($order->getId(), $orderState, true);
-
-        die();
+        $shopwareOrder->setPaymentStatus($order->getId(), $orderState, true);
     }
 
     /**
@@ -156,7 +154,5 @@ class NotificationHandler extends Handler
     protected function handleFailure(FailureResponse $notification)
     {
         $this->logger->error("Failure response", $notification->getData());
-
-        die();
     }
 }

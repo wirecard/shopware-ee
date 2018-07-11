@@ -31,26 +31,18 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
-use Psr\Log\LoggerInterface;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
-use Shopware\Components\Routing\Router;
 use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\CreditCardConfig;
-use Wirecard\PaymentSdk\Entity\CustomField;
-use Wirecard\PaymentSdk\Entity\CustomFieldCollection;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
-use Wirecard\PaymentSdk\Response\InteractionResponse;
-use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
-use WirecardShopwareElasticEngine\Components\Services\ReturnHandler;
 
 class CreditCardPayment extends Payment
 {

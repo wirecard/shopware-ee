@@ -40,7 +40,9 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Transaction extends ModelEntity
 {
-    // todo: type
+    const TYPE_INITIAL = 'initial';
+    const TYPE_RETURN = 'return';
+    const TYPE_NOTIFY = 'notify';
 
     /**
      * @var int
@@ -98,6 +100,12 @@ class Transaction extends ModelEntity
      * @ORM\Column(name="response", type="array", nullable=true)
      */
     private $response;
+
+    /**
+     * @var string
+     * @ORM\Column(name="type", type="string", nullable=true)
+     */
+    private $type;
 
     /**
      * @var \DateTime
@@ -239,6 +247,22 @@ class Transaction extends ModelEntity
     public function setResponse(array $response)
     {
         $this->response = $response;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * @param string $type
+     */
+    public function setType($type = null)
+    {
+        $this->type = $type;
     }
 
     /**

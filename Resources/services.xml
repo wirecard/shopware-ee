@@ -3,6 +3,7 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
+        <!-- Factories -->
         <service id="wirecard_elastic_engine.payment_factory"
                  class="WirecardShopwareElasticEngine\Components\Services\PaymentFactory">
             <argument type="service" id="config"/>
@@ -11,17 +12,8 @@
                  class="WirecardShopwareElasticEngine\Components\Services\TransactionFactory">
             <argument type="service" id="models"/>
         </service>
-        <!--
-        <service id="wirecard_elastic_engine.payment"
-                 class="WirecardShopwareElasticEngine\Components\Payments\Payment"
-                 abstract="true">
-            <argument type="service" id="service_container"/>
-        </service>
-        <service id="wirecard_elastic_engine.payments.paypal"
-                 class="WirecardShopwareElasticEngine\Components\Payments\PaypalPayment"
-                 parent="wirecard_elastic_engine.payment">
-        </service>
-        -->
+
+        <!-- Handler -->
         <service id="wirecard_elastic_engine.payment_handler"
                  class="WirecardShopwareElasticEngine\Components\Services\PaymentHandler">
             <argument type="service" id="config"/>
@@ -29,6 +21,18 @@
             <argument type="service" id="models"/>
             <argument type="service" id="pluginlogger"/>
             <argument type="service" id="router"/>
+        </service>
+        <service id="wirecard_elastic_engine.notification_handler"
+                 class="WirecardShopwareElasticEngine\Components\Services\NotificationHandler">
+            <argument type="service" id="router"/>
+            <argument type="service" id="models"/>
+            <argument type="service" id="pluginlogger"/>
+        </service>
+        <service id="wirecard_elastic_engine.return_handler"
+                 class="WirecardShopwareElasticEngine\Components\Services\ReturnHandler">
+            <argument type="service" id="router"/>
+            <argument type="service" id="models"/>
+            <argument type="service" id="pluginlogger"/>
         </service>
 
         <!-- Subscriber -->
