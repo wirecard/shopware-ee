@@ -32,6 +32,7 @@
 namespace WirecardShopwareElasticEngine\Components\Services;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
@@ -57,7 +58,7 @@ class TransactionFactory
      * @param Response $response
      * @param string   $type
      *
-     * @return Transaction
+     * @return Transaction|null
      */
     public function create($orderNumber, Response $response, $type = null)
     {
@@ -76,11 +77,17 @@ class TransactionFactory
             $transaction->setProviderTransactionId($response->getProviderTransactionId());
         } elseif ($response instanceof InteractionResponse) {
             $transaction->setTransactionId($response->getTransactionId());
+        } elseif ($response instanceof FormInteractionResponse) {
+            $transaction->setTransactionId($response->getTransactionId());
         }
 
         if ($response->getRequestedAmount()) {
             $transaction->setCurrency($response->getRequestedAmount()->getCurrency());
             $transaction->setAmount($response->getRequestedAmount()->getValue());
+        }
+
+        if (! $transaction->getTransactionId()) {
+            return null;
         }
 
         $this->em->persist($transaction);
