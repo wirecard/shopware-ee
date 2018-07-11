@@ -38,6 +38,7 @@ use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
+use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
 use WirecardShopwareElasticEngine\Models\Transaction;
@@ -65,7 +66,7 @@ class ReturnHandler extends Handler
 
         switch (true) {
             case $response instanceof FormInteractionResponse:
-                return $this->handleInteraction($response);
+                return $this->handleFormInteraction($response);
 
             case $response instanceof SuccessResponse:
                 return $this->handleSuccess($response);
@@ -78,16 +79,16 @@ class ReturnHandler extends Handler
 
     /**
      * @param FormInteractionResponse $response
-     * @return RedirectAction
+     * @return ViewAction
      */
-    protected function handleInteraction(FormInteractionResponse $response)
+    protected function handleFormInteraction(FormInteractionResponse $response)
     {
-        return new RedirectAction($this->router->assemble([
-            'type'       => 'form',
+        return new ViewAction('credit_card.tpl', [
+            'threeDSecure' => true,
             'method'     => $response->getMethod(),
             'formFields' => $response->getFormFields(),
             'url'        => $response->getUrl(),
-        ]));
+        ]);
     }
 
     /**
