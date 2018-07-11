@@ -129,7 +129,7 @@ class ReturnHandler extends Handler
             throw new ParentTransactionNotFoundException($parentTransactionId, $transactionId);
         }
 
-        $this->transactionFactory->create($orderNumber, $response);
+        $this->transactionFactory->create($orderNumber, $response, Transaction::TYPE_RETURN);
 
         return new RedirectAction($this->router->assemble([
             'module'     => 'frontend',

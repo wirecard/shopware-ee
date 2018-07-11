@@ -94,7 +94,7 @@ class NotificationHandler extends Handler
             );
         }
 
-        $this->transactionFactory->create($orderNumber, $notification);
+        $this->transactionFactory->create($orderNumber, $notification, Transaction::TYPE_NOTIFY);
 
         if ($order->getPaymentStatus() !== Status::PAYMENT_STATE_OPEN) {
             return ;

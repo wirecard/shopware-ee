@@ -44,6 +44,7 @@ use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
+use WirecardShopwareElasticEngine\Models\Transaction;
 
 class PaymentHandler extends Handler
 {
@@ -96,7 +97,11 @@ class PaymentHandler extends Handler
             case $response instanceof SuccessResponse:
             case $response instanceof InteractionResponse:
                 $this->updateOrder($response->getTransactionId(), $orderSummary);
-                $this->transactionFactory->create($orderSummary->getOrderNumber(), $response);
+                $this->transactionFactory->create(
+                    $orderSummary->getOrderNumber(),
+                    $response,
+                    Transaction::TYPE_INITIAL
+                );
 
                 return new RedirectAction($response->getRedirectUrl());
 
