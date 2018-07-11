@@ -31,9 +31,6 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
-use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 use Wirecard\PaymentSdk\Response\FailureResponse;
@@ -45,32 +42,6 @@ use WirecardShopwareElasticEngine\Models\Transaction;
 
 class NotificationHandler extends Handler
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @var RouterInterface
-     */
-    protected $router;
-
-
-    public function __construct(
-        RouterInterface $router,
-        EntityManagerInterface $em,
-        LoggerInterface $logger
-    ) {
-        $this->router        = $router;
-        $this->em            = $em;
-        $this->logger        = $logger;
-    }
-
     /**
      * @param \sOrder  $shopwareOrder
      * @param Response $notification
@@ -123,8 +94,7 @@ class NotificationHandler extends Handler
             );
         }
 
-        $transactionFactory = new TransactionFactory($this->em);
-        $transactionFactory->create($orderNumber, $notification);
+        $this->transactionFactory->create($orderNumber, $notification);
 
         if ($order->getPaymentStatus() !== Status::PAYMENT_STATE_OPEN) {
             return ;

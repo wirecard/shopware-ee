@@ -31,11 +31,60 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
+use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
+use Shopware\Components\Routing\RouterInterface;
 use Wirecard\PaymentSdk\Response\Response;
 
 abstract class Handler
 {
     protected $devEnvironments = ['dev', 'development'];
+
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $em;
+
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
+     * @var \Shopware_Components_Config
+     */
+    protected $shopwareConfig;
+
+    /**
+     * @var TransactionFactory
+     */
+    protected $transactionFactory;
+
+    /**
+     * @param EntityManagerInterface      $em
+     * @param RouterInterface             $router
+     * @param LoggerInterface             $logger
+     * @param \Shopware_Components_Config $config
+     * @param TransactionFactory          $transactionFactory
+     */
+    public function __construct(
+        EntityManagerInterface $em,
+        RouterInterface $router,
+        LoggerInterface $logger,
+        \Shopware_Components_Config $config,
+        TransactionFactory $transactionFactory
+    ) {
+        $this->em                 = $em;
+        $this->router             = $router;
+        $this->logger             = $logger;
+        $this->shopwareConfig     = $config;
+        $this->transactionFactory = $transactionFactory;
+    }
 
     /**
      * @param int $orderNumber

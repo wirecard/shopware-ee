@@ -31,9 +31,6 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
-use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Shop\Shop;
 use Wirecard\PaymentSdk\Entity\Redirect;
@@ -50,62 +47,6 @@ use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
 
 class PaymentHandler extends Handler
 {
-    /**
-     * @var OrderSummary
-     */
-    protected $orderSummary;
-
-    /**
-     * @var TransactionService
-     */
-    protected $transactionService;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @var \Shopware_Components_Config
-     */
-    protected $config;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var \Enlight_Controller_Router
-     */
-    protected $router;
-
-    /**
-     * @var TransactionFactory
-     */
-    protected $transactionFactory;
-
-    /**
-     * @param \Shopware_Components_Config $config
-     * @param TransactionFactory          $transactionFactory
-     * @param EntityManagerInterface      $em
-     * @param LoggerInterface             $logger
-     * @param RouterInterface             $router
-     */
-    public function __construct(
-        \Shopware_Components_Config $config,
-        TransactionFactory $transactionFactory,
-        EntityManagerInterface $em,
-        LoggerInterface $logger,
-        RouterInterface $router
-    ) {
-        $this->config             = $config;
-        $this->transactionFactory = $transactionFactory;
-        $this->em                 = $em;
-        $this->logger             = $logger;
-        $this->router             = $router;
-    }
-
     /**
      * @param OrderSummary                        $orderSummary
      * @param TransactionService                  $transactionService
@@ -243,7 +184,7 @@ class PaymentHandler extends Handler
      */
     protected function getDescriptor($orderNumber)
     {
-        $shopName = $this->config->get('shopName');
+        $shopName = $this->shopwareConfig->get('shopName');
         return "${shopName} ${orderNumber}";
     }
 }

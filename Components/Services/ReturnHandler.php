@@ -31,9 +31,6 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
-use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Order\Order;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\FormInteractionResponse;
@@ -49,28 +46,6 @@ use WirecardShopwareElasticEngine\Models\Transaction;
 
 class ReturnHandler extends Handler
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @var RouterInterface
-     */
-    protected $router;
-
-    public function __construct(RouterInterface $router, EntityManagerInterface $em, LoggerInterface $logger)
-    {
-        $this->router = $router;
-        $this->em     = $em;
-        $this->logger = $logger;
-    }
-
     /**
      * @param Payment                             $payment
      * @param TransactionService                  $transactionService
@@ -154,8 +129,7 @@ class ReturnHandler extends Handler
             throw new ParentTransactionNotFoundException($parentTransactionId, $transactionId);
         }
 
-        $transactionFactory = new TransactionFactory($this->em);
-        $transactionFactory->create($orderNumber, $response);
+        $this->transactionFactory->create($orderNumber, $response);
 
         return new RedirectAction($this->router->assemble([
             'module'     => 'frontend',
