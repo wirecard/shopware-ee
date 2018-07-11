@@ -2,7 +2,6 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/config.xsd">
     <elements>
-
         <!-- Credit Card -->
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardServer</name>
@@ -45,7 +44,7 @@
             <description lang="en">Secret key for digital signature</description>
         </element>
         <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCard3dsMerchantId</name>
+            <name>wirecardElasticEngineCreditCardThreeDMAID</name>
             <label lang="de">[Credit Card] 3DS Händler ID</label>
             <label lang="en">[Credit Card] 3DS Merchant ID</label>
             <value>508b8896-b37d-4614-845c-26bf8bf2c948</value>
@@ -53,7 +52,7 @@
             <description lang="en">Unique 3DS merchant account id to Wirecard. Keep empty or write "null", to deactivate 3DS.</description>
         </element>
         <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCard3dsSecret</name>
+            <name>wirecardElasticEngineCreditCardThreeDSecret</name>
             <label lang="de">[Credit Card] 3DS Geheimschlüssel</label>
             <label lang="en">[Credit Card] 3DS Secret Key</label>
             <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
@@ -108,7 +107,7 @@ function (button) {
                 </handler>
             </options>
         </element>
-        <element type="select" scope="shop">
+        <element type="select" shope="shop">
             <name>wirecardElasticEngineCreditCardTransactionType</name>
             <label lang="de">[Credit Card] Transaktionsart</label>
             <label lang="en">[Credit Card] Transaction Type</label>
@@ -127,7 +126,7 @@ function (button) {
             </store>
         </element>
         <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCard3dsOnly</name>
+            <name>wirecardElasticEngineCreditCardThreeDSslMaxLimit</name>
             <label lang="de">[Credit Card] 3DS-Pflicht Betrag</label>
             <label lang="en">[Credit Card] 3DS only amount</label>
             <value>300</value>
@@ -135,7 +134,7 @@ function (button) {
             <description lang="en">This amount forces usage of 3DS</description>
         </element>
         <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCard3dsOnlyCurrency</name>
+            <name>wirecardElasticEngineCreditCardThreeDSslMaxLimitCurrency</name>
             <label lang="de">[Credit Card] 3DS-Pflicht Betrag Währung</label>
             <label lang="en">[Credit Card] 3DS only amount currency</label>
             <value></value>
@@ -143,7 +142,7 @@ function (button) {
             <description lang="en">Keep empty for default currency.</description>
         </element>
         <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCard3dsAttempt</name>
+            <name>wirecardElasticEngineCreditCardThreeDMinLimit</name>
             <label lang="de">[Credit Card] 3DS-Versuch Betrag</label>
             <label lang="en">[Credit Card] 3DS attempt amount</label>
             <value>100</value>
@@ -151,7 +150,7 @@ function (button) {
             <description lang="en">This amount attemps usage of 3DS.</description>
         </element>
         <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCard3dsAttemptCurrency</name>
+            <name>wirecardElasticEngineCreditCardThreeDMinLimitCurrency</name>
             <label lang="de">[Credit Card] 3DS-Pflicht Betrag Währung</label>
             <label lang="en">[Credit Card] 3DS only amount currency</label>
             <value></value>
@@ -159,7 +158,7 @@ function (button) {
             <description lang="en">Keep empty for default currency.</description>
         </element>
         <element type="button" scope="shop">
-            <name>wirecardElasticEngineCreditCard3dsDescription</name>
+            <name>wirecardElasticEngineCreditCardThreeDDescription</name>
             <label lang="de">[Credit Card] Erklärung zu 3DS</label>
             <label lang="en">[Credit Card] Description about 3DS</label>
             <options>
