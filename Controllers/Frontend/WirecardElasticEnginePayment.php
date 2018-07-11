@@ -191,6 +191,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $notificationHandler = $this->get('wirecard_elastic_engine.notification_handler');
 
         $notificationHandler->execute($this->get('modules')->Order(), $notification);
+        exit();
     }
 
     /**
