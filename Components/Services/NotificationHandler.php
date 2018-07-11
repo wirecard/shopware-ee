@@ -31,6 +31,130 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
-class NotificationHandler
+use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
+use Shopware\Components\Routing\RouterInterface;
+use Shopware\Models\Order\Order;
+use Shopware\Models\Order\Status;
+use Wirecard\PaymentSdk\Response\FailureResponse;
+use Wirecard\PaymentSdk\Response\Response;
+use Wirecard\PaymentSdk\Response\SuccessResponse;
+use WirecardShopwareElasticEngine\Models\Transaction;
+
+class NotificationHandler extends Handler
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $em;
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    /**
+     * @var \sOrder
+     */
+    protected $shopwareOrder;
+
+    public function __construct(
+        \sOrder $shopwareOrder,
+        RouterInterface $router,
+        EntityManagerInterface $em,
+        LoggerInterface $logger
+    ) {
+        $this->shopwareOrder = $shopwareOrder;
+        $this->router        = $router;
+        $this->em            = $em;
+        $this->logger        = $logger;
+    }
+
+    /**
+     * @param Response $notification
+     */
+    public function execute(Response $notification)
+    {
+        switch (true) {
+            case $notification instanceof SuccessResponse:
+                return $this->handleSuccess($notification);
+
+            case $notification instanceof FailureResponse:
+            default:
+                return $this->handleFailure($notification);
+        }
+    }
+
+    /**
+     * @param SuccessResponse $notification
+     */
+    protected function handleSuccess(SuccessResponse $notification)
+    {
+        $parentTransactionId = $notification->getParentTransactionId();
+        $orderNumber         = $this->getOrderNumberFromResponse($notification);
+
+        $this->logger->info('Incoming notification', $notification->getData());
+
+        $order = $this->em
+            ->getRepository(Order::class)
+            ->findOneBy([
+                'number' => $orderNumber,
+            ]);
+
+        if (! $order) {
+            $this->logger->error("Order (${orderNumber}) in notification not found", $notification->getData());
+            die();
+        }
+
+        $parentTransaction = $this->em
+            ->getRepository(Transaction::class)
+            ->findOneBy([
+                'transactionId' => $parentTransactionId,
+            ]);
+
+        if (! $parentTransaction) {
+            $this->logger->error("Parent transaction in notification not found", $notification->getData());
+            die();
+        }
+
+        $transactionFactory = new TransactionFactory($this->em);
+        $transactionFactory->create($orderNumber, $notification);
+
+        if ($order->getPaymentStatus() !== Status::PAYMENT_STATE_OPEN) {
+            die();
+        }
+
+        switch($notification->getTransactionType()) {
+            case \Wirecard\PaymentSdk\Transaction\Transaction::TYPE_DEBIT:
+                $orderState = Status::PAYMENT_STATE_COMPLETELY_PAID;
+                break;
+
+            case \Wirecard\PaymentSdk\Transaction\Transaction::TYPE_AUTHORIZATION:
+                $orderState = Status::PAYMENT_STATE_RESERVED;
+                break;
+
+            default:
+                $orderState = Status::PAYMENT_STATE_OPEN;
+                break;
+        }
+
+        $this->shopwareOrder->setPaymentStatus($order->getId(), $orderState, true);
+
+        die();
+    }
+
+    /**
+     * @param FailureResponse $notification
+     */
+    protected function handleFailure(FailureResponse $notification)
+    {
+        $this->logger->error("Failure response", $notification->getData());
+
+        die();
+    }
 }

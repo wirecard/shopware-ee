@@ -30,6 +30,7 @@
  */
 
 use Shopware\Components\CSRFWhitelistAware;
+use Shopware\Models\Order\Status;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\TransactionService;
@@ -39,11 +40,13 @@ use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
 use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
+use WirecardShopwareElasticEngine\Components\Services\NotificationHandler;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
 use WirecardShopwareElasticEngine\Components\Services\PaymentHandler;
 use WirecardShopwareElasticEngine\Components\Services\ReturnHandler;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Exception\BasketException;
+use WirecardShopwareElasticEngine\Exception\MissingOrderNumberException;
 use WirecardShopwareElasticEngine\Exception\UnknownActionException;
 use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
 
@@ -68,9 +71,13 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     {
         // Since we're going to need an order number for our `Transaction` we're saving it right away. Confirmation
         // mail here is disabled through the `OrderSubscriber`.
-        // The transactionId will later be overwritten by the return respectively the notify action.
+        // The transactionId will later be overwritten.
         $basketSignature = $this->persistBasket();
-        $orderNumber     = $this->saveOrder($basketSignature, $basketSignature, null, false);
+        $orderNumber     = $this->saveOrder($basketSignature, $basketSignature, Status::PAYMENT_STATE_OPEN, false);
+
+        if (! $orderNumber || $orderNumber === '') {
+            throw new MissingOrderNumberException();
+        }
 
         /** @var PaymentFactory $paymentFactory */
         $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
@@ -149,6 +156,38 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $action        = $returnHandler->execute($response);
 
         return $this->handleAction($action);
+    }
+
+    /**
+     * This method is called by Wirecard servers to modify the state of an order. Notifications are generally the
+     * source of truth regarding orders, meaning the `NotificationHandler` will most likely overwrite things
+     * by the `ReturnHandler`.
+     *
+     * @throws UnknownPaymentException
+     */
+    public function notifyAction()
+    {
+        $request = $this->Request();
+
+        /** @var PaymentFactory $paymentFactory */
+        $paymentFactory = new PaymentFactory($this->get('config'));
+        $payment        = $paymentFactory->create($request->getParam('method'));
+
+        $transactionService = new TransactionService($payment->getTransactionConfig(
+            $this->container->getParameterBag(),
+            $this->container->get('shopware_plugininstaller.plugin_manager')
+        ));
+        $notification       = $transactionService->handleNotification(file_get_contents('php://input'));
+
+        $notificationHandler = new NotificationHandler(
+            $this->get('modules')->Order(),
+            $this->get('router'),
+            $this->getModelManager(),
+            $this->get('pluginlogger')
+        );
+        $notificationHandler->execute($notification);
+
+        die();
     }
 
     /**

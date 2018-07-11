@@ -112,24 +112,15 @@ class ReturnHandler extends Handler
         $parentTransaction = $this->em
             ->getRepository(Transaction::class)
             ->findOneBy([
-                'transactionId' => $response->getParentTransactionId(),
+                'transactionId' => $parentTransactionId,
             ]);
 
         if (! $parentTransaction) {
             throw new ParentTransactionNotFoundException($parentTransactionId, $transactionId);
         }
 
-        $transaction = new Transaction();
-        $transaction->setTransactionId($response->getTransactionId());
-        $transaction->setProviderTransactionId($response->getProviderTransactionId());
-        $transaction->setCurrency($response->getRequestedAmount()->getCurrency());
-        $transaction->setAmount($response->getRequestedAmount()->getValue());
-        $transaction->setTransactionType($response->getTransactionType());
-        $transaction->setResponse($response->getData());
-        $transaction->setCreatedAt(new \DateTime());
-
-        $this->em->persist($transaction);
-        $this->em->flush();
+        $transactionFactory = new TransactionFactory($this->em);
+        $transactionFactory->create($orderNumber, $response);
 
         return new RedirectAction($this->router->assemble([
             'module'     => 'frontend',
