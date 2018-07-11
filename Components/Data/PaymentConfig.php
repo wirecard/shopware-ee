@@ -259,7 +259,7 @@ class PaymentConfig
     }
 
     /**
-     * @return float
+     * @return string|float
      */
     public function getThreeDMinLimit()
     {
@@ -267,7 +267,7 @@ class PaymentConfig
     }
 
     /**
-     * @param float $threeDMinLimit
+     * @param string|float $threeDMinLimit
      */
     public function setThreeDMinLimit($threeDMinLimit)
     {
@@ -307,7 +307,7 @@ class PaymentConfig
     }
 
     /**
-     * @return float
+     * @return string|float
      */
     public function getThreeDSslMaxLimit()
     {
@@ -315,7 +315,7 @@ class PaymentConfig
     }
 
     /**
-     * @param float $threeDSslMaxLimit
+     * @param string|float $threeDSslMaxLimit
      */
     public function setThreeDSslMaxLimit($threeDSslMaxLimit)
     {

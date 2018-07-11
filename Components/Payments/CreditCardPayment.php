@@ -131,32 +131,33 @@ class CreditCardPayment extends Payment
     }
 
     /**
-     * @param Shop $shop
-     * @param      $limitValue
-     * @param      $limitCurrency
+     * @param Shop         $shop
+     * @param float|string $limitValue
+     * @param string       $limitCurrency
      *
      * @return Amount
      */
     private function getLimit(Shop $shop, $limitValue, $limitCurrency)
     {
-        $factor = $this->getCurrencyConversionFactor($shop, strtolower($limitCurrency));
-        return new Amount($limitValue * $factor, $shop->getCurrency()->getCurrency());
+        $limit  = new Amount($limitValue, strtoupper($limitCurrency));
+        $factor = $this->getCurrencyConversionFactor($shop, $limit);
+        return new Amount($limit->getValue() * $factor, $shop->getCurrency()->getCurrency());
     }
 
     /**
      * @param Shop   $shop
-     * @param string $limitCurrency
+     * @param Amount $limit
      *
      * @return float
      */
-    private function getCurrencyConversionFactor(Shop $shop, $limitCurrency)
+    private function getCurrencyConversionFactor(Shop $shop, Amount $limit)
     {
         $shopCurrency = $shop->getCurrency();
 
-        if ($limitCurrency && $limitCurrency !== 'null') {
-            if (strtolower($shopCurrency->getCurrency()) !== $limitCurrency) {
+        if ($limit->getCurrency() && $limit->getCurrency() !== 'NULL') {
+            if (strtoupper($shopCurrency->getCurrency()) !== $limit->getCurrency()) {
                 foreach ($shop->getCurrencies() as $currency) {
-                    if (strtolower($currency->getCurrency()) === $limitCurrency) {
+                    if (strtoupper($currency->getCurrency()) === $limit->getCurrency()) {
                         return $shopCurrency->getFactor() / $currency->getFactor();
                     }
                 }
