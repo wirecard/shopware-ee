@@ -99,7 +99,11 @@ class WirecardShopwareElasticEngine extends Plugin
     protected function registerPayments()
     {
         $installer      = $this->container->get('shopware.plugin_payment_installer');
-        $paymentFactory = new PaymentFactory($this->container->get('config'));
+        $paymentFactory = new PaymentFactory(
+            $this->container->get('config'),
+            $this->container->get('shopware_plugininstaller.plugin_manager'),
+            $this->container->get('router')
+        );
 
         foreach ($paymentFactory->getSupportedPayments() as $payment) {
             $installer->createOrUpdate($payment->getName(), $payment->getPaymentOptions());

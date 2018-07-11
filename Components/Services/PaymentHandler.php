@@ -75,8 +75,7 @@ class PaymentHandler extends Handler
             $transactionService,
             $this->em->getRepository(Shop::class)->getActiveDefault(),
             $redirect,
-            $request,
-            $this->router
+            $request
         );
 
         if ($action !== null) {

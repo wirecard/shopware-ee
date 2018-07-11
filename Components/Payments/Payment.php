@@ -54,9 +54,30 @@ abstract class Payment implements PaymentInterface
      */
     protected $shopwareConfig;
 
-    public function __construct(Shopware_Components_Config $shopwareConfig)
+    /**
+     * @var InstallerService
+     */
+    protected $installerService;
+
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    /**
+     * @param Shopware_Components_Config $shopwareConfig
+     * @param InstallerService           $installerService
+     * @param RouterInterface            $router
+     */
+    public function __construct(
+        Shopware_Components_Config $shopwareConfig,
+        InstallerService $installerService,
+        RouterInterface $router
+    )
     {
-        $this->shopwareConfig = $shopwareConfig;
+        $this->shopwareConfig   = $shopwareConfig;
+        $this->installerService = $installerService;
+        $this->router           = $router;
     }
 
     /**
@@ -119,11 +140,7 @@ abstract class Payment implements PaymentInterface
     /**
      * @inheritdoc
      */
-    public function getTransactionConfig(
-        Shop $shop,
-        ParameterBagInterface $parameterBag,
-        InstallerService $installerService
-    )
+    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag)
     {
         $config = new Config(
             $this->getPaymentConfig()->getBaseUrl(),
@@ -136,7 +153,7 @@ abstract class Payment implements PaymentInterface
             $parameterBag->get('shopware.release.version')
         );
 
-        $plugin = $installerService->getPluginByName(WirecardShopwareElasticEngine::NAME);
+        $plugin = $this->installerService->getPluginByName(WirecardShopwareElasticEngine::NAME);
 
         $config->setPluginInfo($plugin->getName(), $plugin->getVersion());
 
@@ -148,8 +165,7 @@ abstract class Payment implements PaymentInterface
      */
     public function processReturn(
         TransactionService $transactionService,
-        \Enlight_Controller_Request_Request $request,
-        RouterInterface $router
+        \Enlight_Controller_Request_Request $request
     ) {
         return null;
     }

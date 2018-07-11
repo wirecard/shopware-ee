@@ -31,8 +31,6 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
-use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
-use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
@@ -85,17 +83,12 @@ interface PaymentInterface
     /**
      * Returns transaction config.
      *
-     * @param Shop $shop
+     * @param Shop                  $shop
      * @param ParameterBagInterface $parameterBag
-     * @param InstallerService $installerService
      *
      * @return Config
      */
-    public function getTransactionConfig(
-        Shop $shop,
-        ParameterBagInterface $parameterBag,
-        InstallerService $installerService
-    );
+    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag);
 
     /**
      * Returns payment specific configuration.
@@ -117,7 +110,6 @@ interface PaymentInterface
      * @param Shop                                $shop
      * @param Redirect                            $redirect
      * @param \Enlight_Controller_Request_Request $request
-     * @param RouterInterface                     $router
      *
      * @return Action|null
      */
@@ -126,47 +118,17 @@ interface PaymentInterface
         TransactionService $transactionService,
         Shop $shop,
         Redirect $redirect,
-        \Enlight_Controller_Request_Request $request,
-        RouterInterface $router
+        \Enlight_Controller_Request_Request $request
     );
 
     /**
      * @param TransactionService                  $transactionService
      * @param \Enlight_Controller_Request_Request $request
-     * @param RouterInterface                     $router
      *
      * @return Response
      */
     public function processReturn(
         TransactionService $transactionService,
-        \Enlight_Controller_Request_Request $request,
-        RouterInterface $router
+        \Enlight_Controller_Request_Request $request
     );
-
-    /**
-     * Start Transaction
-     *
-     * @param array $paymentData
-     *
-     * @return \Wirecard\PaymentSdk\Transaction\Transaction
-     */
-//    public function createTransaction(array $paymentData);
-
-    /**
-     * Retrieve backend operations for specific transaction
-     *
-     * @param string $transactionId
-     *
-     * @return array
-     */
-//    public function getBackendOperations($transactionId);
-
-    /**
-     * Process backend operation
-     *
-     * @param string $orderNumber
-     * @param string $operation
-     * @param int    $amount
-     */
-//    public function processBackendOperationsForOrder($orderNumber, $operation, $amount = 0);
 }

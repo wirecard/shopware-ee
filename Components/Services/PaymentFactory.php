@@ -31,6 +31,8 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
+use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Shopware\Components\Routing\RouterInterface;
 use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
@@ -44,9 +46,29 @@ class PaymentFactory
      */
     protected $shopwareConfig;
 
-    public function __construct(\Shopware_Components_Config $shopwareConfig)
-    {
-        $this->shopwareConfig = $shopwareConfig;
+    /**
+     * @var InstallerService
+     */
+    protected $installerService;
+
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    /**
+     * @param \Shopware_Components_Config $shopwareConfig
+     * @param InstallerService            $installerService
+     * @param RouterInterface             $router
+     */
+    public function __construct(
+        \Shopware_Components_Config $shopwareConfig,
+        InstallerService $installerService,
+        RouterInterface $router
+    ) {
+        $this->shopwareConfig   = $shopwareConfig;
+        $this->installerService = $installerService;
+        $this->router           = $router;
     }
 
     /**
@@ -57,15 +79,22 @@ class PaymentFactory
      */
     public function create($paymentName)
     {
+        $class = null;
         switch ($paymentName) {
             case PaypalPayment::PAYMETHOD_IDENTIFIER:
-                return new PaypalPayment($this->shopwareConfig);
+                $class = PaypalPayment::class;
+                break;
 
             case CreditCardPayment::PAYMETHOD_IDENTIFIER:
-                return new CreditCardPayment($this->shopwareConfig);
+                $class = CreditCardPayment::class;
+                break;
         }
 
-        throw new UnknownPaymentException($paymentName);
+        if (! $class) {
+            throw new UnknownPaymentException($paymentName);
+        }
+
+        return new $class($this->shopwareConfig, $this->installerService, $this->router);
     }
 
     /**

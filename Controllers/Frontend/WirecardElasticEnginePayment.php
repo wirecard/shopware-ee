@@ -121,8 +121,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $orderSummary,
             new TransactionService($payment->getTransactionConfig(
                 $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
-                $this->container->getParameterBag(),
-                $this->container->get('shopware_plugininstaller.plugin_manager')
+                $this->container->getParameterBag()
             ), $this->get('pluginlogger')),
             new Redirect(
                 $this->getRoute('return', $payment->getName()),
@@ -155,8 +154,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         $transactionService = new TransactionService($payment->getTransactionConfig(
             $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
-            $this->container->getParameterBag(),
-            $this->container->get('shopware_plugininstaller.plugin_manager')
+            $this->container->getParameterBag()
         ));
 
         /** @var ReturnHandler $returnHandler */
@@ -183,8 +181,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         $transactionService = new TransactionService($payment->getTransactionConfig(
             $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
-            $this->container->getParameterBag(),
-            $this->container->get('shopware_plugininstaller.plugin_manager')
+            $this->container->getParameterBag()
         ));
         $notification       = $transactionService->handleNotification(file_get_contents('php://input'));
 

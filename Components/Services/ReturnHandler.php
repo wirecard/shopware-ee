@@ -60,7 +60,7 @@ class ReturnHandler extends Handler
         \Enlight_Controller_Request_Request $request
     )
     {
-        $response = $payment->processReturn($transactionService, $request, $this->router);
+        $response = $payment->processReturn($transactionService, $request);
 
         if (! $response) {
             $response = $transactionService->handleResponse($request->getParams());

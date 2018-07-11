@@ -31,8 +31,6 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
-use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
-use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\CreditCardConfig;
@@ -91,13 +89,9 @@ class CreditCardPayment extends Payment
     /**
      * @inheritdoc
      */
-    public function getTransactionConfig(
-        Shop $shop,
-        ParameterBagInterface $parameterBag,
-        InstallerService $installerService
-    )
+    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag)
     {
-        $transactionConfig = parent::getTransactionConfig($shop, $parameterBag, $installerService);
+        $transactionConfig = parent::getTransactionConfig($shop, $parameterBag);
         $paymentConfig     = $this->getPaymentConfig();
         $creditCardConfig  = new CreditCardConfig();
 
@@ -203,8 +197,7 @@ class CreditCardPayment extends Payment
         TransactionService $transactionService,
         Shop $shop,
         Redirect $redirect,
-        \Enlight_Controller_Request_Request $request,
-        RouterInterface $router
+        \Enlight_Controller_Request_Request $request
     ) {
         $transaction = $this->getTransaction();
         $transaction->setTermUrl($redirect->getSuccessUrl());
@@ -221,7 +214,7 @@ class CreditCardPayment extends Payment
         return new ViewAction('credit_card.tpl', [
             'wirecardUrl'         => $orderSummary->getPayment()->getPaymentConfig()->getBaseUrl(),
             'wirecardRequestData' => $requestData,
-            'url'                 => $router->assemble([
+            'url'                 => $this->router->assemble([
                 'action' => 'return',
                 'method' => CreditCardPayment::PAYMETHOD_IDENTIFIER,
             ]),
@@ -233,15 +226,14 @@ class CreditCardPayment extends Payment
      */
     public function processReturn(
         TransactionService $transactionService,
-        \Enlight_Controller_Request_Request $request,
-        RouterInterface $router
+        \Enlight_Controller_Request_Request $request
     ) {
         $params = $request->getParams();
         if (! empty($params['parent_transaction_id'])
             && ! empty($params['token_id'])
             && ! empty($params['jsresponse'])
         ) {
-            return $transactionService->processJsResponse($request->getParams(), $router->assemble([
+            return $transactionService->processJsResponse($request->getParams(), $this->router->assemble([
                 'action' => 'return',
                 'method' => CreditCardPayment::PAYMETHOD_IDENTIFIER,
             ]));

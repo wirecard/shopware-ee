@@ -7,6 +7,8 @@
         <service id="wirecard_elastic_engine.payment_factory"
                  class="WirecardShopwareElasticEngine\Components\Services\PaymentFactory">
             <argument type="service" id="config"/>
+            <argument type="service" id="shopware_plugininstaller.plugin_manager"/>
+            <argument type="service" id="router"/>
         </service>
         <service id="wirecard_elastic_engine.transaction_factory"
                  class="WirecardShopwareElasticEngine\Components\Services\TransactionFactory">
@@ -16,7 +18,7 @@
         <!-- Handler -->
         <service id="wirecard_elastic_engine.handler"
                  class="WirecardShopwareElasticEngine\Components\Services\Handler"
-                abstract="true">
+                 abstract="true">
             <argument type="service" id="models"/>
             <argument type="service" id="router"/>
             <argument type="service" id="pluginlogger"/>
