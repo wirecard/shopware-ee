@@ -108,6 +108,12 @@ class Transaction extends ModelEntity
     private $type;
 
     /**
+     * @var string
+     * @ORM\Column(name="request_id", type="string", nullable=true)
+     */
+    private $requestId;
+
+    /**
      * @var \DateTime
      * @ORM\Column(name="created_at", type="datetime", nullable=false)
      */
@@ -263,6 +269,22 @@ class Transaction extends ModelEntity
     public function setType($type = null)
     {
         $this->type = $type;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getRequestId()
+    {
+        return $this->requestId;
+    }
+
+    /**
+     * @param string $requestId
+     */
+    public function setRequestId($requestId)
+    {
+        $this->requestId = $requestId;
     }
 
     /**
