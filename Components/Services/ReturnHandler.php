@@ -49,6 +49,7 @@ class ReturnHandler extends Handler
      * @param Payment                             $payment
      * @param TransactionService                  $transactionService
      * @param \Enlight_Controller_Request_Request $request
+     *
      * @return Action
      * @throws OrderNotFoundException
      */
@@ -56,8 +57,7 @@ class ReturnHandler extends Handler
         Payment $payment,
         TransactionService $transactionService,
         \Enlight_Controller_Request_Request $request
-    )
-    {
+    ) {
         $response = $payment->processReturn($transactionService, $request);
 
         if (! $response) {
@@ -79,26 +79,35 @@ class ReturnHandler extends Handler
 
     /**
      * @param FormInteractionResponse $response
+     *
      * @return ViewAction
      */
     protected function handleFormInteraction(FormInteractionResponse $response)
     {
+        try {
+            $order = $this->getOrderFromResponse($response);
+            $this->transactionFactory->create($order->getNumber(), $response, Transaction::TYPE_RETURN);
+        } catch (OrderNotFoundException $e) {
+            $this->logger->notice('Could not create transaction for FormInteractionResponse: ' . $e->getMessage());
+        }
+
         return new ViewAction('credit_card.tpl', [
             'threeDSecure' => true,
-            'method'     => $response->getMethod(),
-            'formFields' => $response->getFormFields(),
-            'url'        => $response->getUrl(),
+            'method'       => $response->getMethod(),
+            'formFields'   => $response->getFormFields(),
+            'url'          => $response->getUrl(),
         ]);
     }
 
     /**
      * @param SuccessResponse $response
+     *
      * @return Action
      * @throws OrderNotFoundException
      */
     protected function handleSuccess(SuccessResponse $response)
     {
-        $order               = $this->getOrderFromResponse($response);
+        $order = $this->getOrderFromResponse($response);
 
         // TemporaryID is set to the order number, since the returned `RedirectAction` will contain this ID
         // as `sUniqueID` to get information about what order has been processed and show proper information.
@@ -110,12 +119,13 @@ class ReturnHandler extends Handler
             'module'     => 'frontend',
             'controller' => 'checkout',
             'action'     => 'finish',
-            'sUniqueID'  => $order->getTemporaryId()
+            'sUniqueID'  => $order->getTemporaryId(),
         ]));
     }
 
     /**
      * @param FailureResponse $response
+     *
      * @return Action
      */
     protected function handleFailure(FailureResponse $response)

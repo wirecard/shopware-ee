@@ -44,7 +44,6 @@ class NotificationHandler extends Handler
      * @param \sOrder  $shopwareOrder
      * @param Response $notification
      *
-     * @throws ParentTransactionNotFoundException
      * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
      */
     public function execute(\sOrder $shopwareOrder, Response $notification)
@@ -63,27 +62,21 @@ class NotificationHandler extends Handler
      * @param \sOrder         $shopwareOrder
      * @param SuccessResponse $notification
      *
-     * @throws ParentTransactionNotFoundException
      * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
      */
     protected function handleSuccess(\sOrder $shopwareOrder, SuccessResponse $notification)
     {
-        $parentTransactionId = $notification->getParentTransactionId();
-        $order               = $this->getOrderFromResponse($notification);
+        $order = $this->getOrderFromResponse($notification);
 
         $this->logger->info('Incoming notification', $notification->getData());
 
-        $parentTransaction = $this->em
-            ->getRepository(Transaction::class)
-            ->findOneBy([
-                'transactionId' => $parentTransactionId,
-            ]);
-
-        if (! $parentTransaction) {
-            $this->logger->error("Parent transaction in notification not found", $notification->getData());
-            throw new ParentTransactionNotFoundException(
-                $notification->getParentTransactionId(),
-                $notification->getTransactionId()
+        try {
+            // We try to get the parent transaction for later usage and log a failed attempt for now
+            $this->getParentTransaction($notification);
+        } catch (ParentTransactionNotFoundException $e) {
+            $this->logger->warning(
+                "Parent transaction in notification not found: " . $e->getMessage(),
+                $notification->getData()
             );
         }
 

@@ -30,7 +30,6 @@
  */
 
 use Shopware\Components\CSRFWhitelistAware;
-use Shopware\Components\Model\QueryBuilder;
 use Shopware\Models\Order\Order;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\TransactionService;

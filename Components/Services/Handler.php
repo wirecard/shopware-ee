@@ -37,7 +37,10 @@ use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Order\Order;
 use Wirecard\PaymentSdk\Exception\MalformedResponseException;
 use Wirecard\PaymentSdk\Response\Response;
+use Wirecard\PaymentSdk\Response\SuccessResponse;
 use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
+use WirecardShopwareElasticEngine\Exception\ParentTransactionNotFoundException;
+use WirecardShopwareElasticEngine\Models\Transaction;
 
 abstract class Handler
 {
@@ -122,8 +125,9 @@ abstract class Handler
             ]);
         } catch (MalformedResponseException $e) {
             // In case we're not finding our `order-number` in the response we'll try to find it via the requestId.
-            $order = $this->em->getRepository(Order::class)->findOneBy([
-                'transactionId' => $response->getRequestId(),
+            $orderNumber = $response->getRequestId();
+            $order       = $this->em->getRepository(Order::class)->findOneBy([
+                'transactionId' => $orderNumber,
             ]);
         }
 
@@ -132,5 +136,27 @@ abstract class Handler
         }
 
         return $order;
+    }
+
+    /**
+     * @param SuccessResponse $response
+     *
+     * @return Transaction
+     * @throws ParentTransactionNotFoundException
+     */
+    protected function getParentTransaction(SuccessResponse $response)
+    {
+        $parentTransaction = $this->em
+            ->getRepository(Transaction::class)
+            ->findOneBy(['transactionId' => $response->getParentTransactionId()]);
+
+        if (! $parentTransaction) {
+            throw new ParentTransactionNotFoundException(
+                $response->getParentTransactionId(),
+                $response->getTransactionId()
+            );
+        }
+
+        return $parentTransaction;
     }
 }

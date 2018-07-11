@@ -50,7 +50,7 @@ class FrontendSubscriber implements SubscriberInterface
     private $templateManager;
 
     /**
-     * @param string $pluginDirectory
+     * @param string                    $pluginDirectory
      * @param \Enlight_Template_Manager $templateManager
      */
     public function __construct($pluginDirectory, \Enlight_Template_Manager $templateManager)
