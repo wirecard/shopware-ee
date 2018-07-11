@@ -1,16 +1,16 @@
-Ext.define('Shopware.apps.WirecardTransactions.store.Order', {
+Ext.define('Shopware.apps.WirecardTransactions.store.Transactions', {
     extend: 'Shopware.store.Listing',
 
-    configure: function() {
+    configure: function () {
         return {
             controller: 'WirecardTransactions'
         };
     },
 
     sorter: [{
-        property: 'number',
+        property: 'orderNumber',
         direction: 'DESC'
     }],
 
-    model: 'Shopware.apps.WirecardTransactions.model.ShopwareOrder'
+    model: 'Shopware.apps.WirecardTransactions.model.Transaction'
 });

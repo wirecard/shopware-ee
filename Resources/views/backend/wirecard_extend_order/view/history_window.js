@@ -64,7 +64,6 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', {
                     return Ext.util.Format.number(value);
                 },
                 asJson: function(value) {
-                    console.log(value);
                     return JSON.stringify(value, null, 2);
                 }
             }

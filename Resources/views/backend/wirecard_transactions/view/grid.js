@@ -4,17 +4,18 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
     region: 'center',
 
     snippets: {
-        orderState: '{s name="OrderState" namespace="backend/wirecard_elastic_engine/order_window"}{/s}',
-        paymentState: '{s name="PaymentState" namespace="backend/wirecard_elastic_engine/order_window"}{/s}',
-        paymentMethod: '{s name="PaymentMethod" namespace="backend/wirecard_elastic_engine/order_window"}{/s}',
-        orderNumber: '{s name="OrderNumber" namespace="backend/wirecard_elastic_engine/order_window"}{/s}',
-        transactionId: '{s name="TransactionId" namespace="backend/wirecard_elastic_engine/order_window"}{/s}',
-        providerTransactionId: '{s name="ProviderTransactionId" namespace="backend/wirecard_elastic_engine/order_window"}{/s}',
-        amount: '{s name="Amount" namespace="backend/wirecard_elastic_engine/order_window"}{/s}',
-        orderTime: '{s name="OrderTime" namespace="backend/wirecard_elastic_engine/order_window"}{/s}'
+        OrderNumber: '{s name="OrderNumber" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
+        TransactionId: '{s name="TransactionId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
+        ParentTransactionId: '{s name="ParentTransactionId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
+        ProviderTransactionId: '{s name="ProviderTransactionId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
+        TransactionType: '{s name="TransactionType" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
+        TransactionState: '{s name="TransactionState" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
+        PaymentMethod: '{s name="PaymentMethod" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
+        Amount: '{s name="Amount" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
+        Currency: '{s name="Currency" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}'
     },
 
-    configure: function() {
+    configure: function () {
         var me = this;
 
         return {
@@ -35,43 +36,43 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
         var me = this;
 
         return {
-            cleared: {
-                header: me.snippets.paymentState,
-                draggable: false,
-                renderer: me.paymentStatusRenderer
-            },
-            status: {
-                header: me.snippets.orderState,
-                draggable: false,
-                renderer: me.orderStatusRenderer
-            },
-            paymentId: {
-                header: me.snippets.paymentMethod,
-                draggable: false,
-                renderer: me.paymentMethodRenderer
-            },
-            number: {
-                header: me.snippets.orderNumber,
+            orderNumber: {
+                header: me.snippets.OrderNumber,
                 draggable: false
             },
             transactionId: {
-                header: me.snippets.transactionId,
+                header: me.snippets.TransactionId,
                 draggable: false
             },
-            temporaryId: {
-                header: me.snippets.providerTransactionId,
-                draggable: false,
-                renderer: me.providerTransactionRenderer
-            },
-            invoiceAmount: {
-                header: me.snippets.amount,
+            parentTransactionId: {
+                header: me.snippets.ParentTransactionId,
                 draggable: false
             },
-            orderTime: {
-                header: me.snippets.orderTime,
-                renderer: me.dateColumnRenderer,
+            providerTransactionId: {
+                header: me.snippets.ProviderTransactionId,
+                draggable: false
+            },
+            transactionType: {
+                header: me.snippets.TransactionType,
+                draggable: false
+            },
+            paymentMethod: {
+                header: me.snippets.PaymentMethod,
+                draggable: false
+            },
+            amount: {
+                header: me.snippets.Amount,
+                draggable: false
+            },
+            currency: {
+                header: me.snippets.Currency,
                 draggable: false
             }
+            // created_at: {
+            //     header: me.snippets.orderTime,
+            //     renderer: me.dateColumnRenderer,
+            //     draggable: false
+            // }
         };
     },
 
@@ -83,7 +84,7 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
             items = me.callParent(arguments);
 
         items.push({
-            iconCls: 'sprite-shopping-basket',
+            iconCls: 'sprite-pencil',
             tooltip: 'Open order details',
 
             handler: function (view, rowIndex, colIndex, item, opts, record) {
@@ -91,77 +92,13 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
                     name: 'Shopware.apps.Order',
                     action: 'detail',
                     params: {
-                        orderId: record.get('id')
+                        orderId: record.get('orderId')
                     }
                 });
             }
         });
 
         return items;
-    },
-
-    /**
-     * @param { String } value
-     * @param { Object } metaData
-     * @param { Ext.data.Model } record
-     * @return { String }
-     */
-    paymentMethodRenderer: function(value, metaData, record) {
-        var status = record.getPayment().first();
-
-        if (status instanceof Ext.data.Model) {
-            return status.get('description');
-        }
-
-        return value;
-    },
-
-    /**
-     * @param { String } value
-     * @param { Object } metaData
-     * @param { Ext.data.Model } record
-     * @return { String }
-     */
-    paymentStatusRenderer: function(value, metaData, record) {
-        var status = record.getPaymentStatus().first();
-
-        if (status instanceof Ext.data.Model) {
-            return status.get('description');
-        }
-
-        return value;
-    },
-
-    /**
-     * @param { String } value
-     * @param { Object } metaData
-     * @param { Ext.data.Model } record
-     * @return { String }
-     */
-    providerTransactionRenderer: function(value, metaData, record) {
-        var status = record.getWirecardTransactions().first();
-
-        if (status instanceof Ext.data.Model) {
-            return status.get('providerTransactionId');
-        }
-
-        return '';
-    },
-
-    /**
-     * @param { String } value
-     * @param { Object } metaData
-     * @param { Ext.data.Model } record
-     * @return { String }
-     */
-    orderStatusRenderer: function(value, metaData, record) {
-        var status = record.getOrderStatus().first();
-
-        if (status instanceof Ext.data.Model) {
-            return status.get('description');
-        }
-
-        return value;
     },
 
     /**

@@ -7,7 +7,7 @@ Ext.define('Shopware.apps.WirecardTransactions', {
     loadPath: '{url action=load}',
     bulkLoad: true,
 
-    controllers: [ 'Main' ],
+    controllers: ['Main'],
 
     views: [
         'Window',
@@ -15,15 +15,14 @@ Ext.define('Shopware.apps.WirecardTransactions', {
     ],
 
     models: [
-        'ShopwareOrder',
-        'WirecardTransactions'
+        'Transaction'
     ],
 
     stores: [
-        'Order'
+        'Transactions'
     ],
 
-    launch: function() {
+    launch: function () {
         return this.getController('Main').mainWindow;
     }
 });

@@ -46,12 +46,12 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
     /**
      * @var string
      */
-    protected $model = Order::class;
+    protected $model = Transaction::class;
 
     /**
      * @var string
      */
-    protected $alias = 'sOrder';
+    protected $alias = 'transaction';
 
     /**
      * Check credentials against wirecard server
@@ -145,9 +145,6 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         ]);
     }
 
-    /**
-     *
-     */
     public function processBackendOperationsAction()
     {
         $params = $this->Request()->getParams();
@@ -174,7 +171,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         }
 
         $result = $payment->processBackendOperationsForOrder($orderNumber, $operation, $amount, $currency);
-        $this->View()->assign($result);
+        return $this->View()->assign($result);
     }
 
     /**
@@ -185,49 +182,17 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         $result = parent::getList($offset, $limit, $sort, $filter, $wholeParams);
 
         foreach ($result['data'] as $key => $current) {
-            $number  = $current['number'];
-            $builder = $this->getManager()->createQueryBuilder();
-            $builder->select(['wirecardTransactions'])
-                    ->from(OrderNumberAssignment::class, 'wirecardTransactions')
-                    ->where('wirecardTransactions.orderNumber = :orderNumber')
-                    ->setParameter('orderNumber', $number);
-            $elasticEngineTransactions = $builder->getQuery()->getArrayResult();
-            if ($elasticEngineTransactions) {
-                $result['data'][$key]['wirecardTransactions'] = $elasticEngineTransactions;
-            }
+            $order = $this->getManager()->getRepository(Order::class)
+                          ->findOneBy(['number' => $current['orderNumber']]);
+
+            /** @var Shopware\Models\Payment\Payment $payment */
+            $payment = $order ? $order->getPayment() : null;
+
+            $result['data'][$key]['orderId']       = $order ? $order->getId() : 0;
+            $result['data'][$key]['paymentMethod'] = $payment ? $payment->getDescription() : 'N/A';
         }
 
         return $result;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getListQuery()
-    {
-        return $this->prepareOrderQueryBuilder(parent::getListQuery());
-    }
-
-    /**
-     * ignores empty orders in query for Order View
-     *
-     * @param QueryBuilder $builder
-     *
-     * @return QueryBuilder
-     * @throws Enlight_Exception
-     */
-    private function prepareOrderQueryBuilder(QueryBuilder $builder)
-    {
-        $builder->leftJoin('sOrder.languageSubShop', 'languageSubShop')
-                ->leftJoin('sOrder.orderStatus', 'orderStatus')
-                ->leftJoin('sOrder.paymentStatus', 'paymentStatus')
-                ->leftJoin('sOrder.payment', 'payment')
-                ->addSelect('payment')
-                ->addSelect('orderStatus')
-                ->addSelect('paymentStatus')
-                ->where('sOrder.number != 0');
-
-        return $builder;
     }
 
     /**

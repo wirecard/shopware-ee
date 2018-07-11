@@ -1,4 +1,4 @@
-Ext.define('Shopware.apps.WirecardTransactions.model.Transactions', {
+Ext.define('Shopware.apps.WirecardTransactions.model.Transaction', {
     extend: 'Shopware.data.Model',
 
     configure: function () {
