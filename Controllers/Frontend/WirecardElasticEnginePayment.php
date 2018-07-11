@@ -66,8 +66,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * `PaymentHandler` service. Further action depends on the response from the handler.
      *
      * @throws ArrayKeyNotFoundException
+     * @throws MissingOrderNumberException
      * @throws UnknownActionException
      * @throws UnknownPaymentException
+     * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
      */
     public function indexAction()
     {
@@ -145,6 +147,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      *
      * @throws UnknownActionException
      * @throws UnknownPaymentException
+     * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
+     * @throws \WirecardShopwareElasticEngine\Exception\ParentTransactionNotFoundException
      */
     public function returnAction()
     {
@@ -195,6 +199,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
     /**
      * @param Action $action
+     *
+     * @throws UnknownActionException
      */
     protected function handleAction(Action $action)
     {
@@ -250,6 +256,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     /**
      * @param int    $code
      * @param string $message
+     *
+     * @throws Exception
      */
     protected function handleError($code, $message = "")
     {

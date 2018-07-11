@@ -40,7 +40,6 @@ use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
-use WirecardShopwareElasticEngine\Exception\ParentTransactionNotFoundException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
 class ReturnHandler extends Handler
@@ -51,7 +50,6 @@ class ReturnHandler extends Handler
      * @param \Enlight_Controller_Request_Request $request
      * @return Action
      * @throws OrderNotFoundException
-     * @throws ParentTransactionNotFoundException
      */
     public function execute(
         Payment $payment,
@@ -96,7 +94,6 @@ class ReturnHandler extends Handler
      * @param SuccessResponse $response
      * @return Action
      * @throws OrderNotFoundException
-     * @throws ParentTransactionNotFoundException
      */
     protected function handleSuccess(SuccessResponse $response)
     {
