@@ -130,7 +130,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $this->getRoute('failure', $payment->getName())
             ),
             $this->getRoute('notify', $payment->getName()),
-            $this->Request()
+            $this->Request(),
+            $this->get('modules')->Order()
         );
 
         return $this->handleAction($action);

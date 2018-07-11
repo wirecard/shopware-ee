@@ -110,6 +110,7 @@ interface PaymentInterface
      * @param Shop                                $shop
      * @param Redirect                            $redirect
      * @param \Enlight_Controller_Request_Request $request
+     * @param \sOrder                             $shopwareOrder
      *
      * @return Action|null
      */
@@ -118,7 +119,8 @@ interface PaymentInterface
         TransactionService $transactionService,
         Shop $shop,
         Redirect $redirect,
-        \Enlight_Controller_Request_Request $request
+        \Enlight_Controller_Request_Request $request,
+        \sOrder $shopwareOrder
     );
 
     /**

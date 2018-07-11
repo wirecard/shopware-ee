@@ -54,6 +54,7 @@ class PaymentHandler extends Handler
      * @param Redirect                            $redirect
      * @param string                              $notificationUrl
      * @param \Enlight_Controller_Request_Request $request
+     * @param \sOrder                             $shopwareOrder
      *
      * @return Action
      * @throws ArrayKeyNotFoundException
@@ -64,7 +65,8 @@ class PaymentHandler extends Handler
         TransactionService $transactionService,
         Redirect $redirect,
         $notificationUrl,
-        \Enlight_Controller_Request_Request $request
+        \Enlight_Controller_Request_Request $request,
+        \sOrder $shopwareOrder
     ) {
         $this->prepareTransaction($orderSummary, $redirect, $notificationUrl);
 
@@ -76,7 +78,8 @@ class PaymentHandler extends Handler
             $transactionService,
             $this->em->getRepository(Shop::class)->getActiveDefault(),
             $redirect,
-            $request
+            $request,
+            $shopwareOrder
         );
 
         if ($action !== null) {

@@ -31,6 +31,7 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Shop\Shop;
@@ -50,6 +51,11 @@ abstract class Payment implements PaymentInterface
     const TRANSACTION_TYPE_UNKNOWN = 'unknown';
 
     /**
+     * @var EntityManagerInterface
+     */
+    protected $em;
+
+    /**
      * @var Shopware_Components_Config
      */
     protected $shopwareConfig;
@@ -65,16 +71,19 @@ abstract class Payment implements PaymentInterface
     protected $router;
 
     /**
+     * @param EntityManagerInterface     $em
      * @param Shopware_Components_Config $shopwareConfig
      * @param InstallerService           $installerService
      * @param RouterInterface            $router
      */
     public function __construct(
+        EntityManagerInterface $em,
         Shopware_Components_Config $shopwareConfig,
         InstallerService $installerService,
         RouterInterface $router
     )
     {
+        $this->em               = $em;
         $this->shopwareConfig   = $shopwareConfig;
         $this->installerService = $installerService;
         $this->router           = $router;

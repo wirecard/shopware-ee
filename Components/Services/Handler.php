@@ -34,7 +34,10 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\Routing\RouterInterface;
+use Shopware\Models\Order\Order;
+use Wirecard\PaymentSdk\Exception\MalformedResponseException;
 use Wirecard\PaymentSdk\Response\Response;
+use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
 
 abstract class Handler
 {
@@ -101,16 +104,29 @@ abstract class Handler
 
     /**
      * @param Response $response
-     * @return string
+     * @return Order
      */
-    protected function getOrderNumberFromResponse(Response $response)
+    protected function getOrderFromResponse(Response $response)
     {
-        $orderNumber = $response->findElement('order-number');
+        try {
+            $orderNumber = $response->findElement('order-number');
 
-        if (in_array(getenv('SHOPWARE_ENV'), $this->devEnvironments) && strpos($orderNumber, '-') >= 0) {
-            $orderNumber = explode('-', $orderNumber)[1];
+            if (in_array(getenv('SHOPWARE_ENV'), $this->devEnvironments) && strpos($orderNumber, '-') >= 0) {
+                $orderNumber = explode('-', $orderNumber)[1];
+            }
+        } catch(MalformedResponseException $e) {
+            // In case we're not finding our `order-number` in the response we'll try to find it via the requestId.
+            $orderNumber = $response->getRequestId();
         }
 
-        return $orderNumber;
+        $order = $this->em->getRepository(Order::class)->findOneBy([
+            'transactionId' => $orderNumber
+        ]);
+
+        if (! $order) {
+            throw new OrderNotFoundException($orderNumber);
+        }
+
+        return $order;
     }
 }

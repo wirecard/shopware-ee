@@ -31,12 +31,10 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
-use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
-use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
 use WirecardShopwareElasticEngine\Exception\ParentTransactionNotFoundException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
@@ -65,20 +63,9 @@ class NotificationHandler extends Handler
     protected function handleSuccess(\sOrder $shopwareOrder, SuccessResponse $notification)
     {
         $parentTransactionId = $notification->getParentTransactionId();
-        $orderNumber         = $this->getOrderNumberFromResponse($notification);
+        $order               = $this->getOrderFromResponse($notification);
 
         $this->logger->info('Incoming notification', $notification->getData());
-
-        $order = $this->em
-            ->getRepository(Order::class)
-            ->findOneBy([
-                'number' => $orderNumber,
-            ]);
-
-        if (! $order) {
-            $this->logger->error("Order (${orderNumber}) in notification not found", $notification->getData());
-            throw new OrderNotFoundException($orderNumber, $notification->getTransactionId());
-        }
 
         $parentTransaction = $this->em
             ->getRepository(Transaction::class)
@@ -94,7 +81,7 @@ class NotificationHandler extends Handler
             );
         }
 
-        $this->transactionFactory->create($orderNumber, $notification, Transaction::TYPE_NOTIFY);
+        $this->transactionFactory->create($order->getNumber(), $notification, Transaction::TYPE_NOTIFY);
 
         if ($order->getPaymentStatus() !== Status::PAYMENT_STATE_OPEN) {
             return ;

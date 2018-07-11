@@ -31,6 +31,7 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Components\Routing\RouterInterface;
 use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
@@ -41,6 +42,11 @@ use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
 
 class PaymentFactory
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $em;
+
     /**
      * @var \Shopware_Components_Config
      */
@@ -57,15 +63,18 @@ class PaymentFactory
     protected $router;
 
     /**
+     * @param EntityManagerInterface      $em
      * @param \Shopware_Components_Config $shopwareConfig
      * @param InstallerService            $installerService
      * @param RouterInterface             $router
      */
     public function __construct(
+        EntityManagerInterface $em,
         \Shopware_Components_Config $shopwareConfig,
         InstallerService $installerService,
         RouterInterface $router
     ) {
+        $this->em               = $em;
         $this->shopwareConfig   = $shopwareConfig;
         $this->installerService = $installerService;
         $this->router           = $router;
@@ -94,7 +103,7 @@ class PaymentFactory
             throw new UnknownPaymentException($paymentName);
         }
 
-        return new $class($this->shopwareConfig, $this->installerService, $this->router);
+        return new $class($this->em, $this->shopwareConfig, $this->installerService, $this->router);
     }
 
     /**

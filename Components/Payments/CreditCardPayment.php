@@ -31,6 +31,7 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
+use Shopware\Models\Order\Order;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\CreditCardConfig;
@@ -41,6 +42,7 @@ use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
+use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
 
 class CreditCardPayment extends Payment
 {
@@ -197,7 +199,8 @@ class CreditCardPayment extends Payment
         TransactionService $transactionService,
         Shop $shop,
         Redirect $redirect,
-        \Enlight_Controller_Request_Request $request
+        \Enlight_Controller_Request_Request $request,
+        \sOrder $shopwareOrder
     ) {
         $transaction = $this->getTransaction();
         $transaction->setTermUrl($redirect->getSuccessUrl());
@@ -208,8 +211,10 @@ class CreditCardPayment extends Payment
             $shop->getLocale()->getLocale()
         );
 
-//        $requestJson = json_decode($requestData, true);
-//        $requestId   = $requestJson[TransactionService::REQUEST_ID];
+        $requestJson = json_decode($requestData, true);
+        $requestId   = $requestJson[TransactionService::REQUEST_ID];
+
+        $this->storeRequestId($orderSummary->getOrderNumber(), $requestId);
 
         return new ViewAction('credit_card.tpl', [
             'wirecardUrl'         => $orderSummary->getPayment()->getPaymentConfig()->getBaseUrl(),
@@ -219,6 +224,20 @@ class CreditCardPayment extends Payment
                 'method' => CreditCardPayment::PAYMETHOD_IDENTIFIER,
             ]),
         ]);
+    }
+
+    private function storeRequestId($orderNumber, $requestId)
+    {
+        $order = $this->em->getRepository(Order::class)->findOneBy([
+            'number' => $orderNumber
+        ]);
+
+        if (! $order) {
+            throw new OrderNotFoundException($orderNumber);
+        }
+
+        $order->setTransactionId($requestId);
+        $this->em->flush();
     }
 
     /**

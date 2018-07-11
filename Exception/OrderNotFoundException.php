@@ -33,8 +33,9 @@ namespace WirecardShopwareElasticEngine\Exception;
 
 class OrderNotFoundException extends \Exception
 {
-    public function __construct($orderNumber, $transactionId)
+    public function __construct($orderNumber, $transactionId = null)
     {
-        parent::__construct("Order (No '${orderNumber}') not found (Transaction ID: '${transactionId}')");
+        parent::__construct("Order (No '${orderNumber}') not found" . ($transactionId ?:
+                " (Transaction ID: '${transactionId}')"));
     }
 }

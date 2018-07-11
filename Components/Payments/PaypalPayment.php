@@ -127,7 +127,8 @@ class PaypalPayment extends Payment
         TransactionService $transactionService,
         Shop $shop,
         Redirect $redirect,
-        \Enlight_Controller_Request_Request $request
+        \Enlight_Controller_Request_Request $request,
+        \sOrder $shopwareOrder
     )
     {
         $transaction = $this->getTransaction();

@@ -31,7 +31,6 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
-use Shopware\Models\Order\Order;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
@@ -101,35 +100,13 @@ class ReturnHandler extends Handler
      */
     protected function handleSuccess(SuccessResponse $response)
     {
-        $transactionId       = $response->getTransactionId();
-        $parentTransactionId = $response->getParentTransactionId();
-        $orderNumber         = $this->getOrderNumberFromResponse($response);
-
-        $order = $this->em
-            ->getRepository(Order::class)
-            ->findOneBy([
-                'number' => $orderNumber,
-            ]);
-
-        if (! $order) {
-            throw new OrderNotFoundException($orderNumber, $transactionId);
-        }
+        $order               = $this->getOrderFromResponse($response);
 
         // TemporaryID is set to the order number, since the returned `RedirectAction` will contain this ID
         // as `sUniqueID` to get information about what order has been processed and show proper information.
-        $order->setTemporaryId($orderNumber);
+        $order->setTemporaryId($order->getNumber());
 
-        $parentTransaction = $this->em
-            ->getRepository(Transaction::class)
-            ->findOneBy([
-                'transactionId' => $parentTransactionId,
-            ]);
-
-        if (! $parentTransaction) {
-            throw new ParentTransactionNotFoundException($parentTransactionId, $transactionId);
-        }
-
-        $this->transactionFactory->create($orderNumber, $response, Transaction::TYPE_RETURN);
+        $this->transactionFactory->create($order->getNumber(), $response, Transaction::TYPE_RETURN);
 
         return new RedirectAction($this->router->assemble([
             'module'     => 'frontend',
