@@ -151,7 +151,7 @@ function (button) {
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardThreeDMinLimitCurrency</name>
-            <label lang="de">[Credit Card] 3DS-Pflicht Betrag Währung</label>
+            <label lang="de">[Credit Card] 3DS-Versuch Betrag Währung</label>
             <label lang="en">[Credit Card] 3DS only amount currency</label>
             <value></value>
             <description lang="de">Leer lassen für Standardwährung.</description>
