@@ -42,7 +42,7 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
         $this->markTestIncomplete();
         
         $this->reset();
-        $this->Request()->setMethod('POST');
+        $this->Request()->setMethod('GET');
         $this->Request()->setHeader('User-Agent', self::USER_AGENT);
         //$this->Request()->setParam('sQuantity', 5);
 
@@ -55,7 +55,7 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
             'sCurrencyId'      => 1,
         ];
         $orderVariables['sUserData'] = [
-            'additional'     => [
+            'additional'      => [
                 'user'    => [
                     'paymentID' => 1,
                     'firstname' => 'First Name',
@@ -66,14 +66,19 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
                     'name' => PaypalPayment::PAYMETHOD_IDENTIFIER,
                 ],
             ],
-            'billingaddress' => [
-                'userID' => 1,
+            'billingaddress'  => [
+                'userID'    => 1,
+                'countryID' => 1,
+            ],
+            'shippingaddress' => [
+                'userID'    => 1,
+                'countryID' => 1,
             ],
         ];
 
         Shopware()->Session()['sOrderVariables'] = $orderVariables;
 
         $response = $this->dispatch('/WirecardElasticEnginePayment');
-        $this->assertContains('<div class="modal--checkout-add-article">', $response->getBody());
+        var_dump($response);
     }
 }

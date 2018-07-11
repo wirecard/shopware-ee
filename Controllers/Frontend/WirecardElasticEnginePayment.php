@@ -75,7 +75,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         // mail here is disabled through the `OrderSubscriber`.
         // The transactionId will later be overwritten.
         $basketSignature = $this->persistBasket();
-        $orderNumber     = $this->saveOrder($basketSignature, $basketSignature, Status::PAYMENT_STATE_OPEN, false);
+        $tmpTransactionId = $basketSignature . '-' . uniqid();
+        $orderNumber      = $this->saveOrder($tmpTransactionId, $basketSignature, Status::PAYMENT_STATE_OPEN, false);
 
         if (! $orderNumber || $orderNumber === '') {
             throw new MissingOrderNumberException();
