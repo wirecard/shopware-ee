@@ -3,8 +3,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.model.WirecardOrderDetails', {
     extend: 'Ext.data.Model',
 
     fields: [
-        'transactionData',
-        'transactionHistory',
+        'transactions',
         'backendOperations'
     ]
 

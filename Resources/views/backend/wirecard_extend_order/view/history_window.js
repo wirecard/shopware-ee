@@ -3,7 +3,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', {
     extend: 'Enlight.app.Window',
     alias: 'widget.wirecard-extend-order-history-window',
     height: 600,
-    title: 'HistoryWindow',
+    title: 'Wirecard Transactions',
     layout: 'anchor',
     bodyPadding: 10,
     autoScroll: true,
@@ -21,8 +21,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', {
         providerTransactionId: 'Provider transaction ID',
         transactionType: 'Transaction Type',
         amount: 'Amount',
-        returnResponse: 'ReturnResponse',
-        notifyResponse: 'NotifyResponse'
+        response: 'Response'
     },
 
     initComponent: function() {
@@ -38,12 +37,12 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', {
 
         return [{
             xtype: 'container',
-            renderTpl: me.createHistoryTemplate(),
+            renderTpl: me.createListTemplate(),
             renderData: me.record.data
         }];
     },
 
-    createHistoryTemplate: function() {
+    createListTemplate: function() {
         var me = this;
 
         return Ext.create('Ext.XTemplate',
@@ -57,14 +56,16 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', {
             '<p><label class="x-form-item-label">' + me.snippets.providerTransactionId + ':</label> {providerTransactionId}</p>',
             '<p><label class="x-form-item-label">' + me.snippets.transactionType + ':</label> {transactionType}</p>',
             '<p><label class="x-form-item-label">' + me.snippets.amount + ':</label> {[this.formatNumber(values.amount)]} {currency}</p>',
-            '<p><label class="x-form-item-label">' + me.snippets.returnResponse + ':</label></p>',
-            '<div><pre>{returnResponse}</pre></div>',
-            '<p><label class="x-form-item-label">' + me.snippets.notifyResponse + ':</label></p>',
-            '<div><pre>{notificationResponse}</pre></div>',
+            '<p><label class="x-form-item-label">' + me.snippets.response + ':</label></p>',
+            '<div><pre>{[this.asJson(values.response)]}</pre></div>',
             '</div>',
             '</tpl>{/literal}', {
                 formatNumber: function(value) {
                     return Ext.util.Format.number(value);
+                },
+                asJson: function(value) {
+                    console.log(value);
+                    return JSON.stringify(value, null, 2);
                 }
             }
         );

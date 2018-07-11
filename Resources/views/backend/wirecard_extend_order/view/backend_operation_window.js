@@ -36,7 +36,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
     operationHistoryContainer: null,
     amountFormContainer: null,
 
-    initComponent: function() {
+    initComponent: function () {
         var me = this;
 
         me.items = me.createItems();
@@ -44,7 +44,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
         me.callParent(arguments);
     },
 
-    createItems: function() {
+    createItems: function () {
         var me = this,
             items = [];
 
@@ -59,30 +59,26 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
         return items;
     },
 
-    createOperationHistory: function() {
+    createOperationHistory: function () {
         var me = this,
             items = [],
             purchaseStr = '';
 
-        me.data.transactionHistory.forEach(function(transaction) {
-            var transactionType = transaction.transactionType,
-                amount = transaction.amount;
-
+        me.data.transactions.forEach(function (transaction) {
             me.currency = transaction.currency;
-
-            if (transactionType === 'authorization') {
-                me.openValue = amount;
-            } else if (transactionType === 'purchase') {
-                me.purchased = amount;
-            } else if (transactionType === 'capture') {
-                me.openValue -= amount;
-            } else if (transactionType === 'refund') {
-                me.purchased -= amount;
+            if (transaction.transactionType === 'authorization') {
+                me.openValue = transaction.amount;
+            } else if (transaction.transactionType === 'purchase') {
+                me.purchased = transaction.amount;
+            } else if (transaction.transactionType === 'capture') {
+                me.openValue -= transaction.amount;
+            } else if (transaction.transactionType === 'refund') {
+                me.purchased -= transaction.amount;
             }
 
             items.push({
                 xtype: 'container',
-                html: '<p><label>' + transactionType + ': </label>' + Ext.util.Format.number(amount) + ' ' + me.currency + '</p>'
+                html: '<p><label>' + transaction.transactionType + ': </label>' + Ext.util.Format.number(transaction.amount) + ' ' + me.currency + '</p>'
             });
         });
 
@@ -121,7 +117,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
         return me.operationHistory;
     },
 
-    createAmountFormContainer: function() {
+    createAmountFormContainer: function () {
         var me = this;
 
         if (me.operation === 'Refund') {
@@ -135,7 +131,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
         return false;
     },
 
-    createRefundForm: function() {
+    createRefundForm: function () {
         var me = this;
 
         me.hasForm = true;
@@ -155,7 +151,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
         });
     },
 
-    createCaptureForm: function() {
+    createCaptureForm: function () {
         var me = this;
 
         me.hasForm = true;
@@ -175,7 +171,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
         });
     },
 
-    onAmountChange: function(value) {
+    onAmountChange: function (value) {
         var me = this,
             amount = parseFloat(
                 value.replace(Ext.util.Format.thousandSeparator, '')
@@ -197,12 +193,12 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
         return true;
     },
 
-    createProcessButton: function() {
+    createProcessButton: function () {
         var me = this,
             button = Ext.create('Ext.button.Button', {
                 text: 'process',
                 cls: 'primary',
-                handler: function() {
+                handler: function () {
                     me.processBackendOperation(me.record, me.operation);
                 }
             });
@@ -217,7 +213,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
         });
     },
 
-    processBackendOperation: function(record, operation) {
+    processBackendOperation: function (record, operation) {
         var me = this,
             url = '{url controller="wirecardTransactions" action="processBackendOperations"}',
             payMethod = me.record.getPayment().first().get('name'),

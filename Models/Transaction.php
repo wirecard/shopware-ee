@@ -310,6 +310,7 @@ class Transaction extends ModelEntity
             'orderNumber'           => $this->getOrderNumber(),
             'transactionType'       => $this->getTransactionType(),
             'transactionId'         => $this->getTransactionId(),
+            'parentTransactionId'   => $this->getParentTransactionId(),
             'providerTransactionId' => $this->getProviderTransactionId(),
             'amount'                => $this->getAmount(),
             'currency'              => $this->getCurrency(),
