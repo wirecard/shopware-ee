@@ -20,6 +20,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
         transactions: 'Transactions',
         transactionsTable: {
             createdAt: 'Created At',
+            transactionId: 'Transaction Id',
             transactionType: 'Transaction type',
             amount: 'Amount',
             currency: 'Currency'
@@ -107,6 +108,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
             border: 0,
             columns: [
                 { text: me.snippets.transactionsTable.createdAt, dataIndex: 'createdAt', flex: 1 },
+                { text: me.snippets.transactionsTable.transactionId, dataIndex: 'transactionId', flex: 1 },
                 { text: me.snippets.transactionsTable.transactionType, dataIndex: 'transactionType', flex: 1 },
                 { text: me.snippets.transactionsTable.amount, dataIndex: 'amount', flex: 1, renderer: Ext.util.Format.numberRenderer('0.00') },
                 { text: me.snippets.transactionsTable.currency, dataIndex: 'currency', flex: 1 },
