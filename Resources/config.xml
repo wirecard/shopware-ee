@@ -107,7 +107,7 @@ function (button) {
                 </handler>
             </options>
         </element>
-        <element type="select" shope="shop">
+        <element type="select" scope="shop">
             <name>wirecardElasticEngineCreditCardTransactionType</name>
             <label lang="de">[Credit Card] Transaktionsart</label>
             <label lang="en">[Credit Card] Transaction Type</label>
