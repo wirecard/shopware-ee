@@ -30,6 +30,7 @@
  */
 
 use Shopware\Components\CSRFWhitelistAware;
+use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 use Shopware\Models\Shop\Shop;
 use Wirecard\PaymentSdk\Entity\Amount;
@@ -46,6 +47,7 @@ use WirecardShopwareElasticEngine\Components\Services\NotificationHandler;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
 use WirecardShopwareElasticEngine\Components\Services\PaymentHandler;
 use WirecardShopwareElasticEngine\Components\Services\ReturnHandler;
+use WirecardShopwareElasticEngine\Components\Services\SessionHandler;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Exception\BasketException;
 use WirecardShopwareElasticEngine\Exception\MissingOrderNumberException;
@@ -76,9 +78,11 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         // Since we're going to need an order number for our `Transaction` we're saving it right away. Confirmation
         // mail here is disabled through the `OrderSubscriber`.
         // The transactionId will later be overwritten.
-        $basketSignature = $this->persistBasket();
+        $basketSignature  = $this->persistBasket();
         $tmpTransactionId = $basketSignature . '-' . uniqid();
         $orderNumber      = $this->saveOrder($tmpTransactionId, $basketSignature, Status::PAYMENT_STATE_OPEN, false);
+
+        $this->get('wirecard_elastic_engine.session_handler')->storeOrder($orderNumber, $basketSignature);
 
         if (! $orderNumber || $orderNumber === '') {
             throw new MissingOrderNumberException();
@@ -96,9 +100,9 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     $this->getUser(),
                     $this->Request()->getClientIp(),
                     $this->getModelManager()->getRepository(Shop::class)
-                                            ->getActiveDefault()
-                                            ->getLocale()
-                                            ->getLocale()
+                         ->getActiveDefault()
+                         ->getLocale()
+                         ->getLocale()
                 ),
                 new BasketMapper(
                     $this->getBasket(),
@@ -151,6 +155,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function returnAction()
     {
+        $this->get('wirecard_elastic_engine.session_handler')->clearOrder();
         $request = $this->Request();
 
         /** @var PaymentFactory $paymentFactory */
@@ -176,7 +181,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      *
      * @throws UnknownPaymentException
      * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
-     * @throws \WirecardShopwareElasticEngine\Exception\ParentTransactionNotFoundException
      */
     public function notifyAction()
     {
@@ -252,6 +256,34 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function cancelAction()
     {
+        /** @var SessionHandler $sessionHandler */
+        $sessionHandler  = $this->get('wirecard_elastic_engine.session_handler')->clearOrder();
+        $orderNumber     = $sessionHandler->getOrderNumber();
+        $basketSignature = $sessionHandler->getBasketSignature();
+        $sessionHandler->clearOrder();
+
+        // Try to cancel the cancelled order and payment
+        if ($orderNumber) {
+            /** @var Order $order */
+            $order = $this->get('models')->getRepository(Order::class)
+                          ->findOneBy(['number' => $orderNumber]);
+            if ($order) {
+                /** @var \sOrder $shopwareOrder */
+                $shopwareOrder = $this->get('modules')->Order();
+                $shopwareOrder->setPaymentStatus($order->getId(), Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED);
+                $shopwareOrder->setOrderStatus($order->getId(), Status::ORDER_STATE_CANCELLED);
+            }
+        }
+
+        // Try to restore the customers basket
+        try {
+            if ($basketSignature) {
+                $this->loadBasketFromSignature($basketSignature);
+            }
+        } catch (\Exception $e) {
+            $this->get('pluginlogger')->notice('Could not restore basket after cancel: ' . $e->getMessage());
+        }
+
         return $this->handleError(ErrorAction::PAYMENT_CANCELED, 'Payment canceled by user');
     }
 

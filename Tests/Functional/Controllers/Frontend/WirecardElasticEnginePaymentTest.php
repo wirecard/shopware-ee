@@ -75,7 +75,7 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
         $orderVariables['sUserData'] = [
             'additional'      => [
                 'user'    => [
-                    'paymentID' => 1,
+                    'paymentID' => 2,
                     'firstname' => 'First Name',
                     'lastname'  => 'Last Name',
                     'email'     => 'test@example.com',

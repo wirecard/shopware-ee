@@ -38,6 +38,10 @@
                  class="WirecardShopwareElasticEngine\Components\Services\PaymentHandler"
                  parent="wirecard_elastic_engine.handler">
         </service>
+        <service id="wirecard_elastic_engine.session_handler"
+                 class="WirecardShopwareElasticEngine\Components\Services\SessionHandler">
+            <argument type="service" id="session"/>
+        </service>
 
         <!-- Subscriber -->
         <service id="wirecard_elastic_engine.subscriber.frontend"

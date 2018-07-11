@@ -75,6 +75,7 @@ class TransactionFactory
             $transaction->setTransactionId($response->getTransactionId());
             $transaction->setParentTransactionId($response->getParentTransactionId());
             $transaction->setProviderTransactionId($response->getProviderTransactionId());
+            $transaction->setProviderTransactionReference($response->getProviderTransactionReference());
         } elseif ($response instanceof InteractionResponse) {
             $transaction->setTransactionId($response->getTransactionId());
         } elseif ($response instanceof FormInteractionResponse) {
