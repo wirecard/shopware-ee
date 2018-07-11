@@ -53,20 +53,38 @@ class PaymentConfigTest extends TestCase
         $this->assertNull($config->getTransactionMAID());
         $this->assertNull($config->getTransactionSecret());
         $this->assertNull($config->getTransactionType());
+        $this->assertNull($config->getThreeDMAID());
+        $this->assertNull($config->getThreeDSecret());
+        $this->assertNull($config->getThreeDMinLimit());
+        $this->assertNull($config->getThreeDMinLimitCurrency());
+        $this->assertNull($config->getThreeDSslMaxLimit());
+        $this->assertNull($config->getThreeDSslMaxLimitCurrency());
         $this->assertFalse($config->hasFraudPrevention());
         $this->assertFalse($config->sendBasket());
         $this->assertFalse($config->sendDescriptor());
 
-        $config->setTransactionMAID('a1a2a3a4-b1b2-c1c2-d1d2-e1e2e3e4e5e6');
-        $config->setTransactionSecret('x1x2x3x4-x5x6-y1y2-z1z2-z3z4z5z6z7z7');
+        $config->setTransactionMAID('transaction-maid');
+        $config->setTransactionSecret('transaction-secret');
         $config->setTransactionType(Payment::TRANSACTION_TYPE_AUTHORIZATION);
+        $config->setThreeDMAID('three3d-maid');
+        $config->setThreeDSecret('three3d-secret');
+        $config->setThreeDMinLimit(50.0);
+        $config->setThreeDMinLimitCurrency('EUR');
+        $config->setThreeDSslMaxLimit(200.0);
+        $config->setThreeDSslMaxLimitCurrency('USD');
         $config->setFraudPrevention(true);
         $config->setSendBasket(true);
         $config->setSendDescriptor(true);
 
-        $this->assertEquals('a1a2a3a4-b1b2-c1c2-d1d2-e1e2e3e4e5e6', $config->getTransactionMAID());
-        $this->assertEquals('x1x2x3x4-x5x6-y1y2-z1z2-z3z4z5z6z7z7', $config->getTransactionSecret());
+        $this->assertEquals('transaction-maid', $config->getTransactionMAID());
+        $this->assertEquals('transaction-secret', $config->getTransactionSecret());
         $this->assertEquals(Payment::TRANSACTION_TYPE_AUTHORIZATION, $config->getTransactionType());
+        $this->assertEquals('three3d-maid', $config->getThreeDMAID());
+        $this->assertEquals('three3d-secret', $config->getThreeDSecret());
+        $this->assertEquals(50.0, $config->getThreeDMinLimit());
+        $this->assertEquals('EUR', $config->getThreeDMinLimitCurrency());
+        $this->assertEquals(200.0, $config->getThreeDSslMaxLimit());
+        $this->assertEquals('USD', $config->getThreeDSslMaxLimitCurrency());
         $this->assertTrue($config->hasFraudPrevention());
         $this->assertTrue($config->sendBasket());
         $this->assertTrue($config->sendDescriptor());
@@ -94,15 +112,24 @@ class PaymentConfigTest extends TestCase
         $this->assertFalse($config->sendBasket());
         $this->assertFalse($config->sendDescriptor());
 
+        $config->setThreeDMinLimit('500,0');
+        $config->setThreeDSslMaxLimit('2000,0');
+        $this->assertEquals('500,0', $config->getThreeDMinLimit());
+        $this->assertEquals('2000,0', $config->getThreeDSslMaxLimit());
+
         $this->assertEquals([
-            'baseUrl'         => 'https://api-test.wirecard.com',
-            'httpUser'        => 'foo',
-            'httpPassword'    => 'bar',
-            'transactionMAID' => 'a1a2a3a4-b1b2-c1c2-d1d2-e1e2e3e4e5e6',
-            'transactionType' => Payment::TRANSACTION_TYPE_PURCHASE,
-            'sendBasket'      => false,
-            'fraudPrevention' => false,
-            'sendDescriptor'  => false,
+            'baseUrl'                   => 'https://api-test.wirecard.com',
+            'httpUser'                  => 'foo',
+            'transactionMAID'           => 'transaction-maid',
+            'transactionType'           => Payment::TRANSACTION_TYPE_PURCHASE,
+            'sendBasket'                => false,
+            'fraudPrevention'           => false,
+            'sendDescriptor'            => false,
+            'threeDMAID'                => 'three3d-maid',
+            'threeDMinLimit'            => '500,0',
+            'threeDMinLimitCurrency'    => 'EUR',
+            'threeDSslMaxLimit'         => '2000,0',
+            'threeDSslMaxLimitCurrency' => 'USD',
         ], $config->toArray());
     }
 }

@@ -34,11 +34,16 @@ namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Services;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Shopware\Models\Order\Order;
+use Shopware\Models\Order\Repository;
+use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
+use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Transaction\Transaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
+use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
@@ -67,6 +72,9 @@ class PaymentHandlerTest extends TestCase
     /** @var Redirect|\PHPUnit_Framework_MockObject_MockObject */
     private $redirect;
 
+    /** @var \Enlight_Controller_Request_Request|\PHPUnit_Framework_MockObject_MockObject */
+    private $request;
+
     /** @var PaymentHandler */
     private $handler;
 
@@ -79,6 +87,7 @@ class PaymentHandlerTest extends TestCase
         $this->orderSummary       = $this->createMock(OrderSummary::class);
         $this->transactionService = $this->createMock(TransactionService::class);
         $this->redirect           = $this->createMock(Redirect::class);
+        $this->request            = $this->createMock(\Enlight_Controller_Request_Request::class);
 
         $this->handler = new PaymentHandler($this->config, $this->em, $this->logger);
     }
@@ -103,15 +112,22 @@ class PaymentHandlerTest extends TestCase
         $payment->method('getTransaction')->willReturn($transaction);
         $payment->method('getPaymentConfig')->willReturn($paymentConfig);
 
+        $response = $this->createMock(Response::class);
+        $response->method('getData')->willReturn([]);
+        $this->transactionService->method('process')->willReturn($response);
+
         $this->orderSummary->method('getPayment')->willReturn($payment);
 
+        /** @var ErrorAction $action */
         $action = $this->handler->execute(
             $this->orderSummary,
             $this->transactionService,
             $this->redirect,
-            'https://localhost/notify'
+            'https://localhost/notify',
+            $this->request
         );
-        $this->assertNull($action);
+        $this->assertInstanceOf(ErrorAction::class, $action);
+        $this->assertEquals(ErrorAction::PROCESSING_FAILED, $action->getCode());
     }
 
     public function testExecuteCustomActionAndPaymentConfig()
@@ -149,7 +165,8 @@ class PaymentHandlerTest extends TestCase
             $this->orderSummary,
             $this->transactionService,
             $this->redirect,
-            'https://localhost/notify'
+            'https://localhost/notify',
+            $this->request
         );
         $this->assertEquals($customAction, $action);
     }
@@ -166,16 +183,24 @@ class PaymentHandlerTest extends TestCase
         $this->orderSummary->method('getPayment')->willReturn($payment);
         $this->orderSummary->method('getBasketMapper')->willReturn($basketMapper);
         $this->orderSummary->method('getUserMapper')->willReturn($userMapper);
+        $this->orderSummary->method('getAmount')->willReturn(new Amount(100, 'EUR'));
         $response = $this->createMock(InteractionResponse::class);
         $response->method('getRedirectUrl')->willReturn('https://localhost/redirect');
+        $response->method('getData')->willReturn([]);
         $this->transactionService->method('process')->willReturn($response);
+
+        $orderRepository = $this->createMock(Repository::class);
+        $order           = new Order();
+        $orderRepository->method('findOneBy')->willReturn($order);
+        $this->em->method('getRepository')->willReturn($orderRepository);
 
         /** @var RedirectAction $action */
         $action = $this->handler->execute(
             $this->orderSummary,
             $this->transactionService,
             $this->redirect,
-            'https://localhost/notify'
+            'https://localhost/notify',
+            $this->request
         );
         $this->assertInstanceOf(RedirectAction::class, $action);
         $this->assertEquals('https://localhost/redirect', $action->getUrl());

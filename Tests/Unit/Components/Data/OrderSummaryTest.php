@@ -45,13 +45,14 @@ class OrderSummaryTest extends TestCase
     public function testOrderSummary()
     {
         /** @var PaymentInterface|\PHPUnit_Framework_MockObject_MockObject $payment */
-        $payment = $this->createMock(PaymentInterface::class);
         /** @var UserMapper|\PHPUnit_Framework_MockObject_MockObject $user */
-        $user = $this->createMock(UserMapper::class);
         /** @var BasketMapper|\PHPUnit_Framework_MockObject_MockObject $basket */
-        $basket = $this->createMock(BasketMapper::class);
         /** @var Amount|\PHPUnit_Framework_MockObject_MockObject $amount */
-        $amount = $this->createMock(Amount::class);
+
+        $payment = $this->createMock(PaymentInterface::class);
+        $user    = $this->createMock(UserMapper::class);
+        $basket  = $this->createMock(BasketMapper::class);
+        $amount  = $this->createMock(Amount::class);
 
         $order = new OrderSummary(
             20001,
@@ -70,27 +71,28 @@ class OrderSummaryTest extends TestCase
 
     public function testToArray()
     {
+        /** @var PaymentInterface|\PHPUnit_Framework_MockObject_MockObject $payment */
+        /** @var UserMapper|\PHPUnit_Framework_MockObject_MockObject $user */
+        /** @var BasketMapper|\PHPUnit_Framework_MockObject_MockObject $basket */
+        /** @var Amount|\PHPUnit_Framework_MockObject_MockObject $amount */
+
         $paymentConfig = $this->createMock(PaymentConfig::class);
         $paymentConfig->method('toArray')->willReturn(['paymentConfig']);
 
         $transaction = $this->createMock(Transaction::class);
         $transaction->method('mappedProperties')->willReturn(['transaction']);
 
-        /** @var PaymentInterface|\PHPUnit_Framework_MockObject_MockObject $payment */
         $payment = $this->createMock(PaymentInterface::class);
         $payment->method('getName')->willReturn('paymentName');
         $payment->method('getPaymentConfig')->willReturn($paymentConfig);
         $payment->method('getTransaction')->willReturn($transaction);
 
-        /** @var UserMapper|\PHPUnit_Framework_MockObject_MockObject $user */
         $user = $this->createMock(UserMapper::class);
         $user->method('toArray')->willReturn(['user']);
 
-        /** @var BasketMapper|\PHPUnit_Framework_MockObject_MockObject $basket */
         $basket = $this->createMock(BasketMapper::class);
         $basket->method('toArray')->willReturn(['basket']);
 
-        /** @var Amount|\PHPUnit_Framework_MockObject_MockObject $amount */
         $amount = $this->createMock(Amount::class);
         $amount->method('mappedProperties')->willReturn(['amount']);
 
