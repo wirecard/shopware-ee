@@ -35,6 +35,7 @@ use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\CreditCardConfig;
+use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
@@ -46,7 +47,9 @@ class CreditCardPayment extends Payment
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_credit_card';
 
-    /** @var CreditCardTransaction */
+    /**
+     * @var CreditCardTransaction
+     */
     private $transactionInstance;
 
     /**
@@ -91,32 +94,77 @@ class CreditCardPayment extends Payment
         Shop $shop,
         ParameterBagInterface $parameterBag,
         InstallerService $installerService
-    )
-    {
+    ) {
         $transactionConfig = parent::getTransactionConfig($shop, $parameterBag, $installerService);
         $paymentConfig     = $this->getPaymentConfig();
         $creditCardConfig  = new CreditCardConfig();
 
-        if ($paymentConfig->getTransactionMAID() !== 'null') {
+        if ($paymentConfig->getTransactionMAID() && $paymentConfig->getTransactionMAID() !== 'null') {
             $creditCardConfig->setSSLCredentials(
                 $paymentConfig->getTransactionMAID(),
                 $paymentConfig->getTransactionSecret()
             );
         }
 
-        if ($paymentConfig->getThreeDMAID() !== 'null') {
+        if ($paymentConfig->getThreeDMAID() && $paymentConfig->getThreeDMAID() !== 'null') {
             $creditCardConfig->setThreeDCredentials(
                 $paymentConfig->getThreeDMAID(),
                 $paymentConfig->getThreeDSecret()
             );
         }
 
+        $creditCardConfig->addSslMaxLimit(
+            $this->getLimit($shop, $paymentConfig->getThreeDMinLimit(), $paymentConfig->getThreeDMinLimitCurrency())
+        );
+        $creditCardConfig->addThreeDMinLimit(
+            $this->getLimit(
+                $shop,
+                $paymentConfig->getThreeDSslMaxLimit(),
+                $paymentConfig->getThreeDSslMaxLimitCurrency()
+            )
+        );
+
         $transactionConfig->add($creditCardConfig);
         $this->getTransaction()->setConfig($creditCardConfig);
 
-        // todo: currency conversion
-
         return $transactionConfig;
+    }
+
+    /**
+     * @param Shop $shop
+     * @param      $limitValue
+     * @param      $limitCurrency
+     *
+     * @return Amount
+     */
+    private function getLimit(Shop $shop, $limitValue, $limitCurrency)
+    {
+        $factor = $this->getCurrencyConversionFactor($shop, strtolower($limitCurrency));
+        return new Amount($limitValue * $factor, $shop->getCurrency()->getCurrency());
+    }
+
+    /**
+     * @param Shop   $shop
+     * @param string $limitCurrency
+     *
+     * @return float
+     */
+    private function getCurrencyConversionFactor(Shop $shop, $limitCurrency)
+    {
+        $shopCurrency = $shop->getCurrency();
+
+        if ($limitCurrency && $limitCurrency !== 'null') {
+            if (strtolower($shopCurrency->getCurrency()) !== $limitCurrency) {
+                foreach ($shop->getCurrencies() as $currency) {
+                    if (strtolower($currency->getCurrency()) === $limitCurrency) {
+                        return $shopCurrency->getFactor() / $currency->getFactor();
+                    }
+                }
+            }
+        } elseif (! $shopCurrency->getDefault()) {
+            return $shopCurrency->getFactor();
+        }
+        return 1.0;
     }
 
     /**
@@ -152,8 +200,7 @@ class CreditCardPayment extends Payment
         TransactionService $transactionService,
         Redirect $redirect,
         \Enlight_Controller_Request_Request $request
-    )
-    {
+    ) {
         $transaction = $this->getTransaction();
         $transaction->setTermUrl($redirect->getSuccessUrl());
 

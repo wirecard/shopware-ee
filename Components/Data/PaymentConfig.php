@@ -344,17 +344,17 @@ class PaymentConfig
     public function toArray()
     {
         return [
-            'baseUrl'                    => $this->getBaseUrl(),
-            'httpUser'                   => $this->getHttpUser(),
-            'transactionMAID'            => $this->getTransactionMAID(),
-            'transactionType'            => $this->getTransactionType(),
-            'sendBasket'                 => $this->sendBasket(),
-            'fraudPrevention'            => $this->hasFraudPrevention(),
-            'sendDescriptor'             => $this->sendDescriptor(),
-            'threeDMAID'                 => $this->getThreeDMAID(),
-            'threeDMinLimit'             => $this->getThreeDMinLimit(),
-            'threeDMinLimitCurrency'     => $this->getThreeDMinLimitCurrency(),
-            'threeDSslMaxLimit'          => $this->getThreeDSslMaxLimitCurrency(),
+            'baseUrl'                   => $this->getBaseUrl(),
+            'httpUser'                  => $this->getHttpUser(),
+            'transactionMAID'           => $this->getTransactionMAID(),
+            'transactionType'           => $this->getTransactionType(),
+            'sendBasket'                => $this->sendBasket(),
+            'fraudPrevention'           => $this->hasFraudPrevention(),
+            'sendDescriptor'            => $this->sendDescriptor(),
+            'threeDMAID'                => $this->getThreeDMAID(),
+            'threeDMinLimit'            => $this->getThreeDMinLimit(),
+            'threeDMinLimitCurrency'    => $this->getThreeDMinLimitCurrency(),
+            'threeDSslMaxLimit'         => $this->getThreeDSslMaxLimit(),
             'threeDSslMaxLimitCurrency' => $this->getThreeDSslMaxLimitCurrency(),
         ];
     }
