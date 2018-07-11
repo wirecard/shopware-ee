@@ -97,7 +97,7 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
         Shopware()->Session()['sOrderVariables'] = $orderVariables;
 
         $response = $this->dispatch('/WirecardElasticEnginePayment');
-        
+
         $this->assertTrue($response->isRedirect());
         $this->assertEquals(302, $response->getHttpResponseCode());
         $locationHeader = $response->getHeaders()[0];

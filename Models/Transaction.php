@@ -302,4 +302,19 @@ class Transaction extends ModelEntity
     {
         return $this->createdAt;
     }
+
+    public function toArray()
+    {
+        return [
+            'id'                    => $this->getId(),
+            'orderNumber'           => $this->getOrderNumber(),
+            'transactionType'       => $this->getTransactionType(),
+            'transactionId'         => $this->getTransactionId(),
+            'providerTransactionId' => $this->getProviderTransactionId(),
+            'amount'                => $this->getAmount(),
+            'currency'              => $this->getCurrency(),
+            'createdAt'             => $this->getCreatedAt(),
+            'response'              => $this->getResponse(),
+        ];
+    }
 }
