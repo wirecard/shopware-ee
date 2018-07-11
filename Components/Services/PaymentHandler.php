@@ -89,7 +89,7 @@ class PaymentHandler extends Handler
 
         $this->logger->debug('Payment processing execution', [
             'summary'  => $orderSummary->toArray(),
-            'response' => $response,
+            'response' => $response->getData(),
         ]);
 
         switch (true) {
