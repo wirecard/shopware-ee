@@ -91,6 +91,7 @@ abstract class Handler
 
     /**
      * @param int $orderNumber
+     *
      * @return string
      */
     protected function getOrderNumberForTransaction($orderNumber)
@@ -104,7 +105,9 @@ abstract class Handler
 
     /**
      * @param Response $response
+     *
      * @return Order
+     * @throws OrderNotFoundException
      */
     protected function getOrderFromResponse(Response $response)
     {
@@ -114,14 +117,15 @@ abstract class Handler
             if (in_array(getenv('SHOPWARE_ENV'), $this->devEnvironments) && strpos($orderNumber, '-') >= 0) {
                 $orderNumber = explode('-', $orderNumber)[1];
             }
-        } catch(MalformedResponseException $e) {
+            $order = $this->em->getRepository(Order::class)->findOneBy([
+                'number' => $orderNumber,
+            ]);
+        } catch (MalformedResponseException $e) {
             // In case we're not finding our `order-number` in the response we'll try to find it via the requestId.
-            $orderNumber = $response->getRequestId();
+            $order = $this->em->getRepository(Order::class)->findOneBy([
+                'transactionId' => $response->getRequestId(),
+            ]);
         }
-
-        $order = $this->em->getRepository(Order::class)->findOneBy([
-            'transactionId' => $orderNumber
-        ]);
 
         if (! $order) {
             throw new OrderNotFoundException($orderNumber);

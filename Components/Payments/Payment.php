@@ -81,8 +81,7 @@ abstract class Payment implements PaymentInterface
         Shopware_Components_Config $shopwareConfig,
         InstallerService $installerService,
         RouterInterface $router
-    )
-    {
+    ) {
         $this->em               = $em;
         $this->shopwareConfig   = $shopwareConfig;
         $this->installerService = $installerService;
@@ -130,6 +129,7 @@ abstract class Payment implements PaymentInterface
 
     /**
      * @return string
+     * @throws UnknownTransactionTypeException
      */
     public function getTransactionType()
     {
@@ -180,8 +180,8 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
-     * @param string                     $name
-     * @param string                     $prefix
+     * @param string $name
+     * @param string $prefix
      *
      * @return string
      */

@@ -31,7 +31,10 @@
 
 namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Services;
 
+use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
+use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Shopware\Components\Routing\RouterInterface;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
@@ -46,10 +49,17 @@ class PaymentFactoryTest extends TestCase
 
     public function setUp()
     {
+        /** @var EntityManagerInterface|\PHPUnit_Framework_MockObject_MockObject $em */
         /** @var \Shopware_Components_Config|\PHPUnit_Framework_MockObject_MockObject $config */
-        $config = $this->createMock(\Shopware_Components_Config::class);
+        /** @var InstallerService|\PHPUnit_Framework_MockObject_MockObject $installer */
+        /** @var RouterInterface|\PHPUnit_Framework_MockObject_MockObject $router */
 
-        $this->factory = new PaymentFactory($config);
+        $em        = $this->createMock(EntityManagerInterface::class);
+        $config    = $this->createMock(\Shopware_Components_Config::class);
+        $installer = $this->createMock(InstallerService::class);
+        $router    = $this->createMock(RouterInterface::class);
+
+        $this->factory = new PaymentFactory($em, $config, $installer, $router);
     }
 
     public function testPaypalInstance()

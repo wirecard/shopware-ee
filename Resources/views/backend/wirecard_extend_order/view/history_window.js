@@ -3,7 +3,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', {
     extend: 'Enlight.app.Window',
     alias: 'widget.wirecard-extend-order-history-window',
     height: 600,
-    title: 'Wirecard Transactions',
+    title: 'Wirecard Transaction',
     layout: 'anchor',
     bodyPadding: 10,
     autoScroll: true,

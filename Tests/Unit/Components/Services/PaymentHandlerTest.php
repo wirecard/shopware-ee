@@ -34,8 +34,10 @@ namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Services;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Repository;
+use Shopware\Models\Shop\Shop;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
@@ -51,6 +53,7 @@ use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
 use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 use WirecardShopwareElasticEngine\Components\Services\PaymentHandler;
+use WirecardShopwareElasticEngine\Components\Services\TransactionFactory;
 
 class PaymentHandlerTest extends TestCase
 {
@@ -59,6 +62,9 @@ class PaymentHandlerTest extends TestCase
 
     /** @var EntityManagerInterface|\PHPUnit_Framework_MockObject_MockObject */
     private $em;
+
+    /** @var RouterInterface|\PHPUnit_Framework_MockObject_MockObject */
+    private $router;
 
     /** @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject */
     private $logger;
@@ -75,21 +81,47 @@ class PaymentHandlerTest extends TestCase
     /** @var \Enlight_Controller_Request_Request|\PHPUnit_Framework_MockObject_MockObject */
     private $request;
 
+    /** @var TransactionFactory|\PHPUnit_Framework_MockObject_MockObject */
+    private $transactionFactory;
+
+    /** @var \sOrder|\PHPUnit_Framework_MockObject_MockObject */
+    private $shopwareOrder;
+
     /** @var PaymentHandler */
     private $handler;
 
     public function setUp()
     {
+        $shopRepo = $this->createMock(\Shopware\Models\Shop\Repository::class);
+        $shopRepo->method('getActiveDefault')->willReturn($this->createMock(Shop::class));
+
+        $orderRepo = $this->createMock(Repository::class);
+        $order     = new Order();
+        $orderRepo->method('findOneBy')->willReturn($order);
+
         $this->config = $this->createMock(\Shopware_Components_Config::class);
         $this->em     = $this->createMock(EntityManagerInterface::class);
+        $this->em->method('getRepository')->willReturnMap([
+            [Shop::class, $shopRepo],
+            [Order::class, $orderRepo],
+        ]);
+        $this->router = $this->createMock(RouterInterface::class);
         $this->logger = $this->createMock(LoggerInterface::class);
 
         $this->orderSummary       = $this->createMock(OrderSummary::class);
         $this->transactionService = $this->createMock(TransactionService::class);
         $this->redirect           = $this->createMock(Redirect::class);
+        $this->transactionFactory = $this->createMock(TransactionFactory::class);
         $this->request            = $this->createMock(\Enlight_Controller_Request_Request::class);
+        $this->shopwareOrder      = $this->createMock(\sOrder::class);
 
-        $this->handler = new PaymentHandler($this->config, $this->em, $this->logger);
+        $this->handler = new PaymentHandler(
+            $this->em,
+            $this->router,
+            $this->logger,
+            $this->config,
+            $this->transactionFactory
+        );
     }
 
     public function testExecute()
@@ -124,7 +156,8 @@ class PaymentHandlerTest extends TestCase
             $this->transactionService,
             $this->redirect,
             'https://localhost/notify',
-            $this->request
+            $this->request,
+            $this->shopwareOrder
         );
         $this->assertInstanceOf(ErrorAction::class, $action);
         $this->assertEquals(ErrorAction::PROCESSING_FAILED, $action->getCode());
@@ -166,7 +199,8 @@ class PaymentHandlerTest extends TestCase
             $this->transactionService,
             $this->redirect,
             'https://localhost/notify',
-            $this->request
+            $this->request,
+            $this->shopwareOrder
         );
         $this->assertEquals($customAction, $action);
     }
@@ -189,18 +223,14 @@ class PaymentHandlerTest extends TestCase
         $response->method('getData')->willReturn([]);
         $this->transactionService->method('process')->willReturn($response);
 
-        $orderRepository = $this->createMock(Repository::class);
-        $order           = new Order();
-        $orderRepository->method('findOneBy')->willReturn($order);
-        $this->em->method('getRepository')->willReturn($orderRepository);
-
         /** @var RedirectAction $action */
         $action = $this->handler->execute(
             $this->orderSummary,
             $this->transactionService,
             $this->redirect,
             'https://localhost/notify',
-            $this->request
+            $this->request,
+            $this->shopwareOrder
         );
         $this->assertInstanceOf(RedirectAction::class, $action);
         $this->assertEquals('https://localhost/redirect', $action->getUrl());

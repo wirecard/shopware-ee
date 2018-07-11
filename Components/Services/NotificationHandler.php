@@ -43,6 +43,9 @@ class NotificationHandler extends Handler
     /**
      * @param \sOrder  $shopwareOrder
      * @param Response $notification
+     *
+     * @throws ParentTransactionNotFoundException
+     * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
      */
     public function execute(\sOrder $shopwareOrder, Response $notification)
     {
@@ -59,6 +62,9 @@ class NotificationHandler extends Handler
     /**
      * @param \sOrder         $shopwareOrder
      * @param SuccessResponse $notification
+     *
+     * @throws ParentTransactionNotFoundException
+     * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
      */
     protected function handleSuccess(\sOrder $shopwareOrder, SuccessResponse $notification)
     {
@@ -84,10 +90,10 @@ class NotificationHandler extends Handler
         $this->transactionFactory->create($order->getNumber(), $notification, Transaction::TYPE_NOTIFY);
 
         if ($order->getPaymentStatus()->getId() !== Status::PAYMENT_STATE_OPEN) {
-            return ;
+            return;
         }
 
-        switch($notification->getTransactionType()) {
+        switch ($notification->getTransactionType()) {
             case \Wirecard\PaymentSdk\Transaction\Transaction::TYPE_DEBIT:
             case \Wirecard\PaymentSdk\Transaction\Transaction::TYPE_PURCHASE:
                 $orderState = Status::PAYMENT_STATE_COMPLETELY_PAID;

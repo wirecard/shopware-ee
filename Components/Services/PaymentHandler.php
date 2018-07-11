@@ -123,14 +123,16 @@ class PaymentHandler extends Handler
     /**
      * Updates the shopware order by setting the proper transaction ID.
      *
-     * @param              $transactionId
+     * @param string       $transactionId
      * @param OrderSummary $orderSummary
+     *
+     * @throws OrderNotFoundException
      */
     private function updateOrder($transactionId, OrderSummary $orderSummary)
     {
         $order = $this->em->getRepository(Order::class)
                           ->findOneBy([
-                              'number' => $orderSummary->getOrderNumber()
+                              'number' => $orderSummary->getOrderNumber(),
                           ]);
 
         if (! $order) {
@@ -147,8 +149,8 @@ class PaymentHandler extends Handler
      * prevention data) data to the `Transaction` object of the payment.
      *
      * @param OrderSummary $orderSummary
-     * @param Redirect $redirect
-     * @param string $notificationUrl
+     * @param Redirect     $redirect
+     * @param string       $notificationUrl
      *
      * @throws ArrayKeyNotFoundException
      */
