@@ -24,7 +24,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', {
         response: 'Response'
     },
 
-    initComponent: function() {
+    initComponent: function () {
         var me = this;
 
         me.items = me.createItems();
@@ -32,7 +32,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', {
         me.callParent(arguments);
     },
 
-    createItems: function() {
+    createItems: function () {
         var me = this;
 
         return [{
@@ -42,7 +42,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', {
         }];
     },
 
-    createListTemplate: function() {
+    createListTemplate: function () {
         var me = this;
 
         return Ext.create('Ext.XTemplate',
@@ -50,20 +50,20 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', {
             '<div class="wirecard-history-entry-pnl">',
             '<p><label class="x-form-item-label">' + me.snippets.createdAt + ':</label> {createdAt}</p>',
             '<p><label class="x-form-item-label">' + me.snippets.orderNumber + ':</label> {orderNumber}</p>',
-            '<p><label class="x-form-item-label">' + me.snippets.requestId + ':</label> {requestId}</p>',
-            '<p><label class="x-form-item-label">' + me.snippets.parentTransactionId + ':</label> {parentTransactionId}</p>',
             '<p><label class="x-form-item-label">' + me.snippets.transactionId + ':</label> {transactionId}</p>',
+            '<p><label class="x-form-item-label">' + me.snippets.parentTransactionId + ':</label> {parentTransactionId}</p>',
             '<p><label class="x-form-item-label">' + me.snippets.providerTransactionId + ':</label> {providerTransactionId}</p>',
             '<p><label class="x-form-item-label">' + me.snippets.transactionType + ':</label> {transactionType}</p>',
             '<p><label class="x-form-item-label">' + me.snippets.amount + ':</label> {[this.formatNumber(values.amount)]} {currency}</p>',
+            '<p><label class="x-form-item-label">' + me.snippets.requestId + ':</label> {requestId}</p>',
             '<p><label class="x-form-item-label">' + me.snippets.response + ':</label></p>',
             '<div><pre>{[this.asJson(values.response)]}</pre></div>',
             '</div>',
             '</tpl>{/literal}', {
-                formatNumber: function(value) {
+                formatNumber: function (value) {
                     return Ext.util.Format.number(value);
                 },
-                asJson: function(value) {
+                asJson: function (value) {
                     return JSON.stringify(value, null, 2);
                 }
             }

@@ -25,18 +25,6 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
             amount: 'Amount',
             currency: 'Currency'
         },
-        transactionType: {
-            'authorization': 'Authorize',
-            'failed': 'Failed',
-            'purchase': 'Purchase',
-            'refund': 'Refund',
-            'cancel': 'Cancel',
-            'credit': 'Credit',
-            'capture': 'Capture',
-            'pending': 'Pending',
-            'void-authorization': 'Void Authorization',
-            'void-purchase': 'Void Purchase'
-        },
 
         buttons: {
             Cancel: '{s name="CancelButtonText" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}',
@@ -181,7 +169,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                         transactionId: transaction.transactionId,
                         providerTransactionId: transaction.providerTransactionId,
                         createdAt: new Date(transaction.createdAt).toLocaleString(),
-                        transactionType: me.snippets.transactionType[transaction.transactionType],
+                        transactionType: transaction.transactionType,
                         amount: transaction.amount,
                         currency: transaction.currency,
                         response: transaction.response

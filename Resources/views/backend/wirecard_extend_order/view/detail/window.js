@@ -20,7 +20,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.Window', {
             result = me.callParent(),
             payment = me.record.getPayment().first();
 
-        if (payment.get('name').substr(0, 23) == 'wirecard_elastic_engine') {
+        if (payment.get('name').substr(0, 23) === 'wirecard_elastic_engine') {
             result.add(Ext.create('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                 record: me.record,
                 orderStatusStore: me.orderStatusStore,

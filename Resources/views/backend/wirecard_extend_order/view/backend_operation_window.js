@@ -38,9 +38,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
 
     initComponent: function () {
         var me = this;
-
         me.items = me.createItems();
-
         me.callParent(arguments);
     },
 
@@ -119,15 +117,12 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
 
     createAmountFormContainer: function () {
         var me = this;
-
         if (me.operation === 'Refund') {
             return me.createRefundForm();
         }
-
         if (me.operation === 'Capture') {
             return me.createCaptureForm();
         }
-
         return false;
     },
 
@@ -181,15 +176,12 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
         if (value === '') {
             return true;
         }
-
         if (isNaN(amount)) {
             return false;
         }
-
         if (amount > me.maxValue) {
             return false;
         }
-
         return true;
     },
 
