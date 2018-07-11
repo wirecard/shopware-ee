@@ -71,16 +71,11 @@ class TransactionFactory
             $transaction->setTransactionId($response->getTransactionId());
         }
 
-        $data = $response->getData();
-        if (isset($data['currency'])) {
-            $transaction->setCurrency($data['currency']);
-        }
-        if (isset($data['requested-amount'])) {
-            $transaction->setAmount($data['requested-amount']);
-        }
+        $transaction->setCurrency($response->getRequestedAmount()->getCurrency());
+        $transaction->setAmount($response->getRequestedAmount()->getValue());
         $transaction->setTransactionType($response->getTransactionType());
         $transaction->setType($type);
-        $transaction->setResponse($data);
+        $transaction->setResponse($response->getData());
         $transaction->setCreatedAt(new \DateTime());
 
         $this->em->persist($transaction);
