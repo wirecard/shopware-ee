@@ -79,6 +79,12 @@ class Transaction extends ModelEntity
 
     /**
      * @var string
+     * @ORM\Column(name="provider_transaction_reference", type="string", nullable=true)
+     */
+    private $providerTransactionReference;
+
+    /**
+     * @var string
      * @ORM\Column(name="transaction_type", type="string", nullable=true)
      */
     private $transactionType;
@@ -189,6 +195,22 @@ class Transaction extends ModelEntity
     public function setProviderTransactionId($providerTransactionId = null)
     {
         $this->providerTransactionId = $providerTransactionId;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getProviderTransactionReference()
+    {
+        return $this->providerTransactionReference;
+    }
+
+    /**
+     * @param string $providerTransactionReference
+     */
+    public function setProviderTransactionReference($providerTransactionReference = null)
+    {
+        $this->providerTransactionReference = $providerTransactionReference;
     }
 
     /**
