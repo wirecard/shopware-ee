@@ -86,10 +86,15 @@ class PaymentHandler extends Handler
             return $action;
         }
 
-        $response = $transactionService->process(
-            $transaction,
-            $payment->getPaymentConfig()->getTransactionOperation()
-        );
+        try {
+            $response = $transactionService->process(
+                $transaction,
+                $payment->getPaymentConfig()->getTransactionOperation()
+            );
+        } catch (\Exception $e) {
+            $this->logger->error('Transaction service proccess failed: ' . $e->getMessage());
+            return new ErrorAction(ErrorAction::PROCESSING_FAILED, 'Transaction processing failed');
+        }
 
         $this->logger->debug('Payment processing execution', [
             'summary'  => $orderSummary->toArray(),
