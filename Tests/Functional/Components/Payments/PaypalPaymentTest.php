@@ -101,6 +101,15 @@ class PaypalPaymentTest extends TestCase
         $this->assertSame('https://api-test.wirecard.com', $config->getBaseUrl());
         $this->assertSame('70000-APITEST-AP', $config->getHttpUser());
         $this->assertSame('qD2wzQ_hrc!8', $config->getHttpPassword());
+        $this->assertSame('2a0e9351-24ed-4110-9a1b-fd0fee6bec26', $config->getTransactionMAID());
+        $this->assertSame('dbc5a498-9a66-43b9-bf1d-a618dd399684', $config->getTransactionSecret());
+        $this->assertSame('pay', $config->getTransactionOperation());
+        $this->assertNull($config->getThreeDSecret());
+        $this->assertNull($config->getThreeDSslMaxLimit());
+        $this->assertNull($config->getThreeDSslMaxLimitCurrency());
+        $this->assertNull($config->getThreeDMinLimit());
+        $this->assertNull($config->getThreeDMinLimitCurrency());
+        $this->assertNull($config->getThreeDMAID());
     }
 
     public function testGetTransactionConfig()

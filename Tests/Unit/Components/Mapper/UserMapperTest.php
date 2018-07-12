@@ -291,6 +291,7 @@ class UserMapperTest extends TestCase
 
     public function testGetShippingAddress()
     {
+        $this->assertEquals($this->user['shippingaddress'], $this->mapper->getShippingAddress());
         $this->assertEquals($this->user['shippingaddress']['city'], $this->mapper->getShippingAddressCity());
         $this->assertEquals($this->user['shippingaddress']['street'], $this->mapper->getShippingAddressStreet());
         $this->assertEquals($this->user['shippingaddress']['zipcode'], $this->mapper->getShippingAddressZip());

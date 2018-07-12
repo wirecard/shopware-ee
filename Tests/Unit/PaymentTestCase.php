@@ -31,8 +31,37 @@
 
 namespace WirecardShopwareElasticEngine\Tests\Unit;
 
+use Doctrine\ORM\EntityManagerInterface;
+use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Shopware\Components\Routing\RouterInterface;
+use Shopware\Models\Plugin\Plugin;
+
 abstract class PaymentTestCase extends \PHPUnit_Framework_TestCase
 {
+    /** @var EntityManagerInterface|\PHPUnit_Framework_MockObject_MockObject */
+    protected $em;
+
+    /** @var \Shopware_Components_Config|\PHPUnit_Framework_MockObject_MockObject */
+    protected $config;
+
+    /** @var InstallerService|\PHPUnit_Framework_MockObject_MockObject */
+    protected $installer;
+
+    /** @var RouterInterface|\PHPUnit_Framework_MockObject_MockObject */
+    protected $router;
+
+    public function setUp()
+    {
+        parent::setUp();
+        $this->em        = $this->createMock(EntityManagerInterface::class);
+        $this->config    = $this->createMock(\Shopware_Components_Config::class);
+        $this->installer = $this->createMock(InstallerService::class);
+        $this->router    = $this->createMock(RouterInterface::class);
+
+        $plugin = $this->createMock(Plugin::class);
+        $this->installer->method('getPluginByName')->willReturn($plugin);
+    }
+
     public function assertPaymentOptions(array $paymentMethod, $name, $description, $position)
     {
         $this->assertEquals([

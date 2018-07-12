@@ -33,40 +33,49 @@ namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Payments;
 
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
+use WirecardShopwareElasticEngine\Tests\Unit\PaymentTestCase;
 
-class AbstractPaymentTest extends \PHPUnit_Framework_TestCase
+class AbstractPaymentTest extends PaymentTestCase
 {
     /** @var Payment */
-    /*protected $stub;
+    protected $payment;
 
     public function setUp()
     {
-        $this->stub = $this->getMockForAbstractClass(Payment::class, [], 'FooPayment');
+        parent::setUp();
+
+        $this->payment = $this->getMockForAbstractClass(Payment::class, [
+            $this->em,
+            $this->config,
+            $this->installer,
+            $this->router,
+        ], 'FooPayment');
     }
 
     public function testInstanceOfPaymentInterface()
     {
-        $this->assertInstanceOf(PaymentInterface::class, $this->stub);
+        $this->assertInstanceOf(PaymentInterface::class, $this->payment);
     }
 
     public function testGetName()
     {
-        $this->assertEquals('wirecard_ee_foo', $this->stub->getName());
+        $this->assertEquals('wirecard_ee_foo', $this->payment->getName());
     }
 
     public function testGetLabel()
     {
-        $this->assertEquals('Wirecard EE Foo', $this->stub->getLabel());
+        $this->assertEquals('Wirecard EE Foo', $this->payment->getLabel());
     }
 
     public function testGetPaymentOptions()
     {
-        $this->assertTrue(is_array($this->stub->getPaymentOptions()));
-        $this->assertTrue(array_key_exists('name', $this->stub->getPaymentOptions()));
-        $this->assertTrue(array_key_exists('description', $this->stub->getPaymentOptions()));
-        $this->assertTrue(array_key_exists('action', $this->stub->getPaymentOptions()));
-        $this->assertTrue(array_key_exists('active', $this->stub->getPaymentOptions()));
-        $this->assertTrue(array_key_exists('position', $this->stub->getPaymentOptions()));
-        $this->assertTrue(array_key_exists('additionalDescription', $this->stub->getPaymentOptions()));
-    }*/
+        $options = $this->payment->getPaymentOptions();
+        $this->assertTrue(is_array($options));
+        $this->assertArrayHasKey('name', $options);
+        $this->assertArrayHasKey('description', $options);
+        $this->assertArrayHasKey('action', $options);
+        $this->assertArrayHasKey('active', $options);
+        $this->assertArrayHasKey('position', $options);
+        $this->assertArrayHasKey('additionalDescription', $options);
+    }
 }

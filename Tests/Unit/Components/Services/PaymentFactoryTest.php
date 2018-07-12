@@ -35,6 +35,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Components\Routing\RouterInterface;
+use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
@@ -72,6 +73,16 @@ class PaymentFactoryTest extends TestCase
         $payments = $this->factory->getSupportedPayments();
         foreach ($payments as $payment) {
             $this->assertInstanceOf(PaymentInterface::class, $payment);
+        }
+    }
+
+    public function testPaymentsGetTransactionImplementation()
+    {
+        $payments = $this->factory->getSupportedPayments();
+        foreach ($payments as $payment) {
+            $transaction = $payment->getTransaction();
+            $this->assertInstanceOf(Transaction::class, $transaction);
+            $this->assertSame($transaction, $payment->getTransaction());
         }
     }
 

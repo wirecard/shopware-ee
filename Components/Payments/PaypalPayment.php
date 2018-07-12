@@ -34,7 +34,6 @@ namespace WirecardShopwareElasticEngine\Components\Payments;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
-use Wirecard\PaymentSdk\Entity\AccountHolder;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\TransactionService;
@@ -45,7 +44,9 @@ class PaypalPayment extends Payment
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_paypal';
 
-    /** @var PayPalTransaction */
+    /**
+     * @var PayPalTransaction
+     */
     private $transactionInstance;
 
     /**
