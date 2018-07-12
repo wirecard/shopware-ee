@@ -100,18 +100,18 @@ class CreditCardPaymentTest extends TestCase
         $config = $this->payment->getPaymentConfig();
 
         $this->assertInstanceOf(PaymentConfig::class, $config);
-        $this->assertSame('https://api-test.wirecard.com', $config->getBaseUrl());
-        $this->assertSame('70000-APITEST-AP', $config->getHttpUser());
-        $this->assertSame('qD2wzQ_hrc!8', $config->getHttpPassword());
-        $this->assertSame('53f2895a-e4de-4e82-a813-0d87a10e55e6', $config->getTransactionMAID());
-        $this->assertSame('dbc5a498-9a66-43b9-bf1d-a618dd399684', $config->getTransactionSecret());
-        $this->assertSame('pay', $config->getTransactionOperation());
-        $this->assertSame('dbc5a498-9a66-43b9-bf1d-a618dd399684', $config->getThreeDSecret());
-        $this->assertSame('300', $config->getThreeDSslMaxLimit());
-        $this->assertSame('', $config->getThreeDSslMaxLimitCurrency());
-        $this->assertSame('100', $config->getThreeDMinLimit());
-        $this->assertSame('', $config->getThreeDMinLimitCurrency());
-        $this->assertSame('508b8896-b37d-4614-845c-26bf8bf2c948', $config->getThreeDMAID());
+        $this->assertEquals('https://api-test.wirecard.com', $config->getBaseUrl());
+        $this->assertEquals('70000-APITEST-AP', $config->getHttpUser());
+        $this->assertEquals('qD2wzQ_hrc!8', $config->getHttpPassword());
+        $this->assertEquals('53f2895a-e4de-4e82-a813-0d87a10e55e6', $config->getTransactionMAID());
+        $this->assertEquals('dbc5a498-9a66-43b9-bf1d-a618dd399684', $config->getTransactionSecret());
+        $this->assertEquals('pay', $config->getTransactionOperation());
+        $this->assertEquals('dbc5a498-9a66-43b9-bf1d-a618dd399684', $config->getThreeDSecret());
+        $this->assertEquals(300, $config->getThreeDSslMaxLimit());
+        $this->assertEmpty($config->getThreeDSslMaxLimitCurrency());
+        $this->assertEquals(100, $config->getThreeDMinLimit());
+        $this->assertEmpty($config->getThreeDMinLimitCurrency());
+        $this->assertEquals('508b8896-b37d-4614-845c-26bf8bf2c948', $config->getThreeDMAID());
     }
 
     public function testGetTransactionConfig()
@@ -121,19 +121,19 @@ class CreditCardPaymentTest extends TestCase
         $config = $this->payment->getTransactionConfig($shop, $this->container->getParameterBag());
 
         $this->assertInstanceOf(Config::class, $config);
-        $this->assertSame('https://api-test.wirecard.com', $config->getBaseUrl());
-        $this->assertSame('70000-APITEST-AP', $config->getHttpUser());
-        $this->assertSame('qD2wzQ_hrc!8', $config->getHttpPassword());
+        $this->assertEquals('https://api-test.wirecard.com', $config->getBaseUrl());
+        $this->assertEquals('70000-APITEST-AP', $config->getHttpUser());
+        $this->assertEquals('qD2wzQ_hrc!8', $config->getHttpPassword());
         $this->assertInstanceOf(PaymentMethodConfig::class, $config->get(CreditCardTransaction::NAME));
-        $this->assertSame(
+        $this->assertEquals(
             '53f2895a-e4de-4e82-a813-0d87a10e55e6',
             $config->get(CreditCardTransaction::NAME)->getMerchantAccountId()
         );
-        $this->assertSame(
+        $this->assertEquals(
             'dbc5a498-9a66-43b9-bf1d-a618dd399684',
             $config->get(CreditCardTransaction::NAME)->getSecret()
         );
-        $this->assertSame(
+        $this->assertEquals(
             '508b8896-b37d-4614-845c-26bf8bf2c948',
             $config->get(CreditCardTransaction::NAME)->getThreeDMerchantAccountId()
         );

@@ -98,12 +98,12 @@ class PaypalPaymentTest extends TestCase
         $config = $this->payment->getPaymentConfig();
 
         $this->assertInstanceOf(PaymentConfig::class, $config);
-        $this->assertSame('https://api-test.wirecard.com', $config->getBaseUrl());
-        $this->assertSame('70000-APITEST-AP', $config->getHttpUser());
-        $this->assertSame('qD2wzQ_hrc!8', $config->getHttpPassword());
-        $this->assertSame('2a0e9351-24ed-4110-9a1b-fd0fee6bec26', $config->getTransactionMAID());
-        $this->assertSame('dbc5a498-9a66-43b9-bf1d-a618dd399684', $config->getTransactionSecret());
-        $this->assertSame('pay', $config->getTransactionOperation());
+        $this->assertEquals('https://api-test.wirecard.com', $config->getBaseUrl());
+        $this->assertEquals('70000-APITEST-AP', $config->getHttpUser());
+        $this->assertEquals('qD2wzQ_hrc!8', $config->getHttpPassword());
+        $this->assertEquals('2a0e9351-24ed-4110-9a1b-fd0fee6bec26', $config->getTransactionMAID());
+        $this->assertEquals('dbc5a498-9a66-43b9-bf1d-a618dd399684', $config->getTransactionSecret());
+        $this->assertEquals('pay', $config->getTransactionOperation());
         $this->assertNull($config->getThreeDSecret());
         $this->assertNull($config->getThreeDSslMaxLimit());
         $this->assertNull($config->getThreeDSslMaxLimitCurrency());
@@ -119,14 +119,14 @@ class PaypalPaymentTest extends TestCase
         $config = $this->payment->getTransactionConfig($shop, $this->container->getParameterBag());
 
         $this->assertInstanceOf(Config::class, $config);
-        $this->assertSame('https://api-test.wirecard.com', $config->getBaseUrl());
-        $this->assertSame('70000-APITEST-AP', $config->getHttpUser());
-        $this->assertSame('qD2wzQ_hrc!8', $config->getHttpPassword());
+        $this->assertEquals('https://api-test.wirecard.com', $config->getBaseUrl());
+        $this->assertEquals('70000-APITEST-AP', $config->getHttpUser());
+        $this->assertEquals('qD2wzQ_hrc!8', $config->getHttpPassword());
         $this->assertInstanceOf(PaymentMethodConfig::class, $config->get(PayPalTransaction::NAME));
-        $this->assertSame(
+        $this->assertEquals(
             '2a0e9351-24ed-4110-9a1b-fd0fee6bec26',
             $config->get(PayPalTransaction::NAME)->getMerchantAccountId());
-        $this->assertSame(
+        $this->assertEquals(
             'dbc5a498-9a66-43b9-bf1d-a618dd399684',
             $config->get(PayPalTransaction::NAME)->getSecret()
         );
