@@ -48,8 +48,8 @@
             <label lang="de">[Credit Card] 3DS Händler ID</label>
             <label lang="en">[Credit Card] 3DS Merchant ID</label>
             <value>508b8896-b37d-4614-845c-26bf8bf2c948</value>
-            <description lang="de">Eindeutige 3DS Händler-ID Ihres Wirecard Konto. Leer lassen oder "null" eintragen, um 3DS zu deaktivieren.</description>
-            <description lang="en">Unique 3DS merchant account id to Wirecard. Keep empty or write "null", to deactivate 3DS.</description>
+            <description lang="de">Eindeutige 3DS Händler-ID Ihres Wirecard Konto. Tragen Sie "null" ein, um 3DS zu deaktivieren.</description>
+            <description lang="en">Unique 3DS merchant account id to Wirecard. Write "null", to deactivate 3DS.</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardThreeDSecret</name>
