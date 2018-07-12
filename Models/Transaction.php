@@ -328,18 +328,19 @@ class Transaction extends ModelEntity
     public function toArray()
     {
         return [
-            'id'                    => $this->getId(),
-            'orderNumber'           => $this->getOrderNumber(),
-            'transactionType'       => $this->getTransactionType(),
-            'transactionId'         => $this->getTransactionId(),
-            'parentTransactionId'   => $this->getParentTransactionId(),
-            'providerTransactionId' => $this->getProviderTransactionId(),
-            'requestId'             => $this->getRequestId(),
-            'type'                  => $this->getType(),
-            'amount'                => $this->getAmount(),
-            'currency'              => $this->getCurrency(),
-            'createdAt'             => $this->getCreatedAt(),
-            'response'              => $this->getResponse(),
+            'id'                           => $this->getId(),
+            'orderNumber'                  => $this->getOrderNumber(),
+            'transactionType'              => $this->getTransactionType(),
+            'transactionId'                => $this->getTransactionId(),
+            'parentTransactionId'          => $this->getParentTransactionId(),
+            'providerTransactionId'        => $this->getProviderTransactionId(),
+            'providerTransactionReference' => $this->getProviderTransactionReference(),
+            'requestId'                    => $this->getRequestId(),
+            'type'                         => $this->getType(),
+            'amount'                       => $this->getAmount(),
+            'currency'                     => $this->getCurrency(),
+            'createdAt'                    => $this->getCreatedAt(),
+            'response'                     => $this->getResponse(),
         ];
     }
 }

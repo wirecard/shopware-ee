@@ -13,6 +13,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
         wirecardOrderNumber: '{s name="WirecardOrderNumber" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}',
         transactionId: '{s name="TransactionId" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}',
         providerTransactionId: '{s name="ProviderTransactionId" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}',
+        providerTransactionReference: '{s name="providerTransactionReference" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}',
 
         noTransactionInfoFound: '{s name="NoTransactionFound" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}',
         backendOperationTitle: '{s name="BackendOperation" namespace="backend/wirecard_elastic_engine/order_info_tab"}{/s}',
@@ -80,6 +81,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                 'parentTransactionId',
                 'transactionId',
                 'providerTransactionId',
+                'providerTransactionReference',
                 'requestId',
                 'createdAt',
                 'amount',
@@ -168,6 +170,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                         requestId: transaction.requestId,
                         transactionId: transaction.transactionId,
                         providerTransactionId: transaction.providerTransactionId,
+                        providerTransactionReference: transaction.providerTransactionReference,
                         createdAt: new Date(transaction.createdAt).toLocaleString(),
                         transactionType: transaction.transactionType,
                         amount: transaction.amount,
