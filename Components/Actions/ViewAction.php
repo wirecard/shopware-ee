@@ -46,8 +46,8 @@ class ViewAction implements Action
     /**
      * ViewAction constructor.
      *
-     * @param string $template
-     * @param array  $assignments
+     * @param string|null $template
+     * @param array       $assignments
      */
     public function __construct($template, array $assignments = [])
     {
@@ -64,7 +64,7 @@ class ViewAction implements Action
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getTemplate()
     {
