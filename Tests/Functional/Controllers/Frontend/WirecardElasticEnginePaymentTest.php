@@ -40,7 +40,7 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
     public function testIndexAction()
     {
         $this->markTestIncomplete();
-        
+
         $this->reset();
         $this->Request()->setMethod('GET');
         $this->Request()->setHeader('User-Agent', self::USER_AGENT);
@@ -96,7 +96,7 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
             ],
         ];
 
-        Shopware()->Session()['sOrderVariables'] = $orderVariables;
+        Shopware()->Session()->offsetSet('sOrderVariables', $orderVariables);
 
         $response = $this->dispatch('/WirecardElasticEnginePayment');
 
