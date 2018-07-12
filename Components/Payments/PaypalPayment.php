@@ -34,6 +34,7 @@ namespace WirecardShopwareElasticEngine\Components\Payments;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
+use Wirecard\PaymentSdk\Entity\AccountHolder;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\TransactionService;
@@ -129,10 +130,14 @@ class PaypalPayment extends Payment
         Redirect $redirect,
         \Enlight_Controller_Request_Request $request,
         \sOrder $shopwareOrder
-    )
-    {
+    ) {
         $transaction = $this->getTransaction();
 
-        $transaction->setOrderDetail($orderSummary->getBasketMapper()->getBasketText());
+        $transaction->setOrderDetail(sprintf(
+            '%s - %.2f %s',
+            $orderSummary->getOrderNumber(),
+            $orderSummary->getAmount()->getValue(),
+            $orderSummary->getAmount()->getCurrency()
+        ));
     }
 }
