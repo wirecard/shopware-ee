@@ -150,7 +150,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function returnAction()
     {
-        $this->get('wirecard_elastic_engine.session_handler')->clearOrder();
         $request = $this->Request();
 
         /** @var PaymentFactory $paymentFactory */
@@ -168,6 +167,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         if ($action instanceof ErrorAction) {
             $this->cancelOrderAndRestoreBasket();
+        } else {
+            $this->get('wirecard_elastic_engine.session_handler')->clearOrder();
         }
 
         return $this->handleAction($action);
@@ -275,6 +276,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         try {
             if ($basketSignature) {
                 $basket = $this->loadBasketFromSignature($basketSignature);
+                /** @var sBasket $shopwareBasket */
                 $shopwareBasket = $this->get('modules')->getModule('Basket');
 
                 $items = $basket->offsetGet('sBasket');
@@ -315,6 +317,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     protected function handleError($code, $message = "")
     {
+        $this->get('pluginlogger')->error("Payment failed: ${message} (${code})", [
+            'params'     => $this->Request()->getParams(),
+            'baseUrl'    => $this->Request()->getBaseUrl(),
+            'requestUri' => $this->Request()->getRequestUri(),
+        ]);
+
         return $this->redirect([
             'controller'                         => 'checkout',
             'action'                             => 'shippingPayment',
