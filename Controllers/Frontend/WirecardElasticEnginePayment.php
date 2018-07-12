@@ -135,6 +135,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $this->get('modules')->Order()
         );
 
+        if ($action instanceof ErrorAction) {
+            $this->cancelOrderAndRestoreBasket();
+        }
+
         return $this->handleAction($action);
     }
 
