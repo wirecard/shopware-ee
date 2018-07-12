@@ -166,6 +166,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $returnHandler = $this->get('wirecard_elastic_engine.return_handler');
         $action        = $returnHandler->execute($payment, $transactionService, $request);
 
+        if ($action instanceof ErrorAction) {
+            $this->cancelOrderAndRestoreBasket();
+        }
+
         return $this->handleAction($action);
     }
 
@@ -246,13 +250,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         ]);
     }
 
-    /**
-     * User gets redirected to this action after canceling payment.
-     */
-    public function cancelAction()
+    private function cancelOrderAndRestoreBasket()
     {
         /** @var SessionHandler $sessionHandler */
-        $sessionHandler  = $this->get('wirecard_elastic_engine.session_handler')->clearOrder();
+        $sessionHandler  = $this->get('wirecard_elastic_engine.session_handler');
         $orderNumber     = $sessionHandler->getOrderNumber();
         $basketSignature = $sessionHandler->getBasketSignature();
         $sessionHandler->clearOrder();
@@ -273,12 +274,27 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         // Try to restore the customers basket
         try {
             if ($basketSignature) {
-                $this->loadBasketFromSignature($basketSignature);
+                $basket = $this->loadBasketFromSignature($basketSignature);
+                $shopwareBasket = $this->get('modules')->getModule('Basket');
+
+                $items = $basket->offsetGet('sBasket');
+                foreach ($items['content'] as $item) {
+                    $itemId = $item['ordernumber'];
+                    $itemQuanity = $item['quantity'];
+                    $shopwareBasket->sAddArticle($itemId, $itemQuanity);
+                }
             }
         } catch (\Exception $e) {
             $this->get('pluginlogger')->notice('Could not restore basket after cancel: ' . $e->getMessage());
         }
+    }
 
+    /**
+     * User gets redirected to this action after canceling payment.
+     */
+    public function cancelAction()
+    {
+        $this->cancelOrderAndRestoreBasket();
         return $this->handleError(ErrorAction::PAYMENT_CANCELED, 'Payment canceled by user');
     }
 
@@ -287,6 +303,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function failureAction()
     {
+        $this->cancelOrderAndRestoreBasket();
         return $this->handleError(ErrorAction::FAILURE_RESPONSE, 'Failure response');
     }
 
