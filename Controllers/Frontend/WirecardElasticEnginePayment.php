@@ -75,6 +75,35 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function indexAction()
     {
+        /** @var PaymentFactory $paymentFactory */
+        $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
+        $payment        = $paymentFactory->create($this->getPaymentShortName());
+
+        try {
+            $userMapper   = new UserMapper(
+                $this->getUser(),
+                $this->Request()->getClientIp(),
+                $this->getModelManager()->getRepository(Shop::class)
+                     ->getActiveDefault()
+                     ->getLocale()
+                     ->getLocale()
+            );
+            $basketMapper = new BasketMapper(
+                $this->getBasket(),
+                $this->getCurrencyShortName(),
+                $this->get('modules')->getModule('Articles'),
+                $payment->getTransaction()
+            );
+            $amount       = new Amount($this->getAmount(), $this->getCurrencyShortName());
+        } catch (BasketException $e) {
+            $this->get('pluginlogger')->notice($e->getMessage());
+            return $this->redirect([
+                'controller'                          => 'checkout',
+                'action'                              => 'cart',
+                'wirecard_elastic_engine_update_cart' => 'true',
+            ]);
+        }
+
         // Since we're going to need an order number for our `Transaction` we're saving it right away. Confirmation
         // mail here is disabled through the `OrderSubscriber`.
         // The transactionId will later be overwritten.
@@ -88,44 +117,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             throw new MissingOrderNumberException();
         }
 
-        /** @var PaymentFactory $paymentFactory */
-        $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
-        $payment        = $paymentFactory->create($this->getPaymentShortName());
-
-        try {
-            $orderSummary = new OrderSummary(
-                $orderNumber,
-                $payment,
-                new UserMapper(
-                    $this->getUser(),
-                    $this->Request()->getClientIp(),
-                    $this->getModelManager()->getRepository(Shop::class)
-                         ->getActiveDefault()
-                         ->getLocale()
-                         ->getLocale()
-                ),
-                new BasketMapper(
-                    $this->getBasket(),
-                    $this->getCurrencyShortName(),
-                    $this->get('modules')->getModule('Articles'),
-                    $payment->getTransaction()
-                ),
-                new Amount($this->getAmount(), $this->getCurrencyShortName())
-            );
-        } catch (BasketException $e) {
-            $this->get('pluginlogger')->notice($e->getMessage());
-            return $this->redirect([
-                'controller'                          => 'checkout',
-                'action'                              => 'cart',
-                'wirecard_elastic_engine_update_cart' => 'true',
-            ]);
-        }
-
         /** @var PaymentHandler $handler */
         $handler = $this->get('wirecard_elastic_engine.payment_handler');
-
-        $action = $handler->execute(
-            $orderSummary,
+        $action  = $handler->execute(
+            new OrderSummary($orderNumber, $payment, $userMapper, $basketMapper, $amount),
             new TransactionService($payment->getTransactionConfig(
                 $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
                 $this->container->getParameterBag()
