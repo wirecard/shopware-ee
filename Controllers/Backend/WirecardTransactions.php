@@ -77,7 +77,6 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
             $transactionService = new TransactionService($testConfig, $this->get('pluginlogger'));
 
             $success = $transactionService->checkCredentials();
-
         } catch (\Exception $e) {
             return $this->View()->assign([
                 'status' => 'failed',

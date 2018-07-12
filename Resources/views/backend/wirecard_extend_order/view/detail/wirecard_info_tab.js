@@ -155,7 +155,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                     historyData = [];
                 window.DATA = data;
 
-                if (! data) {
+                if (!data) {
                     infoPanel.add({
                         xtype: 'container',
                         html: '<p>' + me.snippets.noTransactionInfoFound + '</p>'
@@ -198,7 +198,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                                 title: 'BackendOperationWindow: ' + operation
                             });
                             backendOperationWindow.show();
-                            //me.processBackendOperation(operationType);
+                            // me.processBackendOperation(operationType);
                         }
                     }));
                 });
