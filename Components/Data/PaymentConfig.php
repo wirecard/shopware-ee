@@ -61,7 +61,7 @@ class PaymentConfig
     /**
      * @var string
      */
-    protected $transactionType;
+    protected $transactionOperation;
 
     /**
      * @var bool
@@ -181,17 +181,17 @@ class PaymentConfig
     /**
      * @return string|null
      */
-    public function getTransactionType()
+    public function getTransactionOperation()
     {
-        return $this->transactionType;
+        return $this->transactionOperation;
     }
 
     /**
-     * @param string $transactionType
+     * @param string $transactionOperation
      */
-    public function setTransactionType($transactionType)
+    public function setTransactionOperation($transactionOperation)
     {
-        $this->transactionType = $transactionType;
+        $this->transactionOperation = $transactionOperation;
     }
 
     /**
@@ -347,7 +347,7 @@ class PaymentConfig
             'baseUrl'                   => $this->getBaseUrl(),
             'httpUser'                  => $this->getHttpUser(),
             'transactionMAID'           => $this->getTransactionMAID(),
-            'transactionType'           => $this->getTransactionType(),
+            'transactionOperation'      => $this->getTransactionOperation(),
             'sendBasket'                => $this->sendBasket(),
             'fraudPrevention'           => $this->hasFraudPrevention(),
             'sendDescriptor'            => $this->sendDescriptor(),

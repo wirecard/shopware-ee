@@ -179,7 +179,7 @@ class CreditCardPayment extends Payment
 
         $paymentConfig->setTransactionMAID($this->getPluginConfig('CreditCardMerchantId'));
         $paymentConfig->setTransactionSecret($this->getPluginConfig('CreditCardSecret'));
-        $paymentConfig->setTransactionType($this->getPluginConfig('CreditCardTransactionType'));
+        $paymentConfig->setTransactionOperation($this->getPluginConfig('CreditCardTransactionType'));
 
         $paymentConfig->setThreeDMAID($this->getPluginConfig('CreditCardThreeDMAID'));
         $paymentConfig->setThreeDSecret($this->getPluginConfig('CreditCardThreeDSecret'));

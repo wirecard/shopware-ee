@@ -46,6 +46,9 @@ abstract class Payment implements PaymentInterface
 {
     const ACTION = 'WirecardElasticEnginePayment';
 
+    const TRANSACTION_OPERATION_PAY = 'pay';
+    const TRANSACTION_OPERATION_RESERVE = 'reserve';
+
     const TRANSACTION_TYPE_AUTHORIZATION = 'authorization';
     const TRANSACTION_TYPE_PURCHASE = 'purchase';
     const TRANSACTION_TYPE_UNKNOWN = 'unknown';
@@ -133,17 +136,16 @@ abstract class Payment implements PaymentInterface
      */
     public function getTransactionType()
     {
-        $type = $this->getPaymentConfig()->getTransactionType();
+        $operation = $this->getPaymentConfig()->getTransactionOperation();
 
-        switch ($type) {
-            case 'pay':
+        switch ($operation) {
+            case self::TRANSACTION_OPERATION_PAY:
                 return Payment::TRANSACTION_TYPE_PURCHASE;
-
-            case 'reserve':
+            case self::TRANSACTION_OPERATION_RESERVE:
                 return Payment::TRANSACTION_TYPE_AUTHORIZATION;
         }
 
-        throw new UnknownTransactionTypeException($type);
+        throw new UnknownTransactionTypeException($operation);
     }
 
     /**

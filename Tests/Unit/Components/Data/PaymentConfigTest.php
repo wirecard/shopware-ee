@@ -52,7 +52,7 @@ class PaymentConfigTest extends TestCase
 
         $this->assertNull($config->getTransactionMAID());
         $this->assertNull($config->getTransactionSecret());
-        $this->assertNull($config->getTransactionType());
+        $this->assertNull($config->getTransactionOperation());
         $this->assertNull($config->getThreeDMAID());
         $this->assertNull($config->getThreeDSecret());
         $this->assertNull($config->getThreeDMinLimit());
@@ -65,7 +65,7 @@ class PaymentConfigTest extends TestCase
 
         $config->setTransactionMAID('transaction-maid');
         $config->setTransactionSecret('transaction-secret');
-        $config->setTransactionType(Payment::TRANSACTION_TYPE_AUTHORIZATION);
+        $config->setTransactionOperation(Payment::TRANSACTION_OPERATION_PAY);
         $config->setThreeDMAID('three3d-maid');
         $config->setThreeDSecret('three3d-secret');
         $config->setThreeDMinLimit(50.0);
@@ -78,7 +78,7 @@ class PaymentConfigTest extends TestCase
 
         $this->assertEquals('transaction-maid', $config->getTransactionMAID());
         $this->assertEquals('transaction-secret', $config->getTransactionSecret());
-        $this->assertEquals(Payment::TRANSACTION_TYPE_AUTHORIZATION, $config->getTransactionType());
+        $this->assertEquals(Payment::TRANSACTION_OPERATION_PAY, $config->getTransactionOperation());
         $this->assertEquals('three3d-maid', $config->getThreeDMAID());
         $this->assertEquals('three3d-secret', $config->getThreeDSecret());
         $this->assertEquals(50.0, $config->getThreeDMinLimit());
@@ -89,11 +89,11 @@ class PaymentConfigTest extends TestCase
         $this->assertTrue($config->sendBasket());
         $this->assertTrue($config->sendDescriptor());
 
-        $config->setTransactionType(Payment::TRANSACTION_TYPE_PURCHASE);
+        $config->setTransactionOperation(Payment::TRANSACTION_OPERATION_RESERVE);
         $config->setFraudPrevention(false);
         $config->setSendBasket(false);
         $config->setSendDescriptor(false);
-        $this->assertEquals(Payment::TRANSACTION_TYPE_PURCHASE, $config->getTransactionType());
+        $this->assertEquals(Payment::TRANSACTION_OPERATION_RESERVE, $config->getTransactionOperation());
         $this->assertFalse($config->hasFraudPrevention());
         $this->assertFalse($config->sendBasket());
         $this->assertFalse($config->sendDescriptor());
@@ -121,7 +121,7 @@ class PaymentConfigTest extends TestCase
             'baseUrl'                   => 'https://api-test.wirecard.com',
             'httpUser'                  => 'foo',
             'transactionMAID'           => 'transaction-maid',
-            'transactionType'           => Payment::TRANSACTION_TYPE_PURCHASE,
+            'transactionOperation'      => Payment::TRANSACTION_OPERATION_RESERVE,
             'sendBasket'                => false,
             'fraudPrevention'           => false,
             'sendDescriptor'            => false,

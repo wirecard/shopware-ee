@@ -88,7 +88,7 @@ class PaymentHandler extends Handler
 
         $response = $transactionService->process(
             $transaction,
-            $payment->getPaymentConfig()->getTransactionType()
+            $payment->getPaymentConfig()->getTransactionOperation()
         );
 
         $this->logger->debug('Payment processing execution', [

@@ -111,7 +111,7 @@ class PaypalPayment extends Payment
 
         $paymentConfig->setTransactionMAID($this->getPluginConfig('PaypalMerchantId'));
         $paymentConfig->setTransactionSecret($this->getPluginConfig('PaypalSecret'));
-        $paymentConfig->setTransactionType($this->getPluginConfig('PaypalTransactionType'));
+        $paymentConfig->setTransactionOperation($this->getPluginConfig('PaypalTransactionType'));
         $paymentConfig->setSendBasket($this->getPluginConfig('PaypalSendBasket'));
         $paymentConfig->setFraudPrevention($this->getPluginConfig('PaypalFraudPrevention'));
         $paymentConfig->setSendDescriptor($this->getPluginConfig('PaypalDescriptor'));
