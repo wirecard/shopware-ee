@@ -47,7 +47,7 @@ abstract class PaymentTestCase extends \PHPUnit_Framework_TestCase
 
     public function assertConfigData(array $expected, array $actual)
     {
-        $this->assertTrue($this->assertArraysAreSimilar($expected, $actual));
+        $this->assertTrue($this->getArraysAreSimilar($expected, $actual));
     }
 
     /**
@@ -57,7 +57,7 @@ abstract class PaymentTestCase extends \PHPUnit_Framework_TestCase
      * @param array $actual
      * @return bool
      */
-    protected function assertArraysAreSimilar(array $expected, array $actual)
+    protected function getArraysAreSimilar(array $expected, array $actual)
     {
         if (count(array_diff_assoc($expected, $actual))) {
             return false;
