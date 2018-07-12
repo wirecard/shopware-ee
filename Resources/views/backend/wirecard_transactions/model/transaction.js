@@ -9,6 +9,7 @@ Ext.define('Shopware.apps.WirecardTransactions.model.Transaction', {
 
     fields: [
         { name: 'orderId', type: 'int' },
+        { name: 'orderStatus', type: 'int' },
         { name: 'orderNumber', type: 'string' },
         { name: 'transactionId', type: 'string' },
         { name: 'parentTransactionId', type: 'string' },

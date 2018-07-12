@@ -12,7 +12,10 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
         TransactionState: '{s name="TransactionState" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
         PaymentMethod: '{s name="PaymentMethod" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
         Amount: '{s name="Amount" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        Currency: '{s name="Currency" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}'
+        Currency: '{s name="Currency" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
+
+        OrderCanceledErrorTitle: '{s name="OrderCanceledErrorTitle" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
+        OrderCanceledErrorText: '{s name="OrderCanceledErrorText" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}'
     },
 
     configure: function () {
@@ -38,7 +41,8 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
         return {
             orderNumber: {
                 header: me.snippets.OrderNumber,
-                draggable: false
+                draggable: false,
+                renderer: me.orderColumnRenderer
             },
             transactionId: {
                 header: me.snippets.TransactionId,
@@ -86,8 +90,16 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
         items.push({
             iconCls: 'sprite-pencil',
             tooltip: 'Open order details',
-
             handler: function (view, rowIndex, colIndex, item, opts, record) {
+                if (!record.get('orderId') || record.get('orderStatus') < 0) {
+                    Shopware.Notification.createStickyGrowlMessage({
+                        title: me.snippets.OrderCanceledErrorTitle,
+                        text: me.snippets.OrderCanceledErrorText,
+                        width: 440,
+                        log: false
+                    });
+                    return;
+                }
                 Shopware.app.Application.addSubApplication({
                     name: 'Shopware.apps.Order',
                     action: 'detail',
@@ -99,6 +111,16 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
         });
 
         return items;
+    },
+
+    orderColumnRenderer: function (value, style, row) {
+        if (value === Ext.undefined) {
+            return value;
+        }
+        if (!row.data.orderId || row.data.orderStatus < 0) {
+            return value + ' (canceled)';
+        }
+        return value;
     },
 
     /**
