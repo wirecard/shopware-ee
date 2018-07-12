@@ -11,7 +11,8 @@
         {elseif $payment_mean.name == "wirecard_elastic_engine_paypal"}
             <div class="wirecard-elastic-engine--payments" >
                 <img title="{s name="PayPalTitle" namespace="frontend/wirecard_elastic_engine/payments"}PayPal{/s}"
-                     src="{s name="PayPalLogo" namespace="frontend/wirecard_elastic_engine/payments"}{/s}" />
+                     src="{s name="PayPalLogo" namespace="frontend/wirecard_elastic_engine/payments"}{/s}"
+                     style="padding-left: 40px;" />
             </div>
         {/if}
     {/if}
