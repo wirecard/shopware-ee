@@ -35,7 +35,7 @@ use Shopware\Components\Test\Plugin\TestCase;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\TransactionService;
 
-class ExampleTest extends TestCase
+class ApiCredentialsTest extends TestCase
 {
     const API_TEST_URL = 'https://api-test.wirecard.com';
     const HTTP_USER = '70000-APITEST-AP';
