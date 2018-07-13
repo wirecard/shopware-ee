@@ -41,7 +41,7 @@ use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
-use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
+use WirecardShopwareElasticEngine\Components\Data\CreditCardPaymentConfig;
 use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
 
 class CreditCardPayment extends Payment
@@ -95,6 +95,12 @@ class CreditCardPayment extends Payment
     {
         $transactionConfig = parent::getTransactionConfig($shop, $parameterBag);
         $paymentConfig     = $this->getPaymentConfig();
+
+        if (! $paymentConfig instanceof CreditCardPaymentConfig)
+        {
+            // FIXXXXXME
+        }
+
         $creditCardConfig  = new CreditCardConfig();
 
         if ($paymentConfig->getTransactionMAID() && $paymentConfig->getTransactionMAID() !== 'null') {
@@ -171,7 +177,7 @@ class CreditCardPayment extends Payment
      */
     public function getPaymentConfig()
     {
-        $paymentConfig = new PaymentConfig(
+        $paymentConfig = new CreditCardPaymentConfig(
             $this->getPluginConfig('CreditCardServer'),
             $this->getPluginConfig('CreditCardHttpUser'),
             $this->getPluginConfig('CreditCardHttpPassword')
