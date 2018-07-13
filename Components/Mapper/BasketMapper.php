@@ -74,9 +74,9 @@ class BasketMapper extends ArrayMapper
     /**
      * BasketMapper constructor.
      *
-     * @param array $shopwareBasket
-     * @param string $currency
-     * @param \sArticles $articles
+     * @param array       $shopwareBasket
+     * @param string      $currency
+     * @param \sArticles  $articles
      * @param Transaction $transaction
      *
      * @throws ArrayKeyNotFoundException
@@ -128,12 +128,11 @@ class BasketMapper extends ArrayMapper
      */
     public function getBasketText()
     {
-        $basket   = $this->getShopwareBasket();
-        $currency = $this->currency;
-        $lines    = [];
+        $basket = $this->getShopwareBasket();
+        $lines  = [];
 
         foreach ($this->getShopwareBasketContent() as $item) {
-            $basketItem = new BasketItemMapper($item, $currency);
+            $basketItem = new BasketItemMapper($item, $this->currency);
 
             $name          = $basketItem->getArticleName();
             $articleNumber = $basketItem->getArticleNumber();
@@ -141,12 +140,12 @@ class BasketMapper extends ArrayMapper
             $quantity      = $basketItem->getQuantity();
             $taxRate       = $basketItem->getTaxRate();
 
-            $lines[] = "${name} - ${articleNumber} - ${price} - ${currency} - ${quantity} - ${taxRate}%";
+            $lines[] = "$name - $articleNumber - $price - {$this->currency} - $quantity - $taxRate%";
         }
 
         if (! empty($basket[self::SHIPPING_COSTS_WITH_TAX]) && isset($basket[self::SHIPPING_COSTS_TAX])) {
             $lines[] = "Shipping - shipping - ${basket[self::SHIPPING_COSTS_WITH_TAX]} " .
-                       "${currency} - ${basket[self::SHIPPING_COSTS_TAX]}";
+                       "{$this->currency} - ${basket[self::SHIPPING_COSTS_TAX]}";
         }
 
         return implode("\n", $lines);

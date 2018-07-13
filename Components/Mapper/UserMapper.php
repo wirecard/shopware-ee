@@ -49,7 +49,6 @@ class UserMapper extends ArrayMapper
     const ADDITIONAL_COUNTRY_ISO = 'countryiso';
     const SHIPPING_ADDRESS_FIRST_NAME = 'firstname';
     const SHIPPING_ADDRESS_LAST_NAME = 'lastname';
-    const SHIPPING_ADDRESS_PHONE = 'phone';
     const BILLING_ADDRESS_CITY = 'city';
     const BILLING_ADDRESS_STREET = 'street';
     const BILLING_ADDRESS_ADDITIONAL = 'additionalAddressLine1';
@@ -75,7 +74,7 @@ class UserMapper extends ArrayMapper
     /**
      * UserMapper constructor.
      *
-     * @param array $shopwareUser
+     * @param array  $shopwareUser
      * @param string $clientIp
      * @param string $locale
      */
@@ -299,7 +298,7 @@ class UserMapper extends ArrayMapper
      */
     public function getShippingPhone()
     {
-        return $this->getOptional([self::SHIPPING_ADDRESS, self::SHIPPING_ADDRESS_PHONE]);
+        return $this->getOptional([self::SHIPPING_ADDRESS, self::PHONE]);
     }
 
     /**

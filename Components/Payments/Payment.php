@@ -137,14 +137,12 @@ abstract class Payment implements PaymentInterface
     public function getTransactionType()
     {
         $operation = $this->getPaymentConfig()->getTransactionOperation();
-
-        switch ($operation) {
-            case self::TRANSACTION_OPERATION_PAY:
-                return Payment::TRANSACTION_TYPE_PURCHASE;
-            case self::TRANSACTION_OPERATION_RESERVE:
-                return Payment::TRANSACTION_TYPE_AUTHORIZATION;
+        if ($operation === self::TRANSACTION_OPERATION_PAY) {
+            return Payment::TRANSACTION_TYPE_PURCHASE;
         }
-
+        if ($operation === self::TRANSACTION_OPERATION_RESERVE) {
+            return Payment::TRANSACTION_TYPE_AUTHORIZATION;
+        }
         throw new UnknownTransactionTypeException($operation);
     }
 
