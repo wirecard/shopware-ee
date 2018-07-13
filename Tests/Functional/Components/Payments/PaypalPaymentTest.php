@@ -104,12 +104,6 @@ class PaypalPaymentTest extends TestCase
         $this->assertEquals('2a0e9351-24ed-4110-9a1b-fd0fee6bec26', $config->getTransactionMAID());
         $this->assertEquals('dbc5a498-9a66-43b9-bf1d-a618dd399684', $config->getTransactionSecret());
         $this->assertEquals('pay', $config->getTransactionOperation());
-        $this->assertNull($config->getThreeDSecret());
-        $this->assertNull($config->getThreeDSslMaxLimit());
-        $this->assertNull($config->getThreeDSslMaxLimitCurrency());
-        $this->assertNull($config->getThreeDMinLimit());
-        $this->assertNull($config->getThreeDMinLimitCurrency());
-        $this->assertNull($config->getThreeDMAID());
     }
 
     public function testGetTransactionConfig()

@@ -95,11 +95,6 @@ class CreditCardPayment extends Payment
     {
         $transactionConfig = parent::getTransactionConfig($shop, $parameterBag);
         $paymentConfig     = $this->getPaymentConfig();
-
-        if (! $paymentConfig instanceof CreditCardPaymentConfig) {
-            // FIXXXXXME
-        }
-
         $creditCardConfig  = new CreditCardConfig();
 
         if ($paymentConfig->getTransactionMAID() && $paymentConfig->getTransactionMAID() !== 'null') {
@@ -172,7 +167,9 @@ class CreditCardPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * Returns payment specific configuration.
+     *
+     * @return CreditCardPaymentConfig
      */
     public function getPaymentConfig()
     {
@@ -234,7 +231,7 @@ class CreditCardPayment extends Payment
     private function storeRequestId($orderNumber, $requestId)
     {
         $order = $this->em->getRepository(Order::class)->findOneBy([
-            'number' => $orderNumber
+            'number' => $orderNumber,
         ]);
 
         if (! $order) {

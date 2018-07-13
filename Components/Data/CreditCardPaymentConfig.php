@@ -159,7 +159,7 @@ class CreditCardPaymentConfig extends PaymentConfig
         $this->threeDSslMaxLimitCurrency = $threeDSslMaxLimitCurrency;
     }
 
-   /**
+    /**
      * @inheritdoc
      */
     public function toArray()
