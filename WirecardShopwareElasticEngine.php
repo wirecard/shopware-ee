@@ -70,6 +70,8 @@ class WirecardShopwareElasticEngine extends Plugin
     public function update(UpdateContext $context)
     {
         parent::update($context);
+
+        $this->registerPayments();
         $this->updateDatabase();
     }
 
