@@ -11,10 +11,5 @@
         {elseif $wirecardElasticEngineErrorCode == 5}
             {include file='frontend/_includes/messages.tpl' type='error' content="{s name="MsgErrorCriticalNoOrder" namespace="frontend/wirecard_elastic_engine/checkout"}{/s}"}
         {/if}
-        {if $wirecardElasticEngineErrorMessage}
-            <div class="wirecard--error-message">
-                 {$wirecardElasticEngineErrorMessage}
-            </div>
-        {/if}
     </div>
 {/block}

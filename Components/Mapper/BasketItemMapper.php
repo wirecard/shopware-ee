@@ -62,7 +62,7 @@ class BasketItemMapper extends ArrayMapper
     /**
      * BasketItemMapper constructor.
      *
-     * @param array $shopwareItem
+     * @param array  $shopwareItem
      * @param string $currency
      *
      * @throws InvalidBasketItemException
@@ -188,8 +188,12 @@ class BasketItemMapper extends ArrayMapper
         $wirecardItem = new Item($this->getArticleName(), $amount, $quantity);
         $wirecardItem->setArticleNumber($this->getArticleNumber());
         $wirecardItem->setDescription($this->getDescription());
-        $wirecardItem->setTaxRate($this->getTaxRate());
-        $wirecardItem->setTaxAmount($taxAmount);
+
+        // Negative tax amount results in api-error "400.1221 order item tax amount is invalid"
+        if ($amount->getValue() >= 0.0) {
+            $wirecardItem->setTaxRate($this->getTaxRate());
+            $wirecardItem->setTaxAmount($taxAmount);
+        }
 
         return $wirecardItem;
     }
