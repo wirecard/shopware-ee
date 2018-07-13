@@ -98,6 +98,13 @@ interface PaymentInterface
     public function getPaymentConfig();
 
     /**
+     * Returns payment specific settings for additional payment form fields
+     *
+     * @return Array|null
+     */
+    public function getAdditionalFormFields();
+
+    /**
      * Payment specific processing. This method either returns an `Action` (which is directly returned to the handler)
      * or `null`. Returning `null` leads to the handler executing the transaction via the `TransactionService`. In case
      * of returning an `Action` execution of the transaction (via the `TransactionService`) probably needs to get

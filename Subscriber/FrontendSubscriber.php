@@ -36,6 +36,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Shopware\Components\Theme\LessDefinition;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
+use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
 
 class FrontendSubscriber implements SubscriberInterface
 {
@@ -50,13 +51,23 @@ class FrontendSubscriber implements SubscriberInterface
     private $templateManager;
 
     /**
+     * @var PaymentFactory
+     */
+    private $paymentFactory;
+
+    /**
      * @param string                    $pluginDirectory
      * @param \Enlight_Template_Manager $templateManager
+     * @param PaymentFactory            $paymentFactory
      */
-    public function __construct($pluginDirectory, \Enlight_Template_Manager $templateManager)
-    {
+    public function __construct(
+        $pluginDirectory,
+        \Enlight_Template_Manager $templateManager,
+        PaymentFactory $paymentFactory
+    ) {
         $this->pluginDirectory = $pluginDirectory;
         $this->templateManager = $templateManager;
+        $this->paymentFactory  = $paymentFactory;
     }
 
     public static function getSubscribedEvents()
@@ -92,6 +103,10 @@ class FrontendSubscriber implements SubscriberInterface
 
         if ($request->getActionName() === 'finish') {
             $this->assignPaymentStatus($view);
+        }
+
+        if ($request->getActionName() === 'confirm') {
+            $this->assignAdditionalPaymentFields($view);
         }
 
         $errorCode = $request->getParam('wirecard_elastic_engine_error_code');
@@ -133,5 +148,18 @@ class FrontendSubscriber implements SubscriberInterface
 
         $view->assign('wirecardElasticEnginePayment', true);
         $view->assign('wirecardElasticEnginePaymentStatus', $paymentStatus);
+    }
+
+    private function assignAdditionalPaymentFields(\Enlight_View_Default $view)
+    {
+        $sPayment = $view->getAssign('sPayment');
+        if (strpos($sPayment['name'], 'wirecard_elastic_engine') === false) {
+            return;
+        }
+        $payment = $this->paymentFactory->create($sPayment['name']);
+        if ($payment) {
+            $additionalFormFields = $payment->getAdditionalFormFields();
+            $view->assign('wirecardFormFields', $additionalFormFields);
+        }
     }
 }

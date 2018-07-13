@@ -115,6 +115,23 @@ class SepaPayment extends Payment
     /**
      * @inheritdoc
      */
+    public function getAdditionalFormFields()
+    {
+        $paymentConfig = $this->getPaymentConfig();
+
+        if (! $paymentConfig instanceof SepaPaymentConfig) {
+            return null;
+        }
+
+        return [
+            'method'  => $this->getName(),
+            'showBic' => $paymentConfig->showBic()
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function processPayment(
         OrderSummary $orderSummary,
         TransactionService $transactionService,

@@ -174,6 +174,14 @@ abstract class Payment implements PaymentInterface
     /**
      * @inheritdoc
      */
+    public function getAdditionalFormFields()
+    {
+        return null;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function processReturn(
         TransactionService $transactionService,
         \Enlight_Controller_Request_Request $request
