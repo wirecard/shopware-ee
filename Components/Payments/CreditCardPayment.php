@@ -250,10 +250,7 @@ class CreditCardPayment extends Payment
         \Enlight_Controller_Request_Request $request
     ) {
         $params = $request->getParams();
-        if (! empty($params['parent_transaction_id'])
-            && ! empty($params['token_id'])
-            && ! empty($params['jsresponse'])
-        ) {
+        if (! empty($params['jsresponse'])) {
             return $transactionService->processJsResponse($request->getParams(), $this->router->assemble([
                 'action' => 'return',
                 'method' => CreditCardPayment::PAYMETHOD_IDENTIFIER,
