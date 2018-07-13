@@ -79,7 +79,7 @@ class SepaPaymentConfig extends PaymentConfig
      */
     public function setCreditorId($creditorId)
     {
-        $this->creditorId = $creditorId; 
+        $this->creditorId = $creditorId;
     }
 
     /**
