@@ -33,6 +33,7 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\FormInteractionResponse;
+use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
@@ -74,6 +75,9 @@ class ReturnHandler extends Handler
         }
         if ($response instanceof SuccessResponse) {
             return $this->handleSuccess($response);
+        }
+        if ($response instanceof InteractionResponse) {
+            return $this->handleInteraction($response);
         }
         return $this->handleFailure($response);
     }
@@ -122,6 +126,23 @@ class ReturnHandler extends Handler
             'action'     => 'finish',
             'sUniqueID'  => $order->getTemporaryId(),
         ]));
+    }
+
+    /**
+     * @param InteractionResponse $response
+     *
+     * @return Action
+     */
+    protected function handleInteraction(InteractionResponse $response)
+    {
+        try {
+            $order = $this->getOrderFromResponse($response);
+            $this->transactionFactory->create($order->getNumber(), $response, Transaction::TYPE_RETURN);
+        } catch (OrderNotFoundException $e) {
+            $this->logger->notice('Could not create transaction for InteractionResponse: ' . $e->getMessage());
+        }
+
+        return new RedirectAction($response->getRedirectUrl());
     }
 
     /**
