@@ -304,5 +304,31 @@ function (button) {
             <description lang="en">Send descriptor</description>
         </element>
         <!-- PayPal End -->
+        <!-- Sepa -->
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineSepaServer</name>
+            <label lang="de">[Sepa] Wirecard Server Url</label>
+            <label lang="en">[Sepa] Wirecard Server Url</label>
+            <value>https://api-test.wirecard.com</value>
+            <description lang="de">Wirecard Basis Url (z.B. http://api-test.wirecard.com)</description>
+            <description lang="en">Wirecard Base Url (e.g. http://api-test.wirecard.com)</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineSepaHttpUser</name>
+            <label lang="de">[Sepa] HTTP Benutzer</label>
+            <label lang="en">[Sepa] HTTP User</label>
+            <value>70000-APITEST-AP</value>
+            <description lang="de">HTTP Benutzer</description>
+            <description lang="en">HTTP User</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineSepaHttpPassword</name>
+            <label lang="de">[Sepa] HTTP Passwort</label>
+            <label lang="en">[Sepa] HTTP Password</label>
+            <value>qD2wzQ_hrc!8</value>
+            <description lang="de">HTTP Passwort</description>
+            <description lang="en">HTTP Password</description>
+        </element>
+        <!-- Sepa End -->
     </elements>
 </config>
