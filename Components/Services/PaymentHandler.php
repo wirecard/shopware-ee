@@ -189,8 +189,6 @@ class PaymentHandler extends Handler
 
     /**
      * Returns the descriptor sent to Wirecard. Change to your own needs.
-     * Keep in mind that the descriptor is ignored when shopware runs in development mode (see SHOPWARE_ENV of your
-     * `.htaccess` or your apache configuration).
      *
      * @param $orderNumber
      *
@@ -198,7 +196,7 @@ class PaymentHandler extends Handler
      */
     protected function getDescriptor($orderNumber)
     {
-        $shopName = $this->shopwareConfig->get('shopName');
+        $shopName = substr($this->shopwareConfig->get('shopName'), 0, 9);
         return "${shopName} ${orderNumber}";
     }
 }
