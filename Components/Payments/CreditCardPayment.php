@@ -96,8 +96,7 @@ class CreditCardPayment extends Payment
         $transactionConfig = parent::getTransactionConfig($shop, $parameterBag);
         $paymentConfig     = $this->getPaymentConfig();
 
-        if (! $paymentConfig instanceof CreditCardPaymentConfig)
-        {
+        if (! $paymentConfig instanceof CreditCardPaymentConfig) {
             // FIXXXXXME
         }
 
