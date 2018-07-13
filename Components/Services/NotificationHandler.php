@@ -44,24 +44,29 @@ class NotificationHandler extends Handler
      * @param \sOrder  $shopwareOrder
      * @param Response $notification
      *
+     * @return bool
      * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
      */
     public function execute(\sOrder $shopwareOrder, Response $notification)
     {
-        switch (true) {
-            case $notification instanceof SuccessResponse:
-                return $this->handleSuccess($shopwareOrder, $notification);
-
-            case $notification instanceof FailureResponse:
-            default:
-                return $this->handleFailure($notification);
+        if ($notification instanceof SuccessResponse) {
+            return $this->handleSuccess($shopwareOrder, $notification);
         }
+        if ($notification instanceof FailureResponse) {
+            return $this->handleFailure($notification);
+        }
+        $this->logger->error("Unexpected notification response", [
+            'class'    => get_class($notification),
+            'response' => $notification->getData(),
+        ]);
+        return false;
     }
 
     /**
      * @param \sOrder         $shopwareOrder
      * @param SuccessResponse $notification
      *
+     * @return bool
      * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
      */
     protected function handleSuccess(\sOrder $shopwareOrder, SuccessResponse $notification)
@@ -83,7 +88,7 @@ class NotificationHandler extends Handler
         $this->transactionFactory->create($order->getNumber(), $notification, Transaction::TYPE_NOTIFY);
 
         if ($order->getPaymentStatus()->getId() !== Status::PAYMENT_STATE_OPEN) {
-            return;
+            return true;
         }
 
         switch ($notification->getTransactionType()) {
@@ -102,13 +107,17 @@ class NotificationHandler extends Handler
         }
 
         $shopwareOrder->setPaymentStatus($order->getId(), $orderState, true);
+        return true;
     }
 
     /**
      * @param FailureResponse $notification
+     *
+     * @return bool
      */
     protected function handleFailure(FailureResponse $notification)
     {
         $this->logger->error("Failure response", $notification->getData());
+        return false;
     }
 }

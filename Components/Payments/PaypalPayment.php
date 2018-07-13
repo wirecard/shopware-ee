@@ -140,5 +140,7 @@ class PaypalPayment extends Payment
             $orderSummary->getAmount()->getValue(),
             $orderSummary->getAmount()->getCurrency()
         ));
+
+        return null;
     }
 }
