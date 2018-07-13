@@ -33,8 +33,11 @@ namespace WirecardShopwareElasticEngine\Components\Payments;
 
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\SepaDirectDebitTransaction;
-use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
+use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
+use WirecardShopwareElasticEngine\Components\Data\SepaPaymentConfig;
 
 class SepaPayment extends Payment
 {
@@ -92,12 +95,34 @@ class SepaPayment extends Payment
      */
     public function getPaymentConfig()
     {
-        $paymentConfig = new PaymentConfig(
+        $paymentConfig = new SepaPaymentConfig(
             $this->getPluginConfig('SepaServer'),
             $this->getPluginConfig('SepaHttpUser'),
             $this->getPluginConfig('SepaHttpPassword')
         );
 
+        $paymentConfig->setTransactionMAID($this->getPluginConfig('SepaMerchantId'));
+        $paymentConfig->setTransactionSecret($this->getPluginConfig('SepaSecret'));
+        $paymentConfig->setTransactionOperation($this->getPluginConfig('SepaTransactionType'));
+        $paymentConfig->setShowBic($this->getPluginConfig('SepaShowBic'));
+        $paymentConfig->setCreditorId($this->getPluginConfig('SepaCreditorId'));
+        $paymentConfig->setCreditorName($this->getPluginConfig('SepaCreditorName'));
+        $paymentConfig->setCreditorAddress($this->getPluginConfig('SepaCreditorAddress'));
+        $paymentConfig->setMandateText($this->getPluginConfig('SepaMandateText'));
         return $paymentConfig;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function processPayment(
+        OrderSummary $orderSummary,
+        TransactionService $transactionService,
+        Shop $shop,
+        Redirect $redirect,
+        \Enlight_Controller_Request_Request $request,
+        \sOrder $shopwareOrder
+    ) {
+        // TODO
     }
 }

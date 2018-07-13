@@ -38,6 +38,7 @@ use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
+use WirecardShopwareElasticEngine\Components\Payments\SepaPayment;
 use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
 
 class PaymentFactory
@@ -97,6 +98,10 @@ class PaymentFactory
             case CreditCardPayment::PAYMETHOD_IDENTIFIER:
                 $class = CreditCardPayment::class;
                 break;
+
+            case SepaPayment::PAYMETHOD_IDENTIFIER:
+                $class = SepaPayment::class;
+                break;
         }
 
         if (! $class) {
@@ -114,7 +119,8 @@ class PaymentFactory
     {
         return [
             $this->create(PaypalPayment::PAYMETHOD_IDENTIFIER),
-            $this->create(CreditCardPayment::PAYMETHOD_IDENTIFIER)
+            $this->create(CreditCardPayment::PAYMETHOD_IDENTIFIER),
+            $this->create(SepaPayment::PAYMETHOD_IDENTIFIER)
         ];
     }
 }
