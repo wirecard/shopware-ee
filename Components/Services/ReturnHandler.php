@@ -58,23 +58,24 @@ class ReturnHandler extends Handler
         TransactionService $transactionService,
         \Enlight_Controller_Request_Request $request
     ) {
-        $response = $payment->processReturn($transactionService, $request);
+        try {
+            $response = $payment->processReturn($transactionService, $request);
 
-        if (! $response) {
-            $response = $transactionService->handleResponse($request->getParams());
+            if (! $response) {
+                $response = $transactionService->handleResponse($request->getParams());
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('Return processing failed: ' . $e->getMessage());
+            return new ErrorAction(ErrorAction::PROCESSING_FAILED, 'Return processing failed');
         }
 
-        switch (true) {
-            case $response instanceof FormInteractionResponse:
-                return $this->handleFormInteraction($response);
-
-            case $response instanceof SuccessResponse:
-                return $this->handleSuccess($response);
-
-            case $response instanceof FailureResponse:
-            default:
-                return $this->handleFailure($response);
+        if ($response instanceof FormInteractionResponse) {
+            return $this->handleFormInteraction($response);
         }
+        if ($response instanceof SuccessResponse) {
+            return $this->handleSuccess($response);
+        }
+        return $this->handleFailure($response);
     }
 
     /**
