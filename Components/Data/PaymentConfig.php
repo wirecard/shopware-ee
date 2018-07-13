@@ -79,36 +79,6 @@ class PaymentConfig
     protected $sendDescriptor;
 
     /**
-     * @var string
-     */
-    protected $threeDMAID;
-
-    /**
-     * @var string
-     */
-    protected $threeDSecret;
-
-    /**
-     * @var float
-     */
-    protected $threeDMinLimit;
-
-    /**
-     * @var string
-     */
-    protected $threeDMinLimitCurrency;
-
-    /**
-     * @var float
-     */
-    protected $threeDSslMaxLimit;
-
-    /**
-     * @var string
-     */
-    protected $threeDSslMaxLimitCurrency;
-
-    /**
      * PaymentConfig constructor.
      *
      * @param string $baseUrl
@@ -243,102 +213,6 @@ class PaymentConfig
     }
 
     /**
-     * @return string
-     */
-    public function getThreeDMAID()
-    {
-        return $this->threeDMAID;
-    }
-
-    /**
-     * @param string $threeDMAID
-     */
-    public function setThreeDMAID($threeDMAID)
-    {
-        $this->threeDMAID = $threeDMAID;
-    }
-
-    /**
-     * @return string|float
-     */
-    public function getThreeDMinLimit()
-    {
-        return $this->threeDMinLimit;
-    }
-
-    /**
-     * @param string|float $threeDMinLimit
-     */
-    public function setThreeDMinLimit($threeDMinLimit)
-    {
-        $this->threeDMinLimit = $threeDMinLimit;
-    }
-
-    /**
-     * @return string
-     */
-    public function getThreeDMinLimitCurrency()
-    {
-        return $this->threeDMinLimitCurrency;
-    }
-
-    /**
-     * @param string $threeDMinLimitCurrency
-     */
-    public function setThreeDMinLimitCurrency($threeDMinLimitCurrency)
-    {
-        $this->threeDMinLimitCurrency = $threeDMinLimitCurrency;
-    }
-
-    /**
-     * @return string
-     */
-    public function getThreeDSecret()
-    {
-        return $this->threeDSecret;
-    }
-
-    /**
-     * @param string $threeDSecret
-     */
-    public function setThreeDSecret($threeDSecret)
-    {
-        $this->threeDSecret = $threeDSecret;
-    }
-
-    /**
-     * @return string|float
-     */
-    public function getThreeDSslMaxLimit()
-    {
-        return $this->threeDSslMaxLimit;
-    }
-
-    /**
-     * @param string|float $threeDSslMaxLimit
-     */
-    public function setThreeDSslMaxLimit($threeDSslMaxLimit)
-    {
-        $this->threeDSslMaxLimit = $threeDSslMaxLimit;
-    }
-
-    /**
-     * @return string
-     */
-    public function getThreeDSslMaxLimitCurrency()
-    {
-        return $this->threeDSslMaxLimitCurrency;
-    }
-
-    /**
-     * @param string $threeDSslMaxLimitCurrency
-     */
-    public function setThreeDSslMaxLimitCurrency($threeDSslMaxLimitCurrency)
-    {
-        $this->threeDSslMaxLimitCurrency = $threeDSslMaxLimitCurrency;
-    }
-
-    /**
      * @return array
      */
     public function toArray()
@@ -350,12 +224,7 @@ class PaymentConfig
             'transactionOperation'      => $this->getTransactionOperation(),
             'sendBasket'                => $this->sendBasket(),
             'fraudPrevention'           => $this->hasFraudPrevention(),
-            'sendDescriptor'            => $this->sendDescriptor(),
-            'threeDMAID'                => $this->getThreeDMAID(),
-            'threeDMinLimit'            => $this->getThreeDMinLimit(),
-            'threeDMinLimitCurrency'    => $this->getThreeDMinLimitCurrency(),
-            'threeDSslMaxLimit'         => $this->getThreeDSslMaxLimit(),
-            'threeDSslMaxLimitCurrency' => $this->getThreeDSslMaxLimitCurrency(),
+            'sendDescriptor'            => $this->sendDescriptor()
         ];
     }
 }
