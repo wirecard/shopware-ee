@@ -42,10 +42,9 @@ use Shopware\Components\Plugin\Context\DeactivateContext;
 use Shopware\Components\Plugin\Context\InstallContext;
 use Shopware\Components\Plugin\Context\UninstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
-
+use Shopware\Models\Plugin\Plugin as PluginModel;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
 use WirecardShopwareElasticEngine\Models\Transaction;
-
 use Doctrine\ORM\Tools\SchemaTool;
 
 class WirecardShopwareElasticEngine extends Plugin
@@ -54,13 +53,15 @@ class WirecardShopwareElasticEngine extends Plugin
 
     public function install(InstallContext $context)
     {
-        $this->registerPayments();
+        $this->registerPayments($context->getPlugin());
         $this->updateDatabase();
     }
 
     public function uninstall(UninstallContext $context)
     {
         parent::uninstall($context);
+
+        $this->deactivatePayments($context->getPlugin());
 
         if ($context->keepUserData()) {
             return;
@@ -71,7 +72,7 @@ class WirecardShopwareElasticEngine extends Plugin
     {
         parent::update($context);
 
-        $this->registerPayments();
+        $this->registerPayments($context->getPlugin());
         $this->updateDatabase();
     }
 
@@ -83,6 +84,8 @@ class WirecardShopwareElasticEngine extends Plugin
     public function deactivate(DeactivateContext $context)
     {
         parent::deactivate($context);
+
+        $this->deactivatePayments($context->getPlugin());
     }
 
     protected function updateDatabase()
@@ -98,7 +101,7 @@ class WirecardShopwareElasticEngine extends Plugin
         );
     }
 
-    protected function registerPayments()
+    protected function registerPayments(PluginModel $plugin)
     {
         $installer      = $this->container->get('shopware.plugin_payment_installer');
         $paymentFactory = new PaymentFactory(
@@ -109,7 +112,17 @@ class WirecardShopwareElasticEngine extends Plugin
         );
 
         foreach ($paymentFactory->getSupportedPayments() as $payment) {
-            $installer->createOrUpdate($payment->getName(), $payment->getPaymentOptions());
+            $installer->createOrUpdate($plugin->getName(), $payment->getPaymentOptions());
         }
+    }
+
+    private function deactivatePayments(PluginModel $plugin)
+    {
+        $em = $this->container->get('models');
+
+        foreach ($plugin->getPayments() as $payment) {
+            $payment->setActive(false);
+        }
+        $em->flush();
     }
 }
