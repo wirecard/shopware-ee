@@ -34,6 +34,7 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
+use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
@@ -146,14 +147,23 @@ class ReturnHandler extends Handler
     }
 
     /**
-     * @param FailureResponse $response
+     * @param FailureResponse|Response|mixed $response
      *
      * @return Action
      */
-    protected function handleFailure(FailureResponse $response)
+    protected function handleFailure($response)
     {
-        $this->logger->error('Return handling failed', $response->getData());
+        $message = 'Unexpected response';
+        $context = get_class($response);
 
-        return new ErrorAction(ErrorAction::FAILURE_RESPONSE, 'Failure response');
+        if ($response instanceof FailureResponse) {
+            $message = 'Failure response';
+        }
+        if ($response instanceof Response) {
+            $context = $response->getData();
+        }
+
+        $this->logger->error('Return handling failed: ' . $message, $context);
+        return new ErrorAction(ErrorAction::FAILURE_RESPONSE, $message);
     }
 }
