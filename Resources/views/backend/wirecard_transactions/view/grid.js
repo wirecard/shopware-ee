@@ -1,6 +1,6 @@
 Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
     extend: 'Shopware.grid.Panel',
-    alias: 'widget.order-listing-grid',
+    alias: 'widget.wirecard-transactions-grid',
     region: 'center',
 
     snippets: {
@@ -13,7 +13,6 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
         PaymentMethod: '{s name="PaymentMethod" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
         Amount: '{s name="Amount" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
         Currency: '{s name="Currency" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-
         OrderCanceledErrorTitle: '{s name="OrderCanceledErrorTitle" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
         OrderCanceledErrorText: '{s name="OrderCanceledErrorText" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}'
     },
@@ -72,11 +71,6 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
                 header: me.snippets.Currency,
                 draggable: false
             }
-            // created_at: {
-            //     header: me.snippets.orderTime,
-            //     renderer: me.dateColumnRenderer,
-            //     draggable: false
-            // }
         };
     },
 
@@ -113,6 +107,12 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
         return items;
     },
 
+    /**
+     * @param { String } value
+     * @param { Object } style
+     * @param { Object } row
+     * @returns { String }
+     */
     orderColumnRenderer: function (value, style, row) {
         if (value === Ext.undefined) {
             return value;

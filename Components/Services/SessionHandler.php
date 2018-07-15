@@ -31,13 +31,6 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
-use Shopware\Models\Order\Status;
-use Wirecard\PaymentSdk\Response\FailureResponse;
-use Wirecard\PaymentSdk\Response\Response;
-use Wirecard\PaymentSdk\Response\SuccessResponse;
-use WirecardShopwareElasticEngine\Exception\ParentTransactionNotFoundException;
-use WirecardShopwareElasticEngine\Models\Transaction;
-
 class SessionHandler
 {
     const ORDER = 'WirecardElasticEngineOrder';
