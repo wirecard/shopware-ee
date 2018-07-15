@@ -59,6 +59,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 {
     // @codingStandardsIgnoreEnd
 
+    const ROUTER_CONTROLLER = 'controller';
     const ROUTER_ACTION = 'action';
     const ROUTER_METHOD = 'method';
     const ROUTER_FORCE_SECURE = 'forceSecure';
@@ -98,8 +99,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         } catch (BasketException $e) {
             $this->get('pluginlogger')->notice($e->getMessage());
             return $this->redirect([
-                'controller'                          => 'checkout',
-                'action'                              => 'cart',
+                self::ROUTER_CONTROLLER               => 'checkout',
+                self::ROUTER_ACTION                   => 'cart',
                 'wirecard_elastic_engine_update_cart' => 'true',
             ]);
         }
@@ -154,7 +155,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         /** @var PaymentFactory $paymentFactory */
         $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
-        $payment        = $paymentFactory->create($request->getParam('method'));
+        $payment        = $paymentFactory->create($request->getParam(self::ROUTER_METHOD));
 
         $transactionService = new TransactionService($payment->getTransactionConfig(
             $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
@@ -186,7 +187,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         /** @var PaymentFactory $paymentFactory */
         $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
-        $payment        = $paymentFactory->create($request->getParam('method'));
+        $payment        = $paymentFactory->create($request->getParam(self::ROUTER_METHOD));
 
         $transactionService = new TransactionService($payment->getTransactionConfig(
             $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
@@ -322,8 +323,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         ]);
 
         return $this->redirect([
-            'controller'                         => 'checkout',
-            'action'                             => 'shippingPayment',
+            self::ROUTER_CONTROLLER              => 'checkout',
+            self::ROUTER_ACTION                  => 'shippingPayment',
             'wirecard_elastic_engine_error_code' => $code,
             'wirecard_elastic_engine_error_msg'  => $message,
         ]);

@@ -42,6 +42,9 @@ class SessionHandler
 {
     const ORDER = 'WirecardElasticEngineOrder';
 
+    const ORDER_NUMBER = 'orderNumber';
+    const BASKET_SIGNATURE = 'basketSignature';
+
     /**
      * @var \Enlight_Components_Session_Namespace
      */
@@ -59,8 +62,8 @@ class SessionHandler
     public function storeOrder($orderNumber, $basketSignature)
     {
         $this->session->offsetSet(self::ORDER, [
-            'orderNumber'     => $orderNumber,
-            'basketSignature' => $basketSignature,
+            self::ORDER_NUMBER     => $orderNumber,
+            self::BASKET_SIGNATURE => $basketSignature,
         ]);
     }
 
@@ -73,7 +76,7 @@ class SessionHandler
             return null;
         }
         $store = $this->session->offsetGet(self::ORDER);
-        return isset($store['orderNumber']) ? $store['orderNumber'] : null;
+        return isset($store[self::ORDER_NUMBER]) ? $store[self::ORDER_NUMBER] : null;
     }
 
     /**
@@ -85,7 +88,7 @@ class SessionHandler
             return null;
         }
         $store = $this->session->offsetGet(self::ORDER);
-        return isset($store['basketSignature']) ? $store['basketSignature'] : null;
+        return isset($store[self::BASKET_SIGNATURE]) ? $store[self::BASKET_SIGNATURE] : null;
     }
 
     public function clearOrder()
