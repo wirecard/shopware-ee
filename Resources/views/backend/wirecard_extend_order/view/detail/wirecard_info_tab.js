@@ -43,7 +43,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
         }
     },
 
-    initComponent: function() {
+    initComponent: function () {
         var me = this;
 
         me.items = [
@@ -55,7 +55,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
         me.loadData(me.record);
     },
 
-    createInfoContainer: function() {
+    createInfoContainer: function () {
         var me = this;
 
         return Ext.create('Ext.panel.Panel', {
@@ -65,8 +65,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
             margin: '10 0',
             flex: 1,
             paddingRight: 5,
-            items: [
-            ]
+            items: []
         });
     },
 
@@ -122,7 +121,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
         });
     },
 
-    createBackendOperationContainer: function() {
+    createBackendOperationContainer: function () {
         var me = this;
 
         return Ext.create('Ext.panel.Panel', {
@@ -131,26 +130,25 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
             bodyPadding: 10,
             flex: 1,
             paddingRight: 5,
-            items: [
-            ]
+            items: []
         });
     },
 
-    loadData: function(record) {
+    loadData: function (record) {
         var me = this,
             data = record.data,
             detailsStore = Ext.create('Shopware.apps.WirecardExtendOrder.store.WirecardOrderDetails'),
-            payMethod = record.getPayment().first().get('name'),
+            payment = record.getPayment().first().get('name'),
             infoPanel = me.child('[alias=wirecard-info-panel]'),
             backendOperationPanel = me.child(['[alias=wirecard-backend-operation]']);
 
         detailsStore.getProxy().extraParams = {
             orderNumber: data.number,
-            payMethod: payMethod
+            payment: payment
         };
 
         detailsStore.load({
-            callback: function(records, operation) {
+            callback: function (records, operation) {
                 var data = Array.isArray(records) && records.length === 1 ? records[0].getData() : false,
                     historyData = [];
                 window.DATA = data;
@@ -163,7 +161,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                     return;
                 }
 
-                data.transactions.forEach(function(transaction) {
+                data.transactions.forEach(function (transaction) {
                     historyData.push({
                         orderNumber: transaction.orderNumber,
                         parentTransactionId: transaction.parentTransactionId,
@@ -183,14 +181,14 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                     me.historyStore.loadData(historyData, false);
                 }
 
-                Object.keys(data.backendOperations).forEach(function(key) {
+                Object.keys(data.backendOperations).forEach(function (key) {
                     var operation = data.backendOperations[key];
 
                     backendOperationPanel.add(Ext.create('Ext.button.Button', {
                         text: me.snippets.buttons[operation],
                         cls: 'secondary',
                         action: 'wirecard-operation-' + key,
-                        handler: function() {
+                        handler: function () {
                             var backendOperationWindow = Ext.create('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
                                 record: me.record,
                                 data: data,
