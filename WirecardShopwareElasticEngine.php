@@ -62,17 +62,13 @@ class WirecardShopwareElasticEngine extends Plugin
         parent::uninstall($context);
 
         $this->deactivatePayments($context->getPlugin());
-
-        if ($context->keepUserData()) {
-            return;
-        }
     }
 
     public function update(UpdateContext $context)
     {
         parent::update($context);
 
-        $this->registerPayments($context->getPlugin());
+        $this->updatePayments($context->getPlugin());
         $this->updateDatabase();
     }
 
@@ -103,26 +99,48 @@ class WirecardShopwareElasticEngine extends Plugin
 
     protected function registerPayments(PluginModel $plugin)
     {
-        $installer      = $this->container->get('shopware.plugin_payment_installer');
-        $paymentFactory = new PaymentFactory(
-            $this->container->get('models'),
-            $this->container->get('config'),
-            $this->container->get('shopware_plugininstaller.plugin_manager'),
-            $this->container->get('router')
-        );
+        $installer = $this->container->get('shopware.plugin_payment_installer');
 
-        foreach ($paymentFactory->getSupportedPayments() as $payment) {
+        foreach ($this->getSupportedPayments() as $payment) {
+            $installer->createOrUpdate($plugin->getName(), $payment->getPaymentOptions());
+        }
+    }
+
+    protected function updatePayments(PluginModel $plugin)
+    {
+        $installer = $this->container->get('shopware.plugin_payment_installer');
+
+        $payments = [];
+        foreach ($plugin->getPayments() as $payment) {
+            $payments[$payment->getName()] = $payment;
+        }
+
+        foreach ($this->getSupportedPayments() as $payment) {
+            if (isset($payments[$payment->getName()])) {
+                continue;
+            }
             $installer->createOrUpdate($plugin->getName(), $payment->getPaymentOptions());
         }
     }
 
     private function deactivatePayments(PluginModel $plugin)
     {
-        $em = $this->container->get('models');
-
         foreach ($plugin->getPayments() as $payment) {
             $payment->setActive(false);
         }
+
+        $em = $this->container->get('models');
         $em->flush();
+    }
+
+    private function getSupportedPayments()
+    {
+        $paymentFactory = new PaymentFactory(
+            $this->container->get('models'),
+            $this->container->get('config'),
+            $this->container->get('shopware_plugininstaller.plugin_manager'),
+            $this->container->get('router')
+        );
+        return $paymentFactory->getSupportedPayments();
     }
 }
