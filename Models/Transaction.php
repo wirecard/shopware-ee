@@ -41,6 +41,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Transaction extends ModelEntity
 {
     const TYPE_INITIAL = 'initial';
+    const TYPE_BACKEND = 'backend';
     const TYPE_RETURN = 'return';
     const TYPE_NOTIFY = 'notify';
 
