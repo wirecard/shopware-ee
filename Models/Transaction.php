@@ -367,7 +367,7 @@ class Transaction extends ModelEntity
             'currency'                     => $this->getCurrency(),
             'createdAt'                    => $this->getCreatedAt(),
             'response'                     => $this->getResponse(),
-            'closed'                       => $this->getState()
+            'state'                        => $this->getState()
         ];
     }
 }
