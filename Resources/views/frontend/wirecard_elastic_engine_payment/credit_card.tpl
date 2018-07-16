@@ -11,12 +11,14 @@
         </div>
         {if $threeDSecure}
             <div class="content content--checkout">
-                <h2>Wirecard3DSecureInformation</h2>
+                <h2>{s name="CreditCard3DSTitle" namespace="frontend/wirecard_elastic_engine/checkout"}Wirecard3DSecureInformation{/s}</h2>
                 <form id="wirecardee-redirect--form" method="{$method}" action="{$url}">
                     {foreach from=$formFields item='field' key='key'}
                         <input type="hidden" name="{$key}" value="{$field}"/>
                     {/foreach}
-                    <button class="btn is--primary is--large right" type="submit">Senden</button>
+                    <button class="btn is--primary is--large right" type="submit">
+                        {s name="CreditCardSendButtonLabel" namespace="frontend/wirecard_elastic_engine/checkout"}Send{/s}
+                    </button>
                 </form>
                 <script type="text/javascript">
                     document.getElementById('wirecardee-redirect--form').submit();
@@ -28,7 +30,7 @@
                     <div id="wirecardee-credit-card--iframe-div" style="width: 100%; height: 550px;"></div>
                     <button id="wirecardee-credit-card--form-submit"
                             class="btn is--primary is--large right is--icon-right" type="submit">
-                        Senden
+                        {s name="CreditCardSendButtonLabel" namespace="frontend/wirecard_elastic_engine/checkout"}Send{/s}
                         <i class="icon--arrow-right"></i>
                     </button>
                 </form>
