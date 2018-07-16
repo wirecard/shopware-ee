@@ -111,7 +111,6 @@ class FrontendSubscriber implements SubscriberInterface
 
 
         if ($params['wirecardPayment'] && !empty($params['wirecardPayment'])) {
-
             $sessionHandler = $controller->get('wirecard_elastic_engine.session_handler');
             $sessionHandler->storeAdditionalPaymentData($params['wirecardPayment']);
         }
