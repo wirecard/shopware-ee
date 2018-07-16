@@ -215,7 +215,7 @@ class BasketMapper extends ArrayMapper
             $article    = $this->articles->sGetProductByOrdernumber($basketItem->getArticleNumber());
 
             if (! $article) {
-                // Some items (extra charges, coupon, ...) might have an order number but no article.
+                // Some items (extra charges, coupons, etc.) might have an order number but no article.
                 continue;
             }
 
