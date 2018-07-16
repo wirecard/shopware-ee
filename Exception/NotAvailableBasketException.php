@@ -29,27 +29,15 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Functional;
+namespace WirecardShopwareElasticEngine\Exception;
 
-use Shopware\Components\Test\Plugin\TestCase;
-use Wirecard\PaymentSdk\Config\Config;
-use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Mapper\BasketItemMapper;
+use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
 
-class ExampleTest extends TestCase
+class NotAvailableBasketException extends BasketException
 {
-    const API_TEST_URL = 'https://api-test.wirecard.com';
-    const HTTP_USER = '70000-APITEST-AP';
-    const HTTP_PASSWORD = 'qD2wzQ_hrc!8';
-
-    protected static $ensureLoadedPlugins = [
-        'WirecardShopwareElasticEngine',
-    ];
-
-    public function testCredentials()
+    public function __construct(array $article, BasketItemMapper $item, BasketMapper $basket)
     {
-        $testConfig         = new Config(self::API_TEST_URL, self::HTTP_USER, self::HTTP_PASSWORD);
-        $transactionService = new TransactionService($testConfig);
-
-        $this->assertTrue($transactionService->checkCredentials());
+        parent::__construct("Article '{$item->getArticleName()}' ({$item->getArticleNumber()}) is not available");
     }
 }

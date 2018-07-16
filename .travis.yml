@@ -30,6 +30,7 @@ env:
     - secure: ${SONAR_TOKEN}
     - COMPOSER_ARGS="--no-interaction"
     - PLUGIN_NAME=WirecardShopwareElasticEngine
+    - SHOPWARE_ENV=testing
     - SHOPWARE_DIRECTORY=${HOME}/shopware
     - WEBSERVER_PORT=8000
     - github_token:
@@ -48,11 +49,12 @@ before_script:
   - git clone https://github.com/shopware/shopware.git ${SHOPWARE_DIRECTORY} --branch 5.4
   - ant -f ${SHOPWARE_DIRECTORY}/build/build.xml -Dapp.host=localhost:8000 -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-unit
   - mv ${TRAVIS_BUILD_DIR} ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
-  - php ${HOME}/shopware/bin/console sw:plugin:refresh
-  - php ${HOME}/shopware/bin/console sw:plugin:install ${PLUGIN_NAME}
-  - php ${HOME}/shopware/bin/console sw:plugin:activate ${PLUGIN_NAME}
+  - php ${SHOPWARE_DIRECTORY}/bin/console sw:plugin:refresh
+  - php ${SHOPWARE_DIRECTORY}/bin/console sw:plugin:install ${PLUGIN_NAME}
+  - php ${SHOPWARE_DIRECTORY}/bin/console sw:plugin:activate ${PLUGIN_NAME}
+  - php ${SHOPWARE_DIRECTORY}/bin/console sw:cache:clear
   - cd ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
-  - SHOPWARE_ENV=development php -S localhost:${WEBSERVER_PORT} server.php &
+  - php -S localhost:${WEBSERVER_PORT} server.php &
   - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost:${WEBSERVER_PORT} &
 
 script:
@@ -60,7 +62,10 @@ script:
   - sonar-scanner
   - composer cs-check
   - npm run lint
+  - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
   - npm run test
+  - npm run test:creditcard
+  - npm run test:paypal
 
 after_script:
   - travis_retry composer upload-coverage

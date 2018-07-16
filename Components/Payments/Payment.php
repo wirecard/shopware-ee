@@ -31,28 +31,73 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
+use Doctrine\ORM\EntityManagerInterface;
+use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Shopware\Components\Routing\RouterInterface;
+use Shopware\Models\Shop\Shop;
+use Shopware_Components_Config;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
-use Wirecard\PaymentSdk\Entity\Amount;
-use Wirecard\PaymentSdk\Entity\Basket;
-use Wirecard\PaymentSdk\Entity\CustomField;
-use Wirecard\PaymentSdk\Entity\CustomFieldCollection;
-use Wirecard\PaymentSdk\Entity\Item;
-use Wirecard\PaymentSdk\Entity\AccountHolder;
-use Wirecard\PaymentSdk\Entity\Address;
-use Wirecard\PaymentSdk\Entity\Redirect;
-use Wirecard\PaymentSdk\Entity\Status;
-use Wirecard\PaymentSdk\Response\InteractionResponse;
-use Wirecard\PaymentSdk\Response\FailureResponse;
-use Wirecard\PaymentSdk\Transaction\Reservable;
-use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
-
-use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardShopwareElasticEngine\Exception\UnknownTransactionTypeException;
+use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
 
 abstract class Payment implements PaymentInterface
 {
+    const ACTION = 'WirecardElasticEnginePayment';
+
+    const TRANSACTION_OPERATION_PAY = 'pay';
+    const TRANSACTION_OPERATION_RESERVE = 'reserve';
+
     const TRANSACTION_TYPE_AUTHORIZATION = 'authorization';
     const TRANSACTION_TYPE_PURCHASE = 'purchase';
+    const TRANSACTION_TYPE_UNKNOWN = 'unknown';
+
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $em;
+
+    /**
+     * @var Shopware_Components_Config
+     */
+    protected $shopwareConfig;
+
+    /**
+     * @var InstallerService
+     */
+    protected $installerService;
+
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    /**
+     * @var \Enlight_Event_EventManager
+     */
+    protected $eventManager;
+
+    /**
+     * @param EntityManagerInterface      $em
+     * @param Shopware_Components_Config  $shopwareConfig
+     * @param InstallerService            $installerService
+     * @param RouterInterface             $router
+     * @param \Enlight_Event_EventManager $eventManager
+     */
+    public function __construct(
+        EntityManagerInterface $em,
+        Shopware_Components_Config $shopwareConfig,
+        InstallerService $installerService,
+        RouterInterface $router,
+        \Enlight_Event_EventManager $eventManager
+    ) {
+        $this->em               = $em;
+        $this->shopwareConfig   = $shopwareConfig;
+        $this->installerService = $installerService;
+        $this->router           = $router;
+        $this->eventManager     = $eventManager;
+    }
 
     /**
      * @inheritdoc
@@ -71,6 +116,14 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
+     * @return int
+     */
+    public function getPosition()
+    {
+        return 0;
+    }
+
+    /**
      * @inheritdoc
      */
     public function getPaymentOptions()
@@ -78,382 +131,70 @@ abstract class Payment implements PaymentInterface
         return [
             'name'                  => $this->getName(),
             'description'           => $this->getLabel(),
-            'action'                => 'WirecardElasticEnginePayment',
+            'action'                => self::ACTION,
             'active'                => 0,
-            'position'              => 0,
+            'position'              => $this->getPosition(),
             'additionalDescription' => '',
         ];
     }
 
     /**
-     * @inheritdoc
+     * @return string
+     * @throws UnknownTransactionTypeException
      */
-    public function processPayment(array $paymentData)
+    public function getTransactionType()
     {
-        $configData = $this->getConfigData();
-
-        $config = $this->getConfig($configData);
-
-        $transaction = $this->getTransaction();
-
-        $amount = new Amount($paymentData['amount'], $paymentData['currency']);
-
-        $redirectUrls = new Redirect($paymentData['returnUrl'], $paymentData['cancelUrl']);
-        $notificationUrl = $paymentData['notifyUrl'];
-
-        $transaction->setNotificationUrl($notificationUrl);
-        $transaction->setRedirect($redirectUrls);
-        $transaction->setAmount($amount);
-
-        $customFields = new CustomFieldCollection();
-        $customFields->add(new CustomField('signature', $paymentData['signature']));
-        $transaction->setCustomFields($customFields);
-
-        if ($configData['sendBasket']) {
-            $basket = $this->createBasket($transaction, $paymentData['basket'], $paymentData['currency']);
-            $transaction->setBasket($basket);
+        $operation = $this->getPaymentConfig()->getTransactionOperation();
+        if ($operation === self::TRANSACTION_OPERATION_PAY) {
+            return Payment::TRANSACTION_TYPE_PURCHASE;
         }
-
-        if ($configData['fraudPrevention']) {
-            $this->addConsumer($transaction, $paymentData['user']);
-            $transaction->setIpAddress($paymentData['ipAddr']);
-
-            $locale = Shopware()->Locale()->getLanguage();
-            if (strpos($locale, '@') !== false) {
-                $localeArr = explode('@', $locale);
-                $locale = $localeArr[0];
-            }
-            $transaction->setLocale($locale);
+        if ($operation === self::TRANSACTION_OPERATION_RESERVE) {
+            return Payment::TRANSACTION_TYPE_AUTHORIZATION;
         }
-
-        $elasticEngineTransaction = $this->createElasticEngineTransaction();
-        $orderNumber              = $elasticEngineTransaction->getId();
-        $transaction->setOrderNumber($orderNumber);
-
-        if ($configData['descriptor']) {
-            $descriptor = Shopware()->Config()->get('shopName') . ' ' . $orderNumber;
-            $transaction->setDescriptor($descriptor);
-        }
-
-        $this->addPaymentSpecificData($transaction, $paymentData, $configData);
-
-        $transactionService = new TransactionService($config, Shopware()->PluginLogger());
-
-        $response = null;
-        if ($configData['transactionType'] === self::TRANSACTION_TYPE_AUTHORIZATION
-            && $transaction instanceof Reservable) {
-            $response = $transactionService->reserve($transaction);
-        } elseif ($configData['transactionType'] === self::TRANSACTION_TYPE_PURCHASE) {
-            $response = $transactionService->pay($transaction);
-        }
-
-        if ($response instanceof InteractionResponse) {
-            $elasticEngineTransaction->setTransactionId($response->getTransactionId());
-            Shopware()->Models()->persist($elasticEngineTransaction);
-            Shopware()->Models()->flush();
-
-            return [
-                'status'   => 'success',
-                'redirect' => $response->getRedirectUrl()
-            ];
-        }
-
-        if ($response instanceof FailureResponse) {
-            $errors = '';
-
-            foreach ($response->getStatusCollection()->getIterator() as $item) {
-                /** @var $item Status */
-                $errors .= $item->getDescription() . "\n";
-            }
-
-            Shopware()->PluginLogger()->error($errors);
-        }
-
-        return ['status' => 'error'];
-    }
-
-    /**
-     * get payment settings
-     *
-     * @return array
-     */
-    public function getConfigData()
-    {
-        return [
-            'baseUrl'         => '',
-            'httpUser'        => '',
-            'httpPass'        => '',
-            'transactionMAID' => '',
-            'transactionKey'  => '',
-            'transactionType' => '',
-            'sendBasket'      => false,
-            'fraudPrevention' => false,
-            'descriptor'      => ''
-        ];
+        throw new UnknownTransactionTypeException($operation);
     }
 
     /**
      * @inheritdoc
      */
-    public function getConfig(array $configData)
+    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag)
     {
+        $config = new Config(
+            $this->getPaymentConfig()->getBaseUrl(),
+            $this->getPaymentConfig()->getHttpUser(),
+            $this->getPaymentConfig()->getHttpPassword()
+        );
+
+        $config->setShopInfo(
+            $parameterBag->get('kernel.name'),
+            $parameterBag->get('shopware.release.version')
+        );
+
+        $plugin = $this->installerService->getPluginByName(WirecardShopwareElasticEngine::NAME);
+
+        $config->setPluginInfo($plugin->getName(), $plugin->getVersion());
+
+        return $config;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function processReturn(
+        TransactionService $transactionService,
+        \Enlight_Controller_Request_Request $request
+    ) {
         return null;
     }
 
     /**
-     * @inheritdoc
-     */
-    public function getTransaction()
-    {
-        return null;
-    }
-
-    /**
-     * Adds consumer personal information, billing and shipping address to Transaction
+     * @param string $name
+     * @param string $prefix
      *
-     * @param WirecardTransaction $transaction
-     * @param array $userData
-     * @return WirecardTransaction
-     */
-    protected function addConsumer(WirecardTransaction $transaction, array $userData)
-    {
-        $user = $userData['additional']['user'];
-        $transaction->setConsumerId($user['userID']);
-
-        $firstName = $user['firstname'];
-        $lastName = $user['lastname'];
-        $email = $user['email'];
-
-        $accountHolder = new AccountHolder();
-        $accountHolder->setFirstName($firstName);
-        $accountHolder->setLastName($lastName);
-        $accountHolder->setEmail($email);
-
-        if (isset($user['birthday']) && $user['birthday']) {
-            $birthDate = new \DateTime($user['birthday']);
-            $accountHolder->setDateOfBirth($birthDate);
-        }
-
-        $billingData = $userData['billingaddress'];
-
-        if ($billingData['phone']) {
-            $accountHolder->setPhone($billingData['phone']);
-        }
-
-        $country = $userData['additional']['country']['countryiso'];
-
-        // SDK doesn't support state yet
-        //
-        // if (isset($userData['additional']['state']) &&
-        //    isset($userData['additional']['state']['shortcode']) &&
-        //    $userData['additional']['state']['shortcode']) {
-        //    $country .= '-' .  $userData['additional']['state']['shortcode'];
-        // }
-
-        $city = $billingData['city'];
-        $street = $billingData['street'];
-        $zip = $billingData['zipcode'];
-
-        $billingAddress = new Address($country, $city, $street);
-        $billingAddress->setPostalCode($zip);
-        if ($billingData['additionalAddressLine1']) {
-            $billingAddress->setStreet2($billingData['additionalAddressLine1']);
-        }
-
-        $accountHolder->setAddress($billingAddress);
-
-        $shippingData = $userData['shippingaddress'];
-
-        $shippingUser = new AccountHolder();
-        $shippingUser->setFirstName($shippingData['firstname']);
-        $shippingUser->setLastName($shippingData['lastname']);
-        $shippingUser->setPhone($shippingData['phone']);
-
-        $shippingCountry = $userData['additional']['countryShipping']['countryiso'];
-        $shippingCity = $shippingData['city'];
-        $shippingStreet = $shippingData['street'];
-        $shippingZip = $shippingData['zipcode'];
-
-        // SDK doesn't support state yet
-        //
-        //if (isset($userData['additional']['stateShipping']) &&
-        //    isset($userData['additional']['stateShipping']['shortcode']) &&
-        //    $userData['additional']['stateShipping']['shortcode']) {
-        //    $shippingCountry .= '-' . $userData['additional']['stateShipping']['shortcode'];
-        //}
-
-        $shippingAddress = new Address($shippingCountry, $shippingCity, $shippingStreet);
-        $shippingAddress->setPostalCode($shippingZip);
-
-        if ($shippingData['additionalAddressLine1']) {
-            $shippingAddress->setStreet2($shippingData['additionalAddressLine1']);
-        }
-
-        $shippingUser->setAddress($shippingAddress);
-
-        $transaction->setAccountHolder($accountHolder);
-        $transaction->setShipping($shippingUser);
-
-        return $transaction;
-    }
-
-    /**
-     * creates paymentSDK basket object
-     *
-     * @param WirecardTransaction $transaction
-     * @param array $cart
-     * @param string $currency
-     * @return Basket
-     */
-    protected function createBasket(WirecardTransaction $transaction, array $cart, $currency)
-    {
-        $basket = new Basket();
-        $basket->setVersion($transaction);
-
-        if (isset($cart['content'])) {
-            foreach ($cart['content'] as $item) {
-                $name        = $item['articlename'];
-                $sku         = $item['ordernumber'];
-                $description = $item['additional_details']['description'];
-                $taxRate     = floatval($item['tax_rate']);
-                $quantity    = $item['quantity'];
-
-                if (isset($item['additional_details'])) {
-                    if (isset($item['additional_details']['prices'])
-                        && count($item['additional_details']['prices']) === 1) {
-                        $price = $item['additional_details']['prices'][0]['price_numeric'];
-                    } else {
-                        $price = $item['additional_details']['price_numeric'];
-                    }
-                } else {
-                    $amountStr = $item['price'];
-                    $price     = floatval(str_replace(',', '.', $amountStr));
-                }
-                $amount = new Amount($price, $currency);
-
-                $taxStr = $item['tax'];
-                $taxStr = str_replace(',', '.', $taxStr);
-                $tax    = new Amount(floatval($taxStr) / $quantity, $currency);
-
-                $basketItem = new Item($name, $amount, $quantity);
-
-                $basketItem->setDescription($description);
-                $basketItem->setArticleNumber($sku);
-                $basketItem->setTaxRate($taxRate);
-                $basketItem->setTaxAmount($tax);
-
-                $basket->add($basketItem);
-            }
-        }
-
-        if (isset($cart["sShippingcostsWithTax"]) && $cart["sShippingcostsWithTax"]) {
-            $shippingAmount = new Amount($cart["sShippingcostsWithTax"], $currency);
-            $basketItem = new Item('Shipping', $shippingAmount, 1);
-
-            $basketItem->setDescription('Shipping');
-            $basketItem->setArticleNumber('shipping');
-
-            $shippingTaxValue = $cart["sShippingcostsWithTax"] - $cart['sShippingcostsNet'];
-            $shippingTax = new Amount($shippingTaxValue, $currency);
-            $basketItem->setTaxAmount($shippingTax);
-            $basketItem->setTaxRate($cart["sShippingcostsTax"]);
-            $basket->add($basketItem);
-        }
-
-        return $basket;
-    }
-
-    /**
-     * creates text representing basket
-     *
-     * @param array $cart
-     * @param string $currency
      * @return string
      */
-    protected function createBasketText(array $cart, $currency)
+    protected function getPluginConfig($name, $prefix = 'wirecardElasticEngine')
     {
-        $basketString = '';
-
-        foreach ($cart['content'] as $item) {
-            $name = $item['articlename'];
-            $sku = $item['ordernumber'];
-            $taxRate = floatval($item['tax_rate']);
-            $quantity = $item['quantity'];
-
-            if (isset($item['additional_details'])) {
-                if (isset($item['additional_details']['prices'])
-                    && count($item['additional_details']['prices']) === 1) {
-                    $price = $item['additional_details']['prices'][0]['price_numeric'];
-                } else {
-                    $price = $item['additional_details']['price_numeric'];
-                }
-            } else {
-                $amountStr = $item['price'];
-                $price = floatval(str_replace(',', '.', $amountStr));
-            }
-
-            $itemLine = $name . ' - ' . $sku . ' - ' . $price . ' ' . $currency . ' - ' .
-                      $quantity . ' - ' . $taxRate . '%';
-            $basketString .= $itemLine . "\n";
-        }
-
-        if (isset($cart["sShippingcostsWithTax"]) && $cart["sShippingcostsWithTax"]) {
-            $shippingLine = 'Shipping - shipping - ' . $cart["sShippingcostsWithTax"] . ' ' . $currency . ' - '
-                            . $cart["sShippingcostsTax"] . '%';
-            $basketString .= $shippingLine;
-        }
-
-        return $basketString;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function createElasticEngineTransaction()
-    {
-        $transactionModel = new Transaction();
-        Shopware()->Models()->persist($transactionModel);
-        Shopware()->Models()->flush();
-
-        return $transactionModel;
-    }
-
-    /**
-     * Extra Options for payments are added here
-     *
-     * @param WirecardTransaction $transaction
-     * @param array               $paymentData
-     * @param array               $configData
-     * @return WirecardTransaction
-     */
-    protected function addPaymentSpecificData(WirecardTransaction $transaction, array $paymentData, array $configData)
-    {
-        return $transaction;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getPaymentResponse(array $request)
-    {
-        $configData = $this->getConfigData();
-        $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
-        $service = new TransactionService($config);
-        $response = $service->handleResponse($request);
-
-        return $response;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getPaymentNotification($request)
-    {
-        $configData = $this->getConfigData();
-        $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
-        $service = new TransactionService($config);
-        $notification = $service->handleNotification($request);
-
-        return $notification;
+        return $this->shopwareConfig->getByNamespace(WirecardShopwareElasticEngine::NAME, $prefix . $name);
     }
 }

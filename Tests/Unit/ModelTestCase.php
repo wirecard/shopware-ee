@@ -29,32 +29,38 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components;
+namespace WirecardShopwareElasticEngine\Tests\Unit;
 
-class StatusCodes
+abstract class ModelTestCase extends \PHPUnit_Framework_TestCase
 {
-    /**
-     * User canceled payment
-     */
-    const CANCELED_BY_USER = 1;
+    protected $model;
 
-    /**
-     * Payment couldn't get started
-     */
-    const ERROR_STARTING_PROCESS_FAILED = 2;
+    abstract public function getModel();
 
-    /**
-     * Paymethod does not exist
-     */
-    const ERROR_NOT_A_VALID_METHOD = 3;
+    public function setUp()
+    {
+        $this->model = $this->getModel();
+    }
 
-    /**
-     * Payment got rejected
-     */
-    const ERROR_FAILURE_RESPONSE = 4;
+    public function assertGetterAndSetter($property, $value, $assertInitialNull = true, $setter = null, $getter = null)
+    {
+        if (! $setter) {
+            $setter = 'set' . ucfirst($property);
+        }
 
-    /**
-     * Critical error - order could not get saved
-     */
-    const ERROR_CRITICAL_NO_ORDER = 5;
+        if (! $getter) {
+            $getter = 'get' . ucfirst($property);
+        }
+
+        if (! method_exists($this->model, $setter) || ! method_exists($this->model, $getter)) {
+            throw new \Exception('Getter or setter not defined for ' . get_class($this->model) . ' (' . $property . ')');
+        }
+
+        if ($assertInitialNull) {
+            $this->assertNull($this->model->$getter());
+        }
+
+        $this->model->$setter($value);
+        $this->assertSame($this->model->$getter(), $value);
+    }
 }

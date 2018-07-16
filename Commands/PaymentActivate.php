@@ -29,12 +29,48 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit;
+namespace WirecardShopwareElasticEngine\Commands;
 
-class DefaultTest extends \PHPUnit_Framework_TestCase
+use Shopware\Commands\ShopwareCommand;
+use Shopware\Models\Plugin\Plugin;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
+
+class PaymentActivate extends ShopwareCommand
 {
-    public function testDefault()
+    /**
+     * {@inheritdoc}
+     */
+    protected function configure()
     {
-        $this->assertEquals(3, 3);
+        $this
+            ->setName('wirecardelasticengine:payment:activate')
+            ->setDescription('Activate all Wirecard EE payment methods.');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $em = $this->container->get('models');
+
+        /** @var Plugin $plugin */
+        $plugin = $em->getRepository(Plugin::class)->findOneBy(['name' => WirecardShopwareElasticEngine::NAME]);
+        if (! $plugin) {
+            throw new \RuntimeException("Plugin '" . WirecardShopwareElasticEngine::NAME . "' not found");
+        }
+
+        foreach ($plugin->getPayments() as $payment) {
+            $action = 'already active';
+            if (! $payment->getActive()) {
+                $payment->setActive(true);
+                $action = 'activated';
+            }
+            $name = $payment->getName() . ' (' . $payment->getDescription() . ')';
+            $output->writeln("Payment method <info>$name</info> $action.");
+        }
+        $em->flush();
     }
 }

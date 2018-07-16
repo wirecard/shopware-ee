@@ -30,8 +30,8 @@
 
 /* eslint-env mocha */
 
-const {expect} = require('chai');
-const {Builder, By, until} = require('selenium-webdriver');
+const { expect } = require('chai');
+const { Builder, By, until } = require('selenium-webdriver');
 
 describe('default test', () => {
     const driver = new Builder()
@@ -60,8 +60,21 @@ describe('default test', () => {
         // Wait for the cart to be shown
         await driver.wait(until.elementLocated(By.className('button--checkout')));
 
-        // Checkout
+        // Go to checkout page
         await driver.findElement(By.className('button--checkout')).click();
+
+        // Go to payment selection page select "prepayment"
+        await driver.findElement(By.className('btn--change-payment')).click();
+        await driver.findElement(By.id('payment_mean5')).click();
+
+        // Go back to checkout page and test if payment method has been selected
+        const overlay = await driver.findElements(By.className('js--overlay'));
+        if (overlay.length) {
+            await driver.wait(until.elementIsNotVisible(overlay[0]));
+        }
+        await driver.findElement(By.className('main--actions')).click();
+
+        // Check AGB and confirm order
         await driver.findElement(By.id('sAGB')).click();
         await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
 

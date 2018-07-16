@@ -29,5 +29,12 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-require_once __DIR__ . '/../../../../../tests/Functional/bootstrap.php';
+namespace WirecardShopwareElasticEngine\Exception;
 
+class ArrayKeyNotFoundException extends \Exception
+{
+    public function __construct($key, $className, array $arrayEntity)
+    {
+        parent::__construct("Array key (${key}) not found in ${className}: " . var_export($arrayEntity, true));
+    }
+}

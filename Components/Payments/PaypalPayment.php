@@ -31,14 +31,23 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
-use Wirecard\PaymentSdk\Config\Config;
+use Shopware\Models\Shop\Shop;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
+use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
-use Wirecard\PaymentSdk\Transaction\Transaction as WirecardTransaction;
+use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
+use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
 
 class PaypalPayment extends Payment
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_paypal';
+
+    /**
+     * @var PayPalTransaction
+     */
+    private $transactionInstance;
 
     /**
      * @inheritdoc
@@ -57,19 +66,11 @@ class PaypalPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * @return int
      */
-    public function getConfig(array $configData)
+    public function getPosition()
     {
-        $config = new Config($configData['baseUrl'], $configData['httpUser'], $configData['httpPass']);
-        $paypalConfig = new PaymentMethodConfig(
-            PayPalTransaction::NAME,
-            $configData['transactionMAID'],
-            $configData['transactionKey']
-        );
-        $config->add($paypalConfig);
-
-        return $config;
+        return 1;
     }
 
     /**
@@ -77,78 +78,69 @@ class PaypalPayment extends Payment
      */
     public function getTransaction()
     {
-        return new PayPalTransaction();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getConfigData()
-    {
-        $baseUrl = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalServer'
-        );
-        $httpUser = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalHttpUser'
-        );
-        $httpPass = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalHttpPassword'
-        );
-
-        $paypalMAID = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalMerchandId'
-        );
-        $paypalKey = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalSecret'
-        );
-        $transactionType = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalTransactionType'
-        );
-
-        $sendBasket = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalSendBasket'
-        );
-        $fraudPrevention = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalFraudPrevention'
-        );
-
-        $descriptor = Shopware()->Config()->getByNamespace(
-            'WirecardShopwareElasticEngine',
-            'wirecardElasticEnginePaypalDescriptor'
-        );
-
-        return array_merge(parent::getConfigData(), [
-            'baseUrl'         => $baseUrl,
-            'httpUser'        => $httpUser,
-            'httpPass'        => $httpPass,
-            'transactionMAID' => $paypalMAID,
-            'transactionKey'  => $paypalKey,
-            'transactionType' => $transactionType,
-            'sendBasket'      => $sendBasket,
-            'fraudPrevention' => $fraudPrevention,
-            'descriptor'      => $descriptor
-        ]);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function addPaymentSpecificData(WirecardTransaction $transaction, array $paymentData, array $configData)
-    {
-        $orderDetail = $this->createBasketText($paymentData['basket'], $paymentData['currency']);
-
-        if ($transaction instanceof PayPalTransaction) {
-            $transaction->setOrderDetail($orderDetail);
+        if (! $this->transactionInstance) {
+            $this->transactionInstance = new PayPalTransaction();
         }
+        return $this->transactionInstance;
+    }
 
-        return $transaction;
+    /**
+     * @inheritdoc
+     */
+    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag)
+    {
+        $config = parent::getTransactionConfig($shop, $parameterBag);
+        $config->add(new PaymentMethodConfig(
+            PayPalTransaction::NAME,
+            $this->getPaymentConfig()->getTransactionMAID(),
+            $this->getPaymentConfig()->getTransactionSecret()
+        ));
+
+        return $config;
+    }
+
+
+    /**
+     * @inheritdoc
+     */
+    public function getPaymentConfig()
+    {
+        $paymentConfig = new PaymentConfig(
+            $this->getPluginConfig('PaypalServer'),
+            $this->getPluginConfig('PaypalHttpUser'),
+            $this->getPluginConfig('PaypalHttpPassword')
+        );
+
+        $paymentConfig->setTransactionMAID($this->getPluginConfig('PaypalMerchantId'));
+        $paymentConfig->setTransactionSecret($this->getPluginConfig('PaypalSecret'));
+        $paymentConfig->setTransactionOperation($this->getPluginConfig('PaypalTransactionType'));
+        $paymentConfig->setSendBasket($this->getPluginConfig('PaypalSendBasket'));
+        $paymentConfig->setFraudPrevention($this->getPluginConfig('PaypalFraudPrevention'));
+        $paymentConfig->setSendDescriptor($this->getPluginConfig('PaypalDescriptor'));
+
+        return $paymentConfig;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function processPayment(
+        OrderSummary $orderSummary,
+        TransactionService $transactionService,
+        Shop $shop,
+        Redirect $redirect,
+        \Enlight_Controller_Request_Request $request,
+        \sOrder $shopwareOrder
+    ) {
+        $transaction = $this->getTransaction();
+
+        $transaction->setOrderDetail(sprintf(
+            '%s - %.2f %s',
+            $orderSummary->getOrderNumber(),
+            $orderSummary->getAmount()->getValue(),
+            $orderSummary->getAmount()->getCurrency()
+        ));
+
+        return null;
     }
 }
