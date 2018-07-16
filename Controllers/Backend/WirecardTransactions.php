@@ -110,7 +110,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
 
         $transactions = $this->get('models')
                              ->getRepository(Transaction::class)
-                             ->findOneBy([
+                             ->findBy([
                                  'orderNumber' => $orderNumber,
                              ]);
 
@@ -125,7 +125,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         $backendService = new BackendService($config, $this->get('pluginlogger'));
 
         $result = [
-            'transactions' => [],
+            'transactions'      => [],
             'backendOperations' => $backendService->retrieveBackendOperations(
                 $payment->getTransaction()->setParentTransactionId($transactions)
             )
