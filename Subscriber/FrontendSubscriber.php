@@ -109,11 +109,11 @@ class FrontendSubscriber implements SubscriberInterface
 
         $params = $request->getParams();
 
+
         if ($params['wirecardPayment'] && !empty($params['wirecardPayment'])) {
-            Shopware()->Session()->offsetSet('WirecardElasticEnginePaymentData', [
-                'additionalData' => $params['wirecardPayment']
-            ]);
-            // $this->sessionHandler->storeAdditionalPaymentData($params['wirecardPayment']);
+
+            $sessionHandler = $controller->get('wirecard_elastic_engine.session_handler');
+            $sessionHandler->storeAdditionalPaymentData($params['wirecardPayment']);
         }
 
         if ($request->getActionName() === 'finish') {
