@@ -31,10 +31,11 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
+use Wirecard\PaymentSdk\BackendService;
+use Wirecard\PaymentSdk\Entity\Status;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Transaction\Transaction;
-use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
@@ -42,16 +43,16 @@ use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 class BackendOperationHandler extends Handler
 {
     /**
-     * @param Transaction        $transaction
-     * @param TransactionService $transactionService
-     * @param string             $operation
+     * @param Transaction    $transaction
+     * @param BackendService $transactionService
+     * @param string         $operation
      *
      * @return Action
      * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
      */
     public function execute(
         Transaction $transaction,
-        TransactionService $transactionService,
+        BackendService $transactionService,
         $operation
     ) {
         try {
@@ -76,7 +77,14 @@ class BackendOperationHandler extends Handler
 
         if ($response instanceof FailureResponse) {
             $this->logger->error('Backend operation failed', $response->getData());
-            return new ErrorAction(ErrorAction::BACKEND_OPERATION_FAILED, 'BackendOperationFailed');
+
+            $errors = [];
+            foreach ($response->getStatusCollection() as $status) {
+                /** @var Status $status */
+                $errors[] = $status->getDescription();
+            }
+
+            return new ErrorAction(ErrorAction::BACKEND_OPERATION_FAILED, join("\n", $errors));
         }
 
         $this->logger->error('Backend operation failed', $response->getData());
