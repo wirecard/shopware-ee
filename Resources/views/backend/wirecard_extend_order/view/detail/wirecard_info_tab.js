@@ -48,8 +48,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
 
         me.items = [
             me.createInfoContainer(),
-            me.createTransactionsContainer(),
-            me.createBackendOperationContainer()
+            me.createTransactionsContainer()
         ];
         me.callParent(arguments);
         me.loadData(me.record);
@@ -85,7 +84,9 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                 'createdAt',
                 'amount',
                 'currency',
-                'response'
+                'response',
+                'backendOperations',
+                'isFinal'
             ],
             data: []
         });
@@ -103,14 +104,66 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                 { text: me.snippets.transactionsTable.currency, dataIndex: 'currency', flex: 1 },
                 {
                     xtype: 'actioncolumn',
-                    width: 50,
+                    width: 150,
                     items: [{
                         iconCls: 'sprite-magnifier-medium',
-                        tooltip: 'Open history details',
+                        tooltip: 'Open transaction details',
 
                         handler: function (view, rowIndex, colIndex, item, opts, record) {
                             var historyWindow = Ext.create('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', { record: record });
                             historyWindow.show();
+                        }
+                    }, {
+                        iconCls: 'sprite-cheque--plus',
+                        tooltip: 'Pay / Capture',
+
+                        handler: function(view, row, col, item, opts, record) {
+                            me.showAmountDialog(record.data, 'pay');
+                        },
+
+                        getClass: function(value, meta, record) {
+                            var transaction = record.data;
+
+                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.pay) {
+                                return 'x-hide-display';
+                            }
+                        }
+                    }, {
+                        iconCls: 'sprite-arrow-circle-315',
+                        tooltip: 'Refund',
+
+                        handler: function(view, row, col, item, opts, record) {
+                            me.showAmountDialog(record.data, 'refund');
+                        },
+
+                        getClass: function(value, meta, record) {
+                            var transaction = record.data;
+                            console.log(record.data);
+
+                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.refund) {
+                                return 'x-hide-display';
+                            }
+                        }
+                    }, {
+                        iconCls: 'sprite-cross-circle',
+                        tooltip: 'Cancel / Refund',
+
+                        handler: function(view, row, col, item, opts, record) {
+                            Ext.MessageBox.confirm('Cancel', 'Cancel transaction?', function(choice) {
+                                if (choice === 'no') {
+                                    return false;
+                                }
+
+                                me.processBackendOperation(record.data, 'cancel');
+                            });
+                        },
+
+                        getClass: function(value, meta, record) {
+                            var transaction = record.data;
+
+                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.cancel) {
+                                return 'x-hide-display';
+                            }
                         }
                     }]
                 }
@@ -121,17 +174,31 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
         });
     },
 
-    createBackendOperationContainer: function () {
+    showAmountDialog: function (transaction, operation) {
         var me = this;
-
-        return Ext.create('Ext.panel.Panel', {
-            title: me.snippets.backendOperationTitle,
-            alias: 'wirecard-backend-operation',
-            bodyPadding: 10,
-            flex: 1,
-            paddingRight: 5,
-            items: []
-        });
+        var win = Ext.create('Ext.window.Window', {
+            title: 'Set amount',
+            layout: 'fit',
+            width: 300,
+            height: 100,
+            items: {
+                id: 'transaction-amount',
+                xtype: 'numberfield',
+                fieldLabel: 'Amount',
+                value: transaction.amount
+            },
+            buttons: [{
+                text: 'Submit',
+                handler: function() {
+                    me.processBackendOperation(transaction, operation, Ext.getCmp('transaction-amount').getValue());
+                }
+            }, {
+                text: 'Close',
+                handler: function() {
+                    win.close();
+                }
+            }]
+        }).show();
     },
 
     loadData: function (record) {
@@ -148,7 +215,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
         };
 
         detailsStore.load({
-            callback: function (records, operation) {
+            callback: function (records) {
                 var data = Array.isArray(records) && records.length === 1 ? records[0].getData() : false,
                     historyData = [];
                 window.DATA = data;
@@ -173,7 +240,9 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                         transactionType: transaction.transactionType,
                         amount: transaction.amount,
                         currency: transaction.currency,
-                        response: transaction.response
+                        response: transaction.response,
+                        backendOperations: transaction.backendOperations,
+                        isFinal: transaction.isFinal
                     });
                 });
 
@@ -183,6 +252,10 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
 
                 Object.keys(data.backendOperations).forEach(function (key) {
                     var operation = data.backendOperations[key];
+
+                    if (!operation) {
+                        return;
+                    }
 
                     backendOperationPanel.add(Ext.create('Ext.button.Button', {
                         text: me.snippets.buttons[operation],
@@ -200,6 +273,39 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                         }
                     }));
                 });
+            }
+        });
+    },
+
+    processBackendOperation(transaction, operation, amount = null) {
+        var me = this;
+
+        return Ext.Ajax.request({
+            url: '{url controller="wirecardTransactions" action="processBackendOperations"}',
+            params: {
+                operation: operation,
+                payment: me.record.getPayment().first().get('name'),
+                transactionId: transaction.transactionId,
+                amount: amount,
+                currency: transaction.currency
+            },
+            success: function(response) {
+                var data = Ext.decode(response.responseText);
+
+                if (data.success) {
+                    Shopware.Notification.createStickyGrowlMessage({
+                        title: 'Erfolg',
+                        text: 'Operation erfolgreich durchgeführt',
+                        width: 400
+                    });
+                } else {
+                    console.error(data);
+                    Shopware.Notification.createStickyGrowlMessage({
+                        title: 'Fehlgeschlagen',
+                        text: data.message,
+                        width: 400
+                    });
+                }
             }
         });
     }
