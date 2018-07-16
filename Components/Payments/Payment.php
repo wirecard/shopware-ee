@@ -74,6 +74,11 @@ abstract class Payment implements PaymentInterface
     protected $router;
 
     /**
+     * @var array
+     */
+    protected $additionalData;
+
+    /**
      * @param EntityManagerInterface     $em
      * @param Shopware_Components_Config $shopwareConfig
      * @param InstallerService           $installerService
@@ -177,6 +182,14 @@ abstract class Payment implements PaymentInterface
     public function getAdditionalFormFields()
     {
         return null;
+    }
+
+    /**
+     * @param array $additionalData
+     */
+    public function setAdditionalPaymentData(array $additionalData)
+    {
+        $this->additionalData = $additionalData;
     }
 
     /**

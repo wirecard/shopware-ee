@@ -79,6 +79,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
         $payment        = $paymentFactory->create($this->getPaymentShortName());
 
+        $additionalData = $this->get('wirecard_elastic_engine.session_handler')->getAdditionalPaymentData();
+
+        if ($additionalData) {
+            $payment->setAdditionalPaymentData($additionalData);
+        }
+
         try {
             $userMapper   = new UserMapper(
                 $this->getUser(),

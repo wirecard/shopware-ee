@@ -69,13 +69,11 @@ class FrontendSubscriber implements SubscriberInterface
     public function __construct(
         $pluginDirectory,
         \Enlight_Template_Manager $templateManager,
-        PaymentFactory $paymentFactory,
-        SessionHandler $sessionHandler
+        PaymentFactory $paymentFactory
     ) {
         $this->pluginDirectory = $pluginDirectory;
         $this->templateManager = $templateManager;
         $this->paymentFactory  = $paymentFactory;
-        $this->sessionHandler  = $sessionHandler;
     }
 
     public static function getSubscribedEvents()
@@ -112,7 +110,10 @@ class FrontendSubscriber implements SubscriberInterface
         $params = $request->getParams();
 
         if ($params['wirecardPayment'] && !empty($params['wirecardPayment'])) {
-            $this->sessionHandler->storeAdditionalPaymentData($params['wirecardPayment']);
+            Shopware()->Session()->offsetSet('WirecardElasticEnginePaymentData', [
+                'additionalData' => $params['wirecardPayment']
+            ]);
+            // $this->sessionHandler->storeAdditionalPaymentData($params['wirecardPayment']);
         }
 
         if ($request->getActionName() === 'finish') {

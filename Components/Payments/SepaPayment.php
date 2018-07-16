@@ -33,6 +33,9 @@ namespace WirecardShopwareElasticEngine\Components\Payments;
 
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Wirecard\PaymentSdk\Config\SepaConfig;
+use Wirecard\PaymentSdk\Entity\AccountHolder;
+use Wirecard\PaymentSdk\Entity\Mandate;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\SepaDirectDebitTransaction;
 use Wirecard\PaymentSdk\TransactionService;
@@ -87,6 +90,14 @@ class SepaPayment extends Payment
     {
         $config = parent::getTransactionConfig($shop, $parameterBag);
 
+        $sepaDirectDebitConfig = new SepaConfig(
+            SepaDirectDebitTransaction::NAME,
+            $this->getPaymentConfig()->getTransactionMAID(),
+            $this->getPaymentConfig()->getTransactionSecret()
+        );
+        $sepaDirectDebitConfig->setCreditorId($this->getPaymentConfig()->getCreditorId());
+
+        $config->add($sepaDirectDebitConfig);
         return $config;
     }
 
@@ -109,6 +120,7 @@ class SepaPayment extends Payment
         $paymentConfig->setCreditorName($this->getPluginConfig('SepaCreditorName'));
         $paymentConfig->setCreditorAddress($this->getPluginConfig('SepaCreditorAddress'));
         $paymentConfig->setMandateText($this->getPluginConfig('SepaMandateText'));
+
         return $paymentConfig;
     }
 
@@ -140,6 +152,35 @@ class SepaPayment extends Payment
         \Enlight_Controller_Request_Request $request,
         \sOrder $shopwareOrder
     ) {
-        // TODO
+        if (! isset($this->additionalData['sepaIban']) ||
+            ! isset($this->additionalData['sepaFirstName']) ||
+            ! isset($this->additionalData['sepaLastName'])) {
+            // TODO
+            exit();
+        }
+
+        $transaction = $this->getTransaction();
+
+        $accountHolder = new AccountHolder();
+        $accountHolder->setFirstName($this->additionalData['sepaFirstName']);
+        $accountHolder->setLastName($this->additionalData['sepaLastName']);
+        $transaction->setAccountHolder($accountHolder);
+
+        $transaction->setIban($this->additionalData['sepaIban']);
+
+        if ($this->getPluginConfig('SepaShowBic')) {
+            $transaction->setBic($this->additionalData['sepaBic']);
+        }
+
+        $mandate = new Mandate($this->generateMandate($orderSummary));
+        $transaction->setMandate($mandate);
+    }
+
+    private function generateMandate(OrderSummary $orderSummary)
+    {
+        return
+            $this->getPluginConfig('SepaCreditorId') . '-' .
+            $orderSummary->getOrderNumber() . '-' .
+            strtotime(date('Y-m-d H:i:s'));
     }
 }

@@ -317,7 +317,7 @@ function (button) {
             <name>wirecardElasticEngineSepaHttpUser</name>
             <label lang="de">[Sepa] HTTP Benutzer</label>
             <label lang="en">[Sepa] HTTP User</label>
-            <value>70000-APITEST-AP</value>
+            <value>16390-testing</value>
             <description lang="de">HTTP Benutzer</description>
             <description lang="en">HTTP User</description>
         </element>
@@ -325,7 +325,7 @@ function (button) {
             <name>wirecardElasticEngineSepaHttpPassword</name>
             <label lang="de">[Sepa] HTTP Passwort</label>
             <label lang="en">[Sepa] HTTP Password</label>
-            <value>qD2wzQ_hrc!8</value>
+            <value>3!3013=D3fD8X7</value>
             <description lang="de">HTTP Passwort</description>
             <description lang="en">HTTP Password</description>
         </element>
