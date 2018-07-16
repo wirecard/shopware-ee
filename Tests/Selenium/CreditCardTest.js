@@ -33,7 +33,7 @@
 const { expect } = require('chai');
 const { Builder, By, until } = require('selenium-webdriver');
 
-describe('default test', () => {
+describe('credit card test', () => {
     const driver = new Builder()
         .forBrowser('chrome')
         .build();
@@ -41,8 +41,14 @@ describe('default test', () => {
     const url = 'http://localhost:8000';
     const mail = 'test@example.com';
     const password = 'shopware';
+    const paymentLabel = 'Wirecard Credit Card';
+    const creditCardFields = {
+        last_name: 'Lastname',
+        account_number: '4012000300001003',
+        card_security_code: '003'
+    };
 
-    it('should check the default checkout', async () => {
+    it('should check the credit card payment process', async () => {
         // Log in with example account
         await driver.get(`${url}/account`);
         await driver.wait(until.elementLocated(By.name('email')));
@@ -63,9 +69,12 @@ describe('default test', () => {
         // Go to checkout page
         await driver.findElement(By.className('button--checkout')).click();
 
-        // Go to payment selection page select "prepayment"
+        // Go to payment selection page, check if wirecard payments are present and select credit card
         await driver.findElement(By.className('btn--change-payment')).click();
-        await driver.findElement(By.id('payment_mean5')).click();
+        ['payment_mean7', 'payment_mean8'].forEach(async id => {
+            await driver.findElement(By.id(id));
+        });
+        await driver.findElement(By.xpath("//*[contains(text(), '" + paymentLabel + "')]")).click();
 
         // Go back to checkout page and test if payment method has been selected
         const overlay = await driver.findElements(By.className('js--overlay'));
@@ -73,17 +82,31 @@ describe('default test', () => {
             await driver.wait(until.elementIsNotVisible(overlay[0]));
         }
         await driver.findElement(By.className('main--actions')).click();
+        const paymentDescription = await driver.findElement(By.className('payment--description')).getText();
+        expect(paymentDescription).to.include(paymentLabel);
 
         // Check AGB and confirm order
         await driver.findElement(By.id('sAGB')).click();
         await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
 
-        // Done, check for success.
+        // Fill out credit card iframe
+        await driver.wait(until.elementLocated(By.className('wirecard-seamless-frame')));
+        await driver.wait(until.ableToSwitchToFrame(By.className('wirecard-seamless-frame')));
+        await driver.wait(until.elementLocated(By.id('account_number')));
+        Object.keys(creditCardFields).forEach(async field => {
+            await driver.findElement(By.id(field)).sendKeys(creditCardFields[field]);
+        });
+        await driver.findElement(By.css('#expiration_month_list > option[value=\'01\']')).click();
+        await driver.findElement(By.css('#expiration_year_list > option[value=\'2030\']')).click();
+
+        driver.switchTo().defaultContent();
+        await driver.findElement(By.id('wirecardee-credit-card--form-submit')).click();
+
         await driver.wait(until.elementLocated(By.className('teaser--btn-print')));
-
         const panelTitle = await driver.findElement(By.className('panel--title')).getText();
-
         expect(panelTitle).to.include('Vielen Dank');
+        const paymentContent = await driver.findElement(By.className('payment--content')).getText();
+        expect(paymentContent).to.include(paymentLabel);
     });
 
     after(async () => driver.quit());

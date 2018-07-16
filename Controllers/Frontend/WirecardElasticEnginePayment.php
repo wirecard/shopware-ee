@@ -93,7 +93,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $this->getModules()->Articles(),
                 $payment->getTransaction()
             );
-            $amount       = new Amount($this->getAmount(), $this->getCurrencyShortName());
+            $amount       = new Amount(BasketMapper::numberFormat($this->getAmount()), $this->getCurrencyShortName());
         } catch (BasketException $e) {
             $this->getLogger()->notice($e->getMessage());
             return $this->redirect([

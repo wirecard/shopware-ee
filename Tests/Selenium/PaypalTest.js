@@ -33,7 +33,7 @@
 const { expect } = require('chai');
 const { Builder, By, until } = require('selenium-webdriver');
 
-describe('default test', () => {
+describe('paypal test', () => {
     const driver = new Builder()
         .forBrowser('chrome')
         .build();
@@ -41,8 +41,20 @@ describe('default test', () => {
     const url = 'http://localhost:8000';
     const mail = 'test@example.com';
     const password = 'shopware';
+    const paymentLabel = 'Wirecard PayPal';
+    const payPalLoginFields = {
+        email: 'paypal.buyer2@wirecard.com',
+        password: 'Wirecardbuyer'
+    };
 
-    it('should check the default checkout', async () => {
+    async function waitUntilOverlayIsNotVisible(locator) {
+        const overlay = await driver.findElements(locator);
+        if (overlay.length) {
+            await driver.wait(until.elementIsNotVisible(overlay[0]));
+        }
+    }
+
+    it('should check the paypal payment process', async () => {
         // Log in with example account
         await driver.get(`${url}/account`);
         await driver.wait(until.elementLocated(By.name('email')));
@@ -63,27 +75,53 @@ describe('default test', () => {
         // Go to checkout page
         await driver.findElement(By.className('button--checkout')).click();
 
-        // Go to payment selection page select "prepayment"
+        // Go to payment selection page, check if wirecard payments are present and select paypal
         await driver.findElement(By.className('btn--change-payment')).click();
-        await driver.findElement(By.id('payment_mean5')).click();
+        ['payment_mean7', 'payment_mean8'].forEach(async id => {
+            await driver.findElement(By.id(id));
+        });
+        await driver.findElement(By.xpath("//*[contains(text(), '" + paymentLabel + "')]")).click();
 
         // Go back to checkout page and test if payment method has been selected
-        const overlay = await driver.findElements(By.className('js--overlay'));
-        if (overlay.length) {
-            await driver.wait(until.elementIsNotVisible(overlay[0]));
-        }
+        await waitUntilOverlayIsNotVisible(By.className('js--overlay'));
         await driver.findElement(By.className('main--actions')).click();
+        const paymentDescription = await driver.findElement(By.className('payment--description')).getText();
+        expect(paymentDescription).to.include(paymentLabel);
 
         // Check AGB and confirm order
         await driver.findElement(By.id('sAGB')).click();
         await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
 
-        // Done, check for success.
+        // Log in to paypal
+        await waitUntilOverlayIsNotVisible(By.id('preloaderSpinner'));
+
+        await driver.wait(until.elementLocated(By.id('loginSection')));
+        await driver.wait(driver.findElement(By.css('#loginSection .btn')).click());
+
+        await waitUntilOverlayIsNotVisible(By.id('preloaderSpinner'));
+
+        await driver.wait(until.elementLocated(By.id('btnNext')));
+        await driver.wait(until.elementLocated(By.id('email')));
+        await driver.findElement(By.id('email')).sendKeys(payPalLoginFields.email);
+        await driver.wait(driver.findElement(By.id('btnNext')).click());
+
+        await waitUntilOverlayIsNotVisible(By.className('spinnerWithLockIcon'));
+
+        await driver.wait(until.elementLocated(By.id('btnLogin')));
+        await driver.wait(until.elementLocated(By.id('password')));
+        await driver.findElement(By.id('password')).sendKeys(payPalLoginFields.password);
+        await driver.wait(driver.findElement(By.id('btnLogin')).click());
+
+        await waitUntilOverlayIsNotVisible(By.id('preloaderSpinner'));
+
+        await driver.wait(until.elementLocated(By.id('confirmButtonTop')));
+        await driver.wait(driver.findElement(By.id('confirmButtonTop')).click());
+
         await driver.wait(until.elementLocated(By.className('teaser--btn-print')));
-
         const panelTitle = await driver.findElement(By.className('panel--title')).getText();
-
         expect(panelTitle).to.include('Vielen Dank');
+        const paymentContent = await driver.findElement(By.className('payment--content')).getText();
+        expect(paymentContent).to.include(paymentLabel);
     });
 
     after(async () => driver.quit());
