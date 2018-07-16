@@ -52,8 +52,9 @@ before_script:
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:plugin:refresh
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:plugin:install ${PLUGIN_NAME}
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:plugin:activate ${PLUGIN_NAME}
+  - php ${SHOPWARE_DIRECTORY}/bin/console sw:cache:clear
   - cd ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
-  - SHOPWARE_ENV=testing php -S localhost:${WEBSERVER_PORT} server.php &
+  - php -S localhost:${WEBSERVER_PORT} server.php &
   - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost:${WEBSERVER_PORT} &
 
 script:
