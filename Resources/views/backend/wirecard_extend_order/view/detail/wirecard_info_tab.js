@@ -86,7 +86,9 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                 'currency',
                 'response',
                 'backendOperations',
-                'isFinal'
+                'isFinal',
+                'state',
+                'type'
             ],
             data: []
         });
@@ -124,7 +126,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                         getClass: function(value, meta, record) {
                             var transaction = record.data;
 
-                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.pay) {
+                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.pay || transaction.state === 'closed' || transaction.type === 'return') {
                                 return 'x-hide-display';
                             }
                         }
@@ -138,9 +140,8 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
 
                         getClass: function(value, meta, record) {
                             var transaction = record.data;
-                            console.log(record.data);
 
-                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.refund) {
+                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.refund || transaction.state === 'closed' || transaction.type === 'return') {
                                 return 'x-hide-display';
                             }
                         }
@@ -161,7 +162,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                         getClass: function(value, meta, record) {
                             var transaction = record.data;
 
-                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.cancel) {
+                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.cancel || transaction.state === 'closed' || transaction.type === 'return') {
                                 return 'x-hide-display';
                             }
                         }
@@ -242,7 +243,9 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                         currency: transaction.currency,
                         response: transaction.response,
                         backendOperations: transaction.backendOperations,
-                        isFinal: transaction.isFinal
+                        isFinal: transaction.isFinal,
+                        state: transaction.state,
+                        type: transaction.type
                     });
                 });
 

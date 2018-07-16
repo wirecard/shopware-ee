@@ -63,11 +63,13 @@ class BackendOperationHandler extends Handler
         }
 
         if ($response instanceof SuccessResponse) {
-            $this->transactionFactory->create(
+            $transaction = $this->transactionFactory->create(
                 $this->getOrderFromResponse($response)->getNumber(),
                 $response,
                 \WirecardShopwareElasticEngine\Models\Transaction::TYPE_BACKEND
             );
+
+            $this->updateTransactionState($transaction);
 
             return new ViewAction(null, [
                 'success'       => true,
@@ -89,5 +91,41 @@ class BackendOperationHandler extends Handler
 
         $this->logger->error('Backend operation failed', $response->getData());
         return new ErrorAction(ErrorAction::BACKEND_OPERATION_FAILED, 'BackendOperationFailedUnknownResponse');
+    }
+
+    /**
+     * @param \WirecardShopwareElasticEngine\Models\Transaction $transaction
+     */
+    private function updateTransactionState(\WirecardShopwareElasticEngine\Models\Transaction $transaction)
+    {
+        $parentTransaction = $this->em
+            ->getRepository(\WirecardShopwareElasticEngine\Models\Transaction::class)
+            ->findOneBy([
+                'parentTransactionId' => $transaction->getParentTransactionId()
+            ]);
+
+        if (! $parentTransaction) {
+            return;
+        }
+
+        $childTransactions = $this->em
+            ->getRepository(\WirecardShopwareElasticEngine\Models\Transaction::class)
+            ->findBy([
+                'parentTransactionId' => $transaction->getParentTransactionId(),
+                'transactionType'     => $transaction->getTransactionType(),
+            ]);
+
+        $totalAmount = $parentTransaction->getAmount();
+
+        foreach ($childTransactions as $transaction) {
+            $totalAmount -= $transaction->getAmount();
+        }
+
+        if ($totalAmount > 0) {
+            return;
+        }
+
+        $transaction->setState(\WirecardShopwareElasticEngine\Models\Transaction::STATE_CLOSED);
+        $this->em->flush();
     }
 }
