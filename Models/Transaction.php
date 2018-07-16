@@ -127,6 +127,12 @@ class Transaction extends ModelEntity
     private $createdAt;
 
     /**
+     * @var bool
+     * @ORM\Column(name="closed", type="boolean")
+     */
+    private $closed = false;
+
+    /**
      * @return int|null
      */
     public function getId()
@@ -326,6 +332,22 @@ class Transaction extends ModelEntity
         return $this->createdAt;
     }
 
+    /**
+     * @return bool
+     */
+    public function isClosed()
+    {
+        return $this->closed;
+    }
+
+    /**
+     * @param $closed
+     */
+    public function setClosed($closed)
+    {
+        $this->closed = $closed;
+    }
+
     public function toArray()
     {
         return [
@@ -342,6 +364,7 @@ class Transaction extends ModelEntity
             'currency'                     => $this->getCurrency(),
             'createdAt'                    => $this->getCreatedAt(),
             'response'                     => $this->getResponse(),
+            'closed'                       => $this->isClosed()
         ];
     }
 }
