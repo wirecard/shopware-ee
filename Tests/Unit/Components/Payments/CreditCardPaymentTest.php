@@ -60,7 +60,13 @@ class CreditCardPaymentTest extends PaymentTestCase
             [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineCreditCardThreeDMinLimit', null, '100'],
         ]);
 
-        $this->payment = new CreditCardPayment($this->em, $this->config, $this->installer, $this->router);
+        $this->payment = new CreditCardPayment(
+            $this->em,
+            $this->config,
+            $this->installer,
+            $this->router,
+            $this->eventManager
+        );
     }
 
     public function testGetPaymentOptions()
@@ -130,14 +136,14 @@ class CreditCardPaymentTest extends PaymentTestCase
         $config->method('getByNamespace')->willReturnMap([
             [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalTransactionType', null, 'pay'],
         ]);
-        $payment = new PaypalPayment($this->em, $config, $this->installer, $this->router);
+        $payment = new PaypalPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
         $this->assertEquals('purchase', $payment->getTransactionType());
 
         $config = $this->createMock(\Shopware_Components_Config::class);
         $config->method('getByNamespace')->willReturnMap([
             [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalTransactionType', null, 'reserve'],
         ]);
-        $payment = new PaypalPayment($this->em, $config, $this->installer, $this->router);
+        $payment = new PaypalPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
         $this->assertEquals('authorization', $payment->getTransactionType());
     }
 }

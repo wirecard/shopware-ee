@@ -54,13 +54,15 @@ class PaymentFactoryTest extends TestCase
         /** @var \Shopware_Components_Config|\PHPUnit_Framework_MockObject_MockObject $config */
         /** @var InstallerService|\PHPUnit_Framework_MockObject_MockObject $installer */
         /** @var RouterInterface|\PHPUnit_Framework_MockObject_MockObject $router */
+        /** @var \Enlight_Event_EventManager|\PHPUnit_Framework_MockObject_MockObject $router */
 
-        $em        = $this->createMock(EntityManagerInterface::class);
-        $config    = $this->createMock(\Shopware_Components_Config::class);
-        $installer = $this->createMock(InstallerService::class);
-        $router    = $this->createMock(RouterInterface::class);
+        $em           = $this->createMock(EntityManagerInterface::class);
+        $config       = $this->createMock(\Shopware_Components_Config::class);
+        $installer    = $this->createMock(InstallerService::class);
+        $router       = $this->createMock(RouterInterface::class);
+        $eventManager = $this->createMock(\Enlight_Event_EventManager::class);
 
-        $this->factory = new PaymentFactory($em, $config, $installer, $router);
+        $this->factory = new PaymentFactory($em, $config, $installer, $router, $eventManager);
     }
 
     public function testPaypalInstance()

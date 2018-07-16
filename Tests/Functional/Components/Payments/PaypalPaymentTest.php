@@ -60,18 +60,28 @@ class PaypalPaymentTest extends TestCase
     /** @var RouterInterface $config */
     private $router;
 
+    /** @var \Enlight_Event_EventManager $config */
+    private $eventManager;
+
     /** @var PaypalPayment */
     protected $payment;
 
     public function setUp()
     {
-        $this->container = \Shopware()->Container();
-        $this->em        = $this->container->get('models');
-        $this->config    = $this->container->get('config');
-        $this->installer = $this->container->get('shopware_plugininstaller.plugin_manager');
-        $this->router    = $this->container->get('router');
+        $this->container    = \Shopware()->Container();
+        $this->em           = $this->container->get('models');
+        $this->config       = $this->container->get('config');
+        $this->installer    = $this->container->get('shopware_plugininstaller.plugin_manager');
+        $this->router       = $this->container->get('router');
+        $this->eventManager = $this->container->get('events');
 
-        $this->payment = new PaypalPayment($this->em, $this->config, $this->installer, $this->router);
+        $this->payment = new PaypalPayment(
+            $this->em,
+            $this->config,
+            $this->installer,
+            $this->router,
+            $this->eventManager
+        );
     }
 
     public function testGetPaymentOptions()

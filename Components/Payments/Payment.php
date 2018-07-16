@@ -74,21 +74,29 @@ abstract class Payment implements PaymentInterface
     protected $router;
 
     /**
-     * @param EntityManagerInterface     $em
-     * @param Shopware_Components_Config $shopwareConfig
-     * @param InstallerService           $installerService
-     * @param RouterInterface            $router
+     * @var \Enlight_Event_EventManager
+     */
+    protected $eventManager;
+
+    /**
+     * @param EntityManagerInterface      $em
+     * @param Shopware_Components_Config  $shopwareConfig
+     * @param InstallerService            $installerService
+     * @param RouterInterface             $router
+     * @param \Enlight_Event_EventManager $eventManager
      */
     public function __construct(
         EntityManagerInterface $em,
         Shopware_Components_Config $shopwareConfig,
         InstallerService $installerService,
-        RouterInterface $router
+        RouterInterface $router,
+        \Enlight_Event_EventManager $eventManager
     ) {
         $this->em               = $em;
         $this->shopwareConfig   = $shopwareConfig;
         $this->installerService = $installerService;
         $this->router           = $router;
+        $this->eventManager     = $eventManager;
     }
 
     /**
