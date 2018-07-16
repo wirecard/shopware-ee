@@ -179,7 +179,7 @@ class BasketItemMapper extends ArrayMapper
     {
         $this->validateItem();
 
-        $amount   = new Amount($this->getPrice(), $this->currency);
+        $amount   = new Amount(BasketMapper::numberFormat($this->getPrice()), $this->currency);
         $quantity = $this->getQuantity();
 
         $item = new Item($this->getArticleName(), $amount, $quantity);
@@ -188,7 +188,7 @@ class BasketItemMapper extends ArrayMapper
 
         // Negative tax amount results in api-error "400.1221 order item tax amount is invalid"
         if ($amount->getValue() >= 0.0) {
-            $taxAmount = new Amount($this->getTax() / $quantity, $this->currency);
+            $taxAmount = new Amount(BasketMapper::numberFormat($this->getTax() / $quantity), $this->currency);
             $item->setTaxRate($this->getTaxRate());
             $item->setTaxAmount($taxAmount);
         }

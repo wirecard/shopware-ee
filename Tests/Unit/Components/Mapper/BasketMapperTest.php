@@ -256,4 +256,43 @@ class BasketMapperTest extends TestCase
         $this->expectException(InvalidBasketException::class);
         new BasketMapper([], 'EUR', $articles, $transaction);
     }
+
+    /**
+     * @dataProvider numberFormatProvider
+     *
+     * @param string       $expected
+     * @param string|float $amount
+     */
+    public function testNumberFormat($expected, $amount)
+    {
+        $this->assertSame($expected, BasketMapper::numberFormat($amount));
+    }
+
+    public function numberFormatProvider()
+    {
+        return [
+            ['0.00', 0],
+            ['1.00', 1],
+            ['-1.00', -1],
+            ['1.10', 1.10],
+            ['-1.10', -1.1],
+            ['10000.50', 10000.5],
+            ['10.99', 10.99],
+            ['11.00', 10.99999999],
+            ['11.00', 10.995],
+            ['10.99', 10.9949],
+            ['10.00', 10.0001],
+            ['0.00', '0'],
+            ['1.00', '1'],
+            ['-1.00', '-1'],
+            ['1.10', '1.10'],
+            ['-1.10', '-1.1'],
+            ['10000.50', '10000.5'],
+            ['10.99', '10.99'],
+            ['11.00', '10.99999999'],
+            ['11.00', '10.995'],
+            ['10.99', '10.9949'],
+            ['10.00', '10.0001'],
+        ];
+    }
 }
