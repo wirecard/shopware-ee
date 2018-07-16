@@ -3,7 +3,7 @@
 {block name='frontend_checkout_confirm_information_wrapper'}
     {$smarty.block.parent}
     {if $wirecardFormFields}
-        <div class="panel has--border">
+        <div class="panel has--border wirecard--aditional-form-fields">
             <div class="panel--title primary is--underline">
                 Additional Form Fields
             </div>
