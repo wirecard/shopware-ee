@@ -75,6 +75,16 @@ class PaymentFactoryTest extends TestCase
         $payments = $this->factory->getSupportedPayments();
         foreach ($payments as $payment) {
             $this->assertInstanceOf(PaymentInterface::class, $payment);
+            $this->assertStringStartsWith('wirecard_elastic_engine_', $payment->getName());
+            $this->assertStringStartsWith('Wirecard ', $payment->getLabel());
+            $options = $payment->getPaymentOptions();
+            $this->assertTrue(is_array($options));
+            $this->assertArrayHasKey('name', $options);
+            $this->assertArrayHasKey('description', $options);
+            $this->assertArrayHasKey('action', $options);
+            $this->assertArrayHasKey('active', $options);
+            $this->assertArrayHasKey('position', $options);
+            $this->assertArrayHasKey('additionalDescription', $options);
         }
     }
 

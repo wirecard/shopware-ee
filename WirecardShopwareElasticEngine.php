@@ -133,7 +133,11 @@ class WirecardShopwareElasticEngine extends Plugin
         $em->flush();
     }
 
-    private function getSupportedPayments()
+    /**
+     * @return Components\Payments\PaymentInterface[]
+     * @throws Exception\UnknownPaymentException
+     */
+    public function getSupportedPayments()
     {
         $paymentFactory = new PaymentFactory(
             $this->container->get('models'),
