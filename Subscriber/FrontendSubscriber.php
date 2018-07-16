@@ -37,6 +37,7 @@ use Shopware\Components\Theme\LessDefinition;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
+use WirecardShopwareElasticEngine\Components\Services\SessionHandler;
 
 class FrontendSubscriber implements SubscriberInterface
 {
@@ -56,6 +57,11 @@ class FrontendSubscriber implements SubscriberInterface
     private $paymentFactory;
 
     /**
+     * @var SessionHandler
+     */
+    private $sessionHandler;
+
+    /**
      * @param string                    $pluginDirectory
      * @param \Enlight_Template_Manager $templateManager
      * @param PaymentFactory            $paymentFactory
@@ -63,11 +69,13 @@ class FrontendSubscriber implements SubscriberInterface
     public function __construct(
         $pluginDirectory,
         \Enlight_Template_Manager $templateManager,
-        PaymentFactory $paymentFactory
+        PaymentFactory $paymentFactory,
+        SessionHandler $sessionHandler
     ) {
         $this->pluginDirectory = $pluginDirectory;
         $this->templateManager = $templateManager;
         $this->paymentFactory  = $paymentFactory;
+        $this->sessionHandler  = $sessionHandler;
     }
 
     public static function getSubscribedEvents()
@@ -75,7 +83,7 @@ class FrontendSubscriber implements SubscriberInterface
         return [
             'Enlight_Controller_Action_PreDispatch'                          => 'onPreDispatch',
             'Theme_Compiler_Collect_Plugin_Less'                             => 'onCollectLessFiles',
-            'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchCheckout',
+            'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchCheckout'
         ];
     }
 
@@ -100,6 +108,12 @@ class FrontendSubscriber implements SubscriberInterface
         $controller = $args->getSubject();
         $request    = $controller->Request();
         $view       = $controller->View();
+
+        $params = $request->getParams();
+
+        if ($params['wirecardPayment'] && !empty($params['wirecardPayment'])) {
+            $this->sessionHandler->storeAdditionalPaymentData($params['wirecardPayment']);
+        }
 
         if ($request->getActionName() === 'finish') {
             $this->assignPaymentStatus($view);

@@ -41,6 +41,7 @@ use WirecardShopwareElasticEngine\Models\Transaction;
 class SessionHandler
 {
     const ORDER = 'WirecardElasticEngineOrder';
+    const PAYMENT_DATA = 'WirecardElasticEnginePaymentData';
 
     /**
      * @var \Enlight_Components_Session_Namespace
@@ -91,5 +92,28 @@ class SessionHandler
     public function clearOrder()
     {
         $this->session->offsetSet(self::ORDER, []);
+    }
+
+    /**
+     * @param array $additionalData
+     */
+    public function storeAdditionalPaymentData(array $additionalData)
+    {
+        $this->session->offsetSet(self::PAYMENT_DATA, [
+            'additionalData' => $additionalData
+        ]);
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getAdditionalPaymentData()
+    {
+        if (! $this->session->offsetExists(self::PAYMENT_DATA)) {
+            return null;
+        }
+
+        $store = $this->session->offsetGet(self::PAYMENT_DATA);
+        return isset($store['additionalData']) ? $store['additionalData'] : null;
     }
 }
