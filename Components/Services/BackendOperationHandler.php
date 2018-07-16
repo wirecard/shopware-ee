@@ -35,6 +35,7 @@ use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Transaction\Transaction;
 use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 
@@ -44,20 +45,15 @@ class BackendOperationHandler extends Handler
      * @param Transaction        $transaction
      * @param TransactionService $transactionService
      * @param string             $operation
-     * @param string             $notificationUrl
      *
-     * @return ErrorAction
+     * @return Action
+     * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
      */
     public function execute(
         Transaction $transaction,
         TransactionService $transactionService,
-        $operation,
-        $notificationUrl
+        $operation
     ) {
-        $transaction->setNotificationUrl($notificationUrl);
-
-        // TODO: eventually implement payment specific backend operation processing
-
         try {
             $response = $transactionService->process($transaction, $operation);
         } catch (\Exception $e) {
@@ -66,22 +62,24 @@ class BackendOperationHandler extends Handler
         }
 
         if ($response instanceof SuccessResponse) {
-            return $this->handleSuccess($response);
+            $this->transactionFactory->create(
+                $this->getOrderFromResponse($response)->getNumber(),
+                $response,
+                \WirecardShopwareElasticEngine\Models\Transaction::TYPE_BACKEND
+            );
+
+            return new ViewAction(null, [
+                'success'       => true,
+                'transactionId' => $response->getTransactionId(),
+            ]);
         }
 
         if ($response instanceof FailureResponse) {
-            return $this->handleFailure($response);
+            $this->logger->error('Backend operation failed', $response->getData());
+            return new ErrorAction(ErrorAction::BACKEND_OPERATION_FAILED, 'BackendOperationFailed');
         }
-    }
 
-    protected function handleSuccess(SuccessResponse $response)
-    {
-        return new ViewAction(null, [
-            'transactionId' => $response->getTransactionId()
-        ]);
-    }
-
-    protected function handleFailure(FailureResponse $response)
-    {
+        $this->logger->error('Backend operation failed', $response->getData());
+        return new ErrorAction(ErrorAction::BACKEND_OPERATION_FAILED, 'BackendOperationFailedUnknownResponse');
     }
 }
