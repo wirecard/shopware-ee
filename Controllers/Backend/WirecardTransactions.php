@@ -172,13 +172,6 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
 
         $transaction = $payment->getTransaction();
         $transaction->setParentTransactionId($transactionId);
-        $transaction->setNotificationUrl($this->get('router')->assemble([
-            'module'      => 'frontend',
-            'controller'  => 'WirecardElasticEnginePayment',
-            'action'      => 'notify',
-            'method'      => $payment->getName(),
-            'transaction' => $transactionId, // todo: required?
-        ]));
 
         if ($amount) {
             $transaction->setAmount(new Amount($amount, $currency));
