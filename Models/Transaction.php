@@ -45,6 +45,9 @@ class Transaction extends ModelEntity
     const TYPE_RETURN = 'return';
     const TYPE_NOTIFY = 'notify';
 
+    const STATE_OPEN = 'open';
+    const STATE_CLOSED = 'closed';
+
     /**
      * @var int
      *
@@ -127,10 +130,10 @@ class Transaction extends ModelEntity
     private $createdAt;
 
     /**
-     * @var bool
-     * @ORM\Column(name="closed", type="boolean")
+     * @var string
+     * @ORM\Column(name="state", type="string")
      */
-    private $closed = false;
+    private $state = self::STATE_OPEN;
 
     /**
      * @return int|null
@@ -335,17 +338,17 @@ class Transaction extends ModelEntity
     /**
      * @return bool
      */
-    public function isClosed()
+    public function getState()
     {
-        return $this->closed;
+        return $this->state;
     }
 
     /**
-     * @param $closed
+     * @param $state
      */
-    public function setClosed($closed)
+    public function setState($state)
     {
-        $this->closed = $closed;
+        $this->state = $state;
     }
 
     public function toArray()
@@ -364,7 +367,7 @@ class Transaction extends ModelEntity
             'currency'                     => $this->getCurrency(),
             'createdAt'                    => $this->getCreatedAt(),
             'response'                     => $this->getResponse(),
-            'closed'                       => $this->isClosed()
+            'closed'                       => $this->getState()
         ];
     }
 }
