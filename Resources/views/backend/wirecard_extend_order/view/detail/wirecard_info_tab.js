@@ -44,6 +44,8 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
         }
     },
 
+    detailStore: null,
+
     initComponent: function () {
         var me = this;
 
@@ -181,6 +183,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
         var me = this;
         var win = Ext.create('Ext.window.Window', {
             title: 'Set amount',
+            id: 'transaction-amount-window',
             layout: 'fit',
             width: 300,
             height: 100,
@@ -205,19 +208,25 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
     },
 
     loadData: function (record) {
-        var me = this,
-            data = record.data,
-            detailsStore = Ext.create('Shopware.apps.WirecardExtendOrder.store.WirecardOrderDetails'),
-            payment = record.getPayment().first().get('name'),
-            infoPanel = me.child('[alias=wirecard-info-panel]'),
-            backendOperationPanel = me.child(['[alias=wirecard-backend-operation]']);
+        var data = record.data,
+            payment = record.getPayment().first().get('name');
+        this.detailsStore = Ext.create('Shopware.apps.WirecardExtendOrder.store.WirecardOrderDetails');
 
-        detailsStore.getProxy().extraParams = {
+        this.detailsStore.getProxy().extraParams = {
             orderNumber: data.number,
             payment: payment
         };
 
-        detailsStore.load({
+        this.loadStore();
+    },
+
+    loadStore: function() {
+        var me = this,
+            infoPanel = me.child('[alias=wirecard-info-panel]');
+
+        me.child('[alias=wirecard-transaction-history]').disable();
+
+        this.detailsStore.load({
             callback: function (records) {
                 var data = Array.isArray(records) && records.length === 1 ? records[0].getData() : false,
                     historyData = [];
@@ -255,35 +264,15 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                     me.historyStore.loadData(historyData, false);
                 }
 
-                Object.keys(data.backendOperations).forEach(function (key) {
-                    var operation = data.backendOperations[key];
-
-                    if (!operation) {
-                        return;
-                    }
-
-                    backendOperationPanel.add(Ext.create('Ext.button.Button', {
-                        text: me.snippets.buttons[operation],
-                        cls: 'secondary',
-                        action: 'wirecard-operation-' + key,
-                        handler: function () {
-                            var backendOperationWindow = Ext.create('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
-                                record: me.record,
-                                data: data,
-                                operation: operation,
-                                title: 'BackendOperationWindow: ' + operation
-                            });
-                            backendOperationWindow.show();
-                            // me.processBackendOperation(operationType);
-                        }
-                    }));
-                });
+                me.child('[alias=wirecard-transaction-history]').enable();
             }
         });
     },
 
     processBackendOperation(transaction, operation, amount = null) {
         var me = this;
+
+        Ext.getCmp('transaction-amount-window').mask('Loading...');
 
         return Ext.Ajax.request({
             url: '{url controller="wirecardTransactions" action="processBackendOperations"}',
@@ -303,13 +292,16 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                         text: 'Operation erfolgreich durchgeführt',
                         width: 400
                     });
+                    me.loadStore();
+                    Ext.getCmp('transaction-amount-window').close();
                 } else {
-                    console.error(data);
                     Shopware.Notification.createStickyGrowlMessage({
                         title: 'Fehlgeschlagen',
                         text: data.message,
                         width: 400
                     });
+                    me.loadStore();
+                    Ext.getCmp('transaction-amount-window').close();
                 }
             }
         });
