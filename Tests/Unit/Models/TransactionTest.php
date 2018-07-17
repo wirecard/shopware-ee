@@ -31,7 +31,6 @@
 
 namespace WirecardShopwareElasticEngine\Tests\Unit\Models;
 
-use Shopware\Models\Order\Order;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Models\Transaction;
 use WirecardShopwareElasticEngine\Tests\Unit\ModelTestCase;
@@ -58,14 +57,38 @@ class TransactionTest extends ModelTestCase
         $this->assertGetterAndSetter('orderNumber', 1337);
         $this->assertGetterAndSetter('parentTransactionId', '6832b2f0-792b-4161-9f9a-f2916f7aae8e');
         $this->assertGetterAndSetter('transactionType', Payment::TRANSACTION_TYPE_PURCHASE);
-        $this->assertGetterAndSetter('transactionId', '6832b2f0-792b-4161-9f9a-f2916f7aae8e');
-        $this->assertGetterAndSetter('providerTransactionId', '6832b2f0-792b-4161-9f9a-f2916f7aae8e');
+        $this->assertGetterAndSetter('transactionId', '6832b2f0-abcd-4161-9f9a-f2916f7aae8e');
+        $this->assertGetterAndSetter('providerTransactionId', '6832b2f0-efgh-4161-9f9a-f2916f7aae8e');
+        $this->assertGetterAndSetter('providerTransactionReference', 'foo');
+        $this->assertGetterAndSetter('requestId', 'bar');
         $this->assertGetterAndSetter('amount', 42.42);
         $this->assertGetterAndSetter('currency', 'USD');
+        $this->assertGetterAndSetter('type', Transaction::TYPE_NOTIFY);
+        $this->assertGetterAndSetter('state', Transaction::STATE_CLOSED, Transaction::STATE_OPEN);
         $this->assertGetterAndSetter('response', [
-            'transaction-id' => '6832b2f0-792b-4161-9f9a-f2916f7aae8e',
-            'request-id'     => 'db2616a7bc7d140ec4e20117c8582a54',
+            'transaction-id' => '6832b2f0-abcd-4161-9f9a-f2916f7aae8e',
+            'request-id'     => 'bar',
         ]);
+
+        $this->assertEquals([
+            'id'                           => null,
+            'orderNumber'                  => 1337,
+            'transactionType'              => Payment::TRANSACTION_TYPE_PURCHASE,
+            'transactionId'                => '6832b2f0-abcd-4161-9f9a-f2916f7aae8e',
+            'parentTransactionId'          => '6832b2f0-792b-4161-9f9a-f2916f7aae8e',
+            'providerTransactionId'        => '6832b2f0-efgh-4161-9f9a-f2916f7aae8e',
+            'providerTransactionReference' => 'foo',
+            'requestId'                    => 'bar',
+            'type'                         => 'notify',
+            'amount'                       => 42.42,
+            'currency'                     => 'USD',
+            'createdAt'                    => null,
+            'response'                     => [
+                'transaction-id' => '6832b2f0-abcd-4161-9f9a-f2916f7aae8e',
+                'request-id'     => 'bar',
+            ],
+            'state'                        => 'closed',
+        ], $this->model->toArray());
     }
 
     public function testCreatedAt()

@@ -29,36 +29,29 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit;
+namespace WirecardShopwareElasticEngine\Tests\Unit\Subscriber;
 
-abstract class ModelTestCase extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+use WirecardShopwareElasticEngine\Components\Payments\Payment;
+use WirecardShopwareElasticEngine\Subscriber\OrderSubscriber;
+
+class OrderSubscriberTest extends TestCase
 {
-    protected $model;
-
-    abstract public function getModel();
-
-    public function setUp()
+    public function testSubscribedEvents()
     {
-        $this->model = $this->getModel();
+        $this->assertEquals([
+            'Shopware_Modules_Order_SendMail_Send' => 'onOrderShouldSendMail',
+        ], OrderSubscriber::getSubscribedEvents());
     }
 
-    public function assertGetterAndSetter($property, $value, $initialValue = null, $setter = null, $getter = null)
+    public function testOnOrderShouldSendMail()
     {
-        if (! $setter) {
-            $setter = 'set' . ucfirst($property);
-        }
+        $subscriber = new OrderSubscriber();
 
-        if (! $getter) {
-            $getter = 'get' . ucfirst($property);
-        }
+        $this->assertNull($subscriber->onOrderShouldSendMail(new \Enlight_Controller_ActionEventArgs()));
 
-        if (! method_exists($this->model, $setter) || ! method_exists($this->model, $getter)) {
-            throw new \Exception('Getter or setter not defined for ' . get_class($this->model) . " ($property)");
-        }
-
-        $this->assertEquals($initialValue, $this->model->$getter());
-
-        $this->model->$setter($value);
-        $this->assertSame($this->model->$getter(), $value);
+        $args = new \Enlight_Controller_ActionEventArgs();
+        $args->set('variables', ['additional' => ['payment' => ['action' => Payment::ACTION]]]);
+        $this->assertFalse($subscriber->onOrderShouldSendMail($args));
     }
 }
