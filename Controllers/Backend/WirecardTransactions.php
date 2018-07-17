@@ -125,9 +125,11 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
             return $this->handleError('No transactions found');
         }
 
+        $shop               = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
         $config             = $payment->getTransactionConfig(
-            $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
-            $this->container->getParameterBag()
+            $shop,
+            $this->container->getParameterBag(),
+            $shop->getCurrency()->getCurrency()
         );
         $backendService     = new BackendService($config, $this->getLogger());
         $paymentTransaction = $payment->getTransaction();
@@ -167,9 +169,11 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
         $payment        = $paymentFactory->create($this->Request()->getParam('payment'));
 
+        $shop           = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
         $config         = $payment->getTransactionConfig(
-            $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
-            $this->container->getParameterBag()
+            $shop,
+            $this->container->getParameterBag(),
+            $shop->getCurrency()->getCurrency()
         );
         $backendService = new BackendService($config, $this->getLogger());
 

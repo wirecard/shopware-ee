@@ -126,7 +126,7 @@ class CreditCardPaymentTest extends TestCase
     {
         $shop = $this->container->get('models')->getRepository(Shop::class)->getActiveDefault();
 
-        $config = $this->payment->getTransactionConfig($shop, $this->container->getParameterBag());
+        $config = $this->payment->getTransactionConfig($shop, $this->container->getParameterBag(), 'EUR');
 
         $this->assertInstanceOf(Config::class, $config);
         $this->assertEquals('https://api-test.wirecard.com', $config->getBaseUrl());

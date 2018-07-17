@@ -177,7 +177,7 @@ class CreditCardPayment extends Payment
         $limitFactor    = 1.0;
         $repo           = $this->em->getRepository(Currency::class);
         $currency       = $repo->findOneBy(['currency' => $selectedCurrency]);
-        
+
         // Get factor of the selected currency (if it is the default currency, use factor 1.0)
         if ($currency && ! $currency->getDefault()) {
             $selectedFactor = $currency->getFactor();

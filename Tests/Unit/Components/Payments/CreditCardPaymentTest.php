@@ -31,6 +31,8 @@
 
 namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Payments;
 
+use Doctrine\ORM\EntityRepository;
+use Shopware\Models\Order\Repository;
 use Shopware\Models\Shop\Currency;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -104,12 +106,12 @@ class CreditCardPaymentTest extends PaymentTestCase
         /** @var Shop|\PHPUnit_Framework_MockObject_MockObject $shop */
         /** @var ParameterBagInterface|\PHPUnit_Framework_MockObject_MockObject $parameters */
 
-        $currency = $this->createMock(Currency::class);
-        $shop     = $this->createMock(Shop::class);
-        $shop->expects($this->atLeastOnce())->method('getCurrency')->willReturn($currency);
+        $shop       = $this->createMock(Shop::class);
         $parameters = $this->createMock(ParameterBagInterface::class);
 
-        $config = $this->payment->getTransactionConfig($shop, $parameters);
+        $this->em->method('getRepository')->willReturn($this->createMock(EntityRepository::class));
+
+        $config = $this->payment->getTransactionConfig($shop, $parameters, 'EUR');
 
         $this->assertInstanceOf(Config::class, $config);
         $this->assertNull($config->getBaseUrl());

@@ -103,7 +103,7 @@ class PaypalPaymentTest extends PaymentTestCase
         $shop       = $this->createMock(Shop::class);
         $parameters = $this->createMock(ParameterBagInterface::class);
 
-        $config = $this->payment->getTransactionConfig($shop, $parameters);
+        $config = $this->payment->getTransactionConfig($shop, $parameters, 'EUR');
 
         $this->assertInstanceOf(Config::class, $config);
         $this->assertNull($config->getBaseUrl());
