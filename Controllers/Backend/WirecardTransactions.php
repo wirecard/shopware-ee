@@ -156,8 +156,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         $currency = $this->Request()->getParam('currency');
 
         if (! $operation) {
-            // todo: error message
-            return $this->handleError('fail');
+            return $this->handleError('BackendOperationFailed');
         }
 
         /** @var PaymentFactory $paymentFactory */
