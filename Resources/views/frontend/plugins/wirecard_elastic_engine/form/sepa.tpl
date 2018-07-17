@@ -14,7 +14,6 @@
             <input class="is--required" type="text" name="wirecardPayment[sepaIban]" required="required" placeholder="IBAN" />
         </div>
     {/block}
-    {$wirecardFormFields.showBic}
     {if $wirecardFormFields.showBic}
         {block name="wirecard_elastic_engine_sepa_bic"}
             <div class="wirecard--sepa-bic">

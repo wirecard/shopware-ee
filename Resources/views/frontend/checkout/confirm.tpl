@@ -10,6 +10,7 @@
             <div class="panel--body is--wide">
                 {if $wirecardFormFields.method == 'wirecard_elastic_engine_sepa'}
                     {include file="frontend/plugins/wirecard_elastic_engine/form/sepa.tpl"}
+                    {include file="frontend/plugins/wirecard_elastic_engine/form/sepa_mandate.tpl"}
                 {/if}
             </div>
         </div>
