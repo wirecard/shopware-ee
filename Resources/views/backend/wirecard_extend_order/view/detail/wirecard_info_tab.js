@@ -159,6 +159,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                                     return false;
                                 }
 
+                                me.child('[alias=wirecard-transaction-history]').disable();
                                 me.processBackendOperation(record.data, 'cancel');
                             });
                         },
@@ -196,6 +197,9 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
             buttons: [{
                 text: 'Submit',
                 handler: function() {
+                    if (me.child('[alias=wirecard-transaction-history]')) {
+                        me.child('[alias=wirecard-transaction-history]').disable();
+                    }
                     me.processBackendOperation(transaction, operation, Ext.getCmp('transaction-amount').getValue());
                 }
             }, {
@@ -223,8 +227,6 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
     loadStore: function() {
         var me = this,
             infoPanel = me.child('[alias=wirecard-info-panel]');
-
-        me.child('[alias=wirecard-transaction-history]').disable();
 
         this.detailsStore.load({
             callback: function (records) {
@@ -264,7 +266,9 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                     me.historyStore.loadData(historyData, false);
                 }
 
-                me.child('[alias=wirecard-transaction-history]').enable();
+                if (me.child('[alias=wirecard-transaction-history]')) {
+                    me.child('[alias=wirecard-transaction-history]').enable();
+                }
             }
         });
     },
