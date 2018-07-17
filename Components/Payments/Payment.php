@@ -157,7 +157,7 @@ abstract class Payment implements PaymentInterface
     /**
      * @inheritdoc
      */
-    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag)
+    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag, $selectedCurrency)
     {
         $config = new Config(
             $this->getPaymentConfig()->getBaseUrl(),

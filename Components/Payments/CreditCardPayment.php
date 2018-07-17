@@ -32,6 +32,7 @@
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
 use Shopware\Models\Order\Order;
+use Shopware\Models\Shop\Currency;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\CreditCardConfig;
@@ -91,9 +92,9 @@ class CreditCardPayment extends Payment
     /**
      * @inheritdoc
      */
-    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag)
+    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag, $selectedCurrency)
     {
-        $transactionConfig = parent::getTransactionConfig($shop, $parameterBag);
+        $transactionConfig = parent::getTransactionConfig($shop, $parameterBag, $selectedCurrency);
         $paymentConfig     = $this->getPaymentConfig();
         $creditCardConfig  = new CreditCardConfig();
 
@@ -112,13 +113,17 @@ class CreditCardPayment extends Payment
         }
 
         $creditCardConfig->addSslMaxLimit(
-            $this->getLimit($shop, $paymentConfig->getThreeDMinLimit(), $paymentConfig->getThreeDMinLimitCurrency())
+            $this->getLimit(
+                $selectedCurrency,
+                $paymentConfig->getThreeDSslMaxLimit(),
+                $paymentConfig->getThreeDSslMaxLimitCurrency()
+            )
         );
         $creditCardConfig->addThreeDMinLimit(
             $this->getLimit(
-                $shop,
-                $paymentConfig->getThreeDSslMaxLimit(),
-                $paymentConfig->getThreeDSslMaxLimitCurrency()
+                $selectedCurrency,
+                $paymentConfig->getThreeDMinLimit(),
+                $paymentConfig->getThreeDMinLimitCurrency()
             )
         );
 
@@ -129,17 +134,17 @@ class CreditCardPayment extends Payment
     }
 
     /**
-     * @param Shop         $shop
+     * @param string       $selectedCurrency
      * @param float|string $limitValue
      * @param string       $limitCurrency
      *
      * @return Amount
      * @throws \Enlight_Event_Exception
      */
-    private function getLimit(Shop $shop, $limitValue, $limitCurrency)
+    private function getLimit($selectedCurrency, $limitValue, $limitCurrency)
     {
         $limit  = new Amount($limitValue, strtoupper($limitCurrency));
-        $factor = $this->getCurrencyConversionFactor($shop, $limit);
+        $factor = $this->getCurrencyConversionFactor(strtoupper($selectedCurrency), $limit);
 
         $factor = Shopware()->Events()->filter(
             'WirecardShopwareElasticEngine_CreditCardPayment_getLimitCurrencyConversionFactor',
@@ -150,31 +155,46 @@ class CreditCardPayment extends Payment
             ]
         );
 
-        return new Amount($limit->getValue() * $factor, $shop->getCurrency()->getCurrency());
+        return new Amount($limit->getValue() * $factor, $selectedCurrency);
     }
 
     /**
-     * @param Shop   $shop
+     * Return conversion factor from currently selected currency to limit currency of the plugin configuration.
+     * If no limit currency has been set, the default currency of the shopware installation is used as fallback.
+     *
+     * @param string $selectedCurrency
      * @param Amount $limit
      *
      * @return float
      */
-    private function getCurrencyConversionFactor(Shop $shop, Amount $limit)
+    private function getCurrencyConversionFactor($selectedCurrency, Amount $limit)
     {
-        $shopCurrency = $shop->getCurrency();
-
-        if ($limit->getCurrency() && $limit->getCurrency() !== 'NULL') {
-            if (strtoupper($shopCurrency->getCurrency()) !== $limit->getCurrency()) {
-                foreach ($shop->getCurrencies() as $currency) {
-                    if (strtoupper($currency->getCurrency()) === $limit->getCurrency()) {
-                        return $shopCurrency->getFactor() / $currency->getFactor();
-                    }
-                }
-            }
-        } elseif (! $shopCurrency->getDefault()) {
-            return $shopCurrency->getFactor();
+        if ($limit->getCurrency() === $selectedCurrency) {
+            return 1.0;
         }
-        return 1.0;
+
+        $selectedFactor = 1.0;
+        $limitFactor    = 1.0;
+        $repo           = $this->em->getRepository(Currency::class);
+        $currency       = $repo->findOneBy(['currency' => $selectedCurrency]);
+        
+        // Get factor of the selected currency (if it is the default currency, use factor 1.0)
+        if ($currency && ! $currency->getDefault()) {
+            $selectedFactor = $currency->getFactor();
+        }
+
+        // Check if limit currency has been configured
+        if ($limit->getCurrency() && $limit->getCurrency() !== 'NULL') {
+            // Get factor of the limit currency (if it is the default currency, use factor 1.0)
+            $limitCurrency = $repo->findOneBy(['currency' => $limit->getCurrency()]);
+            if ($limitCurrency && ! $currency->getDefault()) {
+                $limitFactor = $limitCurrency->getFactor();
+            }
+        }
+        if (! $selectedFactor || ! $limitFactor) {
+            return 1.0;
+        }
+        return $selectedFactor / $limitFactor;
     }
 
     /**
