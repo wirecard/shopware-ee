@@ -5,6 +5,7 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
 
     snippets: {
         OrderNumber: '{s name="OrderNumber" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
+        Type: '{s name="Type" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
         TransactionId: '{s name="TransactionId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
         ParentTransactionId: '{s name="ParentTransactionId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
         ProviderTransactionId: '{s name="ProviderTransactionId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
@@ -42,6 +43,10 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
                 header: me.snippets.OrderNumber,
                 draggable: false,
                 renderer: me.orderColumnRenderer
+            },
+            type: {
+                header: me.snippets.Type,
+                draggable: false
             },
             transactionId: {
                 header: me.snippets.TransactionId,
