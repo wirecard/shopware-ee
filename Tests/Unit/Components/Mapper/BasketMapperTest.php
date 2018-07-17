@@ -61,7 +61,7 @@ class BasketMapperTest extends TestCase
                     'tax'         => 150,
                     'tax_rate'    => 15,
                     'quantity'    => 1,
-                    'price'       => 1000,
+                    'price'       => 999.99999,
                 ],
                 [
                     'articlename' => 'bar',
@@ -76,7 +76,7 @@ class BasketMapperTest extends TestCase
         $mapper      = new BasketMapper($basketArray, 'EUR', $articles, $transaction);
         $this->assertEquals($basketArray, $mapper->getShopwareBasket());
         $this->assertEquals(implode("\n", [
-            'foo - 10 - 1000 - EUR - 1 - 15%',
+            'foo - 10 - 999.99999 - EUR - 1 - 15%',
             'bar - 11 - 500 - EUR - 2 - 20%',
         ]), $mapper->getBasketText());
         $this->assertInstanceOf(Basket::class, $mapper->getWirecardBasket());
