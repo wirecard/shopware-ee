@@ -200,6 +200,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                     if (me.child('[alias=wirecard-transaction-history]')) {
                         me.child('[alias=wirecard-transaction-history]').disable();
                     }
+                    win.mask();
                     me.processBackendOperation(transaction, operation, Ext.getCmp('transaction-amount').getValue());
                 }
             }, {
