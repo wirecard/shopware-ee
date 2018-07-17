@@ -33,6 +33,7 @@ namespace WirecardShopwareElasticEngine\Commands;
 
 use Shopware\Commands\ShopwareCommand;
 use Shopware\Models\Plugin\Plugin;
+use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
@@ -59,7 +60,7 @@ class PaymentActivate extends ShopwareCommand
         /** @var Plugin $plugin */
         $plugin = $em->getRepository(Plugin::class)->findOneBy(['name' => WirecardShopwareElasticEngine::NAME]);
         if (! $plugin) {
-            throw new \RuntimeException("Plugin '" . WirecardShopwareElasticEngine::NAME . "' not found");
+            throw new RuntimeException("Plugin '" . WirecardShopwareElasticEngine::NAME . "' not found");
         }
 
         foreach ($plugin->getPayments() as $payment) {

@@ -98,7 +98,6 @@ class NotificationHandler extends Handler
             return true;
         }
 
-        $paymentState = Status::PAYMENT_STATE_OPEN;
         switch ($backendService->getOrderState($notification->getTransactionType())) {
             case BackendService::TYPE_AUTHORIZED:
                 $paymentState = Status::PAYMENT_STATE_RESERVED;
@@ -112,6 +111,8 @@ class NotificationHandler extends Handler
             case BackendService::TYPE_REFUNDED:
                 $paymentState = Status::PAYMENT_STATE_RE_CREDITING;
                 break;
+            default:
+                $paymentState = Status::PAYMENT_STATE_OPEN;
         }
 
         $shopwareOrder->setPaymentStatus($order->getId(), $paymentState, true);
@@ -139,7 +140,7 @@ class NotificationHandler extends Handler
             ->getRepository(Transaction::class)
             ->findOneBy([
                 'transactionId' => $transaction->getParentTransactionId(),
-                'type'          => Transaction::TYPE_NOTIFY
+                'type'          => Transaction::TYPE_NOTIFY,
             ]);
 
         if (! $parentTransaction || ! $isFinal) {

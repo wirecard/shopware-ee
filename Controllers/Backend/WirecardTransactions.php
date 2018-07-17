@@ -41,7 +41,11 @@ use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Services\BackendOperationHandler;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
+<<<<<<< HEAD
 use WirecardShopwareElasticEngine\Exception\UnknownActionException;
+=======
+use WirecardShopwareElasticEngine\Exception\MissingCredentialsException;
+>>>>>>> Improve code quality
 use WirecardShopwareElasticEngine\Models\Transaction;
 
 // @codingStandardsIgnoreStart
@@ -73,7 +77,9 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
                 || empty($params[$prefix . 'HttpUser'])
                 || empty($params[$prefix . 'HttpPassword'])
             ) {
-                throw new \Exception('Missing credentials. Please check Server, HttpUser and HttpPassword.');
+                throw new MissingCredentialsException(
+                    'Missing credentials. Please check Server, HttpUser and HttpPassword.'
+                );
             }
 
             $testConfig         = new Config(
@@ -81,7 +87,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
                 $params[$prefix . 'HttpUser'],
                 $params[$prefix . 'HttpPassword']
             );
-            $transactionService = new TransactionService($testConfig, $this->get('pluginlogger'));
+            $transactionService = new TransactionService($testConfig, $this->getLogger());
 
             $success = $transactionService->checkCredentials();
         } catch (\Exception $e) {
@@ -126,7 +132,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
             $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
             $this->container->getParameterBag()
         );
-        $backendService     = new BackendService($config, $this->get('pluginlogger'));
+        $backendService     = new BackendService($config, $this->getLogger());
         $paymentTransaction = $payment->getTransaction();
 
         $result = [
@@ -168,7 +174,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
             $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
             $this->container->getParameterBag()
         );
-        $backendService = new BackendService($config, $this->get('pluginlogger'));
+        $backendService = new BackendService($config, $this->getLogger());
 
         $transaction = $payment->getTransaction();
         $transaction->setParentTransactionId($transactionId);
@@ -190,6 +196,8 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
 
     /**
      * @param Action $action
+     *
+     * @throws Exception
      */
     protected function handleAction(Action $action)
     {
@@ -235,6 +243,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
 
     /**
      * @param array $assignments
+     *
      * @return Enlight_View|Enlight_View_Default
      */
     private function handleSuccess(array $assignments)
@@ -246,11 +255,13 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
 
     /**
      * @param string $message
+     *
      * @return Enlight_View|Enlight_View_Default
+     * @throws Exception
      */
     private function handleError($message = '')
     {
-        $this->get('pluginlogger')->error($message, $this->Request()->getParams());
+        $this->getLogger()->error($message, $this->Request()->getParams());
 
         return $this->View()->assign([
             'success' => false,
@@ -264,5 +275,14 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
     public function getWhitelistedCSRFActions()
     {
         return ['notify', 'testSettings'];
+    }
+
+    /**
+     * @return \Shopware\Components\Logger
+     * @throws Exception
+     */
+    private function getLogger()
+    {
+        return $this->get('pluginlogger');
     }
 }
