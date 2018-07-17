@@ -41,6 +41,7 @@ use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Services\BackendOperationHandler;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
+use WirecardShopwareElasticEngine\Exception\UnknownActionException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
 // @codingStandardsIgnoreStart
@@ -205,7 +206,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
             return;
         }
 
-        // todo: unknown action
+        throw new UnknownActionException(get_class($action));
     }
 
     /**
