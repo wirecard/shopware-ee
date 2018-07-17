@@ -102,7 +102,7 @@ class BackendOperationHandler extends Handler
         $parentTransaction = $this->em
             ->getRepository(TransactionModel::class)
             ->findOneBy([
-                'parentTransactionId' => $transaction->getParentTransactionId(),
+                'transactionId' => $transaction->getParentTransactionId(),
             ]);
 
         if (! $parentTransaction) {
@@ -126,7 +126,7 @@ class BackendOperationHandler extends Handler
             return;
         }
 
-        $transaction->setState(TransactionModel::STATE_CLOSED);
+        $parentTransaction->setState(TransactionModel::STATE_CLOSED);
         $this->em->flush();
     }
 }

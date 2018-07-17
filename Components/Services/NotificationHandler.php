@@ -36,7 +36,6 @@ use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
-use Wirecard\PaymentSdk\Transaction\Transaction as PaymentTransaction;
 use WirecardShopwareElasticEngine\Exception\ParentTransactionNotFoundException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
@@ -138,7 +137,7 @@ class NotificationHandler extends Handler
     {
         $parentTransaction = $this->em
             ->getRepository(Transaction::class)
-            ->findOneBy(['parentTransactionId' => $transaction->getParentTransactionId()]);
+            ->findOneBy(['transactionId' => $transaction->getParentTransactionId()]);
 
         if (! $parentTransaction || ! $isFinal) {
             return;
