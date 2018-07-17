@@ -39,6 +39,7 @@ use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
+use WirecardShopwareElasticEngine\Models\Transaction as TransactionModel;
 
 class BackendOperationHandler extends Handler
 {
@@ -66,7 +67,7 @@ class BackendOperationHandler extends Handler
             $transaction = $this->transactionFactory->create(
                 $this->getOrderFromResponse($response)->getNumber(),
                 $response,
-                \WirecardShopwareElasticEngine\Models\Transaction::TYPE_BACKEND
+                TransactionModel::TYPE_BACKEND
             );
 
             $this->updateTransactionState($transaction);
@@ -94,14 +95,14 @@ class BackendOperationHandler extends Handler
     }
 
     /**
-     * @param \WirecardShopwareElasticEngine\Models\Transaction $transaction
+     * @param TransactionModel $transaction
      */
-    private function updateTransactionState(\WirecardShopwareElasticEngine\Models\Transaction $transaction)
+    private function updateTransactionState(TransactionModel $transaction)
     {
         $parentTransaction = $this->em
-            ->getRepository(\WirecardShopwareElasticEngine\Models\Transaction::class)
+            ->getRepository(TransactionModel::class)
             ->findOneBy([
-                'parentTransactionId' => $transaction->getParentTransactionId()
+                'parentTransactionId' => $transaction->getParentTransactionId(),
             ]);
 
         if (! $parentTransaction) {
@@ -109,23 +110,23 @@ class BackendOperationHandler extends Handler
         }
 
         $childTransactions = $this->em
-            ->getRepository(\WirecardShopwareElasticEngine\Models\Transaction::class)
+            ->getRepository(TransactionModel::class)
             ->findBy([
                 'parentTransactionId' => $transaction->getParentTransactionId(),
                 'transactionType'     => $transaction->getTransactionType(),
             ]);
 
-        $totalAmount = $parentTransaction->getAmount();
+        $totalAmount = (float)$parentTransaction->getAmount();
 
-        foreach ($childTransactions as $transaction) {
-            $totalAmount -= $transaction->getAmount();
+        foreach ($childTransactions as $childTransaction) {
+            $totalAmount -= (float)$childTransaction->getAmount();
         }
 
         if ($totalAmount > 0) {
             return;
         }
 
-        $transaction->setState(\WirecardShopwareElasticEngine\Models\Transaction::STATE_CLOSED);
+        $transaction->setState(TransactionModel::STATE_CLOSED);
         $this->em->flush();
     }
 }

@@ -133,7 +133,12 @@ class Transaction extends ModelEntity
      * @var string
      * @ORM\Column(name="state", type="string")
      */
-    private $state = self::STATE_OPEN;
+    private $state;
+
+    public function __construct()
+    {
+        $this->setState(self::STATE_OPEN);
+    }
 
     /**
      * @return int|null
@@ -336,7 +341,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return bool
+     * @return string
      */
     public function getState()
     {
@@ -344,7 +349,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param $state
+     * @param string $state
      */
     public function setState($state)
     {
@@ -367,7 +372,7 @@ class Transaction extends ModelEntity
             'currency'                     => $this->getCurrency(),
             'createdAt'                    => $this->getCreatedAt(),
             'response'                     => $this->getResponse(),
-            'state'                        => $this->getState()
+            'state'                        => $this->getState(),
         ];
     }
 }
