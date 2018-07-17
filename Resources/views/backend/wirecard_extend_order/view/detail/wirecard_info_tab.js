@@ -272,8 +272,6 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
     processBackendOperation(transaction, operation, amount = null) {
         var me = this;
 
-        Ext.getCmp('transaction-amount-window').mask('Loading...');
-
         return Ext.Ajax.request({
             url: '{url controller="wirecardTransactions" action="processBackendOperations"}',
             params: {
