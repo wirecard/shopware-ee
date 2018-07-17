@@ -33,6 +33,7 @@ use Shopware\Components\CSRFWhitelistAware;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 use Shopware\Models\Shop\Shop;
+use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\TransactionService;
@@ -189,16 +190,16 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
         $payment        = $paymentFactory->create($request->getParam(self::ROUTER_METHOD));
 
-        $transactionService = new TransactionService($payment->getTransactionConfig(
+        $backendService = new BackendService($payment->getTransactionConfig(
             $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
             $this->container->getParameterBag()
         ));
-        $notification       = $transactionService->handleNotification(file_get_contents('php://input'));
+        $notification   = $backendService->handleNotification(file_get_contents('php://input'));
 
         /** @var NotificationHandler $notificationHandler */
         $notificationHandler = $this->get('wirecard_elastic_engine.notification_handler');
 
-        $notificationHandler->execute($this->get('modules')->Order(), $notification);
+        $notificationHandler->execute($this->get('modules')->Order(), $notification, $backendService);
         exit();
     }
 
