@@ -130,7 +130,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                         getClass: function(value, meta, record) {
                             var transaction = record.data;
 
-                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.pay || transaction.state === 'closed' || transaction.type === 'return') {
+                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.pay || transaction.state === 'closed' || transaction.type === 'return' || transaction.type === 'backend') {
                                 return 'x-hide-display';
                             }
                         }
@@ -145,7 +145,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                         getClass: function(value, meta, record) {
                             var transaction = record.data;
 
-                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.refund || transaction.state === 'closed' || transaction.type === 'return') {
+                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.refund || transaction.state === 'closed' || transaction.type === 'return' || transaction.type === 'backend') {
                                 return 'x-hide-display';
                             }
                         }
@@ -166,7 +166,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                         getClass: function(value, meta, record) {
                             var transaction = record.data;
 
-                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.cancel || transaction.state === 'closed' || transaction.type === 'return') {
+                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.cancel || transaction.state === 'closed' || transaction.type === 'return' || transaction.type === 'backend') {
                                 return 'x-hide-display';
                             }
                         }
@@ -291,7 +291,9 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                         width: 400
                     });
                     me.loadStore();
-                    Ext.getCmp('transaction-amount-window').close();
+                    if (Ext.getCmp('transaction-amount-window')) {
+                        Ext.getCmp('transaction-amount-window').close();
+                    }
                 } else {
                     Shopware.Notification.createStickyGrowlMessage({
                         title: 'Fehlgeschlagen',
@@ -299,7 +301,9 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                         width: 400
                     });
                     me.loadStore();
-                    Ext.getCmp('transaction-amount-window').close();
+                    if (Ext.getCmp('transaction-amount-window')) {
+                        Ext.getCmp('transaction-amount-window').close();
+                    }
                 }
             }
         });
