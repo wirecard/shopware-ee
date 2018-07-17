@@ -79,7 +79,7 @@ describe('credit card test', () => {
         // Go back to checkout page and test if payment method has been selected
         const overlay = await driver.findElements(By.className('js--overlay'));
         if (overlay.length) {
-            await driver.wait(until.elementIsNotVisible(overlay[0]));
+            await driver.wait(until.stalenessOf(overlay[0]));
         }
         await driver.findElement(By.className('main--actions')).click();
         const paymentDescription = await driver.findElement(By.className('payment--description')).getText();

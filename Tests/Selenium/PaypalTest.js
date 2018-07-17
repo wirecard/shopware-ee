@@ -54,6 +54,13 @@ describe('paypal test', () => {
         }
     }
 
+    async function waitUntilOverlayIsStale(locator) {
+        const overlay = await driver.findElements(locator);
+        if (overlay.length) {
+            await driver.wait(until.stalenessOf(overlay[0]));
+        }
+    }
+
     it('should check the paypal payment process', async () => {
         // Log in with example account
         await driver.get(`${url}/account`);
@@ -83,7 +90,7 @@ describe('paypal test', () => {
         await driver.findElement(By.xpath("//*[contains(text(), '" + paymentLabel + "')]")).click();
 
         // Go back to checkout page and test if payment method has been selected
-        await waitUntilOverlayIsNotVisible(By.className('js--overlay'));
+        await waitUntilOverlayIsStale(By.className('js--overlay'));
         await driver.findElement(By.className('main--actions')).click();
         const paymentDescription = await driver.findElement(By.className('payment--description')).getText();
         expect(paymentDescription).to.include(paymentLabel);
