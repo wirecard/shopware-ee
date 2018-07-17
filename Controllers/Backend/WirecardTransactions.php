@@ -41,11 +41,8 @@ use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Services\BackendOperationHandler;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
-<<<<<<< HEAD
 use WirecardShopwareElasticEngine\Exception\UnknownActionException;
-=======
 use WirecardShopwareElasticEngine\Exception\MissingCredentialsException;
->>>>>>> Improve code quality
 use WirecardShopwareElasticEngine\Models\Transaction;
 
 // @codingStandardsIgnoreStart
