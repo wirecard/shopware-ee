@@ -103,6 +103,7 @@ class BackendOperationHandler extends Handler
             ->getRepository(TransactionModel::class)
             ->findOneBy([
                 'transactionId' => $transaction->getParentTransactionId(),
+                'type'          => TransactionModel::TYPE_NOTIFY
             ]);
 
         if (! $parentTransaction) {

@@ -137,7 +137,10 @@ class NotificationHandler extends Handler
     {
         $parentTransaction = $this->em
             ->getRepository(Transaction::class)
-            ->findOneBy(['transactionId' => $transaction->getParentTransactionId()]);
+            ->findOneBy([
+                'transactionId' => $transaction->getParentTransactionId(),
+                'type'          => Transaction::TYPE_NOTIFY
+            ]);
 
         if (! $parentTransaction || ! $isFinal) {
             return;
