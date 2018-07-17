@@ -65,8 +65,6 @@ script:
   - npm run lint
   - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
   - npm run test
-  - npm run test:creditcard
-  - npm run test:paypal
 
 after_script:
   - travis_retry composer upload-coverage
