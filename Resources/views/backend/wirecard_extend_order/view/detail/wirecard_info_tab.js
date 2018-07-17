@@ -159,7 +159,9 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                                     return false;
                                 }
 
-                                me.child('[alias=wirecard-transaction-history]').disable();
+                                if (me.child('[alias=wirecard-transaction-history]')) {
+                                    me.child('[alias=wirecard-transaction-history]').disable();
+                                }
                                 me.processBackendOperation(record.data, 'cancel');
                             });
                         },
