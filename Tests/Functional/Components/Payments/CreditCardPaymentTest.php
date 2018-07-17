@@ -40,10 +40,8 @@ use Symfony\Component\DependencyInjection\Container;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
-use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
 use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
-use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 
 class CreditCardPaymentTest extends TestCase
 {
@@ -62,18 +60,28 @@ class CreditCardPaymentTest extends TestCase
     /** @var RouterInterface $config */
     private $router;
 
+    /** @var \Enlight_Event_EventManager $config */
+    private $eventManager;
+
     /** @var CreditCardPayment */
     protected $payment;
 
     public function setUp()
     {
-        $this->container = \Shopware()->Container();
-        $this->em        = $this->container->get('models');
-        $this->config    = $this->container->get('config');
-        $this->installer = $this->container->get('shopware_plugininstaller.plugin_manager');
-        $this->router    = $this->container->get('router');
+        $this->container    = \Shopware()->Container();
+        $this->em           = $this->container->get('models');
+        $this->config       = $this->container->get('config');
+        $this->installer    = $this->container->get('shopware_plugininstaller.plugin_manager');
+        $this->router       = $this->container->get('router');
+        $this->eventManager = $this->container->get('events');
 
-        $this->payment = new CreditCardPayment($this->em, $this->config, $this->installer, $this->router);
+        $this->payment = new CreditCardPayment(
+            $this->em,
+            $this->config,
+            $this->installer,
+            $this->router,
+            $this->eventManager
+        );
     }
 
     public function testGetPaymentOptions()

@@ -50,13 +50,17 @@ abstract class PaymentTestCase extends \PHPUnit_Framework_TestCase
     /** @var RouterInterface|\PHPUnit_Framework_MockObject_MockObject */
     protected $router;
 
+    /** @var \Enlight_Event_EventManager|\PHPUnit_Framework_MockObject_MockObject */
+    protected $eventManager;
+
     public function setUp()
     {
         parent::setUp();
-        $this->em        = $this->createMock(EntityManagerInterface::class);
-        $this->config    = $this->createMock(\Shopware_Components_Config::class);
-        $this->installer = $this->createMock(InstallerService::class);
-        $this->router    = $this->createMock(RouterInterface::class);
+        $this->em           = $this->createMock(EntityManagerInterface::class);
+        $this->config       = $this->createMock(\Shopware_Components_Config::class);
+        $this->installer    = $this->createMock(InstallerService::class);
+        $this->router       = $this->createMock(RouterInterface::class);
+        $this->eventManager = $this->createMock(\Enlight_Event_EventManager::class);
 
         $plugin = $this->createMock(Plugin::class);
         $this->installer->method('getPluginByName')->willReturn($plugin);
@@ -84,6 +88,7 @@ abstract class PaymentTestCase extends \PHPUnit_Framework_TestCase
      *
      * @param array $expected
      * @param array $actual
+     *
      * @return bool
      */
     protected function getArraysAreSimilar(array $expected, array $actual)

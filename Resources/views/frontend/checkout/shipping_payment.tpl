@@ -6,6 +6,5 @@
             {include file='frontend/plugins/wirecard_elastic_engine/error_message.tpl'}
         {/if}
     {/block}
-
     {$smarty.block.parent}
 {/block}

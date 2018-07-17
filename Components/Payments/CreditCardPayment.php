@@ -134,11 +134,22 @@ class CreditCardPayment extends Payment
      * @param string       $limitCurrency
      *
      * @return Amount
+     * @throws \Enlight_Event_Exception
      */
     private function getLimit(Shop $shop, $limitValue, $limitCurrency)
     {
         $limit  = new Amount($limitValue, strtoupper($limitCurrency));
         $factor = $this->getCurrencyConversionFactor($shop, $limit);
+
+        $factor = Shopware()->Events()->filter(
+            'WirecardShopwareElasticEngine_CreditCardPayment_getLimitCurrencyConversionFactor',
+            $factor,
+            [
+                'subject' => $this,
+                'limit'   => $limit,
+            ]
+        );
+
         return new Amount($limit->getValue() * $factor, $shop->getCurrency()->getCurrency());
     }
 
