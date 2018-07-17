@@ -229,6 +229,10 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
         var me = this,
             infoPanel = me.child('[alias=wirecard-info-panel]');
 
+        if (me.child('[alias=wirecard-transaction-history]')) {
+            me.child('[alias=wirecard-transaction-history]').disable();
+        }
+
         this.detailsStore.load({
             callback: function (records) {
                 var data = Array.isArray(records) && records.length === 1 ? records[0].getData() : false,
