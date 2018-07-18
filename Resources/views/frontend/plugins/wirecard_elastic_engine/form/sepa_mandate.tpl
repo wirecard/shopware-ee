@@ -53,25 +53,7 @@
 		    <table border="0" width="100%">
 		        <tr>
 			    <td class="text11justify">
-	                        {s name="AuthorizeCreditorHead"}{/s}
-                                {$wirecardFormFields.creditorName} 
-	                        {s name="AuthorizeCreditorMid"}{/s}
-	                        {$wirecardFormFields.creditorName} {$wirecardFormFields.additionalText}
-	                        {s name="AuthorizeCreditorTail"}{/s}
-			    </td>
-			    <td width="10%">&nbsp;</td>
-		        </tr>
-		        <tr>
-			    <td class="text11justify">
-                                {s name="RefundEntitlementNote"}{/s}
-			    </td>
-			    <td width="10%">&nbsp;</td>
-		        </tr>
-		        <tr>
-			    <td class="text11justify">
-	                        {s name="AgreementTextHead"}{/s}
-	                        {$wirecardFormFields.creditorName}
-	                        {s name="AgreementTextTail"}{/s}
+                                {s name="SepaMandateText"}{/s}
 			    </td>
 			    <td width="10%">&nbsp;</td>
 		        </tr>
