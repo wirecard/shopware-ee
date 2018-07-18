@@ -44,7 +44,6 @@ use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
-use WirecardShopwareElasticEngine\Models\Transaction;
 
 class PaymentHandler extends Handler
 {
@@ -70,8 +69,7 @@ class PaymentHandler extends Handler
     ) {
         $this->prepareTransaction($orderSummary, $redirect, $notificationUrl);
 
-        $payment     = $orderSummary->getPayment();
-        $transaction = $payment->getTransaction();
+        $payment = $orderSummary->getPayment();
 
         try {
             $action = $payment->processPayment(
@@ -88,7 +86,7 @@ class PaymentHandler extends Handler
             }
 
             $response = $transactionService->process(
-                $transaction,
+                $payment->getTransaction(),
                 $payment->getPaymentConfig()->getTransactionOperation()
             );
         } catch (\Exception $e) {
@@ -105,10 +103,10 @@ class PaymentHandler extends Handler
             case $response instanceof SuccessResponse:
             case $response instanceof InteractionResponse:
                 $this->updateOrder($response->getTransactionId(), $orderSummary);
-                $this->transactionFactory->create(
-                    $orderSummary->getOrderNumber(),
-                    $response,
-                    Transaction::TYPE_INITIAL
+                $this->transactionFactory->createInitial(
+                    $orderSummary->getInternalOrderNumber(),
+                    $orderSummary->getBasketMapper()->getSignature(),
+                    $response
                 );
 
                 return new RedirectAction($response->getRedirectUrl());
@@ -137,11 +135,11 @@ class PaymentHandler extends Handler
     {
         $order = $this->em->getRepository(Order::class)
                           ->findOneBy([
-                              'number' => $orderSummary->getOrderNumber(),
+                              'number' => $orderSummary->getInternalOrderNumber(),
                           ]);
 
         if (! $order) {
-            throw new OrderNotFoundException($orderSummary->getOrderNumber(), $transactionId);
+            throw new OrderNotFoundException($orderSummary->getInternalOrderNumber(), $transactionId);
         }
 
         $order->setTransactionId($transactionId);
@@ -164,7 +162,7 @@ class PaymentHandler extends Handler
         $payment       = $orderSummary->getPayment();
         $paymentConfig = $payment->getPaymentConfig();
         $transaction   = $payment->getTransaction();
-        $orderNumber   = $this->getOrderNumberForTransaction($orderSummary->getOrderNumber());
+        $orderNumber   = $this->getOrderNumberForTransaction($orderSummary->getInternalOrderNumber());
 
         $transaction->setRedirect($redirect);
         $transaction->setAmount($orderSummary->getAmount());

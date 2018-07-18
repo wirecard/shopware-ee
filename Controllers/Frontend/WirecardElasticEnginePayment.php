@@ -36,6 +36,7 @@ use Shopware\Models\Shop\Shop;
 use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
+use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
@@ -51,7 +52,6 @@ use WirecardShopwareElasticEngine\Components\Services\ReturnHandler;
 use WirecardShopwareElasticEngine\Components\Services\SessionHandler;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Exception\BasketException;
-use WirecardShopwareElasticEngine\Exception\MissingOrderNumberException;
 use WirecardShopwareElasticEngine\Exception\UnknownActionException;
 use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
 
@@ -70,7 +70,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * `PaymentHandler` service. Further action depends on the response from the handler.
      *
      * @throws ArrayKeyNotFoundException
-     * @throws MissingOrderNumberException
      * @throws UnknownActionException
      * @throws UnknownPaymentException
      * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
@@ -80,6 +79,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $payment = $this->getPaymentFactory()->create($this->getPaymentShortName());
 
         try {
+            $currency     = $this->getCurrencyShortName();
             $userMapper   = new UserMapper(
                 $this->getUser(),
                 $this->Request()->getClientIp(),
@@ -90,11 +90,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             );
             $basketMapper = new BasketMapper(
                 $this->getBasket(),
-                $this->getCurrencyShortName(),
+                $this->persistBasket(),
+                $currency,
                 $this->getModules()->Articles(),
                 $payment->getTransaction()
             );
-            $amount       = new Amount(BasketMapper::numberFormat($this->getAmount()), $this->getCurrencyShortName());
+            $amount       = new Amount(BasketMapper::numberFormat($this->getAmount()), $currency);
         } catch (BasketException $e) {
             $this->getLogger()->notice($e->getMessage());
             return $this->redirect([
@@ -104,28 +105,15 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             ]);
         }
 
-        // Since we're going to need an order number for our `Transaction` we're saving it right away. Confirmation
-        // mail here is disabled through the `OrderSubscriber`.
-        // The transactionId will later be overwritten.
-        $basketSignature  = $this->persistBasket();
-        $tmpTransactionId = $basketSignature . '-' . uniqid();
-        $orderNumber      = $this->saveOrder($tmpTransactionId, $basketSignature, Status::PAYMENT_STATE_OPEN, false);
-
-        $this->getSessionHandler()->storeOrder($orderNumber, $basketSignature);
-
-        if (! $orderNumber || $orderNumber === '') {
-            throw new MissingOrderNumberException();
-        }
-
         /** @var PaymentHandler $handler */
         $handler = $this->get('wirecard_elastic_engine.payment_handler');
         $action  = $handler->execute(
-            new OrderSummary($orderNumber, $payment, $userMapper, $basketMapper, $amount),
+            new OrderSummary($this->generateUniqueInternalOrderNumber(), $payment, $userMapper, $basketMapper, $amount),
             new TransactionService(
                 $payment->getTransactionConfig(
                     $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
                     $this->container->getParameterBag(),
-                    $this->getCurrencyShortName()
+                    $currency
                 ),
                 $this->getLogger()
             ),
@@ -142,6 +130,11 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         return $this->handleAction($action);
     }
 
+    private function generateUniqueInternalOrderNumber()
+    {
+        return uniqid('', true);
+    }
+
     /**
      * After paying the user gets redirected to this action, where the `ReturnHandler` takes care about what to do
      * next (e.g. redirecting to the "Thank you" page, rendering templates, ...).
@@ -150,7 +143,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      *
      * @throws UnknownActionException
      * @throws UnknownPaymentException
-     * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
      */
     public function returnAction()
     {
@@ -164,15 +156,66 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $this->getCurrencyShortName()
         ));
 
-        /** @var ReturnHandler $returnHandler */
-        $returnHandler = $this->get('wirecard_elastic_engine.return_handler');
-        $action        = $returnHandler->execute($payment, $transactionService, $request);
-
-        if (! $action instanceof ErrorAction) {
-            $this->getSessionHandler()->clearOrder();
+        try {
+            /** @var ReturnHandler $returnHandler */
+            $returnHandler = $this->get('wirecard_elastic_engine.return_handler');
+            $response      = $returnHandler->execute($payment, $transactionService, $request);
+        } catch (\Exception $e) {
+            $this->logger->error('Return processing failed: ' . $e->getMessage());
+            return $this->handleAction(
+                new ErrorAction(ErrorAction::PROCESSING_FAILED, 'Return processing failed')
+            );
         }
 
-        return $this->handleAction($action);
+        $orderNumber = null;
+        if ($response instanceof SuccessResponse) {
+
+            try {
+                // get transaction by request-id/internal-ordernumber by parent-transaction and request id recursively until first "initial" transaction
+                $transaction = $returnHandler->getInitialTransaction($response);
+                $basket      = $this->loadBasketFromSignature($transaction->getBasketSignature());
+                $this->verifyBasketSignature($transaction->getBasketSignature(), $basket);
+            } catch (\Exception $e) {
+                $this->getLogger()->error('Return handling SuccessResponse failed: ' . get_class($e) . ': '
+                                          . $e->getMessage());
+                return $this->handleAction(
+                    new ErrorAction(ErrorAction::PROCESSING_FAILED, 'Return processing failed')
+                );
+            }
+
+            // check if payment-metadata has been set
+            $paymentStatus  = Status::PAYMENT_STATE_OPEN;
+            $additionalData = $transaction->getAdditionalData();
+            if (isset($additionalData['payment-status'])) {
+                $paymentStatus = $additionalData['payment-status'];
+            }
+
+            // create order (set payment to open or payment-metadata). Save real order-number to transaction(s). transaction-id and temporary-id?
+            // todo: consider changing temporaryID
+            $orderNumber = $this->saveOrder(
+                $response->getTransactionId(),
+                $response->getTransactionId(),
+                $paymentStatus,
+                false
+            );
+
+            // if no payment-metadata was present, reload transaction and check if payment-metadata is found
+            if (! isset($additionalData['payment-status'])) {
+                $this->get('models')->refresh($transaction);
+                $additionalData = $transaction->getAdditionalData();
+                if (isset($additionalData['payment-status'])) {
+                    // if payment-metadata is now present, call save/setPaymentStatus with new info
+                    $this->savePaymentStatus(
+                        $response->getTransactionId(),
+                        $response->getTransactionId(),
+                        $additionalData['payment-status'],
+                        false
+                    );
+                }
+            }
+        }
+
+        return $this->handleAction($returnHandler->handleResponse($response, $orderNumber));
     }
 
     /**
@@ -185,6 +228,18 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function notifyAction()
     {
+        /**
+         * - get transaction by request-id/internal-ordernumber by parent-transaction and request id recursively until first "initial" transaction
+         * - check if order already present
+         * - yes: update order payment state
+         * - no: save payment state to initial transaction
+         * - reload transaction:
+         * - check for order-number present now: setPaymentState of order now
+         *
+         * + show internal order number in transactions list and order details
+         * + show error-message in backend
+         */
+
         $request = $this->Request();
 
         /** @var PaymentFactory $paymentFactory */

@@ -40,9 +40,9 @@ use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 class OrderSummary
 {
     /**
-     * @var int
+     * @var string
      */
-    protected $orderNumber;
+    protected $internalOrderNumber;
 
     /**
      * @var Payment
@@ -67,24 +67,24 @@ class OrderSummary
     /**
      * OrderDetails constructor.
      *
-     * @param int              $orderNumber
+     * @param string           $internalOrderNumber
      * @param PaymentInterface $payment
      * @param UserMapper       $userMapper
      * @param BasketMapper     $basketMapper
      * @param Amount           $amount
      */
     public function __construct(
-        $orderNumber,
+        $internalOrderNumber,
         PaymentInterface $payment,
         UserMapper $userMapper,
         BasketMapper $basketMapper,
         Amount $amount
     ) {
-        $this->orderNumber  = $orderNumber;
-        $this->payment      = $payment;
-        $this->userMapper   = $userMapper;
-        $this->amount       = $amount;
-        $this->basketMapper = $basketMapper;
+        $this->internalOrderNumber = $internalOrderNumber;
+        $this->payment             = $payment;
+        $this->userMapper          = $userMapper;
+        $this->amount              = $amount;
+        $this->basketMapper        = $basketMapper;
     }
 
     /**
@@ -120,11 +120,11 @@ class OrderSummary
     }
 
     /**
-     * @return int
+     * @return string
      */
-    public function getOrderNumber()
+    public function getInternalOrderNumber()
     {
-        return $this->orderNumber;
+        return $this->internalOrderNumber;
     }
 
     /**
@@ -134,15 +134,15 @@ class OrderSummary
     public function toArray()
     {
         return [
-            'orderNumber' => $this->getOrderNumber(),
-            'payment'     => [
+            'internalOrderNumber' => $this->getInternalOrderNumber(),
+            'payment'             => [
                 'name'          => $this->getPayment()->getName(),
                 'paymentConfig' => $this->getPayment()->getPaymentConfig()->toArray(),
                 'transaction'   => $this->getPayment()->getTransaction()->mappedProperties(),
             ],
-            'user'        => $this->getUserMapper()->toArray(),
-            'basket'      => $this->getBasketMapper()->toArray(),
-            'amount'      => $this->getAmount()->mappedProperties(),
+            'user'                => $this->getUserMapper()->toArray(),
+            'basket'              => $this->getBasketMapper()->toArray(),
+            'amount'              => $this->getAmount()->mappedProperties(),
         ];
     }
 }

@@ -54,16 +54,61 @@ class TransactionFactory
     }
 
     /**
-     * @param int      $orderNumber
+     * @param string   $internalOrderNumber
+     * @param Response $response
+     * @param string   $basketSignature
+     *
+     * @return Transaction|null
+     */
+    public function createInitial($internalOrderNumber, $basketSignature, Response $response)
+    {
+        $transaction = $this->create($response, Transaction::TYPE_INITIAL);
+        $transaction->setInternalOrderNumber($internalOrderNumber);
+        $transaction->setBasketSignature($basketSignature);
+
+        return $this->persist($transaction);
+    }
+
+    /**
+     * @param Response $response
+     *
+     * @return Transaction|null
+     */
+    public function createInteraction(Response $response)
+    {
+        $transaction = $this->create($response, Transaction::TYPE_INTERACTION);
+        return $this->persist($transaction);
+    }
+
+    /**
+     * @param string   $orderNumber
+     * @param Response $response
+     *
+     * @return Transaction|null
+     */
+    public function createReturn($orderNumber, Response $response)
+    {
+        // TODO: set order-number for all parent transactions!
+
+        $transaction = $this->create($response, Transaction::TYPE_RETURN);
+        $transaction->setOrderNumber($orderNumber);
+
+        if (! $transaction->getTransactionId()) {
+            return null;
+        }
+
+        return $this->persist($transaction);
+    }
+
+    /**
      * @param Response $response
      * @param string   $type
      *
      * @return Transaction|null
      */
-    public function create($orderNumber, Response $response, $type = null)
+    private function create(Response $response, $type = null)
     {
         $transaction = new Transaction();
-        $transaction->setOrderNumber($orderNumber);
         $transaction->setType($type);
         $transaction->setCreatedAt(new \DateTime());
 
@@ -85,13 +130,13 @@ class TransactionFactory
             $transaction->setAmount($response->getRequestedAmount()->getValue());
         }
 
-        if (! $transaction->getTransactionId()) {
-            return null;
-        }
+        return $transaction;
+    }
 
+    private function persist(Transaction $transaction)
+    {
         $this->em->persist($transaction);
         $this->em->flush();
-
         return $transaction;
     }
 }

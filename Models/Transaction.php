@@ -41,8 +41,10 @@ use Doctrine\ORM\Mapping as ORM;
 class Transaction extends ModelEntity
 {
     const TYPE_INITIAL = 'initial';
+    const TYPE_INITIAL_REQUEST = 'initial-request';
     const TYPE_BACKEND = 'backend';
     const TYPE_RETURN = 'return';
+    const TYPE_INTERACTION = 'interaction';
     const TYPE_NOTIFY = 'notify';
 
     const STATE_OPEN = 'open';
@@ -50,7 +52,6 @@ class Transaction extends ModelEntity
 
     /**
      * @var int
-     *
      * @ORM\Column(name="id", type="integer", nullable=false)
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
@@ -59,9 +60,15 @@ class Transaction extends ModelEntity
 
     /**
      * @var string
-     * @ORM\Column(name="order_number", type="string", nullable=false)
+     * @ORM\Column(name="order_number", type="string", nullable=true)
      */
     private $orderNumber;
+
+    /**
+     * @var string
+     * @ORM\Column(name="internal_order_number", type="string", nullable=true)
+     */
+    private $internalOrderNumber;
 
     /**
      * @var string
@@ -71,7 +78,7 @@ class Transaction extends ModelEntity
 
     /**
      * @var string
-     * @ORM\Column(name="transaction_id", type="string", nullable=false)
+     * @ORM\Column(name="transaction_id", type="string", nullable=true)
      */
     private $transactionId;
 
@@ -135,6 +142,18 @@ class Transaction extends ModelEntity
      */
     private $state;
 
+    /**
+     * @var string
+     * @ORM\Column(name="basket_signature", type="string", nullable=true)
+     */
+    private $basketSignature;
+
+    /**
+     * @var array
+     * @ORM\Column(name="additional_data", type="array", nullable=true)
+     */
+    private $additionalData;
+
     public function __construct()
     {
         $this->setState(self::STATE_OPEN);
@@ -149,7 +168,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getOrderNumber()
     {
@@ -157,11 +176,27 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param string orderNumber
+     * @param string|null orderNumber
      */
     public function setOrderNumber($orderNumber)
     {
         $this->orderNumber = $orderNumber;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getInternalOrderNumber()
+    {
+        return $this->internalOrderNumber;
+    }
+
+    /**
+     * @param string|null $internalOrderNumber
+     */
+    public function setInternalOrderNumber($internalOrderNumber)
+    {
+        $this->internalOrderNumber = $internalOrderNumber;
     }
 
     /**
@@ -301,7 +336,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param string $type
+     * @param string|null $type
      */
     public function setType($type = null)
     {
@@ -354,6 +389,38 @@ class Transaction extends ModelEntity
     public function setState($state)
     {
         $this->state = $state;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getBasketSignature()
+    {
+        return $this->basketSignature;
+    }
+
+    /**
+     * @param string|null $basketSignature
+     */
+    public function setBasketSignature($basketSignature)
+    {
+        $this->basketSignature = $basketSignature;
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getAdditionalData()
+    {
+        return $this->additionalData;
+    }
+
+    /**
+     * @param array|null $additionalData
+     */
+    public function setAdditionalData($additionalData)
+    {
+        $this->additionalData = $additionalData;
     }
 
     public function toArray()

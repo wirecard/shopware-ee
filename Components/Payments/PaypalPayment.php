@@ -136,7 +136,7 @@ class PaypalPayment extends Payment
 
         $transaction->setOrderDetail(sprintf(
             '%s - %.2f %s',
-            $orderSummary->getOrderNumber(),
+            $orderSummary->getInternalOrderNumber(),
             $orderSummary->getAmount()->getValue(),
             $orderSummary->getAmount()->getCurrency()
         ));

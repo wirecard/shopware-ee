@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?php
 /**
  * Shop System Plugins - Terms of Use
  *
@@ -29,17 +28,15 @@
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
  */
--->
-<plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/plugin.xsd">
-    <label>Wirecard</label>
 
-    <version>0.2.0</version>
-    <compatibility minVersion="5.3.0" />
+namespace WirecardShopwareElasticEngine\Exception;
 
-    <author>Wirecard</author>
-    <link>https://www.wirecard.at/</link>
-    <license>GPL-3.0</license>
-
-    <description>build </description>
-</plugin>
+class InitialTransactionNotFoundException extends \Exception
+{
+    public function __construct($transactionID)
+    {
+        parent::__construct(
+            "Initial transaction for transaction (ID '{$transactionID}') not found"
+        );
+    }
+}

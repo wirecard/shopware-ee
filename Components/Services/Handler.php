@@ -93,17 +93,16 @@ abstract class Handler
     }
 
     /**
-     * @param int $orderNumber
+     * @param string $internalOrderNumber
      *
      * @return string
      */
-    protected function getOrderNumberForTransaction($orderNumber)
+    protected function getOrderNumberForTransaction($internalOrderNumber)
     {
         if (in_array(getenv('SHOPWARE_ENV'), $this->devEnvironments)) {
-            $orderNumber = uniqid() . '-' . $orderNumber;
+            $internalOrderNumber = 'dev-' . $internalOrderNumber;
         }
-
-        return $orderNumber;
+        return $internalOrderNumber;
     }
 
     /**
