@@ -37,7 +37,7 @@
                      if ($('#wirecard-sepa--confirm-mandate').val() !== 'confirmed') {
                          event.preventDefault();
                          modalWindow = $.modal.open(getMandateText(), {
-                             title: "Sepa Mandate",
+                             title: "{s name="SepaMandateTitle" namespace="frontend/wirecard_elastic_engine/sepa"}{/s}",
                              closeOnOverlay: false,
                              showCloseButton: false
                          });

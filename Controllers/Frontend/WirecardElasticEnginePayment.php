@@ -140,8 +140,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $this->getRoute('cancel', $payment->getName()),
                 $this->getRoute('failure', $payment->getName())
             ),
-            //$this->getRoute('notify', $payment->getName()),
-            'http://5625c146.ngrok.io/WirecardElasticEnginePayment/notify/method/' . $payment->getName(),
+            $this->getRoute('notify', $payment->getName()),
             $this->Request(),
             $this->getModules()->Order()
         );

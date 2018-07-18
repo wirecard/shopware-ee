@@ -156,7 +156,9 @@ class SepaPayment extends Payment
         \Enlight_Controller_Request_Request $request,
         \sOrder $shopwareOrder
     ) {
-        if (! isset($this->additionalData['sepaIban']) ||
+        if (! isset($this->additionalData['sepaConfirmMandate']) ||
+            $this->additionalData['sepaConfirmMandate'] !== 'confirmed' ||
+            ! isset($this->additionalData['sepaIban']) ||
             ! isset($this->additionalData['sepaFirstName']) ||
             ! isset($this->additionalData['sepaLastName'])) {
             // TODO
