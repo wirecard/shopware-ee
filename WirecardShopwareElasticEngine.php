@@ -76,11 +76,13 @@ class WirecardShopwareElasticEngine extends Plugin
     public function activate(ActivateContext $context)
     {
         parent::activate($context);
+        $context->scheduleClearCache(ActivateContext::CACHE_LIST_ALL);
     }
 
     public function deactivate(DeactivateContext $context)
     {
         parent::deactivate($context);
+        $context->scheduleClearCache(DeactivateContext::CACHE_LIST_ALL);
     }
 
     protected function updateDatabase()

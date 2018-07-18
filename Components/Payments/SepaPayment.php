@@ -136,8 +136,12 @@ class SepaPayment extends Payment
         }
 
         return [
-            'method'  => $this->getName(),
-            'showBic' => $paymentConfig->showBic()
+            'method'          => $this->getName(),
+            'showBic'         => $paymentConfig->showBic(),
+            'creditorId'      => $paymentConfig->getCreditorId(),
+            'creditorName'    => $paymentConfig->getCreditorName(),
+            'creditorAddress' => $paymentConfig->getCreditorAddress(),
+            'additionalText'  => $paymentConfig->getMandateText()
         ];
     }
 
