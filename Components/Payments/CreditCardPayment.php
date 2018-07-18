@@ -187,12 +187,15 @@ class CreditCardPayment extends Payment
         if ($limit->getCurrency() && $limit->getCurrency() !== 'NULL') {
             // Get factor of the limit currency (if it is the default currency, use factor 1.0)
             $limitCurrency = $repo->findOneBy(['currency' => $limit->getCurrency()]);
-            if ($limitCurrency && ! $currency->getDefault()) {
+            if ($limitCurrency && ! $limitCurrency->getDefault()) {
                 $limitFactor = $limitCurrency->getFactor();
             }
         }
-        if (! $selectedFactor || ! $limitFactor) {
-            return 1.0;
+        if (! $selectedFactor) {
+            $selectedFactor = 1.0;
+        }
+        if (! $limitFactor) {
+            $limitFactor = 1.0;
         }
         return $selectedFactor / $limitFactor;
     }
