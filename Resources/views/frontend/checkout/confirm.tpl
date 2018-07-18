@@ -6,7 +6,7 @@
         {if $wirecardFormFields.method == 'wirecard_elastic_engine_sepa'}
             <div class="panel has--border wirecard--aditional-form-fields">
                 <div class="panel--title primary is--underline">
-                    Additional Form Fields
+                    {s name="AdditionalPaymentFields" namespace="frontend/wirecard_elastic_engine/sepa"}{/s}
                 </div>
                 <div class="panel--body is--wide">
                     {include file="frontend/plugins/wirecard_elastic_engine/form/sepa.tpl"}

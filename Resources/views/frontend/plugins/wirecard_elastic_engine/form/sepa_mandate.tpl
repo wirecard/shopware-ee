@@ -95,7 +95,7 @@
 		        <tr>
 			    <td style="text-align: right;">
                                 <button class="btn btn-primary" id="sepa--cancel-button" type="button">{s name="Cancel"}{/s}</button>
-                                <button class="btn btn-primary" id="sepa--confirm-button" type="button">Confirm</button>
+                                <button class="btn btn-primary" id="sepa--confirm-button" type="button">{s name="Confirm"}{/s}</button>
                             </td>
 		        </tr>
 		    </table>
