@@ -177,7 +177,7 @@ class SepaPayment extends Payment
             ! isset($this->additionalData['sepaIban']) ||
             ! isset($this->additionalData['sepaFirstName']) ||
             ! isset($this->additionalData['sepaLastName'])) {
-            throw new \Exception('Unsufficiant Data');
+            throw new \Exception('Unsufficiant Data for SEPA Transaction');
         }
 
         $transaction = $this->getTransaction();
