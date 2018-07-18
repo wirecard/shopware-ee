@@ -59,6 +59,21 @@ class SepaPaymentConfig extends PaymentConfig
     protected $mandateText;
 
     /**
+     * @var string
+     */
+    protected $backendTransactionMaid;
+
+    /**
+     * @var string
+     */
+    protected $backendTransactionSecret;
+
+    /**
+     * @var string
+     */
+    protected $backendCreditorId;
+
+    /**
      * @param bool
      */
     public function setShowBic($showBic)
@@ -139,6 +154,55 @@ class SepaPaymentConfig extends PaymentConfig
     }
 
     /**
+     * @param string
+     */
+    public function setBackendTransactionMAID($backendTransactionMaid)
+    {
+        $this->backendTransactionMaid = $backendTransactionMaid;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBackendTransactionMAID()
+    {
+        return $this->backendTransactionMaid;
+    }
+
+    /**
+     * @param string
+     */
+    public function setBackendTransactionSecret($backendTransactionSecret)
+    {
+        $this->backendTransactionSecret = $backendTransactionSecret;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBackendTransactionSecret()
+    {
+        return $this->backendTransactionSecret;
+    }
+
+    /**
+     * @param string
+     */
+    public function setBackendCreditorId($backendCreditorId)
+    {
+        $this->backendCreditorId = $backendCreditorId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBackendCreditorId()
+    {
+        return $this->backendCreditorId;
+    }
+
+
+    /**
      * @inheritdoc
      */
     public function toArray()
@@ -146,11 +210,14 @@ class SepaPaymentConfig extends PaymentConfig
         return array_merge(
             parent::toArray(),
             [
-                'showBic'         => $this->showBic(),
-                'creditorId'      => $this->getCreditorId(),
-                'creditorName'    => $this->getCreditorName(),
-                'creditorAddress' => $this->getCreditorAddress(),
-                'mandateText'     => $this->getMandateText()
+                'showBic'                  => $this->showBic(),
+                'creditorId'               => $this->getCreditorId(),
+                'creditorName'             => $this->getCreditorName(),
+                'creditorAddress'          => $this->getCreditorAddress(),
+                'mandateText'              => $this->getMandateText(),
+                'backendTransactionMaid'   => $this->getBackendTransactionMAID(),
+                'backendTransactionSecret' => $this->getBackendTransactionSecret(),
+                'backendCreditorId'        => $this->getBackendCreditorId()
             ]
         );
     }

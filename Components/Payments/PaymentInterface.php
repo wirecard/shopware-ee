@@ -69,9 +69,10 @@ interface PaymentInterface
     /**
      * Returns payment specific transaction object.
      *
+     * @param string $operation
      * @return \Wirecard\PaymentSdk\Transaction\Transaction
      */
-    public function getTransaction();
+    public function getTransaction($operation = null);
 
     /**
      * Returns the transaction type from `getPaymentOptions`.

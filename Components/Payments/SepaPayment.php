@@ -37,6 +37,7 @@ use Wirecard\PaymentSdk\Config\SepaConfig;
 use Wirecard\PaymentSdk\Entity\AccountHolder;
 use Wirecard\PaymentSdk\Entity\Mandate;
 use Wirecard\PaymentSdk\Entity\Redirect;
+use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\Transaction\SepaDirectDebitTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
@@ -75,10 +76,14 @@ class SepaPayment extends Payment
     /**
      * @return SepaDirectDebitTransaction
      */
-    public function getTransaction()
+    public function getTransaction($operation = null)
     {
         if (! $this->transactionInstance) {
-            $this->transactionInstance = new SepaDirectDebitTransaction();
+            if ($operation && $operation === 'credit') {
+                $this->transactionInstance = new SepaCreditTransferTransaction();
+            } else {
+                $this->transactionInstance = new SepaDirectDebitTransaction();
+            }
         }
         return $this->transactionInstance;
     }
@@ -96,8 +101,16 @@ class SepaPayment extends Payment
             $this->getPaymentConfig()->getTransactionSecret()
         );
         $sepaDirectDebitConfig->setCreditorId($this->getPaymentConfig()->getCreditorId());
-
         $config->add($sepaDirectDebitConfig);
+
+        $sepaCreditTransferConfig = new SepaConfig(
+            SepaCreditTransferTransaction::NAME,
+            $this->getPaymentConfig()->getBackendTransactionMAID(),
+            $this->getPaymentConfig()->getBackendTransactionSecret()
+        );
+        $sepaCreditTransferConfig->setCreditorId($this->getPaymentConfig()->getBackendCreditorId());
+        $config->add($sepaCreditTransferConfig);
+
         return $config;
     }
 
@@ -120,6 +133,9 @@ class SepaPayment extends Payment
         $paymentConfig->setCreditorName($this->getPluginConfig('SepaCreditorName'));
         $paymentConfig->setCreditorAddress($this->getPluginConfig('SepaCreditorAddress'));
         $paymentConfig->setMandateText($this->getPluginConfig('SepaMandateText'));
+        $paymentConfig->setBackendTransactionMAID($this->getPluginConfig('SepaBackendMerchantId'));
+        $paymentConfig->setBackendTransactionSecret($this->getPluginConfig('SepaBackendSecret'));
+        $paymentConfig->setBackendCreditorId($this->getPluginConfig('SepaBackendCreditorId'));
 
         return $paymentConfig;
     }
@@ -161,8 +177,7 @@ class SepaPayment extends Payment
             ! isset($this->additionalData['sepaIban']) ||
             ! isset($this->additionalData['sepaFirstName']) ||
             ! isset($this->additionalData['sepaLastName'])) {
-            // TODO
-            exit();
+            throw new \Exception('Unsufficiant Data');
         }
 
         $transaction = $this->getTransaction();

@@ -307,48 +307,48 @@ function (button) {
         <!-- Sepa -->
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaServer</name>
-            <label lang="de">[Sepa] Wirecard Server Url</label>
-            <label lang="en">[Sepa] Wirecard Server Url</label>
+            <label lang="de">[SEPA] Wirecard Server Url</label>
+            <label lang="en">[SEPA] Wirecard Server Url</label>
             <value>https://api-test.wirecard.com</value>
             <description lang="de">Wirecard Basis Url (z.B. http://api-test.wirecard.com)</description>
             <description lang="en">Wirecard Base Url (e.g. http://api-test.wirecard.com)</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaHttpUser</name>
-            <label lang="de">[Sepa] HTTP Benutzer</label>
-            <label lang="en">[Sepa] HTTP User</label>
+            <label lang="de">[SEPA] HTTP Benutzer</label>
+            <label lang="en">[SEPA] HTTP User</label>
             <value>16390-testing</value>
             <description lang="de">HTTP Benutzer</description>
             <description lang="en">HTTP User</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaHttpPassword</name>
-            <label lang="de">[Sepa] HTTP Passwort</label>
-            <label lang="en">[Sepa] HTTP Password</label>
+            <label lang="de">[SEPA] HTTP Passwort</label>
+            <label lang="en">[SEPA] HTTP Password</label>
             <value>3!3013=D3fD8X7</value>
             <description lang="de">HTTP Passwort</description>
             <description lang="en">HTTP Password</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaMerchantId</name>
-            <label lang="de">[Sepa] Händler ID</label>
-            <label lang="en">[Sepa] Merchant ID</label>
+            <label lang="de">[SEPA] Händler ID</label>
+            <label lang="en">[SEPA] Merchant ID</label>
             <value>933ad170-88f0-4c3d-a862-cff315ecfbc0</value>
             <description lang="de">Eindeutige Händler-ID Ihres Wirecard Konto</description>
             <description lang="en">Unique merchant account id to Wirecard</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaSecret</name>
-            <label lang="de">[Sepa] Geheimschlüssel</label>
-            <label lang="en">[Sepa] Secret Key</label>
+            <label lang="de">[SEPA] Geheimschlüssel</label>
+            <label lang="en">[SEPA] Secret Key</label>
             <value>ecdf5990-0372-47cd-a55d-037dccfe9d25</value>
             <description lang="de">Geheimschlüssel für die digitale Signatur</description>
             <description lang="en">Secret key for digital signature</description>
         </element>
         <element type="button" scope="shop">
             <name>wirecardElasticEngineSepaTestApi</name>
-            <label lang="de">[Sepa] Konfiguration testen</label>
-            <label lang="en">[Sepa] Test settings</label>
+            <label lang="de">[SEPA] Konfiguration testen</label>
+            <label lang="en">[SEPA] Test settings</label>
             <options>
                 <handler>
                     <![CDATA[
@@ -395,8 +395,8 @@ function (button) {
         </element>
         <element type="select" scope="shop">
             <name>wirecardElasticEngineSepaTransactionType</name>
-            <label lang="de">[Sepa] Transaktionsart</label>
-            <label lang="en">[Sepa] Transaction Type</label>
+            <label lang="de">[SEPA] Transaktionsart</label>
+            <label lang="en">[SEPA] Transaction Type</label>
             <value>pay</value>
             <store>
                 <option>
@@ -413,44 +413,70 @@ function (button) {
         </element>
         <element type="boolean" scope="shop">
             <name>wirecardElasticEngineSepaShowBic</name>
-            <label lang="de">[Sepa] BIC anzeigen</label>
-            <label lang="en">[Sepa] show BIC</label>
+            <label lang="de">[SEPA] BIC anzeigen</label>
+            <label lang="en">[SEPA] show BIC</label>
             <value>false</value>
             <description lang="de"></description>
             <description lang="en"></description>
         </element>
         <element required="true" type="text" scope="shop">
             <name>wirecardElasticEngineSepaCreditorId</name>
-            <label lang="de">[Sepa] Creditor ID</label>
-            <label lang="en">[Sepa] Creditor ID</label>
+            <label lang="de">[SEPA] Creditor ID</label>
+            <label lang="en">[SEPA] Creditor ID</label>
             <value>DE98ZZZ09999999999</value>
             <description lang="de">Die Creditor ID wird benötigt, um das SEPA-Lastschrift-Mandat zu erstellen. Die Creditor ID muss beim zuständigen Bankinstitut angefordert werden.</description>
             <description lang="en">SEPA requires Creditor ID to create SEPA Direct Debit Mandate. To get a Creditor ID apply at the responsible bank institute.</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaCreditorName</name>
-            <label lang="de">[Sepa] Creditor Name</label>
-            <label lang="en">[Sepa] Creditor Name</label>
+            <label lang="de">[SEPA] Creditor Name</label>
+            <label lang="en">[SEPA] Creditor Name</label>
             <value></value>
             <description lang="de">Für das SEPA-Lastschrift-Mandat wird der Name des Zahlungsempfängers (Creditor) benötigt.</description>
             <description lang="en">SEPA requires a Creditor Name for display on the SEPA Direct Debit Mandate page.</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaCreditorAddress</name>
-            <label lang="de">[Sepa] Creditor Adresse</label>
-            <label lang="en">[Sepa] Creditor Address</label>
+            <label lang="de">[SEPA] Creditor Adresse</label>
+            <label lang="en">[SEPA] Creditor Address</label>
             <value></value>
             <description lang="de">Für das SEPA-Lastschrift-Mandat wird die Adresse des Zahlungsempfängers (Creditor) benötigt.</description>
             <description lang="en">SEPA requires a Creditor Address for display on the SEPA Direct Debit Mandate page.</description>
         </element>
         <element type="textarea" scope="shop">
             <name>wirecardElasticEngineSepaMandateText</name>
-            <label lang="de">[Sepa] Zusatztext</label>
-            <label lang="en">[Sepa] Additianl Text</label>
+            <label lang="de">[SEPA] Zusatztext</label>
+            <label lang="en">[SEPA] Additianl Text</label>
             <value></value>
             <description lang="de">Dieser Text wird am Ende des ersten Paragraphen des SEPA-Lastschrift-Mandats angezeigt.</description>
             <description lang="en">This text appears on the SEPA Direct Debit Mandate page at the end of the first paragraph.</description>
         </element>
         <!-- Sepa End -->
+        <!-- Sepa Backend -->
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineSepaBackendMerchantId</name>
+            <label lang="de">[SEPA Backend] Händler ID</label>
+            <label lang="en">[SEPA Backend] Merchant ID</label>
+            <value>59a01668-693b-49f0-8a1f-f3c1ba025d45</value>
+            <description lang="de">Eindeutige Händler-ID Ihres Wirecard Konto</description>
+            <description lang="en">Unique merchant account id to Wirecard</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineSepaBackendSecret</name>
+            <label lang="de">[SEPA Backend] Geheimschlüssel</label>
+            <label lang="en">[SEPA Backend] Secret Key</label>
+            <value>ecdf5990-0372-47cd-a55d-037dccfe9d25</value>
+            <description lang="de">Geheimschlüssel für die digitale Signatur</description>
+            <description lang="en">Secret key for digital signature</description>
+        </element>
+        <element required="true" type="text" scope="shop">
+            <name>wirecardElasticEngineSepaBackendCreditorId</name>
+            <label lang="de">[SEPA Backend] Creditor ID</label>
+            <label lang="en">[SEPA Backend] Creditor ID</label>
+            <value>DE98ZZZ09999999999</value>
+            <description lang="de">Die Creditor ID wird benötigt, um das SEPA-Lastschrift-Mandat zu erstellen. Die Creditor ID muss beim zuständigen Bankinstitut angefordert werden.</description>
+            <description lang="en">SEPA requires Creditor ID to create SEPA Direct Debit Mandate. To get a Creditor ID apply at the responsible bank institute.</description>
+        </element>
+        <!-- Sepa Backend End -->
     </elements>
 </config>
