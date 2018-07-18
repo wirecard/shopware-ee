@@ -33,6 +33,8 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\FormInteractionResponse;
+use Wirecard\PaymentSdk\Response\InteractionResponse;
+use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
@@ -58,23 +60,27 @@ class ReturnHandler extends Handler
         TransactionService $transactionService,
         \Enlight_Controller_Request_Request $request
     ) {
-        $response = $payment->processReturn($transactionService, $request);
+        try {
+            $response = $payment->processReturn($transactionService, $request);
 
-        if (! $response) {
-            $response = $transactionService->handleResponse($request->getParams());
+            if (! $response) {
+                $response = $transactionService->handleResponse($request->getParams());
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('Return processing failed: ' . $e->getMessage());
+            return new ErrorAction(ErrorAction::PROCESSING_FAILED, 'Return processing failed');
         }
 
-        switch (true) {
-            case $response instanceof FormInteractionResponse:
-                return $this->handleFormInteraction($response);
-
-            case $response instanceof SuccessResponse:
-                return $this->handleSuccess($response);
-
-            case $response instanceof FailureResponse:
-            default:
-                return $this->handleFailure($response);
+        if ($response instanceof FormInteractionResponse) {
+            return $this->handleFormInteraction($response);
         }
+        if ($response instanceof SuccessResponse) {
+            return $this->handleSuccess($response);
+        }
+        if ($response instanceof InteractionResponse) {
+            return $this->handleInteraction($response);
+        }
+        return $this->handleFailure($response);
     }
 
     /**
@@ -124,14 +130,40 @@ class ReturnHandler extends Handler
     }
 
     /**
-     * @param FailureResponse $response
+     * @param InteractionResponse $response
      *
      * @return Action
      */
-    protected function handleFailure(FailureResponse $response)
+    protected function handleInteraction(InteractionResponse $response)
     {
-        $this->logger->error('Return handling failed', $response->getData());
+        try {
+            $order = $this->getOrderFromResponse($response);
+            $this->transactionFactory->create($order->getNumber(), $response, Transaction::TYPE_RETURN);
+        } catch (OrderNotFoundException $e) {
+            $this->logger->notice('Could not create transaction for InteractionResponse: ' . $e->getMessage());
+        }
 
-        return new ErrorAction(ErrorAction::FAILURE_RESPONSE, 'Failure response');
+        return new RedirectAction($response->getRedirectUrl());
+    }
+
+    /**
+     * @param FailureResponse|Response|mixed $response
+     *
+     * @return Action
+     */
+    protected function handleFailure($response)
+    {
+        $message = 'Unexpected response';
+        $context = get_class($response);
+
+        if ($response instanceof FailureResponse) {
+            $message = 'Failure response';
+        }
+        if ($response instanceof Response) {
+            $context = $response->getData();
+        }
+
+        $this->logger->error('Return handling failed: ' . $message, $context);
+        return new ErrorAction(ErrorAction::FAILURE_RESPONSE, $message);
     }
 }

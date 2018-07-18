@@ -61,7 +61,7 @@ class BasketMapperTest extends TestCase
                     'tax'         => 150,
                     'tax_rate'    => 15,
                     'quantity'    => 1,
-                    'price'       => 1000,
+                    'price'       => 999.99999,
                 ],
                 [
                     'articlename' => 'bar',
@@ -76,7 +76,7 @@ class BasketMapperTest extends TestCase
         $mapper      = new BasketMapper($basketArray, 'EUR', $articles, $transaction);
         $this->assertEquals($basketArray, $mapper->getShopwareBasket());
         $this->assertEquals(implode("\n", [
-            'foo - 10 - 1000 - EUR - 1 - 15%',
+            'foo - 10 - 999.99999 - EUR - 1 - 15%',
             'bar - 11 - 500 - EUR - 2 - 20%',
         ]), $mapper->getBasketText());
         $this->assertInstanceOf(Basket::class, $mapper->getWirecardBasket());
@@ -255,5 +255,44 @@ class BasketMapperTest extends TestCase
 
         $this->expectException(InvalidBasketException::class);
         new BasketMapper([], 'EUR', $articles, $transaction);
+    }
+
+    /**
+     * @dataProvider numberFormatProvider
+     *
+     * @param string       $expected
+     * @param string|float $amount
+     */
+    public function testNumberFormat($expected, $amount)
+    {
+        $this->assertSame($expected, BasketMapper::numberFormat($amount));
+    }
+
+    public function numberFormatProvider()
+    {
+        return [
+            ['0.00', 0],
+            ['1.00', 1],
+            ['-1.00', -1],
+            ['1.10', 1.10],
+            ['-1.10', -1.1],
+            ['10000.50', 10000.5],
+            ['10.99', 10.99],
+            ['11.00', 10.99999999],
+            ['11.00', 10.995],
+            ['10.99', 10.9949],
+            ['10.00', 10.0001],
+            ['0.00', '0'],
+            ['1.00', '1'],
+            ['-1.00', '-1'],
+            ['1.10', '1.10'],
+            ['-1.10', '-1.1'],
+            ['10000.50', '10000.5'],
+            ['10.99', '10.99'],
+            ['11.00', '10.99999999'],
+            ['11.00', '10.995'],
+            ['10.99', '10.9949'],
+            ['10.00', '10.0001'],
+        ];
     }
 }

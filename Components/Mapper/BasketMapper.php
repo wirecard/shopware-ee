@@ -74,9 +74,9 @@ class BasketMapper extends ArrayMapper
     /**
      * BasketMapper constructor.
      *
-     * @param array $shopwareBasket
-     * @param string $currency
-     * @param \sArticles $articles
+     * @param array       $shopwareBasket
+     * @param string      $currency
+     * @param \sArticles  $articles
      * @param Transaction $transaction
      *
      * @throws ArrayKeyNotFoundException
@@ -128,12 +128,11 @@ class BasketMapper extends ArrayMapper
      */
     public function getBasketText()
     {
-        $basket   = $this->getShopwareBasket();
-        $currency = $this->currency;
-        $lines    = [];
+        $basket = $this->getShopwareBasket();
+        $lines  = [];
 
         foreach ($this->getShopwareBasketContent() as $item) {
-            $basketItem = new BasketItemMapper($item, $currency);
+            $basketItem = new BasketItemMapper($item, $this->currency);
 
             $name          = $basketItem->getArticleName();
             $articleNumber = $basketItem->getArticleNumber();
@@ -141,12 +140,12 @@ class BasketMapper extends ArrayMapper
             $quantity      = $basketItem->getQuantity();
             $taxRate       = $basketItem->getTaxRate();
 
-            $lines[] = "${name} - ${articleNumber} - ${price} - ${currency} - ${quantity} - ${taxRate}%";
+            $lines[] = "$name - $articleNumber - $price - {$this->currency} - $quantity - $taxRate%";
         }
 
         if (! empty($basket[self::SHIPPING_COSTS_WITH_TAX]) && isset($basket[self::SHIPPING_COSTS_TAX])) {
             $lines[] = "Shipping - shipping - ${basket[self::SHIPPING_COSTS_WITH_TAX]} " .
-                       "${currency} - ${basket[self::SHIPPING_COSTS_TAX]}";
+                       "{$this->currency} - ${basket[self::SHIPPING_COSTS_TAX]}";
         }
 
         return implode("\n", $lines);
@@ -178,14 +177,14 @@ class BasketMapper extends ArrayMapper
 
         $shippingCosts = $this->getOptional(self::SHIPPING_COSTS_WITH_TAX);
         if ($shippingCosts) {
-            $shippingAmount = new Amount($shippingCosts, $this->currency);
+            $shippingAmount = new Amount(self::numberFormat($shippingCosts), $this->currency);
 
             $shippingTaxValue = $shippingCosts - $this->getOptional(self::SHIPPING_COSTS_NET, 0.0);
 
             $basketItem = new Item('Shipping', $shippingAmount, 1);
             $basketItem->setDescription('Shipping');
             $basketItem->setArticleNumber('shipping');
-            $basketItem->setTaxAmount(new Amount($shippingTaxValue, $this->currency));
+            $basketItem->setTaxAmount(new Amount(self::numberFormat($shippingTaxValue), $this->currency));
             $basketItem->setTaxRate($this->getOptional(self::SHIPPING_COSTS_TAX, 0.0));
 
             $basket->add($basketItem);
@@ -216,7 +215,7 @@ class BasketMapper extends ArrayMapper
             $article    = $this->articles->sGetProductByOrdernumber($basketItem->getArticleNumber());
 
             if (! $article) {
-                // Some items (extra charges, ...) might have an order number but no article.
+                // Some items (extra charges, coupons, etc.) might have an order number but no article.
                 continue;
             }
 
@@ -235,5 +234,15 @@ class BasketMapper extends ArrayMapper
     public function toArray()
     {
         return $this->getShopwareBasket();
+    }
+
+    /**
+     * @param string|float $amount
+     *
+     * @return string
+     */
+    public static function numberFormat($amount)
+    {
+        return number_format($amount, 2, '.', '');
     }
 }

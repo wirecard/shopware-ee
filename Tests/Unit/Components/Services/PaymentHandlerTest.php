@@ -173,7 +173,7 @@ class PaymentHandlerTest extends TestCase
         $transaction->expects($this->atLeastOnce())->method('setAccountHolder');
         $transaction->expects($this->atLeastOnce())->method('setShipping');
         $transaction->expects($this->atLeastOnce())->method('setLocale');
-        $transaction->expects($this->atLeastOnce())->method('setDescriptor')->with('WirecardShopware ');
+        $transaction->expects($this->atLeastOnce())->method('setDescriptor');
         $transaction->expects($this->atLeastOnce())->method('setNotificationUrl')->with('https://localhost/notify');
 
         $paymentConfig = $this->createMock(PaymentConfig::class);

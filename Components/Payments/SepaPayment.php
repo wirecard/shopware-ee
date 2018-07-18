@@ -86,9 +86,9 @@ class SepaPayment extends Payment
     /**
      * @inheritdoc
      */
-    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag)
+    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag, $selectedCurrency)
     {
-        $config = parent::getTransactionConfig($shop, $parameterBag);
+        $config = parent::getTransactionConfig($shop, $parameterBag, $selectedCurrency);
 
         $sepaDirectDebitConfig = new SepaConfig(
             SepaDirectDebitTransaction::NAME,

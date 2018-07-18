@@ -31,11 +31,19 @@
 
 use Shopware\Components\CSRFWhitelistAware;
 use Shopware\Models\Order\Order;
+use Shopware\Models\Shop\Shop;
+use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Config\Config;
+use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Actions\Action;
+use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
+use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
+use WirecardShopwareElasticEngine\Components\Services\BackendOperationHandler;
+use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
+use WirecardShopwareElasticEngine\Exception\UnknownActionException;
+use WirecardShopwareElasticEngine\Exception\MissingCredentialsException;
 use WirecardShopwareElasticEngine\Models\Transaction;
-use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
-use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 
 // @codingStandardsIgnoreStart
 class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Controllers_Backend_Application implements CSRFWhitelistAware
@@ -66,7 +74,9 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
                 || empty($params[$prefix . 'HttpUser'])
                 || empty($params[$prefix . 'HttpPassword'])
             ) {
-                throw new \Exception('Missing credentials. Please check Server, HttpUser and HttpPassword.');
+                throw new MissingCredentialsException(
+                    'Missing credentials. Please check Server, HttpUser and HttpPassword.'
+                );
             }
 
             $testConfig         = new Config(
@@ -74,7 +84,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
                 $params[$prefix . 'HttpUser'],
                 $params[$prefix . 'HttpPassword']
             );
-            $transactionService = new TransactionService($testConfig, $this->get('pluginlogger'));
+            $transactionService = new TransactionService($testConfig, $this->getLogger());
 
             $success = $transactionService->checkCredentials();
         } catch (\Exception $e) {
@@ -95,81 +105,117 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
      */
     public function detailsAction()
     {
-        $params = $this->Request()->getParams();
+        /** @var PaymentFactory $paymentFactory */
+        $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
+        $payment        = $paymentFactory->create($this->Request()->getParam('payment'));
 
-        $orderNumber = $params['orderNumber'];
-        $payMethod   = $params['payMethod'];
+        $orderNumber = $this->Request()->getParam('orderNumber');
 
         if (! $orderNumber) {
-            return $this->View()->assign(['success' => false]);
+            return $this->handleError('Order number not found');
         }
 
-        $builder = $this->getManager()->createQueryBuilder();
-        $builder->select('transaction')
-                ->from(Transaction::class, 'transaction')
-                ->where('transaction.orderNumber = :orderNumber')
-                ->setParameter('orderNumber', $orderNumber);
+        $transactions = $this->get('models')
+                             ->getRepository(Transaction::class)
+                             ->findBy([
+                                 'orderNumber' => $orderNumber,
+                             ]);
 
-        /** @var Transaction[] $transactions */
-        $transactions = $builder->getQuery()->execute();
-
-        if (! count($transactions)) {
-            return $this->View()->assign(['success' => false]);
+        if (! $transactions) {
+            return $this->handleError('No transactions found');
         }
+
+        $shop               = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
+        $config             = $payment->getTransactionConfig(
+            $shop,
+            $this->container->getParameterBag(),
+            $shop->getCurrency()->getCurrency()
+        );
+        $backendService     = new BackendService($config, $this->getLogger());
+        $paymentTransaction = $payment->getTransaction();
 
         $result = [
             'transactions' => [],
         ];
+
         foreach ($transactions as $transaction) {
-            $result['transactions'][] = $transaction->toArray();
-            //$entry['notificationResponse'] = print_r($notificationResponse, true);
-            //$requestId                     = $notificationResponse['request-id'];
+            /** @var Transaction $transaction */
+            $paymentTransaction->setParentTransactionId($transaction->getTransactionId());
+
+            $result['transactions'][] = array_merge($transaction->toArray(), [
+                'backendOperations' => $backendService->retrieveBackendOperations($paymentTransaction, true),
+                'isFinal'           => $backendService->isFinal($transaction->getTransactionType()),
+            ]);
         }
 
-        $backendOperations = [];
-        if ($payMethod === PaypalPayment::PAYMETHOD_IDENTIFIER) {
-            //            $paypal            = new PaypalPayment();
-            //            $backendOperations = $paypal->getBackendOperations($transactionData[0]['transactionId']);
-        } elseif ($payMethod === CreditCardPayment::PAYMETHOD_IDENTIFIER) {
-            //            $creditCard        = new CreditCardPayment();
-            //            $backendOperations = $creditCard->getBackendOperations($transactionData[0]['transactionId']);
-        }
-
-        $result['backendOperations'] = $backendOperations;
-
-        return $this->View()->assign([
-            'success' => true,
-            'data'    => $result,
+        return $this->handleSuccess([
+            'data' => $result,
         ]);
     }
 
     public function processBackendOperationsAction()
     {
-        $params = $this->Request()->getParams();
+        $operation     = $this->Request()->getParam('operation');
+        $transactionId = $this->Request()->getParam('transactionId');
 
-        $operation   = $params['operation'];
-        $orderNumber = $params['orderNumber'];
-        $payMethod   = $params['payMethod'];
-        $amount      = empty($params['amount']) ? null : $params['amount'];
-        $currency    = empty($params['currency']) ? null : $params['currency'];
-        $payment     = null;
+        $amount   = $this->Request()->getParam('amount');
+        $currency = $this->Request()->getParam('currency');
 
-        if (! $operation || ! $orderNumber || ! $payMethod) {
-            return $this->View()->assign(['success' => false, 'msg' => 'unsufficiantData']);
+        if (! $operation) {
+            return $this->handleError('BackendOperationFailed');
         }
 
-        if ($payMethod === PaypalPayment::PAYMETHOD_IDENTIFIER) {
-            $payment = new PaypalPayment();
-        } elseif ($payMethod === CreditCardPayment::PAYMETHOD_IDENTIFIER) {
-            $payment = new CreditCardPayment();
+        /** @var PaymentFactory $paymentFactory */
+        $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
+        $payment        = $paymentFactory->create($this->Request()->getParam('payment'));
+
+        $shop           = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
+        $config         = $payment->getTransactionConfig(
+            $shop,
+            $this->container->getParameterBag(),
+            $shop->getCurrency()->getCurrency()
+        );
+        $backendService = new BackendService($config, $this->getLogger());
+
+        $transaction = $payment->getTransaction();
+        $transaction->setParentTransactionId($transactionId);
+
+        if ($amount) {
+            $transaction->setAmount(new Amount($amount, $currency));
         }
 
-        if (! $payment) {
-            return $this->View()->assign(['success' => false, 'msg' => 'unknownPaymethod']);
+        /** @var BackendOperationHandler $backendOperationHandler */
+        $backendOperationHandler = $this->get('wirecard_elastic_engine.backend_operation_handler');
+        $action                  = $backendOperationHandler->execute(
+            $transaction,
+            $backendService,
+            $operation
+        );
+
+        return $this->handleAction($action);
+    }
+
+    /**
+     * @param Action $action
+     *
+     * @throws Exception
+     */
+    protected function handleAction(Action $action)
+    {
+        if ($action instanceof ViewAction) {
+            // we're not able to render templates here, so ignore `$action->getTemplate()` here
+            foreach ($action->getAssignments() as $key => $value) {
+                $this->View()->assign($key, $value);
+            }
+            return;
         }
 
-        $result = $payment->processBackendOperationsForOrder($orderNumber, $operation, $amount, $currency);
-        return $this->View()->assign($result);
+        if ($action instanceof ErrorAction) {
+            $this->handleError($action->getMessage());
+            return;
+        }
+
+        throw new UnknownActionException(get_class($action));
     }
 
     /**
@@ -197,10 +243,47 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
     }
 
     /**
+     * @param array $assignments
+     *
+     * @return Enlight_View|Enlight_View_Default
+     */
+    private function handleSuccess(array $assignments)
+    {
+        return $this->View()->assign(array_merge([
+            'success' => true,
+        ], $assignments));
+    }
+
+    /**
+     * @param string $message
+     *
+     * @return Enlight_View|Enlight_View_Default
+     * @throws Exception
+     */
+    private function handleError($message = '')
+    {
+        $this->getLogger()->error($message, $this->Request()->getParams());
+
+        return $this->View()->assign([
+            'success' => false,
+            'message' => $message,
+        ]);
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getWhitelistedCSRFActions()
     {
         return ['notify', 'testSettings'];
+    }
+
+    /**
+     * @return \Shopware\Components\Logger
+     * @throws Exception
+     */
+    private function getLogger()
+    {
+        return $this->get('pluginlogger');
     }
 }

@@ -54,13 +54,15 @@ class PaymentFactoryTest extends TestCase
         /** @var \Shopware_Components_Config|\PHPUnit_Framework_MockObject_MockObject $config */
         /** @var InstallerService|\PHPUnit_Framework_MockObject_MockObject $installer */
         /** @var RouterInterface|\PHPUnit_Framework_MockObject_MockObject $router */
+        /** @var \Enlight_Event_EventManager|\PHPUnit_Framework_MockObject_MockObject $router */
 
-        $em        = $this->createMock(EntityManagerInterface::class);
-        $config    = $this->createMock(\Shopware_Components_Config::class);
-        $installer = $this->createMock(InstallerService::class);
-        $router    = $this->createMock(RouterInterface::class);
+        $em           = $this->createMock(EntityManagerInterface::class);
+        $config       = $this->createMock(\Shopware_Components_Config::class);
+        $installer    = $this->createMock(InstallerService::class);
+        $router       = $this->createMock(RouterInterface::class);
+        $eventManager = $this->createMock(\Enlight_Event_EventManager::class);
 
-        $this->factory = new PaymentFactory($em, $config, $installer, $router);
+        $this->factory = new PaymentFactory($em, $config, $installer, $router, $eventManager);
     }
 
     public function testPaypalInstance()
@@ -73,6 +75,16 @@ class PaymentFactoryTest extends TestCase
         $payments = $this->factory->getSupportedPayments();
         foreach ($payments as $payment) {
             $this->assertInstanceOf(PaymentInterface::class, $payment);
+            $this->assertStringStartsWith('wirecard_elastic_engine_', $payment->getName());
+            $this->assertStringStartsWith('Wirecard ', $payment->getLabel());
+            $options = $payment->getPaymentOptions();
+            $this->assertTrue(is_array($options));
+            $this->assertArrayHasKey('name', $options);
+            $this->assertArrayHasKey('description', $options);
+            $this->assertArrayHasKey('action', $options);
+            $this->assertArrayHasKey('active', $options);
+            $this->assertArrayHasKey('position', $options);
+            $this->assertArrayHasKey('additionalDescription', $options);
         }
     }
 

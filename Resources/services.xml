@@ -10,6 +10,7 @@
             <argument type="service" id="config"/>
             <argument type="service" id="shopware_plugininstaller.plugin_manager"/>
             <argument type="service" id="router"/>
+            <argument type="service" id="events"/>
         </service>
         <service id="wirecard_elastic_engine.transaction_factory"
                  class="WirecardShopwareElasticEngine\Components\Services\TransactionFactory">
@@ -38,6 +39,10 @@
                  class="WirecardShopwareElasticEngine\Components\Services\PaymentHandler"
                  parent="wirecard_elastic_engine.handler">
         </service>
+        <service id="wirecard_elastic_engine.backend_operation_handler"
+                 class="WirecardShopwareElasticEngine\Components\Services\BackendOperationHandler"
+                 parent="wirecard_elastic_engine.handler">
+        </service>
         <service id="wirecard_elastic_engine.session_handler"
                  class="WirecardShopwareElasticEngine\Components\Services\SessionHandler">
             <argument type="service" id="session"/>
@@ -59,6 +64,12 @@
         <service id="wirecard_elastic_engine.subscriber.order_send_mail"
                  class="WirecardShopwareElasticEngine\Subscriber\OrderSubscriber">
             <tag name="shopware.event_subscriber"/>
+        </service>
+
+        <!-- Commands -->
+        <service id="wirecard_elastic_engine.commands.payment_activate"
+                 class="WirecardShopwareElasticEngine\Commands\PaymentActivate">
+            <tag name="console.command"/>
         </service>
     </services>
 </container>

@@ -41,8 +41,12 @@ use Doctrine\ORM\Mapping as ORM;
 class Transaction extends ModelEntity
 {
     const TYPE_INITIAL = 'initial';
+    const TYPE_BACKEND = 'backend';
     const TYPE_RETURN = 'return';
     const TYPE_NOTIFY = 'notify';
+
+    const STATE_OPEN = 'open';
+    const STATE_CLOSED = 'closed';
 
     /**
      * @var int
@@ -124,6 +128,17 @@ class Transaction extends ModelEntity
      * @ORM\Column(name="created_at", type="datetime", nullable=false)
      */
     private $createdAt;
+
+    /**
+     * @var string
+     * @ORM\Column(name="state", type="string")
+     */
+    private $state;
+
+    public function __construct()
+    {
+        $this->setState(self::STATE_OPEN);
+    }
 
     /**
      * @return int|null
@@ -325,6 +340,22 @@ class Transaction extends ModelEntity
         return $this->createdAt;
     }
 
+    /**
+     * @return string
+     */
+    public function getState()
+    {
+        return $this->state;
+    }
+
+    /**
+     * @param string $state
+     */
+    public function setState($state)
+    {
+        $this->state = $state;
+    }
+
     public function toArray()
     {
         return [
@@ -341,6 +372,7 @@ class Transaction extends ModelEntity
             'currency'                     => $this->getCurrency(),
             'createdAt'                    => $this->getCreatedAt(),
             'response'                     => $this->getResponse(),
+            'state'                        => $this->getState(),
         ];
     }
 }

@@ -75,26 +75,26 @@ class PaymentHandler extends Handler
         $payment     = $orderSummary->getPayment();
         $transaction = $payment->getTransaction();
 
-        $action = $payment->processPayment(
-            $orderSummary,
-            $transactionService,
-            $this->em->getRepository(Shop::class)->getActiveDefault(),
-            $redirect,
-            $request,
-            $shopwareOrder
-        );
-
-        if ($action !== null) {
-            return $action;
-        }
-
         try {
+            $action = $payment->processPayment(
+                $orderSummary,
+                $transactionService,
+                $this->em->getRepository(Shop::class)->getActiveDefault(),
+                $redirect,
+                $request,
+                $shopwareOrder
+            );
+
+            if ($action !== null) {
+                return $action;
+            }
+
             $response = $transactionService->process(
                 $transaction,
                 $payment->getPaymentConfig()->getTransactionOperation()
             );
         } catch (\Exception $e) {
-            $this->logger->error('Transaction service proccess failed: ' . $e->getMessage());
+            $this->logger->error('Transaction service process failed: ' . $e->getMessage());
             return new ErrorAction(ErrorAction::PROCESSING_FAILED, 'Transaction processing failed');
         }
 

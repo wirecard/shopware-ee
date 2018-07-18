@@ -21,6 +21,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
         transactions: 'Transactions',
         transactionsTable: {
             createdAt: 'Created At',
+            type: 'Type',
             transactionId: 'Transaction Id',
             transactionType: 'Transaction type',
             amount: 'Amount',
@@ -43,19 +44,20 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
         }
     },
 
-    initComponent: function() {
+    detailStore: null,
+
+    initComponent: function () {
         var me = this;
 
         me.items = [
             me.createInfoContainer(),
-            me.createTransactionsContainer(),
-            me.createBackendOperationContainer()
+            me.createTransactionsContainer()
         ];
         me.callParent(arguments);
         me.loadData(me.record);
     },
 
-    createInfoContainer: function() {
+    createInfoContainer: function () {
         var me = this;
 
         return Ext.create('Ext.panel.Panel', {
@@ -65,8 +67,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
             margin: '10 0',
             flex: 1,
             paddingRight: 5,
-            items: [
-            ]
+            items: []
         });
     },
 
@@ -86,7 +87,11 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                 'createdAt',
                 'amount',
                 'currency',
-                'response'
+                'response',
+                'backendOperations',
+                'isFinal',
+                'state',
+                'type'
             ],
             data: []
         });
@@ -98,20 +103,75 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
             border: 0,
             columns: [
                 { text: me.snippets.transactionsTable.createdAt, dataIndex: 'createdAt', flex: 1 },
+                { text: me.snippets.transactionsTable.type, dataIndex: 'type', flex: 1 },
                 { text: me.snippets.transactionsTable.transactionId, dataIndex: 'transactionId', flex: 1 },
                 { text: me.snippets.transactionsTable.transactionType, dataIndex: 'transactionType', flex: 1 },
                 { text: me.snippets.transactionsTable.amount, dataIndex: 'amount', flex: 1, renderer: Ext.util.Format.numberRenderer('0.00') },
                 { text: me.snippets.transactionsTable.currency, dataIndex: 'currency', flex: 1 },
                 {
                     xtype: 'actioncolumn',
-                    width: 50,
+                    width: 150,
                     items: [{
                         iconCls: 'sprite-magnifier-medium',
-                        tooltip: 'Open history details',
+                        tooltip: 'Open transaction details',
 
                         handler: function (view, rowIndex, colIndex, item, opts, record) {
                             var historyWindow = Ext.create('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', { record: record });
                             historyWindow.show();
+                        }
+                    }, {
+                        iconCls: 'sprite-cheque--plus',
+                        tooltip: 'Pay / Capture',
+
+                        handler: function(view, row, col, item, opts, record) {
+                            me.showAmountDialog(record.data, 'pay');
+                        },
+
+                        getClass: function(value, meta, record) {
+                            var transaction = record.data;
+
+                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.pay || transaction.state === 'closed' || transaction.type === 'return' || transaction.type === 'backend') {
+                                return 'x-hide-display';
+                            }
+                        }
+                    }, {
+                        iconCls: 'sprite-arrow-circle-315',
+                        tooltip: 'Refund',
+
+                        handler: function(view, row, col, item, opts, record) {
+                            me.showAmountDialog(record.data, 'refund');
+                        },
+
+                        getClass: function(value, meta, record) {
+                            var transaction = record.data;
+
+                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.refund || transaction.state === 'closed' || transaction.type === 'return' || transaction.type === 'backend') {
+                                return 'x-hide-display';
+                            }
+                        }
+                    }, {
+                        iconCls: 'sprite-cross-circle',
+                        tooltip: 'Cancel / Refund',
+
+                        handler: function(view, row, col, item, opts, record) {
+                            Ext.MessageBox.confirm('Cancel', 'Cancel transaction?', function(choice) {
+                                if (choice === 'no') {
+                                    return false;
+                                }
+
+                                if (me.child('[alias=wirecard-transaction-history]')) {
+                                    me.child('[alias=wirecard-transaction-history]').disable();
+                                }
+                                me.processBackendOperation(record.data, 'cancel');
+                            });
+                        },
+
+                        getClass: function(value, meta, record) {
+                            var transaction = record.data;
+
+                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.cancel || transaction.state === 'closed' || transaction.type === 'return' || transaction.type === 'backend') {
+                                return 'x-hide-display';
+                            }
                         }
                     }]
                 }
@@ -122,35 +182,61 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
         });
     },
 
-    createBackendOperationContainer: function() {
+    showAmountDialog: function (transaction, operation) {
         var me = this;
-
-        return Ext.create('Ext.panel.Panel', {
-            title: me.snippets.backendOperationTitle,
-            alias: 'wirecard-backend-operation',
-            bodyPadding: 10,
-            flex: 1,
-            paddingRight: 5,
-            items: [
-            ]
-        });
+        var win = Ext.create('Ext.window.Window', {
+            title: 'Set amount',
+            id: 'transaction-amount-window',
+            layout: 'fit',
+            width: 300,
+            height: 100,
+            items: {
+                id: 'transaction-amount',
+                xtype: 'numberfield',
+                fieldLabel: 'Amount',
+                value: transaction.amount
+            },
+            buttons: [{
+                text: 'Submit',
+                handler: function() {
+                    if (me.child('[alias=wirecard-transaction-history]')) {
+                        me.child('[alias=wirecard-transaction-history]').disable();
+                    }
+                    win.mask();
+                    me.processBackendOperation(transaction, operation, Ext.getCmp('transaction-amount').getValue());
+                }
+            }, {
+                text: 'Close',
+                handler: function() {
+                    win.close();
+                }
+            }]
+        }).show();
     },
 
-    loadData: function(record) {
-        var me = this,
-            data = record.data,
-            detailsStore = Ext.create('Shopware.apps.WirecardExtendOrder.store.WirecardOrderDetails'),
-            payMethod = record.getPayment().first().get('name'),
-            infoPanel = me.child('[alias=wirecard-info-panel]'),
-            backendOperationPanel = me.child(['[alias=wirecard-backend-operation]']);
+    loadData: function (record) {
+        var data = record.data,
+            payment = record.getPayment().first().get('name');
+        this.detailsStore = Ext.create('Shopware.apps.WirecardExtendOrder.store.WirecardOrderDetails');
 
-        detailsStore.getProxy().extraParams = {
+        this.detailsStore.getProxy().extraParams = {
             orderNumber: data.number,
-            payMethod: payMethod
+            payment: payment
         };
 
-        detailsStore.load({
-            callback: function(records, operation) {
+        this.loadStore();
+    },
+
+    loadStore: function() {
+        var me = this,
+            infoPanel = me.child('[alias=wirecard-info-panel]');
+
+        if (me.child('[alias=wirecard-transaction-history]')) {
+            me.child('[alias=wirecard-transaction-history]').disable();
+        }
+
+        this.detailsStore.load({
+            callback: function (records) {
                 var data = Array.isArray(records) && records.length === 1 ? records[0].getData() : false,
                     historyData = [];
                 window.DATA = data;
@@ -163,7 +249,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                     return;
                 }
 
-                data.transactions.forEach(function(transaction) {
+                data.transactions.forEach(function (transaction) {
                     historyData.push({
                         orderNumber: transaction.orderNumber,
                         parentTransactionId: transaction.parentTransactionId,
@@ -175,7 +261,11 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                         transactionType: transaction.transactionType,
                         amount: transaction.amount,
                         currency: transaction.currency,
-                        response: transaction.response
+                        response: transaction.response,
+                        backendOperations: transaction.backendOperations,
+                        isFinal: transaction.isFinal,
+                        state: transaction.state,
+                        type: transaction.type
                     });
                 });
 
@@ -183,25 +273,49 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                     me.historyStore.loadData(historyData, false);
                 }
 
-                Object.keys(data.backendOperations).forEach(function(key) {
-                    var operation = data.backendOperations[key];
+                if (me.child('[alias=wirecard-transaction-history]')) {
+                    me.child('[alias=wirecard-transaction-history]').enable();
+                }
+            }
+        });
+    },
 
-                    backendOperationPanel.add(Ext.create('Ext.button.Button', {
-                        text: me.snippets.buttons[operation],
-                        cls: 'secondary',
-                        action: 'wirecard-operation-' + key,
-                        handler: function() {
-                            var backendOperationWindow = Ext.create('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
-                                record: me.record,
-                                data: data,
-                                operation: operation,
-                                title: 'BackendOperationWindow: ' + operation
-                            });
-                            backendOperationWindow.show();
-                            // me.processBackendOperation(operationType);
-                        }
-                    }));
-                });
+    processBackendOperation(transaction, operation, amount = null) {
+        var me = this;
+
+        return Ext.Ajax.request({
+            url: '{url controller="wirecardTransactions" action="processBackendOperations"}',
+            params: {
+                operation: operation,
+                payment: me.record.getPayment().first().get('name'),
+                transactionId: transaction.transactionId,
+                amount: amount,
+                currency: transaction.currency
+            },
+            success: function(response) {
+                var data = Ext.decode(response.responseText);
+
+                if (data.success) {
+                    Shopware.Notification.createStickyGrowlMessage({
+                        title: 'Erfolg',
+                        text: 'Operation erfolgreich durchgeführt',
+                        width: 400
+                    });
+                    me.loadStore();
+                    if (Ext.getCmp('transaction-amount-window')) {
+                        Ext.getCmp('transaction-amount-window').close();
+                    }
+                } else {
+                    Shopware.Notification.createStickyGrowlMessage({
+                        title: 'Fehlgeschlagen',
+                        text: data.message,
+                        width: 400
+                    });
+                    me.loadStore();
+                    if (Ext.getCmp('transaction-amount-window')) {
+                        Ext.getCmp('transaction-amount-window').close();
+                    }
+                }
             }
         });
     }

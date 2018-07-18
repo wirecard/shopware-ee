@@ -53,12 +53,6 @@ class PaymentConfigTest extends TestCase
         $this->assertNull($config->getTransactionMAID());
         $this->assertNull($config->getTransactionSecret());
         $this->assertNull($config->getTransactionOperation());
-        $this->assertNull($config->getThreeDMAID());
-        $this->assertNull($config->getThreeDSecret());
-        $this->assertNull($config->getThreeDMinLimit());
-        $this->assertNull($config->getThreeDMinLimitCurrency());
-        $this->assertNull($config->getThreeDSslMaxLimit());
-        $this->assertNull($config->getThreeDSslMaxLimitCurrency());
         $this->assertFalse($config->hasFraudPrevention());
         $this->assertFalse($config->sendBasket());
         $this->assertFalse($config->sendDescriptor());
@@ -66,12 +60,6 @@ class PaymentConfigTest extends TestCase
         $config->setTransactionMAID('transaction-maid');
         $config->setTransactionSecret('transaction-secret');
         $config->setTransactionOperation(Payment::TRANSACTION_OPERATION_PAY);
-        $config->setThreeDMAID('three3d-maid');
-        $config->setThreeDSecret('three3d-secret');
-        $config->setThreeDMinLimit(50.0);
-        $config->setThreeDMinLimitCurrency('EUR');
-        $config->setThreeDSslMaxLimit(200.0);
-        $config->setThreeDSslMaxLimitCurrency('USD');
         $config->setFraudPrevention(true);
         $config->setSendBasket(true);
         $config->setSendDescriptor(true);
@@ -79,12 +67,6 @@ class PaymentConfigTest extends TestCase
         $this->assertEquals('transaction-maid', $config->getTransactionMAID());
         $this->assertEquals('transaction-secret', $config->getTransactionSecret());
         $this->assertEquals(Payment::TRANSACTION_OPERATION_PAY, $config->getTransactionOperation());
-        $this->assertEquals('three3d-maid', $config->getThreeDMAID());
-        $this->assertEquals('three3d-secret', $config->getThreeDSecret());
-        $this->assertEquals(50.0, $config->getThreeDMinLimit());
-        $this->assertEquals('EUR', $config->getThreeDMinLimitCurrency());
-        $this->assertEquals(200.0, $config->getThreeDSslMaxLimit());
-        $this->assertEquals('USD', $config->getThreeDSslMaxLimitCurrency());
         $this->assertTrue($config->hasFraudPrevention());
         $this->assertTrue($config->sendBasket());
         $this->assertTrue($config->sendDescriptor());
@@ -112,24 +94,14 @@ class PaymentConfigTest extends TestCase
         $this->assertFalse($config->sendBasket());
         $this->assertFalse($config->sendDescriptor());
 
-        $config->setThreeDMinLimit('500,0');
-        $config->setThreeDSslMaxLimit('2000,0');
-        $this->assertEquals('500,0', $config->getThreeDMinLimit());
-        $this->assertEquals('2000,0', $config->getThreeDSslMaxLimit());
-
         $this->assertEquals([
-            'baseUrl'                   => 'https://api-test.wirecard.com',
-            'httpUser'                  => 'foo',
-            'transactionMAID'           => 'transaction-maid',
-            'transactionOperation'      => Payment::TRANSACTION_OPERATION_RESERVE,
-            'sendBasket'                => false,
-            'fraudPrevention'           => false,
-            'sendDescriptor'            => false,
-            'threeDMAID'                => 'three3d-maid',
-            'threeDMinLimit'            => '500,0',
-            'threeDMinLimitCurrency'    => 'EUR',
-            'threeDSslMaxLimit'         => '2000,0',
-            'threeDSslMaxLimitCurrency' => 'USD',
+            'baseUrl'              => 'https://api-test.wirecard.com',
+            'httpUser'             => 'foo',
+            'transactionMAID'      => 'transaction-maid',
+            'transactionOperation' => Payment::TRANSACTION_OPERATION_RESERVE,
+            'sendBasket'           => false,
+            'fraudPrevention'      => false,
+            'sendDescriptor'       => false,
         ], $config->toArray());
     }
 }

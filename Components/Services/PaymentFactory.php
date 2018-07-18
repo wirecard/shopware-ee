@@ -64,21 +64,29 @@ class PaymentFactory
     protected $router;
 
     /**
+     * @var \Enlight_Event_EventManager
+     */
+    protected $eventManager;
+
+    /**
      * @param EntityManagerInterface      $em
      * @param \Shopware_Components_Config $shopwareConfig
      * @param InstallerService            $installerService
      * @param RouterInterface             $router
+     * @param \Enlight_Event_EventManager $eventManager
      */
     public function __construct(
         EntityManagerInterface $em,
         \Shopware_Components_Config $shopwareConfig,
         InstallerService $installerService,
-        RouterInterface $router
+        RouterInterface $router,
+        \Enlight_Event_EventManager $eventManager
     ) {
         $this->em               = $em;
         $this->shopwareConfig   = $shopwareConfig;
         $this->installerService = $installerService;
         $this->router           = $router;
+        $this->eventManager     = $eventManager;
     }
 
     /**
@@ -89,26 +97,18 @@ class PaymentFactory
      */
     public function create($paymentName)
     {
-        $class = null;
-        switch ($paymentName) {
-            case PaypalPayment::PAYMETHOD_IDENTIFIER:
-                $class = PaypalPayment::class;
-                break;
-
-            case CreditCardPayment::PAYMETHOD_IDENTIFIER:
-                $class = CreditCardPayment::class;
-                break;
-
-            case SepaPayment::PAYMETHOD_IDENTIFIER:
-                $class = SepaPayment::class;
-                break;
-        }
-
-        if (! $class) {
+        $mapping = $this->getMappedPayments();
+        if (! isset($mapping[$paymentName])) {
             throw new UnknownPaymentException($paymentName);
         }
 
-        return new $class($this->em, $this->shopwareConfig, $this->installerService, $this->router);
+        return new $mapping[$paymentName](
+            $this->em,
+            $this->shopwareConfig,
+            $this->installerService,
+            $this->router,
+            $this->eventManager
+        );
     }
 
     /**
@@ -117,10 +117,24 @@ class PaymentFactory
      */
     public function getSupportedPayments()
     {
+        $payments = [];
+
+        foreach ($this->getMappedPayments() as $identifier => $className) {
+            $payments[] = $this->create($identifier);
+        }
+
+        return $payments;
+    }
+
+    /**
+     * @return array
+     */
+    private function getMappedPayments()
+    {
         return [
-            $this->create(PaypalPayment::PAYMETHOD_IDENTIFIER),
-            $this->create(CreditCardPayment::PAYMETHOD_IDENTIFIER),
-            $this->create(SepaPayment::PAYMETHOD_IDENTIFIER)
+            PaypalPayment::PAYMETHOD_IDENTIFIER     => PaypalPayment::class,
+            CreditCardPayment::PAYMETHOD_IDENTIFIER => CreditCardPayment::class,
+            SepaPayment::PAYMETHOD_IDENTIFIER       => SepaPayment::class
         ];
     }
 }

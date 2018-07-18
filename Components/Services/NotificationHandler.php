@@ -32,6 +32,7 @@
 namespace WirecardShopwareElasticEngine\Components\Services;
 
 use Shopware\Models\Order\Status;
+use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
@@ -41,31 +42,41 @@ use WirecardShopwareElasticEngine\Models\Transaction;
 class NotificationHandler extends Handler
 {
     /**
-     * @param \sOrder  $shopwareOrder
-     * @param Response $notification
+     * @param \sOrder        $shopwareOrder
+     * @param Response       $notification
+     * @param BackendService $backendService
      *
+     * @return bool
      * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
      */
-    public function execute(\sOrder $shopwareOrder, Response $notification)
+    public function execute(\sOrder $shopwareOrder, Response $notification, BackendService $backendService)
     {
-        switch (true) {
-            case $notification instanceof SuccessResponse:
-                return $this->handleSuccess($shopwareOrder, $notification);
-
-            case $notification instanceof FailureResponse:
-            default:
-                return $this->handleFailure($notification);
+        if ($notification instanceof SuccessResponse) {
+            return $this->handleSuccess($shopwareOrder, $notification, $backendService);
         }
+        if ($notification instanceof FailureResponse) {
+            return $this->handleFailure($notification);
+        }
+        $this->logger->error("Unexpected notification response", [
+            'class'    => get_class($notification),
+            'response' => $notification->getData(),
+        ]);
+        return false;
     }
 
     /**
      * @param \sOrder         $shopwareOrder
      * @param SuccessResponse $notification
+     * @param BackendService  $backendService
      *
+     * @return bool
      * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
      */
-    protected function handleSuccess(\sOrder $shopwareOrder, SuccessResponse $notification)
-    {
+    protected function handleSuccess(
+        \sOrder $shopwareOrder,
+        SuccessResponse $notification,
+        BackendService $backendService
+    ) {
         $order = $this->getOrderFromResponse($notification);
 
         $this->logger->info('Incoming notification', $notification->getData());
@@ -80,35 +91,63 @@ class NotificationHandler extends Handler
             );
         }
 
-        $this->transactionFactory->create($order->getNumber(), $notification, Transaction::TYPE_NOTIFY);
+        $transaction = $this->transactionFactory->create($order->getNumber(), $notification, Transaction::TYPE_NOTIFY);
+        $this->updateTransactionState($transaction, $backendService->isFinal($notification->getTransactionType()));
 
         if ($order->getPaymentStatus()->getId() !== Status::PAYMENT_STATE_OPEN) {
-            return;
+            return true;
         }
 
-        switch ($notification->getTransactionType()) {
-            case \Wirecard\PaymentSdk\Transaction\Transaction::TYPE_DEBIT:
-            case \Wirecard\PaymentSdk\Transaction\Transaction::TYPE_PURCHASE:
-                $orderState = Status::PAYMENT_STATE_COMPLETELY_PAID;
+        switch ($backendService->getOrderState($notification->getTransactionType())) {
+            case BackendService::TYPE_AUTHORIZED:
+                $paymentState = Status::PAYMENT_STATE_RESERVED;
                 break;
-
-            case \Wirecard\PaymentSdk\Transaction\Transaction::TYPE_AUTHORIZATION:
-                $orderState = Status::PAYMENT_STATE_RESERVED;
+            case BackendService::TYPE_CANCELLED:
+                $paymentState = Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED;
                 break;
-
+            case BackendService::TYPE_PROCESSING:
+                $paymentState = Status::PAYMENT_STATE_COMPLETELY_PAID;
+                break;
+            case BackendService::TYPE_REFUNDED:
+                $paymentState = Status::PAYMENT_STATE_RE_CREDITING;
+                break;
             default:
-                $orderState = Status::PAYMENT_STATE_OPEN;
-                break;
+                $paymentState = Status::PAYMENT_STATE_OPEN;
         }
 
-        $shopwareOrder->setPaymentStatus($order->getId(), $orderState, true);
+        $shopwareOrder->setPaymentStatus($order->getId(), $paymentState, true);
+        return true;
     }
 
     /**
      * @param FailureResponse $notification
+     *
+     * @return bool
      */
     protected function handleFailure(FailureResponse $notification)
     {
         $this->logger->error("Failure response", $notification->getData());
+        return false;
+    }
+
+    /**
+     * @param Transaction $transaction
+     * @param bool        $isFinal
+     */
+    private function updateTransactionState(Transaction $transaction, $isFinal)
+    {
+        $parentTransaction = $this->em
+            ->getRepository(Transaction::class)
+            ->findOneBy([
+                'transactionId' => $transaction->getParentTransactionId(),
+                'type'          => Transaction::TYPE_NOTIFY,
+            ]);
+
+        if (! $parentTransaction || ! $isFinal) {
+            return;
+        }
+
+        $transaction->setState(Transaction::STATE_CLOSED);
+        $this->em->flush();
     }
 }

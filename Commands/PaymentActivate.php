@@ -29,36 +29,49 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit;
+namespace WirecardShopwareElasticEngine\Commands;
 
-abstract class ModelTestCase extends \PHPUnit_Framework_TestCase
+use Shopware\Commands\ShopwareCommand;
+use Shopware\Models\Plugin\Plugin;
+use Symfony\Component\Console\Exception\RuntimeException;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
+
+class PaymentActivate extends ShopwareCommand
 {
-    protected $model;
-
-    abstract public function getModel();
-
-    public function setUp()
+    /**
+     * {@inheritdoc}
+     */
+    protected function configure()
     {
-        $this->model = $this->getModel();
+        $this
+            ->setName('wirecardelasticengine:payment:activate')
+            ->setDescription('Activate all Wirecard EE payment methods.');
     }
 
-    public function assertGetterAndSetter($property, $value, $initialValue = null, $setter = null, $getter = null)
+    /**
+     * {@inheritdoc}
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if (! $setter) {
-            $setter = 'set' . ucfirst($property);
+        $em = $this->container->get('models');
+
+        /** @var Plugin $plugin */
+        $plugin = $em->getRepository(Plugin::class)->findOneBy(['name' => WirecardShopwareElasticEngine::NAME]);
+        if (! $plugin) {
+            throw new RuntimeException("Plugin '" . WirecardShopwareElasticEngine::NAME . "' not found");
         }
 
-        if (! $getter) {
-            $getter = 'get' . ucfirst($property);
+        foreach ($plugin->getPayments() as $payment) {
+            $action = 'already active';
+            if (! $payment->getActive()) {
+                $payment->setActive(true);
+                $action = 'activated';
+            }
+            $name = $payment->getName() . ' (' . $payment->getDescription() . ')';
+            $output->writeln("Payment method <info>$name</info> $action.");
         }
-
-        if (! method_exists($this->model, $setter) || ! method_exists($this->model, $getter)) {
-            throw new \Exception('Getter or setter not defined for ' . get_class($this->model) . " ($property)");
-        }
-
-        $this->assertEquals($initialValue, $this->model->$getter());
-
-        $this->model->$setter($value);
-        $this->assertSame($this->model->$getter(), $value);
+        $em->flush();
     }
 }

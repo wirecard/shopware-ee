@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "scripts": {
     "lint": "node_modules/.bin/eslint -c ../../../themes/.eslintrc.js **/*.js **/*.js --ignore-path .eslintignore",
-    "test": "node_modules/.bin/mocha Tests/Selenium/**/*Test.js --timeout 60000"
+    "test": "node_modules/.bin/mocha Tests/Selenium/**/*Test.js --timeout 120000",
+    "test:creditcard": "node_modules/.bin/mocha Tests/Selenium/CreditCardTest.js --timeout 120000",
+    "test:paypal": "node_modules/.bin/mocha Tests/Selenium/PaypalTest.js --timeout 120000"
   },
   "private": true,
   "license": "GPL-3.0",

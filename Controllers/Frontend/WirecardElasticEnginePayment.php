@@ -33,6 +33,7 @@ use Shopware\Components\CSRFWhitelistAware;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 use Shopware\Models\Shop\Shop;
+use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\TransactionService;
@@ -59,6 +60,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 {
     // @codingStandardsIgnoreEnd
 
+    const ROUTER_CONTROLLER = 'controller';
     const ROUTER_ACTION = 'action';
     const ROUTER_METHOD = 'method';
     const ROUTER_FORCE_SECURE = 'forceSecure';
@@ -75,9 +77,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function indexAction()
     {
-        /** @var PaymentFactory $paymentFactory */
-        $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
-        $payment        = $paymentFactory->create($this->getPaymentShortName());
+        $payment = $this->getPaymentFactory()->create($this->getPaymentShortName());
 
         $additionalData = $this->get('wirecard_elastic_engine.session_handler')->getAdditionalPaymentData();
 
@@ -97,15 +97,15 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $basketMapper = new BasketMapper(
                 $this->getBasket(),
                 $this->getCurrencyShortName(),
-                $this->get('modules')->getModule('Articles'),
+                $this->getModules()->Articles(),
                 $payment->getTransaction()
             );
-            $amount       = new Amount($this->getAmount(), $this->getCurrencyShortName());
+            $amount       = new Amount(BasketMapper::numberFormat($this->getAmount()), $this->getCurrencyShortName());
         } catch (BasketException $e) {
-            $this->get('pluginlogger')->notice($e->getMessage());
+            $this->getLogger()->notice($e->getMessage());
             return $this->redirect([
-                'controller'                          => 'checkout',
-                'action'                              => 'cart',
+                self::ROUTER_CONTROLLER               => 'checkout',
+                self::ROUTER_ACTION                   => 'cart',
                 'wirecard_elastic_engine_update_cart' => 'true',
             ]);
         }
@@ -117,7 +117,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $tmpTransactionId = $basketSignature . '-' . uniqid();
         $orderNumber      = $this->saveOrder($tmpTransactionId, $basketSignature, Status::PAYMENT_STATE_OPEN, false);
 
-        $this->get('wirecard_elastic_engine.session_handler')->storeOrder($orderNumber, $basketSignature);
+        $this->getSessionHandler()->storeOrder($orderNumber, $basketSignature);
 
         if (! $orderNumber || $orderNumber === '') {
             throw new MissingOrderNumberException();
@@ -127,10 +127,14 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $handler = $this->get('wirecard_elastic_engine.payment_handler');
         $action  = $handler->execute(
             new OrderSummary($orderNumber, $payment, $userMapper, $basketMapper, $amount),
-            new TransactionService($payment->getTransactionConfig(
-                $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
-                $this->container->getParameterBag()
-            ), $this->get('pluginlogger')),
+            new TransactionService(
+                $payment->getTransactionConfig(
+                    $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
+                    $this->container->getParameterBag(),
+                    $this->getCurrencyShortName()
+                ),
+                $this->getLogger()
+            ),
             new Redirect(
                 $this->getRoute('return', $payment->getName()),
                 $this->getRoute('cancel', $payment->getName()),
@@ -139,12 +143,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             //$this->getRoute('notify', $payment->getName()),
             'http://5625c146.ngrok.io/WirecardElasticEnginePayment/notify/method/' . $payment->getName(),
             $this->Request(),
-            $this->get('modules')->Order()
+            $this->getModules()->Order()
         );
-
-        if ($action instanceof ErrorAction) {
-            $this->cancelOrderAndRestoreBasket();
-        }
 
         return $this->handleAction($action);
     }
@@ -163,23 +163,20 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     {
         $request = $this->Request();
 
-        /** @var PaymentFactory $paymentFactory */
-        $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
-        $payment        = $paymentFactory->create($request->getParam('method'));
+        $payment = $this->getPaymentFactory()->create($request->getParam(self::ROUTER_METHOD));
 
         $transactionService = new TransactionService($payment->getTransactionConfig(
             $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
-            $this->container->getParameterBag()
+            $this->container->getParameterBag(),
+            $this->getCurrencyShortName()
         ));
 
         /** @var ReturnHandler $returnHandler */
         $returnHandler = $this->get('wirecard_elastic_engine.return_handler');
         $action        = $returnHandler->execute($payment, $transactionService, $request);
 
-        if ($action instanceof ErrorAction) {
-            $this->cancelOrderAndRestoreBasket();
-        } else {
-            $this->get('wirecard_elastic_engine.session_handler')->clearOrder();
+        if (! $action instanceof ErrorAction) {
+            $this->getSessionHandler()->clearOrder();
         }
 
         return $this->handleAction($action);
@@ -199,18 +196,19 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         /** @var PaymentFactory $paymentFactory */
         $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
-        $payment        = $paymentFactory->create($request->getParam('method'));
+        $payment        = $paymentFactory->create($request->getParam(self::ROUTER_METHOD));
 
-        $transactionService = new TransactionService($payment->getTransactionConfig(
+        $backendService = new BackendService($payment->getTransactionConfig(
             $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
-            $this->container->getParameterBag()
+            $this->container->getParameterBag(),
+            $this->getCurrencyShortName()
         ));
-        $notification       = $transactionService->handleNotification(file_get_contents('php://input'));
+        $notification   = $backendService->handleNotification(file_get_contents('php://input'));
 
         /** @var NotificationHandler $notificationHandler */
         $notificationHandler = $this->get('wirecard_elastic_engine.notification_handler');
 
-        $notificationHandler->execute($this->get('modules')->Order(), $notification);
+        $notificationHandler->execute($this->getModules()->Order(), $notification, $backendService);
         exit();
     }
 
@@ -226,11 +224,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             return;
         }
 
-        if ($action instanceof ErrorAction) {
-            $this->handleError($action->getCode(), $action->getMessage());
-            return;
-        }
-
         if ($action instanceof ViewAction) {
             if ($action->getTemplate() !== null) {
                 $this->View()->loadTemplate(
@@ -240,6 +233,11 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             foreach ($action->getAssignments() as $key => $value) {
                 $this->View()->assign($key, $value);
             }
+            return;
+        }
+
+        if ($action instanceof ErrorAction) {
+            $this->handleError($action->getCode(), $action->getMessage());
             return;
         }
 
@@ -265,7 +263,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     private function cancelOrderAndRestoreBasket()
     {
         /** @var SessionHandler $sessionHandler */
-        $sessionHandler  = $this->get('wirecard_elastic_engine.session_handler');
+        $sessionHandler  = $this->getSessionHandler();
         $orderNumber     = $sessionHandler->getOrderNumber();
         $basketSignature = $sessionHandler->getBasketSignature();
         $sessionHandler->clearOrder();
@@ -277,7 +275,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                           ->findOneBy(['number' => $orderNumber]);
             if ($order) {
                 /** @var \sOrder $shopwareOrder */
-                $shopwareOrder = $this->get('modules')->Order();
+                $shopwareOrder = $this->getModules()->Order();
                 $shopwareOrder->setPaymentStatus($order->getId(), Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED);
                 $shopwareOrder->setOrderStatus($order->getId(), Status::ORDER_STATE_CANCELLED);
             }
@@ -288,17 +286,17 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             if ($basketSignature) {
                 $basket = $this->loadBasketFromSignature($basketSignature);
                 /** @var sBasket $shopwareBasket */
-                $shopwareBasket = $this->get('modules')->getModule('Basket');
+                $shopwareBasket = $this->getModules()->Basket();
 
                 $items = $basket->offsetGet('sBasket');
                 foreach ($items['content'] as $item) {
-                    $itemId = $item['ordernumber'];
+                    $itemId      = $item['ordernumber'];
                     $itemQuanity = $item['quantity'];
                     $shopwareBasket->sAddArticle($itemId, $itemQuanity);
                 }
             }
         } catch (\Exception $e) {
-            $this->get('pluginlogger')->notice('Could not restore basket after cancel: ' . $e->getMessage());
+            $this->getLogger()->notice('Could not restore basket after cancel: ' . $e->getMessage());
         }
     }
 
@@ -307,16 +305,14 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function cancelAction()
     {
-        $this->cancelOrderAndRestoreBasket();
         return $this->handleError(ErrorAction::PAYMENT_CANCELED, 'Payment canceled by user');
     }
 
     /**
-     * User gets redirected to this action after canceling payment.
+     * User gets redirected to this action after failed payment attempt.
      */
     public function failureAction()
     {
-        $this->cancelOrderAndRestoreBasket();
         return $this->handleError(ErrorAction::FAILURE_RESPONSE, 'Failure response');
     }
 
@@ -328,15 +324,17 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     protected function handleError($code, $message = "")
     {
-        $this->get('pluginlogger')->error("Payment failed: ${message} (${code})", [
+        $this->cancelOrderAndRestoreBasket();
+
+        $this->getLogger()->error("Payment failed: ${message} (${code})", [
             'params'     => $this->Request()->getParams(),
             'baseUrl'    => $this->Request()->getBaseUrl(),
             'requestUri' => $this->Request()->getRequestUri(),
         ]);
 
         return $this->redirect([
-            'controller'                         => 'checkout',
-            'action'                             => 'shippingPayment',
+            self::ROUTER_CONTROLLER              => 'checkout',
+            self::ROUTER_ACTION                  => 'shippingPayment',
             'wirecard_elastic_engine_error_code' => $code,
             'wirecard_elastic_engine_error_msg'  => $message,
         ]);
@@ -348,5 +346,41 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     public function getWhitelistedCSRFActions()
     {
         return ['return', 'notify', 'failure', 'notifyBackend'];
+    }
+
+    /**
+     * @return PaymentFactory
+     * @throws Exception
+     */
+    private function getPaymentFactory()
+    {
+        return $this->get('wirecard_elastic_engine.payment_factory');
+    }
+
+    /**
+     * @return SessionHandler
+     * @throws Exception
+     */
+    private function getSessionHandler()
+    {
+        return $this->get('wirecard_elastic_engine.session_handler');
+    }
+
+    /**
+     * @return Shopware_Components_Modules
+     * @throws Exception
+     */
+    private function getModules()
+    {
+        return $this->get('modules');
+    }
+
+    /**
+     * @return \Shopware\Components\Logger
+     * @throws Exception
+     */
+    private function getLogger()
+    {
+        return $this->get('pluginlogger');
     }
 }

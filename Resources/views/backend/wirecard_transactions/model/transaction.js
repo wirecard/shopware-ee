@@ -6,11 +6,11 @@ Ext.define('Shopware.apps.WirecardTransactions.model.Transaction', {
             controller: 'WirecardTransactions'
         };
     },
-
     fields: [
         { name: 'orderId', type: 'int' },
         { name: 'orderStatus', type: 'int' },
         { name: 'orderNumber', type: 'string' },
+        { name: 'type', type: 'string' },
         { name: 'transactionId', type: 'string' },
         { name: 'parentTransactionId', type: 'string' },
         { name: 'providerTransactionId', type: 'string' },
@@ -19,5 +19,4 @@ Ext.define('Shopware.apps.WirecardTransactions.model.Transaction', {
         { name: 'amount', type: 'float' },
         { name: 'currency', type: 'string' }
     ]
-
 });

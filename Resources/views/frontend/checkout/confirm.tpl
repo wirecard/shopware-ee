@@ -1,9 +1,9 @@
 {extends file="parent:frontend/checkout/confirm.tpl"}
 
-{if $wirecardFormFields}
-    {if $wirecardFormFields.method == 'wirecard_elastic_engine_sepa'}
-        {block name='frontend_checkout_confirm_information_wrapper'}
-            {$smarty.block.parent}
+{block name='frontend_checkout_confirm_information_wrapper'}
+    {$smarty.block.parent}
+    {if $wirecardFormFields}
+        {if $wirecardFormFields.method == 'wirecard_elastic_engine_sepa'}
             <div class="panel has--border wirecard--aditional-form-fields">
                 <div class="panel--title primary is--underline">
                     Additional Form Fields
@@ -12,10 +12,14 @@
                     {include file="frontend/plugins/wirecard_elastic_engine/form/sepa.tpl"}
                 </div>
             </div>
-        {/block}
+        {/if}
+    {/if}
+{/block}
 
-        {block name="frontend_index_javascript_async_ready"}
-            {$smarty.block.parent}
+{block name="frontend_index_javascript_async_ready"}
+    {$smarty.block.parent}
+    {if $wirecardFormFields}
+        {if $wirecardFormFields.method == 'wirecard_elastic_engine_sepa'}
             <script type="text/javascript">
              document.asyncReady(function() {
                  var $ = jQuery,
@@ -62,6 +66,6 @@
                  });
              });
             </script>
-        {/block}
+        {/if}
     {/if}
-{/if}
+{/block}

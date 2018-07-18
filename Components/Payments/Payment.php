@@ -79,21 +79,29 @@ abstract class Payment implements PaymentInterface
     protected $additionalData;
 
     /**
-     * @param EntityManagerInterface     $em
-     * @param Shopware_Components_Config $shopwareConfig
-     * @param InstallerService           $installerService
-     * @param RouterInterface            $router
+     * @var \Enlight_Event_EventManager
+     */
+    protected $eventManager;
+
+    /**
+     * @param EntityManagerInterface      $em
+     * @param Shopware_Components_Config  $shopwareConfig
+     * @param InstallerService            $installerService
+     * @param RouterInterface             $router
+     * @param \Enlight_Event_EventManager $eventManager
      */
     public function __construct(
         EntityManagerInterface $em,
         Shopware_Components_Config $shopwareConfig,
         InstallerService $installerService,
-        RouterInterface $router
+        RouterInterface $router,
+        \Enlight_Event_EventManager $eventManager
     ) {
         $this->em               = $em;
         $this->shopwareConfig   = $shopwareConfig;
         $this->installerService = $installerService;
         $this->router           = $router;
+        $this->eventManager     = $eventManager;
     }
 
     /**
@@ -142,21 +150,19 @@ abstract class Payment implements PaymentInterface
     public function getTransactionType()
     {
         $operation = $this->getPaymentConfig()->getTransactionOperation();
-
-        switch ($operation) {
-            case self::TRANSACTION_OPERATION_PAY:
-                return Payment::TRANSACTION_TYPE_PURCHASE;
-            case self::TRANSACTION_OPERATION_RESERVE:
-                return Payment::TRANSACTION_TYPE_AUTHORIZATION;
+        if ($operation === self::TRANSACTION_OPERATION_PAY) {
+            return Payment::TRANSACTION_TYPE_PURCHASE;
         }
-
+        if ($operation === self::TRANSACTION_OPERATION_RESERVE) {
+            return Payment::TRANSACTION_TYPE_AUTHORIZATION;
+        }
         throw new UnknownTransactionTypeException($operation);
     }
 
     /**
      * @inheritdoc
      */
-    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag)
+    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag, $selectedCurrency)
     {
         $config = new Config(
             $this->getPaymentConfig()->getBaseUrl(),

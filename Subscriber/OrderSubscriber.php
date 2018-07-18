@@ -55,6 +55,7 @@ class OrderSubscriber implements SubscriberInterface
             return false;
         }
 
-        return true;
+        // Return null to allow other subscribers to handle this event (see EventManager::notifyUntil)
+        return null;
     }
 }

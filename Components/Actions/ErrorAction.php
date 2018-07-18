@@ -36,6 +36,7 @@ class ErrorAction implements Action
     const PROCESSING_FAILED = 1;
     const FAILURE_RESPONSE = 2;
     const PAYMENT_CANCELED = 3;
+    const BACKEND_OPERATION_FAILED = 4;
 
     /**
      * @var int

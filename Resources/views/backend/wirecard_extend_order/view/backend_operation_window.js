@@ -208,7 +208,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
     processBackendOperation: function (record, operation) {
         var me = this,
             url = '{url controller="wirecardTransactions" action="processBackendOperations"}',
-            payMethod = me.record.getPayment().first().get('name'),
+            payment = me.record.getPayment().first().get('name'),
             amount = me.hasForm ? me.amountFormContainer.getForm().findField('amount').getValue() : null,
             params = {};
 
@@ -227,7 +227,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
         params = {
             operation: operation,
             orderNumber: me.record.data.number,
-            payMethod: payMethod
+            payment: payment
         };
 
         if (amount) {

@@ -87,9 +87,9 @@ class PaypalPayment extends Payment
     /**
      * @inheritdoc
      */
-    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag)
+    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag, $selectedCurrency)
     {
-        $config = parent::getTransactionConfig($shop, $parameterBag);
+        $config = parent::getTransactionConfig($shop, $parameterBag, $selectedCurrency);
         $config->add(new PaymentMethodConfig(
             PayPalTransaction::NAME,
             $this->getPaymentConfig()->getTransactionMAID(),
@@ -140,5 +140,7 @@ class PaypalPayment extends Payment
             $orderSummary->getAmount()->getValue(),
             $orderSummary->getAmount()->getCurrency()
         ));
+
+        return null;
     }
 }

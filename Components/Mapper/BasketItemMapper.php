@@ -62,7 +62,7 @@ class BasketItemMapper extends ArrayMapper
     /**
      * BasketItemMapper constructor.
      *
-     * @param array $shopwareItem
+     * @param array  $shopwareItem
      * @param string $currency
      *
      * @throws InvalidBasketItemException
@@ -125,7 +125,7 @@ class BasketItemMapper extends ArrayMapper
      */
     public function getTax()
     {
-        return $this->get(self::TAX);
+        return floatval(str_replace(',', '.', $this->get(self::TAX)));
     }
 
     /**
@@ -146,7 +146,7 @@ class BasketItemMapper extends ArrayMapper
     }
 
     /**
-     * @return float|mixed
+     * @return float
      * @throws ArrayKeyNotFoundException
      */
     public function getPrice()
@@ -179,19 +179,21 @@ class BasketItemMapper extends ArrayMapper
     {
         $this->validateItem();
 
-        $tax      = str_replace(',', '.', $this->getTax());
+        $amount   = new Amount(BasketMapper::numberFormat($this->getPrice()), $this->currency);
         $quantity = $this->getQuantity();
 
-        $amount    = new Amount($this->getPrice(), $this->currency);
-        $taxAmount = new Amount(floatval($tax) / $quantity, $this->currency);
+        $item = new Item($this->getArticleName(), $amount, $quantity);
+        $item->setArticleNumber($this->getArticleNumber());
+        $item->setDescription($this->getDescription());
 
-        $wirecardItem = new Item($this->getArticleName(), $amount, $quantity);
-        $wirecardItem->setArticleNumber($this->getArticleNumber());
-        $wirecardItem->setDescription($this->getDescription());
-        $wirecardItem->setTaxRate($this->getTaxRate());
-        $wirecardItem->setTaxAmount($taxAmount);
+        // Negative tax amount results in api-error "400.1221 order item tax amount is invalid"
+        if ($amount->getValue() >= 0.0) {
+            $taxAmount = new Amount(BasketMapper::numberFormat($this->getTax() / $quantity), $this->currency);
+            $item->setTaxRate($this->getTaxRate());
+            $item->setTaxAmount($taxAmount);
+        }
 
-        return $wirecardItem;
+        return $item;
     }
 
     /**

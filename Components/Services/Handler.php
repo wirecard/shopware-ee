@@ -44,7 +44,7 @@ use WirecardShopwareElasticEngine\Models\Transaction;
 
 abstract class Handler
 {
-    protected $devEnvironments = ['dev', 'development'];
+    protected $devEnvironments = ['dev', 'development', 'testing'];
 
     /**
      * @var EntityManagerInterface
