@@ -1,6 +1,6 @@
 Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
     extend: 'Shopware.grid.Panel',
-    alias: 'widget.wirecard-transactions-grid',
+    alias: 'widget.wirecardee-transactions-grid',
     region: 'center',
 
     snippets: {

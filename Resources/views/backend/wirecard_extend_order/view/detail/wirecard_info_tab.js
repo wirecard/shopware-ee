@@ -62,7 +62,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
 
         return Ext.create('Ext.panel.Panel', {
             title: me.snippets.infoTitle,
-            alias: 'wirecard-info-panel',
+            alias: 'wirecardee-info-panel',
             bodyPadding: 10,
             margin: '10 0',
             flex: 1,
@@ -98,7 +98,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
 
         return Ext.create('Ext.grid.Panel', {
             title: me.snippets.transactions,
-            alias: 'wirecard-transaction-history',
+            alias: 'wirecardee-transaction-history',
             store: me.historyStore,
             border: 0,
             columns: [
