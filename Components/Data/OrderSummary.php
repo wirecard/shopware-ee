@@ -67,20 +67,20 @@ class OrderSummary
     /**
      * OrderDetails constructor.
      *
-     * @param string           $internalOrderNumber
+     * @param string           $paymentUniqueId
      * @param PaymentInterface $payment
      * @param UserMapper       $userMapper
      * @param BasketMapper     $basketMapper
      * @param Amount           $amount
      */
     public function __construct(
-        $internalOrderNumber,
+        $paymentUniqueId,
         PaymentInterface $payment,
         UserMapper $userMapper,
         BasketMapper $basketMapper,
         Amount $amount
     ) {
-        $this->paymentUniqueId = $internalOrderNumber;
+        $this->paymentUniqueId = $paymentUniqueId;
         $this->payment         = $payment;
         $this->userMapper      = $userMapper;
         $this->amount          = $amount;

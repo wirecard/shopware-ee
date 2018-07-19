@@ -94,7 +94,7 @@ class NotificationHandler extends Handler
         }
         $initialTransaction->setPaymentStatus($paymentStatusId);
         $this->em->flush();
-        $this->logger->notice("NotificationHandler::handleSuccess: flushed initial transaction {$initialTransaction->getId()} with payment status $paymentStatusId");
+        $this->logger->debug("NotificationHandler::handleSuccess: flushed initial transaction {$initialTransaction->getId()} with payment status $paymentStatusId");
 
         /** @var Order $order */
         $order = $this->em->getRepository(Order::class)->findOneBy([
@@ -103,27 +103,27 @@ class NotificationHandler extends Handler
 
         // if we already have an order, we can update the payment status directly
         if ($order) {
-            $this->logger->notice('NotificationHandler::handleSuccess: order found, save payment status '
+            $this->logger->debug('NotificationHandler::handleSuccess: order found, save payment status '
                                   . $paymentStatusId);
             $this->savePaymentStatus($shopwareOrder, $order, $paymentStatusId);
             return $initialTransaction;
         }
-        $this->logger->notice('NotificationHandler::handleSuccess: no order');
+        $this->logger->debug('NotificationHandler::handleSuccess: no order');
 
         // otherwise, lets save the payment status to the initial transaction (see returnAction)
         $this->em->refresh($initialTransaction);
-        $this->logger->notice('NotificationHandler::handleSuccess: refreshed initial transaction');
+        $this->logger->debug('NotificationHandler::handleSuccess: refreshed initial transaction');
 
         // check again if order exists and try to update payment status
         $order = $this->em->getRepository(Order::class)->findOneBy([
             'temporaryId' => $initialTransaction->getPaymentUniqueId(),
         ]);
-        $this->logger->notice('NotificationHandler::handleSuccess: order: ' . ($order ? ' found' : ' not found'));
+        $this->logger->debug('NotificationHandler::handleSuccess: order: ' . ($order ? ' found' : ' not found'));
         if ($order) {
             $this->savePaymentStatus($shopwareOrder, $order, $paymentStatusId);
         }
 
-        $this->logger->notice('NotificationHandler::handleSuccess: finished');
+        $this->logger->debug('NotificationHandler::handleSuccess: finished');
         return $initialTransaction;
     }
 
