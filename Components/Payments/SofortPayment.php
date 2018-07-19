@@ -112,6 +112,8 @@ class SofortPayment extends Payment
 
         $paymentConfig->setTransactionMAID($this->getPluginConfig('SofortMerchantId'));
         $paymentConfig->setTransactionSecret($this->getPluginConfig('SofortSecret'));
+        $paymentConfig->setTransactionOperation(parent::TRANSACTION_OPERATION_PAY);
+        $paymentConfig->setSendDescriptor(true);
 
         return $paymentConfig;
     }
