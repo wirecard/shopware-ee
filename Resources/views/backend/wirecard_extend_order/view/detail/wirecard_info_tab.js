@@ -150,6 +150,21 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                             }
                         }
                     }, {
+                        iconCls: 'sprite-arrow-circle-315',
+                        tooltip: 'Credit Refund',
+
+                        handler: function(view, row, col, item, opts, record) {
+                            me.showAmountDialog(record.data, 'refund');
+                        },
+
+                        getClass: function(value, meta, record) {
+                            var transaction = record.data;
+
+                            if (transaction.isFinal || !transaction.backendOperations || !transaction.backendOperations.credit || transaction.state === 'closed' || transaction.type === 'return' || transaction.type === 'backend') {
+                                return 'x-hide-display';
+                            }
+                        }
+                    }, {
                         iconCls: 'sprite-cross-circle',
                         tooltip: 'Cancel / Refund',
 
