@@ -76,7 +76,7 @@ class PaypalPayment extends Payment
     /**
      * @return PayPalTransaction
      */
-    public function getTransaction($operation = null)
+    public function getTransaction($operation = null, $paymentMethod = null)
     {
         if (! $this->transactionInstance) {
             $this->transactionInstance = new PayPalTransaction();

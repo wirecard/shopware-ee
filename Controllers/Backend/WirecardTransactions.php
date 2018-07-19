@@ -132,13 +132,17 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
             $shop->getCurrency()->getCurrency()
         );
         $backendService     = new BackendService($config, $this->getLogger());
-        $paymentTransaction = $payment->getTransaction();
-
         $result = [
             'transactions' => [],
         ];
 
         foreach ($transactions as $transaction) {
+            $response = $transaction->getResponse();
+            $paymentTransaction = $payment->getTransaction(
+                $transaction->getTransactionType(),
+                $response['payment-methods.0.name']
+            );
+
             /** @var Transaction $transaction */
             $paymentTransaction->setParentTransactionId($transaction->getTransactionId());
 

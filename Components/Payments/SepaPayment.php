@@ -76,8 +76,17 @@ class SepaPayment extends Payment
     /**
      * @return SepaDirectDebitTransaction
      */
-    public function getTransaction($operation = null)
+    public function getTransaction($operation = null, $paymentMethod = null)
     {
+        // only needed to get backendoperations
+        if ($paymentMethod) {
+            if ($paymentMethod === SepaCreditTransferTransaction::NAME) {
+                return new SepaCreditTransferTransaction();
+            }
+
+            return new SepaDirectDebitTransaction();
+        }
+
         if (! $this->transactionInstance) {
             if ($operation && $operation === 'credit') {
                 $this->transactionInstance = new SepaCreditTransferTransaction();

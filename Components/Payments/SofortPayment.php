@@ -78,10 +78,19 @@ class SofortPayment extends Payment
     /**
      * @return SofortTransaction
      */
-    public function getTransaction($operation = null)
+    public function getTransaction($operation = null, $paymentMethod = null)
     {
+        // only needed to get backendoperations
+        if ($paymentMethod) {
+            if ($paymentMethod === SepaCreditTransferTransaction::NAME) {
+                return new SepaCreditTransferTransaction();
+            }
+
+            return new SofortTransaction();
+        }
+
         if (! $this->transactionInstance) {
-            if ($operation && $operation === 'credit') {
+            if ($operation && ($operation === 'credit' || $operation === 'cancel')) {
                 $this->transactionInstance = new SepaCreditTransferTransaction();
             } else {
                 $this->transactionInstance = new SofortTransaction();
