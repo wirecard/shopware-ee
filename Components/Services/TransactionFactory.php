@@ -36,6 +36,7 @@ use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
+use WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
 class TransactionFactory
@@ -54,83 +55,80 @@ class TransactionFactory
     }
 
     /**
-     * @param string   $internalOrderNumber
+     * @param string   $paymentUniqueId
      * @param Response $response
      * @param string   $basketSignature
      *
      * @return Transaction|null
      */
-    public function createInitial($internalOrderNumber, $basketSignature, Response $response)
+    public function createInitial($paymentUniqueId, $basketSignature, Response $response)
     {
-        $transaction = $this->create($response, Transaction::TYPE_INITIAL);
-        $transaction->setInternalOrderNumber($internalOrderNumber);
+        $transaction = new Transaction(Transaction::TYPE_INITIAL_RESPONSE);
+        $transaction->setPaymentUniqueId($paymentUniqueId);
         $transaction->setBasketSignature($basketSignature);
+        $transaction->setResponse($response);
 
         return $this->persist($transaction);
     }
 
     /**
-     * @param Response $response
+     * @param InteractionResponse|FormInteractionResponse $response
      *
      * @return Transaction|null
      */
-    public function createInteraction(Response $response)
+    public function createInteraction($response)
     {
-        $transaction = $this->create($response, Transaction::TYPE_INTERACTION);
-        return $this->persist($transaction);
-    }
+        $parentTransaction = $this->em->getRepository(Transaction::class)
+                                      ->findOneBy(['requestId' => $response->getRequestId()]);
 
-    /**
-     * @param string   $orderNumber
-     * @param Response $response
-     *
-     * @return Transaction|null
-     */
-    public function createReturn($orderNumber, Response $response)
-    {
-        // TODO: set order-number for all parent transactions!
-
-        $transaction = $this->create($response, Transaction::TYPE_RETURN);
-        $transaction->setOrderNumber($orderNumber);
-
-        if (! $transaction->getTransactionId()) {
-            return null;
+        $transaction = new Transaction(Transaction::TYPE_INTERACTION);
+        if ($parentTransaction) {
+            $transaction->setPaymentUniqueId($parentTransaction->getPaymentUniqueId());
+            $transaction->setOrderNumber($parentTransaction->getOrderNumber());
         }
+        $transaction->setResponse($response);
 
         return $this->persist($transaction);
     }
 
     /**
-     * @param Response $response
-     * @param string   $type
+     * @param Transaction $initialTransaction
+     * @param Response    $response
      *
      * @return Transaction|null
      */
-    private function create(Response $response, $type = null)
+    public function createReturn(Transaction $initialTransaction, Response $response)
     {
-        $transaction = new Transaction();
-        $transaction->setType($type);
-        $transaction->setCreatedAt(new \DateTime());
-
-        $transaction->setRequestId($response->getRequestId());
-        $transaction->setTransactionType($response->getTransactionType());
-        $transaction->setResponse($response->getData());
-
-        if ($response instanceof SuccessResponse) {
-            $transaction->setTransactionId($response->getTransactionId());
-            $transaction->setParentTransactionId($response->getParentTransactionId());
-            $transaction->setProviderTransactionId($response->getProviderTransactionId());
-            $transaction->setProviderTransactionReference($response->getProviderTransactionReference());
-        } elseif ($response instanceof InteractionResponse || $response instanceof FormInteractionResponse) {
-            $transaction->setTransactionId($response->getTransactionId());
+        $transactions = $this->em->getRepository(Transaction::class)
+                                 ->findBy(['paymentUniqueId' => $initialTransaction->getPaymentUniqueId()]);
+        foreach ($transactions as $transaction) {
+            if ($transaction->getId() !== $initialTransaction->getId()) {
+                $transaction->setOrderNumber($initialTransaction->getOrderNumber());
+            }
         }
 
-        if ($response->getRequestedAmount()) {
-            $transaction->setCurrency($response->getRequestedAmount()->getCurrency());
-            $transaction->setAmount($response->getRequestedAmount()->getValue());
-        }
+        $transaction = new Transaction(Transaction::TYPE_RETURN);
+        $transaction->setPaymentUniqueId($initialTransaction->getPaymentUniqueId());
+        $transaction->setOrderNumber($initialTransaction->getOrderNumber());
+        $transaction->setResponse($response);
 
-        return $transaction;
+        return $this->persist($transaction);
+    }
+
+    /**
+     * @param Transaction $initialTransaction
+     * @param Response    $response
+     *
+     * @return Transaction|null
+     */
+    public function createNotify(Transaction $initialTransaction, Response $response)
+    {
+        $transaction = new Transaction(Transaction::TYPE_NOTIFY);
+        $transaction->setPaymentUniqueId($initialTransaction->getPaymentUniqueId());
+        $transaction->setOrderNumber($initialTransaction->getOrderNumber());
+        $transaction->setResponse($response);
+
+        return $this->persist($transaction);
     }
 
     private function persist(Transaction $transaction)
@@ -138,5 +136,50 @@ class TransactionFactory
         $this->em->persist($transaction);
         $this->em->flush();
         return $transaction;
+    }
+
+    /**
+     * @param SuccessResponse $response
+     *
+     * @return Transaction
+     * @throws InitialTransactionNotFoundException
+     */
+    public function getInitialTransaction(SuccessResponse $response)
+    {
+        $transaction = $this->findInitialTransaction($response->getParentTransactionId(), $response->getRequestId());
+        if (! $transaction) {
+            throw new InitialTransactionNotFoundException($response->getTransactionId());
+        }
+        return $transaction;
+    }
+
+    /**
+     * @param string|null $parentTransactionId
+     * @param string|null $requestId
+     *
+     * @return null|object|Transaction
+     */
+    private function findInitialTransaction($parentTransactionId, $requestId)
+    {
+        $repo = $this->em->getRepository(Transaction::class);
+        if ($parentTransactionId) {
+            $transaction = $repo->findOneBy(['transactionId' => $parentTransactionId]);
+            if ($transaction) {
+                if (! $transaction->getParentTransactionId() && $transaction->isInitial()) {
+                    return $transaction;
+                }
+                return $this->findInitialTransaction(
+                    $transaction->getParentTransactionId(),
+                    $transaction->getRequestId()
+                );
+            }
+        }
+        if (! $requestId || ! ($transaction = $repo->findOneBy(['requestId' => $requestId]))) {
+            return null;
+        }
+        if (! $transaction->getParentTransactionId() && $transaction->isInitial()) {
+            return $transaction;
+        }
+        return $this->findInitialTransaction($transaction->getParentTransactionId(), $transaction->getRequestId());
     }
 }

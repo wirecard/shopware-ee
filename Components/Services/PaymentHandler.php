@@ -102,9 +102,8 @@ class PaymentHandler extends Handler
         switch (true) {
             case $response instanceof SuccessResponse:
             case $response instanceof InteractionResponse:
-                $this->updateOrder($response->getTransactionId(), $orderSummary);
                 $this->transactionFactory->createInitial(
-                    $orderSummary->getInternalOrderNumber(),
+                    $orderSummary->getPaymentUniqueId(),
                     $orderSummary->getBasketMapper()->getSignature(),
                     $response
                 );
@@ -124,30 +123,6 @@ class PaymentHandler extends Handler
     }
 
     /**
-     * Updates the shopware order by setting the proper transaction ID.
-     *
-     * @param string       $transactionId
-     * @param OrderSummary $orderSummary
-     *
-     * @throws OrderNotFoundException
-     */
-    private function updateOrder($transactionId, OrderSummary $orderSummary)
-    {
-        $order = $this->em->getRepository(Order::class)
-                          ->findOneBy([
-                              'number' => $orderSummary->getInternalOrderNumber(),
-                          ]);
-
-        if (! $order) {
-            throw new OrderNotFoundException($orderSummary->getInternalOrderNumber(), $transactionId);
-        }
-
-        $order->setTransactionId($transactionId);
-
-        $this->em->flush();
-    }
-
-    /**
      * Prepares the transaction for being sent to Wirecard by adding specific (e.g. amount) and optional (e.g. fraud
      * prevention data) data to the `Transaction` object of the payment.
      *
@@ -162,7 +137,7 @@ class PaymentHandler extends Handler
         $payment       = $orderSummary->getPayment();
         $paymentConfig = $payment->getPaymentConfig();
         $transaction   = $payment->getTransaction();
-        $orderNumber   = $this->getOrderNumberForTransaction($orderSummary->getInternalOrderNumber());
+        $orderNumber   = $this->getOrderNumberForTransaction($orderSummary->getPaymentUniqueId());
 
         $transaction->setRedirect($redirect);
         $transaction->setAmount($orderSummary->getAmount());

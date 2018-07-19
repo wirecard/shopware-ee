@@ -42,7 +42,6 @@ use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
-use WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
 class ReturnHandler extends Handler
@@ -69,66 +68,17 @@ class ReturnHandler extends Handler
     }
 
     /**
-     * @param SuccessResponse $response
-     *
-     * @return Transaction
-     * @throws InitialTransactionNotFoundException
-     */
-    public function getInitialTransaction(SuccessResponse $response)
-    {
-        $transaction = $this->findInitialTransaction($response->getParentTransactionId(), $response->getRequestId());
-        if (! $transaction) {
-            throw new InitialTransactionNotFoundException($response->getTransactionId());
-        }
-        return $transaction;
-    }
-
-    /**
-     * @param string|null $parentTransactionId
-     * @param string|null $requestId
-     *
-     * @return null|object|Transaction
-     */
-    public function findInitialTransaction($parentTransactionId, $requestId)
-    {
-        $repo = $this->em->getRepository(Transaction::class);
-        if ($parentTransactionId) {
-            $transaction = $repo->findOneBy(['transactionId' => $parentTransactionId]);
-            if ($transaction) {
-                if (! $transaction->getParentTransactionId()) {
-                    return $transaction;
-                }
-                return $this->findInitialTransaction(
-                    $transaction->getParentTransactionId(),
-                    $transaction->getRequestId()
-                );
-            }
-        }
-        if (! $requestId || ! ($transaction = $repo->findOneBy(['requestId' => $requestId]))) {
-            return null;
-        }
-        if (! $transaction->getParentTransactionId()) {
-            return $transaction;
-        }
-        return $this->findInitialTransaction($transaction->getParentTransactionId(), $transaction->getRequestId());
-    }
-
-    /**
-     * @param Response    $response
-     * @param string|null $orderNumber
+     * @param Response $response
      *
      * @return Action|ViewAction
      */
-    public function handleResponse(Response $response, $orderNumber)
+    public function handleResponse(Response $response)
     {
         if ($response instanceof FormInteractionResponse) {
             return $this->handleFormInteraction($response);
         }
         if ($response instanceof InteractionResponse) {
             return $this->handleInteraction($response);
-        }
-        if ($response instanceof SuccessResponse) {
-            return $this->handleSuccess($response, $orderNumber);
         }
         return $this->handleFailure($response);
     }
@@ -152,20 +102,20 @@ class ReturnHandler extends Handler
 
     /**
      * @param SuccessResponse $response
-     * @param string          $orderNumber
+     * @param Transaction     $initialTransaction
      *
      * @return Action
      */
-    protected function handleSuccess(SuccessResponse $response, $orderNumber)
+    public function handleSuccess(SuccessResponse $response, Transaction $initialTransaction)
     {
-        $this->transactionFactory->createReturn($orderNumber, $response);
+        $this->transactionFactory->createReturn($initialTransaction, $response);
 
         // `sUniqueID` should match the order temporaryId/paymentUniqueId to show proper information after redirect.
         return new RedirectAction($this->router->assemble([
             'module'     => 'frontend',
             'controller' => 'checkout',
             'action'     => 'finish',
-            'sUniqueID'  => $response->getTransactionId(),
+            'sUniqueID'  => $initialTransaction->getPaymentUniqueId(),
         ]));
     }
 

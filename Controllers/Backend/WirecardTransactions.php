@@ -234,9 +234,9 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
             /** @var Shopware\Models\Order\Status $status */
             $status = $order ? $order->getOrderStatus() : null;
 
-            $result['data'][$key]['orderId']       = $order ? $order->getId() : 0;
-            $result['data'][$key]['orderStatus']   = $status ? $status->getId() : 0;
-            $result['data'][$key]['paymentMethod'] = $payment ? $payment->getDescription() : 'N/A';
+            $result['data'][$key]['orderId']            = $order ? $order->getId() : 0;
+            $result['data'][$key]['orderStatus']        = $status ? $status->getId() : 0;
+            $result['data'][$key]['orderPaymentMethod'] = $payment ? $payment->getDescription() : null;
         }
 
         return $result;

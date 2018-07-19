@@ -42,7 +42,7 @@ class OrderSummary
     /**
      * @var string
      */
-    protected $internalOrderNumber;
+    protected $paymentUniqueId;
 
     /**
      * @var Payment
@@ -80,11 +80,11 @@ class OrderSummary
         BasketMapper $basketMapper,
         Amount $amount
     ) {
-        $this->internalOrderNumber = $internalOrderNumber;
-        $this->payment             = $payment;
-        $this->userMapper          = $userMapper;
-        $this->amount              = $amount;
-        $this->basketMapper        = $basketMapper;
+        $this->paymentUniqueId = $internalOrderNumber;
+        $this->payment         = $payment;
+        $this->userMapper      = $userMapper;
+        $this->amount          = $amount;
+        $this->basketMapper    = $basketMapper;
     }
 
     /**
@@ -122,9 +122,9 @@ class OrderSummary
     /**
      * @return string
      */
-    public function getInternalOrderNumber()
+    public function getPaymentUniqueId()
     {
-        return $this->internalOrderNumber;
+        return $this->paymentUniqueId;
     }
 
     /**
@@ -134,15 +134,15 @@ class OrderSummary
     public function toArray()
     {
         return [
-            'internalOrderNumber' => $this->getInternalOrderNumber(),
-            'payment'             => [
+            'paymentUniqueId' => $this->getPaymentUniqueId(),
+            'payment'         => [
                 'name'          => $this->getPayment()->getName(),
                 'paymentConfig' => $this->getPayment()->getPaymentConfig()->toArray(),
                 'transaction'   => $this->getPayment()->getTransaction()->mappedProperties(),
             ],
-            'user'                => $this->getUserMapper()->toArray(),
-            'basket'              => $this->getBasketMapper()->toArray(),
-            'amount'              => $this->getAmount()->mappedProperties(),
+            'user'            => $this->getUserMapper()->toArray(),
+            'basket'          => $this->getBasketMapper()->toArray(),
+            'amount'          => $this->getAmount()->mappedProperties(),
         ];
     }
 }

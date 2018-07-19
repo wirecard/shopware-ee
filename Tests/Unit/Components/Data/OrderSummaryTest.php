@@ -62,7 +62,7 @@ class OrderSummaryTest extends TestCase
             $amount
         );
 
-        $this->assertSame(20001, $order->getInternalOrderNumber());
+        $this->assertSame(20001, $order->getPaymentUniqueId());
         $this->assertSame($payment, $order->getPayment());
         $this->assertSame($user, $order->getUserMapper());
         $this->assertSame($basket, $order->getBasketMapper());

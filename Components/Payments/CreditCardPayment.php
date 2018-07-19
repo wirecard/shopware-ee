@@ -246,28 +246,12 @@ class CreditCardPayment extends Payment
             $shop->getLocale()->getLocale()
         );
 
-        $requestJson = json_decode($requestData, true);
-
-        $transaction = new Transaction();
-        $transaction->setCreatedAt(new \DateTime());
-        $transaction->setType(Transaction::TYPE_INITIAL_REQUEST);
-        $transaction->setInternalOrderNumber($orderSummary->getInternalOrderNumber());
+        $transaction = new Transaction(Transaction::TYPE_INITIAL_REQUEST);
+        $transaction->setPaymentUniqueId($orderSummary->getPaymentUniqueId());
         $transaction->setBasketSignature($orderSummary->getBasketMapper()->getSignature());
-        $transaction->setRequestId($requestJson[TransactionService::REQUEST_ID]);
-        if (isset($requestJson['transaction_type'])) {
-            $transaction->setTransactionType($requestJson['transaction_type']);
-        }
-        if (isset($requestJson['requested_amount'])) {
-            $transaction->setAmount($requestJson['requested_amount']);
-        }
-        if (isset($requestJson['requested_amount_currency'])) {
-            $transaction->setCurrency($requestJson['requested_amount_currency']);
-        }
-        $transaction->setResponse($requestJson);
+        $transaction->setRequest(json_decode($requestData, true));
         $this->em->persist($transaction);
         $this->em->flush();
-        // TODO: consider persisting paymentmethod here
-        //$requestJson['payment_method'];
 
         return new ViewAction('credit_card.tpl', [
             'wirecardUrl'         => $orderSummary->getPayment()->getPaymentConfig()->getBaseUrl(),
