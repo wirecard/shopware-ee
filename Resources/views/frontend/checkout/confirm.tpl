@@ -2,70 +2,79 @@
 
 {block name='frontend_checkout_confirm_information_wrapper'}
     {$smarty.block.parent}
-    {if $wirecardFormFields}
-        {if $wirecardFormFields.method == 'wirecard_elastic_engine_sepa'}
-            <div class="panel has--border wirecard--aditional-form-fields">
-                <div class="panel--title primary is--underline">
-                    {s name="AdditionalPaymentFields" namespace="frontend/wirecard_elastic_engine/sepa"}{/s}
-                </div>
-                <div class="panel--body is--wide">
-                    {include file="frontend/plugins/wirecard_elastic_engine/form/sepa.tpl"}
-                </div>
+    {if $wirecardFormFields and $wirecardFormFields.method == 'wirecard_elastic_engine_sepa'}
+        <div class="panel has--border wirecardee--additional-form-fields">
+            <div class="panel--title primary is--underline">
+                {s name="SepaPaymentFormHeader" namespace="frontend/wirecard_elastic_engine/sepa"}{/s}
             </div>
-        {/if}
+            <div class="panel--body is--wide">
+                {include file="frontend/plugins/wirecard_elastic_engine/form/sepa.tpl"}
+            </div>
+        </div>
     {/if}
 {/block}
 
 {block name="frontend_index_javascript_async_ready"}
     {$smarty.block.parent}
-    {if $wirecardFormFields}
-        {if $wirecardFormFields.method == 'wirecard_elastic_engine_sepa'}
-            <script type="text/javascript">
-             document.asyncReady(function() {
-                 var $ = jQuery,
-                     modalWindow = null;
+    {if $wirecardFormFields and $wirecardFormFields.method == 'wirecard_elastic_engine_sepa'}
+        <div id="wirecardee-sepa--mandate-text" style="display:none;">
+            {include file="frontend/plugins/wirecard_elastic_engine/form/sepa_mandate.tpl"}
+        </div>
+        <script type="text/javascript">
+            document.asyncReady(function () {
+                var $ = jQuery,
+                    modalWindow = null,
+                    $mandateText = $('#wirecardee-sepa--mandate-text'),
+                    template = $mandateText.html();
+                $mandateText.remove();
 
-                 var getMandateText = function() {
-                     var firstName = $('#wirecard-sepa--first-name').val(),
-                         lastName = $('#wirecard-sepa--last-name').val(),
-                         iban = $('#wirecard-sepa--iban').val(),
-                         bic = $('#wirecard-sepa--bic').val();
-                     return `{include file="frontend/plugins/wirecard_elastic_engine/form/sepa_mandate.tpl"}`;
-                 }
+                var getMandateText = function () {
+                    var firstName = $('#wirecardee-sepa--first-name').val(),
+                        lastName = $('#wirecardee-sepa--last-name').val(),
+                        iban = $('#wirecardee-sepa--iban').val(),
+                        bic = $('#wirecardee-sepa--bic').val();
+                    return template.replace('{literal}${firstName}{/literal}', firstName)
+                        .replace('{literal}${lastName}{/literal}', lastName)
+                        .replace('{literal}${iban}{/literal}', iban)
+                        .replace('{literal}${bic}{/literal}', bic);
+                };
 
-                 $('#confirm--form').on('submit', function(event) {
-                     if ($('#wirecard-sepa--confirm-mandate').val() !== 'confirmed') {
-                         event.preventDefault();
-                         modalWindow = $.modal.open(getMandateText(), {
-                             title: "{s name="SepaMandateTitle" namespace="frontend/wirecard_elastic_engine/sepa"}{/s}",
-                             closeOnOverlay: false,
-                             showCloseButton: false
-                         });
-                         return false;
-                     }
-                 });
+                $('#confirm--form').on('submit', function (event) {
+                    if ($('#wirecardee-sepa--confirm-mandate').val() !== 'confirmed') {
+                        event.preventDefault();
+                        modalWindow = $.modal.open(getMandateText(), {
+                            title: "{s name="SepaMandateTitle" namespace="frontend/wirecard_elastic_engine/sepa"}{/s}",
+                            closeOnOverlay: false,
+                            showCloseButton: false
+                        });
+                        return false;
+                    }
+                });
 
-                 $(document).on('click', '#sepa--confirm-button', function() {
-                     if ($('#sepa-check').is(':checked')) {
-                         $('#wirecard-sepa--confirm-mandate').val('confirmed');
-                         $('#confirm--form').submit();
-                         return;
-                     }
+                $(document).on('click', '#wirecardee-sepa--confirm-button', function () {
+                    var $check = $('#wirecardee-sepa--confirm-check');
+                    if ($check.is(':checked')) {
+                        $('#wirecardee-sepa--confirm-mandate').val('confirmed');
+                        $('#confirm--form').submit();
+                        return;
+                    }
 
-                     $('#sepa-check')[0].reportValidity();
-                     $('label[for=sepa-check]').addClass('has--error').focus();
-                 });
+                    if ($check.length && $check[0].reportValidity) {
+                        $check[0].reportValidity();
+                    }
+                    $('label[for=wirecardee-sepa--confirm-check]').addClass('has--error').focus();
+                });
 
-                 $(document).on('click', '#sepa--cancel-button', function() {
-                     if (modalWindow) {
-                         modalWindow.close();
-                     }
-                     $(".main--actions button[type=submit]").prop('disabled', false);
-                     $(".main--actions button[type=submit] .js--loading").remove();
-                     $(".main--actions button[type=submit]").append('<i class="icon--arrow-right">');
-                 });
-             });
-            </script>
-        {/if}
+                $(document).on('click', '#wirecardee-sepa--cancel-button', function () {
+                    if (modalWindow) {
+                        modalWindow.close();
+                    }
+                    var $submitButton = $(".main--actions button[type=submit]");
+                    $submitButton.prop('disabled', false);
+                    $submitButton.find('.js--loading').remove();
+                    $submitButton.append('<i class="icon--arrow-right">');
+                });
+            });
+        </script>
     {/if}
 {/block}

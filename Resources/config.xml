@@ -443,14 +443,6 @@ function (button) {
             <description lang="de">Für das SEPA-Lastschrift-Mandat wird die Adresse des Zahlungsempfängers (Creditor) benötigt.</description>
             <description lang="en">SEPA requires a Creditor Address for display on the SEPA Direct Debit Mandate page.</description>
         </element>
-        <element type="textarea" scope="shop">
-            <name>wirecardElasticEngineSepaMandateText</name>
-            <label lang="de">[SEPA] Zusatztext</label>
-            <label lang="en">[SEPA] Additianl Text</label>
-            <value></value>
-            <description lang="de">Dieser Text wird am Ende des ersten Paragraphen des SEPA-Lastschrift-Mandats angezeigt.</description>
-            <description lang="en">This text appears on the SEPA Direct Debit Mandate page at the end of the first paragraph.</description>
-        </element>
         <!-- Sepa End -->
         <!-- Sepa Backend -->
         <element type="text" scope="shop">
