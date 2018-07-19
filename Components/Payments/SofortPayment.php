@@ -78,7 +78,7 @@ class SofortPayment extends Payment
      */
     public function getTransaction($operation = null)
     {
-        if(! $this->transactionInstance) {
+        if (! $this->transactionInstance) {
             $this->transactionInstance = new SofortTransaction();
         }
         return $this->transactionInstance;

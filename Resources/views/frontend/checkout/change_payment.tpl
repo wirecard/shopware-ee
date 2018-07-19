@@ -18,6 +18,11 @@
                 <img title="{s name="SepaTitle" namespace="frontend/wirecard_elastic_engine/payments"}SEPA{/s}"
                      src="{s name="SepaLogo" namespace="frontend/wirecard_elastic_engine/payments"}{/s}" />
             </div>
+        {elseif $payment_mean.name == "wirecard_elastic_engine_sofort"}
+            <div class="wirecard-elastic-engine--payments" >
+                <img title="{s name="SofortTitle" namespace="frontend/wirecard_elastic_engine/payments"}Sofort.{/s}"
+                     src="{s name="SofortLogo" namespace="frontend/wirecard_elastic_engine/payments"}{/s}" />
+            </div>
         {/if}
     {/if}
     {$smarty.block.parent}
