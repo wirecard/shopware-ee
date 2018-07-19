@@ -81,7 +81,7 @@ class CreditCardPayment extends Payment
     /**
      * @return CreditCardTransaction
      */
-    public function getTransaction($operation = null, $paymentMethod = null)
+    public function getTransaction()
     {
         if (! $this->transactionInstance) {
             $this->transactionInstance = new CreditCardTransaction();

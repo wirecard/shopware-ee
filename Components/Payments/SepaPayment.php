@@ -37,6 +37,7 @@ use Wirecard\PaymentSdk\Config\SepaConfig;
 use Wirecard\PaymentSdk\Entity\AccountHolder;
 use Wirecard\PaymentSdk\Entity\Mandate;
 use Wirecard\PaymentSdk\Entity\Redirect;
+use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\Transaction\SepaDirectDebitTransaction;
 use Wirecard\PaymentSdk\TransactionService;
@@ -76,25 +77,29 @@ class SepaPayment extends Payment
     /**
      * @return SepaDirectDebitTransaction
      */
-    public function getTransaction($operation = null, $paymentMethod = null)
+    public function getTransaction()
     {
-        // only needed to get backendoperations
-        if ($paymentMethod) {
-            if ($paymentMethod === SepaCreditTransferTransaction::NAME) {
-                return new SepaCreditTransferTransaction();
-            }
-
-            return new SepaDirectDebitTransaction();
-        }
-
         if (! $this->transactionInstance) {
-            if ($operation && $operation === 'credit') {
-                $this->transactionInstance = new SepaCreditTransferTransaction();
-            } else {
-                $this->transactionInstance = new SepaDirectDebitTransaction();
-            }
+            $this->transactionInstance = new SepaDirectDebitTransaction();
         }
         return $this->transactionInstance;
+    }
+
+    /**
+     * If the paymentMethod is 'sepacredit' or a 'credit' operation is requested, we need a
+     * SepaCreditTransferTransaction instead of SepaDirectDebitTransaction for this payment method.
+     *
+     * @param string|null $operation
+     * @param string|null $paymentMethod
+     *
+     * @return SepaDirectDebitTransaction|SepaCreditTransferTransaction
+     */
+    public function getBackendTransaction($operation, $paymentMethod)
+    {
+        if ($paymentMethod === SepaCreditTransferTransaction::NAME || $operation === Operation::CREDIT) {
+            return new SepaCreditTransferTransaction();
+        }
+        return new SepaDirectDebitTransaction();
     }
 
     /**
@@ -166,7 +171,7 @@ class SepaPayment extends Payment
             'creditorId'      => $paymentConfig->getCreditorId(),
             'creditorName'    => $paymentConfig->getCreditorName(),
             'creditorAddress' => $paymentConfig->getCreditorAddress(),
-            'additionalText'  => $paymentConfig->getMandateText()
+            'additionalText'  => $paymentConfig->getMandateText(),
         ];
     }
 
@@ -181,11 +186,11 @@ class SepaPayment extends Payment
         \Enlight_Controller_Request_Request $request,
         \sOrder $shopwareOrder
     ) {
-        if (! isset($this->additionalData['sepaConfirmMandate']) ||
-            $this->additionalData['sepaConfirmMandate'] !== 'confirmed' ||
-            ! isset($this->additionalData['sepaIban']) ||
-            ! isset($this->additionalData['sepaFirstName']) ||
-            ! isset($this->additionalData['sepaLastName'])) {
+        if (! isset($this->additionalData['sepaConfirmMandate'])
+            || $this->additionalData['sepaConfirmMandate'] !== 'confirmed'
+            || ! isset($this->additionalData['sepaIban'])
+            || ! isset($this->additionalData['sepaFirstName'])
+            || ! isset($this->additionalData['sepaLastName'])) {
             throw new \Exception('Unsufficiant Data for SEPA Transaction');
         }
 

@@ -36,6 +36,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Config\SepaConfig;
 use Wirecard\PaymentSdk\Entity\Redirect;
+use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\Transaction\SofortTransaction;
 use Wirecard\PaymentSdk\TransactionService;
@@ -78,25 +79,32 @@ class SofortPayment extends Payment
     /**
      * @return SofortTransaction
      */
-    public function getTransaction($operation = null, $paymentMethod = null)
+    public function getTransaction()
     {
-        // only needed to get backendoperations
-        if ($paymentMethod) {
-            if ($paymentMethod === SepaCreditTransferTransaction::NAME) {
-                return new SepaCreditTransferTransaction();
-            }
-
-            return new SofortTransaction();
-        }
-
         if (! $this->transactionInstance) {
-            if ($operation && ($operation === 'credit' || $operation === 'cancel')) {
-                $this->transactionInstance = new SepaCreditTransferTransaction();
-            } else {
-                $this->transactionInstance = new SofortTransaction();
-            }
+            $this->transactionInstance = new SofortTransaction();
         }
         return $this->transactionInstance;
+    }
+
+    /**
+     * If the paymentMethod is 'sepacredit' or a 'credit'/'cancel' operation is requested, we need a
+     * SepaCreditTransferTransaction instead of SofortTransaction for this payment method.
+     *
+     * @param string|null $operation
+     * @param string|null $paymentMethod
+     *
+     * @return SofortTransaction|SepaCreditTransferTransaction
+     */
+    public function getBackendTransaction($operation, $paymentMethod)
+    {
+        if ($paymentMethod === SepaCreditTransferTransaction::NAME
+            || $operation === Operation::CREDIT
+            || $operation === Operation::CANCEL
+        ) {
+            return new SepaCreditTransferTransaction();
+        }
+        return new SofortTransaction();
     }
 
     /**
