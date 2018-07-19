@@ -280,7 +280,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
         });
     },
 
-    processBackendOperation(transaction, operation, amount = null) {
+    processBackendOperation(transaction, operation, amount) {
         var me = this;
 
         return Ext.Ajax.request({
