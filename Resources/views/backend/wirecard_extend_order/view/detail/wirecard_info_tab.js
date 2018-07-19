@@ -154,7 +154,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
                         tooltip: 'Credit Refund',
 
                         handler: function(view, row, col, item, opts, record) {
-                            me.showAmountDialog(record.data, 'refund');
+                            me.showAmountDialog(record.data, 'credit');
                         },
 
                         getClass: function(value, meta, record) {

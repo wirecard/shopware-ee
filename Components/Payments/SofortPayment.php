@@ -34,11 +34,13 @@ namespace WirecardShopwareElasticEngine\Components\Payments;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
+use Wirecard\PaymentSdk\Config\SepaConfig;
 use Wirecard\PaymentSdk\Entity\Redirect;
+use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\Transaction\SofortTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
-use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
+use WirecardShopwareElasticEngine\Components\Data\SofortPaymentConfig;
 
 class SofortPayment extends Payment
 {
@@ -79,7 +81,11 @@ class SofortPayment extends Payment
     public function getTransaction($operation = null)
     {
         if (! $this->transactionInstance) {
-            $this->transactionInstance = new SofortTransaction();
+            if ($operation && $operation === 'credit') {
+                $this->transactionInstance = new SepaCreditTransferTransaction();
+            } else {
+                $this->transactionInstance = new SofortTransaction();
+            }
         }
         return $this->transactionInstance;
     }
@@ -96,6 +102,14 @@ class SofortPayment extends Payment
             $this->getPaymentConfig()->getTransactionSecret()
         ));
 
+        $sepaCreditTransferConfig = new SepaConfig(
+            SepaCreditTransferTransaction::NAME,
+            $this->getPaymentConfig()->getBackendTransactionMAID(),
+            $this->getPaymentConfig()->getBackendTransactionSecret()
+        );
+        $sepaCreditTransferConfig->setCreditorId($this->getPaymentConfig()->getBackendCreditorId());
+        $config->add($sepaCreditTransferConfig);
+
         return $config;
     }
 
@@ -104,7 +118,7 @@ class SofortPayment extends Payment
      */
     public function getPaymentConfig()
     {
-        $paymentConfig = new PaymentConfig(
+        $paymentConfig = new SofortPaymentConfig(
             $this->getPluginConfig('SofortServer'),
             $this->getPluginConfig('SofortHttpUser'),
             $this->getPluginConfig('SofortHttpPassword')
@@ -114,6 +128,9 @@ class SofortPayment extends Payment
         $paymentConfig->setTransactionSecret($this->getPluginConfig('SofortSecret'));
         $paymentConfig->setTransactionOperation(parent::TRANSACTION_OPERATION_PAY);
         $paymentConfig->setSendDescriptor(true);
+        $paymentConfig->setBackendTransactionMAID($this->getPluginConfig('SepaBackendMerchantId'));
+        $paymentConfig->setBackendTransactionSecret($this->getPluginConfig('SepaBackendSecret'));
+        $paymentConfig->setBackendCreditorId($this->getPluginConfig('SepaBackendCreditorId'));
 
         return $paymentConfig;
     }

@@ -177,7 +177,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         );
         $backendService = new BackendService($config, $this->getLogger());
 
-        $transaction = $payment->getTransaction();
+        $transaction = $payment->getTransaction($operation);
         $transaction->setParentTransactionId($transactionId);
 
         if ($amount) {
