@@ -55,6 +55,7 @@ use WirecardShopwareElasticEngine\Exception\BasketException;
 use WirecardShopwareElasticEngine\Exception\CouldNotSaveOrderException;
 use WirecardShopwareElasticEngine\Exception\UnknownActionException;
 use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
+use WirecardShopwareElasticEngine\Models\Transaction;
 
 // @codingStandardsIgnoreStart
 class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopware_Controllers_Frontend_Payment implements CSRFWhitelistAware
@@ -137,9 +138,22 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         return $this->handleAction($action);
     }
 
+    /**
+     * Generate a sortable paymentUniqueId (used as internal order number sent to wirecard) that is stored with each
+     * transaction and the shopware order as `temporaryId` (paymentUniqueId). The actual order number will be generated
+     * in the returnAction.
+     * Format: "[timestamp]-[uniqueId]"
+     *
+     * @return string
+     * @throws Exception
+     */
     private function generatePaymentUniqueId()
     {
-        return uniqid('', true);
+        $repo = $this->getModelManager()->getRepository(Transaction::class);
+        do {
+            $id = time() . '-' . uniqid();
+        } while ($repo->findOneBy(['paymentUniqueId' => $id]));
+        return $id;
     }
 
     /**
