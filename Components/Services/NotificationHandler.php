@@ -94,7 +94,8 @@ class NotificationHandler extends Handler
         }
         $initialTransaction->setPaymentStatus($paymentStatusId);
         $this->em->flush();
-        $this->logger->debug("NotificationHandler::handleSuccess: flushed initial transaction {$initialTransaction->getId()} with payment status $paymentStatusId");
+        $this->logger->debug("NotificationHandler::handleSuccess: flushed initial transaction " .
+                             "{$initialTransaction->getId()} with payment status $paymentStatusId");
 
         /** @var Order $order */
         $order = $this->em->getRepository(Order::class)->findOneBy([
@@ -104,7 +105,7 @@ class NotificationHandler extends Handler
         // if we already have an order, we can update the payment status directly
         if ($order) {
             $this->logger->debug('NotificationHandler::handleSuccess: order found, save payment status '
-                                  . $paymentStatusId);
+                                 . $paymentStatusId);
             $this->savePaymentStatus($shopwareOrder, $order, $paymentStatusId);
             return $initialTransaction;
         }

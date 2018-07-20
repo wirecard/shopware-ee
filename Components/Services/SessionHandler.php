@@ -33,11 +33,7 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 
 class SessionHandler
 {
-    const ORDER = 'WirecardElasticEngineOrder';
     const PAYMENT_DATA = 'WirecardElasticEnginePaymentData';
-
-    const ORDER_NUMBER = 'orderNumber';
-    const BASKET_SIGNATURE = 'basketSignature';
 
     /**
      * @var \Enlight_Components_Session_Namespace
@@ -50,66 +46,21 @@ class SessionHandler
     }
 
     /**
-     * @param string $orderNumber
-     * @param string $basketSignature
+     * @param array $paymentData
      */
-    public function storeOrder($orderNumber, $basketSignature)
+    public function storePaymentData(array $paymentData)
     {
-        $this->session->offsetSet(self::ORDER, [
-            self::ORDER_NUMBER     => $orderNumber,
-            self::BASKET_SIGNATURE => $basketSignature,
-        ]);
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getOrderNumber()
-    {
-        if (! $this->session->offsetExists(self::ORDER)) {
-            return null;
-        }
-        $store = $this->session->offsetGet(self::ORDER);
-        return isset($store[self::ORDER_NUMBER]) ? $store[self::ORDER_NUMBER] : null;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getBasketSignature()
-    {
-        if (! $this->session->offsetExists(self::ORDER)) {
-            return null;
-        }
-        $store = $this->session->offsetGet(self::ORDER);
-        return isset($store[self::BASKET_SIGNATURE]) ? $store[self::BASKET_SIGNATURE] : null;
-    }
-
-    public function clearOrder()
-    {
-        $this->session->offsetSet(self::ORDER, []);
-    }
-
-    /**
-     * @param array $additionalData
-     */
-    public function storeAdditionalPaymentData(array $additionalData)
-    {
-        $this->session->offsetSet(self::PAYMENT_DATA, [
-            'additionalData' => $additionalData
-        ]);
+        $this->session->offsetSet(self::PAYMENT_DATA, $paymentData);
     }
 
     /**
      * @return array|null
      */
-    public function getAdditionalPaymentData()
+    public function getPaymentData()
     {
         if (! $this->session->offsetExists(self::PAYMENT_DATA)) {
             return null;
         }
-
-        $store = $this->session->offsetGet(self::PAYMENT_DATA);
-        return isset($store['additionalData']) ? $store['additionalData'] : null;
+        return $this->session->offsetGet(self::PAYMENT_DATA);
     }
 }
