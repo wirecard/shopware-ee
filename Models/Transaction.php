@@ -176,7 +176,7 @@ class Transaction extends ModelEntity
 
     public function __construct($type)
     {
-        $this->setType($type);
+        $this->type = $type;
         $this->setState(self::STATE_OPEN);
         $this->setCreatedAt(new \DateTime());
     }
@@ -230,27 +230,11 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param string $parentTransactionId
-     */
-    public function setParentTransactionId($parentTransactionId = null)
-    {
-        $this->parentTransactionId = $parentTransactionId;
-    }
-
-    /**
      * @return string
      */
     public function getTransactionId()
     {
         return $this->transactionId;
-    }
-
-    /**
-     * @param string $transactionId
-     */
-    public function setTransactionId($transactionId)
-    {
-        $this->transactionId = $transactionId;
     }
 
     /**
@@ -262,14 +246,6 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param string $providerTransactionId
-     */
-    public function setProviderTransactionId($providerTransactionId = null)
-    {
-        $this->providerTransactionId = $providerTransactionId;
-    }
-
-    /**
      * @return string|null
      */
     public function getProviderTransactionReference()
@@ -278,27 +254,11 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param string $providerTransactionReference
-     */
-    public function setProviderTransactionReference($providerTransactionReference = null)
-    {
-        $this->providerTransactionReference = $providerTransactionReference;
-    }
-
-    /**
      * @return string
      */
     public function getTransactionType()
     {
         return $this->transactionType;
-    }
-
-    /**
-     * @param string $transactionType
-     */
-    public function setTransactionType($transactionType)
-    {
-        $this->transactionType = $transactionType;
     }
 
     /**
@@ -312,7 +272,7 @@ class Transaction extends ModelEntity
     /**
      * @param string $paymentMethod
      */
-    public function setPaymentMethod($paymentMethod)
+    private function setPaymentMethod($paymentMethod)
     {
         $this->paymentMethod = $paymentMethod;
     }
@@ -326,27 +286,11 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param float $amount
-     */
-    public function setAmount($amount = null)
-    {
-        $this->amount = $amount;
-    }
-
-    /**
      * @return string|null
      */
     public function getCurrency()
     {
         return $this->currency;
-    }
-
-    /**
-     * @param string $currency
-     */
-    public function setCurrency($currency = null)
-    {
-        $this->currency = $currency;
     }
 
     /**
@@ -362,22 +306,22 @@ class Transaction extends ModelEntity
      */
     public function setResponse(Response $response)
     {
-        $this->setRequestId($response->getRequestId());
-        $this->setTransactionType($response->getTransactionType());
+        $this->requestId       = $response->getRequestId();
+        $this->transactionType = $response->getTransactionType();
 
         if ($response instanceof SuccessResponse) {
-            $this->setTransactionId($response->getTransactionId());
-            $this->setParentTransactionId($response->getParentTransactionId());
-            $this->setProviderTransactionId($response->getProviderTransactionId());
-            $this->setProviderTransactionReference($response->getProviderTransactionReference());
+            $this->transactionId                = $response->getTransactionId();
+            $this->parentTransactionId          = $response->getParentTransactionId();
+            $this->providerTransactionId        = $response->getProviderTransactionId();
+            $this->providerTransactionReference = $response->getProviderTransactionReference();
             $this->setPaymentMethod($response->getPaymentMethod());
         } elseif ($response instanceof InteractionResponse || $response instanceof FormInteractionResponse) {
-            $this->setTransactionId($response->getTransactionId());
+            $this->transactionId = $response->getTransactionId();
         }
 
         if ($response->getRequestedAmount()) {
-            $this->setCurrency($response->getRequestedAmount()->getCurrency());
-            $this->setAmount($response->getRequestedAmount()->getValue());
+            $this->currency = $response->getRequestedAmount()->getCurrency();
+            $this->amount   = $response->getRequestedAmount()->getValue();
         }
 
         if (! $this->getPaymentUniqueId()) {
@@ -404,16 +348,16 @@ class Transaction extends ModelEntity
     public function setRequest(array $request)
     {
         if (isset($request[TransactionService::REQUEST_ID])) {
-            $this->setRequestId($request[TransactionService::REQUEST_ID]);
+            $this->requestId = $request[TransactionService::REQUEST_ID];
         }
         if (isset($request['transaction_type'])) {
-            $this->setTransactionType($request['transaction_type']);
+            $this->transactionType = $request['transaction_type'];
         }
         if (isset($request['requested_amount'])) {
-            $this->setAmount($request['requested_amount']);
+            $this->amount = $request['requested_amount'];
         }
         if (isset($request['requested_amount_currency'])) {
-            $this->setCurrency($request['requested_amount_currency']);
+            $this->currency = $request['requested_amount_currency'];
         }
         if (isset($request['payment_method'])) {
             $this->setPaymentMethod($request['payment_method']);
@@ -431,27 +375,11 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param string|null $type
-     */
-    public function setType($type = null)
-    {
-        $this->type = $type;
-    }
-
-    /**
      * @return string|null
      */
     public function getRequestId()
     {
         return $this->requestId;
-    }
-
-    /**
-     * @param string $requestId
-     */
-    public function setRequestId($requestId)
-    {
-        $this->requestId = $requestId;
     }
 
     /**
