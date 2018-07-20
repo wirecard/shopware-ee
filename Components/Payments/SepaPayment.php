@@ -43,6 +43,7 @@ use Wirecard\PaymentSdk\Transaction\SepaDirectDebitTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\SepaPaymentConfig;
+use WirecardShopwareElasticEngine\Exception\InsufficientDataException;
 
 class SepaPayment extends Payment
 {
@@ -191,7 +192,7 @@ class SepaPayment extends Payment
             || ! isset($this->additionalData['sepaIban'])
             || ! isset($this->additionalData['sepaFirstName'])
             || ! isset($this->additionalData['sepaLastName'])) {
-            throw new \Exception('Unsufficiant Data for SEPA Transaction');
+            throw new InsufficientDataException('Insufficient Data for SEPA Transaction');
         }
 
         $transaction = $this->getTransaction();
@@ -203,7 +204,7 @@ class SepaPayment extends Payment
 
         $transaction->setIban($this->additionalData['sepaIban']);
 
-        if ($this->getPluginConfig('SepaShowBic')) {
+        if ($this->getPluginConfig('SepaShowBic') && isset($this->additionalData['sepaBic'])) {
             $transaction->setBic($this->additionalData['sepaBic']);
         }
 
@@ -213,9 +214,8 @@ class SepaPayment extends Payment
 
     private function generateMandate(OrderSummary $orderSummary)
     {
-        return
-            $this->getPluginConfig('SepaCreditorId') . '-' .
-            $orderSummary->getOrderNumber() . '-' .
-            strtotime(date('Y-m-d H:i:s'));
+        return $this->getPluginConfig('SepaCreditorId') . '-' .
+               $orderSummary->getPaymentUniqueId() . '-' .
+               time();
     }
 }
