@@ -34,18 +34,12 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\Routing\RouterInterface;
-use Shopware\Models\Order\Order;
-use Wirecard\PaymentSdk\Exception\MalformedResponseException;
-use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
-use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
 use WirecardShopwareElasticEngine\Exception\ParentTransactionNotFoundException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
 abstract class Handler
 {
-    protected $devEnvironments = ['dev', 'development', 'testing'];
-
     /**
      * @var EntityManagerInterface
      */
@@ -90,51 +84,6 @@ abstract class Handler
         $this->logger             = $logger;
         $this->shopwareConfig     = $config;
         $this->transactionManager = $transactionManager;
-    }
-
-    /**
-     * @param string $paymentUniqueId
-     *
-     * @return string
-     */
-    protected function getOrderNumberForTransaction($paymentUniqueId)
-    {
-        if (in_array(getenv('SHOPWARE_ENV'), $this->devEnvironments)) {
-            $paymentUniqueId = 'dev-' . $paymentUniqueId;
-        }
-        return $paymentUniqueId;
-    }
-
-    /**
-     * @param Response $response
-     *
-     * @return Order
-     * @throws OrderNotFoundException
-     */
-    protected function getOrderFromResponse(Response $response)
-    {
-        try {
-            $orderNumber = $response->findElement('order-number');
-
-            if (in_array(getenv('SHOPWARE_ENV'), $this->devEnvironments) && strpos($orderNumber, '-') >= 0) {
-                $orderNumber = explode('-', $orderNumber)[1];
-            }
-            $order = $this->em->getRepository(Order::class)->findOneBy([
-                'number' => $orderNumber,
-            ]);
-        } catch (MalformedResponseException $e) {
-            // In case we're not finding our `order-number` in the response we'll try to find it via the requestId.
-            $orderNumber = $response->getRequestId();
-            $order       = $this->em->getRepository(Order::class)->findOneBy([
-                'transactionId' => $orderNumber,
-            ]);
-        }
-
-        if (! $order) {
-            throw new OrderNotFoundException($orderNumber);
-        }
-
-        return $order;
     }
 
     /**

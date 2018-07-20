@@ -39,7 +39,6 @@ use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
-use WirecardShopwareElasticEngine\Models\Transaction as TransactionModel;
 
 class BackendOperationHandler extends Handler
 {
@@ -49,7 +48,6 @@ class BackendOperationHandler extends Handler
      * @param string         $operation
      *
      * @return Action
-     * @throws \WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException
      */
     public function execute(
         Transaction $transaction,

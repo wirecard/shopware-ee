@@ -33,6 +33,7 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Wirecard\PaymentSdk\BackendService;
+use Wirecard\PaymentSdk\Exception\MalformedResponseException;
 use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\Response;
@@ -207,9 +208,21 @@ class TransactionManager
      */
     public function getInitialTransaction(SuccessResponse $response)
     {
+        try {
+            // try to get paymentUniqueId from response
+            $paymentUniqueId = $response->findElement('order-number');
+            if ($paymentUniqueId) {
+                $transaction = $this->em->getRepository(Transaction::class)
+                                        ->findOneBy(['paymentUniqueId' => $paymentUniqueId]);
+                if ($transaction && $transaction->isInitial()) {
+                    return $transaction;
+                }
+            }
+        } catch (MalformedResponseException $e) {
+        }
         $transaction = $this->findInitialTransaction($response->getParentTransactionId(), $response->getRequestId());
         if (! $transaction) {
-            throw new InitialTransactionNotFoundException($response->getTransactionId());
+            throw new InitialTransactionNotFoundException($response);
         }
         return $transaction;
     }

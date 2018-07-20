@@ -115,7 +115,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
             return $this->handleError('Order number not found');
         }
 
-        $transactions = $this->get('models')
+        $transactions = $this->getModelManager()
                              ->getRepository(Transaction::class)
                              ->findBy([
                                  'orderNumber' => $orderNumber,
@@ -125,20 +125,20 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
             return $this->handleError('No transactions found');
         }
 
-        $shop               = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
-        $config             = $payment->getTransactionConfig(
+        $shop           = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
+        $config         = $payment->getTransactionConfig(
             $shop,
             $this->container->getParameterBag(),
             $shop->getCurrency()->getCurrency()
         );
-        $backendService     = new BackendService($config, $this->getLogger());
-        $result = [
+        $backendService = new BackendService($config, $this->getLogger());
+        $result         = [
             'transactions' => [],
         ];
 
         foreach ($transactions as $transaction) {
             /** @var Transaction $transaction */
-            $response = $transaction->getResponse();
+            $response           = $transaction->getResponse();
             $paymentTransaction = $payment->getBackendTransaction(
                 $transaction->getTransactionType(),
                 $response['payment-methods.0.name']

@@ -103,9 +103,9 @@ class PaymentHandler extends Handler
 
         if ($response instanceof FormInteractionResponse) {
             return new ViewAction('payment_redirect.tpl', [
-                'method'       => $response->getMethod(),
-                'formFields'   => $response->getFormFields(),
-                'url'          => $response->getUrl(),
+                'method'     => $response->getMethod(),
+                'formFields' => $response->getFormFields(),
+                'url'        => $response->getUrl(),
             ]);
         }
 
@@ -147,12 +147,11 @@ class PaymentHandler extends Handler
         $payment       = $orderSummary->getPayment();
         $paymentConfig = $payment->getPaymentConfig();
         $transaction   = $payment->getTransaction();
-        $orderNumber   = $this->getOrderNumberForTransaction($orderSummary->getPaymentUniqueId());
 
         $transaction->setRedirect($redirect);
         $transaction->setAmount($orderSummary->getAmount());
         $transaction->setNotificationUrl($notificationUrl);
-        $transaction->setOrderNumber($orderNumber);
+        $transaction->setOrderNumber($orderSummary->getPaymentUniqueId());
 
         if ($paymentConfig->sendBasket()) {
             $transaction->setBasket($orderSummary->getBasketMapper()->getWirecardBasket());
@@ -166,7 +165,7 @@ class PaymentHandler extends Handler
         }
 
         if ($paymentConfig->sendDescriptor()) {
-            $transaction->setDescriptor($this->getDescriptor($orderNumber));
+            $transaction->setDescriptor($this->getDescriptor($orderSummary->getPaymentUniqueId()));
         }
     }
 

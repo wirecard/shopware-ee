@@ -31,12 +31,18 @@
 
 namespace WirecardShopwareElasticEngine\Exception;
 
+use Wirecard\PaymentSdk\Response\SuccessResponse;
+
 class InitialTransactionNotFoundException extends \Exception
 {
-    public function __construct($transactionID)
+    public function __construct(SuccessResponse $response)
     {
         parent::__construct(
-            "Initial transaction for transaction (ID '{$transactionID}') not found"
+            "Initial transaction for transaction (" .
+            "Id '{$response->getTransactionId()}', " .
+            "ParentId '{$response->getParentTransactionId()}', " .
+            "RequestId '{$response->getRequestId()}'" .
+            ") not found: " . json_encode($response->getData())
         );
     }
 }
