@@ -3,6 +3,10 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
     alias: 'widget.wirecardee-transactions-grid',
     region: 'center',
 
+    viewConfig: {
+        enableTextSelection: true
+    },
+
     snippets: {
         OrderNumber: '{s name="OrderNumber" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
         PaymentUniqueId: '{s name="PaymentUniqueId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',

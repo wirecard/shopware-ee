@@ -101,6 +101,9 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
             alias: 'wirecardee-transaction-history',
             store: me.historyStore,
             border: 0,
+            viewConfig: {
+                enableTextSelection: true
+            },
             columns: [
                 { text: me.snippets.transactionsTable.createdAt, dataIndex: 'createdAt', flex: 1 },
                 { text: me.snippets.transactionsTable.type, dataIndex: 'type', flex: 1 },
