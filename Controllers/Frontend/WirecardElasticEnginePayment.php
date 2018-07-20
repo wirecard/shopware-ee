@@ -171,7 +171,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         /** @var ReturnHandler $returnHandler */
         $returnHandler      = $this->get('wirecard_elastic_engine.return_handler');
-        $transactionFactory = $this->get('wirecard_elastic_engine.transaction_factory');
+        $transactionManager = $this->get('wirecard_elastic_engine.transaction_manager');
         $request            = $this->Request();
         $payment            = $this->getPaymentFactory()->create($request->getParam(self::ROUTER_METHOD));
 
@@ -192,7 +192,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $orderStatus        = Status::ORDER_STATE_OPEN;
                 $orderStatusComment = null;
 
-                $initialTransaction = $transactionFactory->getInitialTransaction($response);
+                $initialTransaction = $transactionManager->getInitialTransaction($response);
                 $this->getLogger()->debug("Frontend::returnAction: got initial transaction " .
                                           "{$initialTransaction->getId()}, load basket");
                 $orderBasket = $this->loadBasketFromSignature($initialTransaction->getBasketSignature());

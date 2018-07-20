@@ -112,7 +112,7 @@ class PaymentHandler extends Handler
         switch (true) {
             case $response instanceof SuccessResponse:
             case $response instanceof InteractionResponse:
-                $this->transactionFactory->createInitial(
+                $this->transactionManager->createInitial(
                     $orderSummary->getPaymentUniqueId(),
                     $orderSummary->getBasketMapper()->getSignature(),
                     $response

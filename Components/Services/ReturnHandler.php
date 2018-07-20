@@ -90,7 +90,7 @@ class ReturnHandler extends Handler
      */
     protected function handleFormInteraction(FormInteractionResponse $response)
     {
-        $this->transactionFactory->createInteraction($response);
+        $this->transactionManager->createInteraction($response);
 
         return new ViewAction('credit_card.tpl', [
             'threeDSecure' => true,
@@ -108,7 +108,7 @@ class ReturnHandler extends Handler
      */
     public function handleSuccess(SuccessResponse $response, Transaction $initialTransaction)
     {
-        $this->transactionFactory->createReturn($initialTransaction, $response);
+        $this->transactionManager->createReturn($initialTransaction, $response);
 
         // `sUniqueID` should match the order temporaryId/paymentUniqueId to show proper information after redirect.
         return new RedirectAction($this->router->assemble([
@@ -126,7 +126,7 @@ class ReturnHandler extends Handler
      */
     protected function handleInteraction(InteractionResponse $response)
     {
-        $this->transactionFactory->createInteraction($response);
+        $this->transactionManager->createInteraction($response);
 
         return new RedirectAction($response->getRedirectUrl());
     }

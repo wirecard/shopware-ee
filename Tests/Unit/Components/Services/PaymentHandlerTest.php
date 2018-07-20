@@ -53,7 +53,7 @@ use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
 use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 use WirecardShopwareElasticEngine\Components\Services\PaymentHandler;
-use WirecardShopwareElasticEngine\Components\Services\TransactionFactory;
+use WirecardShopwareElasticEngine\Components\Services\TransactionManager;
 
 class PaymentHandlerTest extends TestCase
 {
@@ -81,8 +81,8 @@ class PaymentHandlerTest extends TestCase
     /** @var \Enlight_Controller_Request_Request|\PHPUnit_Framework_MockObject_MockObject */
     private $request;
 
-    /** @var TransactionFactory|\PHPUnit_Framework_MockObject_MockObject */
-    private $transactionFactory;
+    /** @var TransactionManager|\PHPUnit_Framework_MockObject_MockObject */
+    private $transactionManager;
 
     /** @var \sOrder|\PHPUnit_Framework_MockObject_MockObject */
     private $shopwareOrder;
@@ -111,7 +111,7 @@ class PaymentHandlerTest extends TestCase
         $this->orderSummary       = $this->createMock(OrderSummary::class);
         $this->transactionService = $this->createMock(TransactionService::class);
         $this->redirect           = $this->createMock(Redirect::class);
-        $this->transactionFactory = $this->createMock(TransactionFactory::class);
+        $this->transactionManager = $this->createMock(TransactionManager::class);
         $this->request            = $this->createMock(\Enlight_Controller_Request_Request::class);
         $this->shopwareOrder      = $this->createMock(\sOrder::class);
 
@@ -120,7 +120,7 @@ class PaymentHandlerTest extends TestCase
             $this->router,
             $this->logger,
             $this->config,
-            $this->transactionFactory
+            $this->transactionManager
         );
     }
 

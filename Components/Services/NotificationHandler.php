@@ -54,8 +54,7 @@ class NotificationHandler extends Handler
         if ($notification instanceof SuccessResponse) {
             $initialTransaction = $this->handleSuccess($shopwareOrder, $notification, $backendService);
 
-            $transaction = $this->transactionFactory->createNotify($initialTransaction, $notification);
-            $this->updateTransactionState($transaction, $backendService->isFinal($notification->getTransactionType()));
+            $this->transactionManager->createNotify($initialTransaction, $notification, $backendService);
 
             return true;
         }
@@ -88,7 +87,7 @@ class NotificationHandler extends Handler
         $this->logger->info('Incoming success notification', $notification->getData());
 
         $paymentStatusId    = $this->getPaymentStatusId($backendService, $notification);
-        $initialTransaction = $this->transactionFactory->getInitialTransaction($notification);
+        $initialTransaction = $this->transactionManager->getInitialTransaction($notification);
         if ($paymentStatusId === Status::PAYMENT_STATE_OPEN) {
             return $initialTransaction;
         }
@@ -166,26 +165,5 @@ class NotificationHandler extends Handler
             default:
                 return Status::PAYMENT_STATE_OPEN;
         }
-    }
-
-    /**
-     * @param Transaction $transaction
-     * @param bool        $isFinal
-     */
-    private function updateTransactionState(Transaction $transaction, $isFinal)
-    {
-        $parentTransaction = $this->em
-            ->getRepository(Transaction::class)
-            ->findOneBy([
-                'transactionId' => $transaction->getParentTransactionId(),
-                'type'          => Transaction::TYPE_NOTIFY,
-            ]);
-
-        if (! $parentTransaction || ! $isFinal) {
-            return;
-        }
-
-        $transaction->setState(Transaction::STATE_CLOSED);
-        $this->em->flush();
     }
 }

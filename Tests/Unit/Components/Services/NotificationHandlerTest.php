@@ -44,7 +44,7 @@ use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardShopwareElasticEngine\Components\Services\NotificationHandler;
-use WirecardShopwareElasticEngine\Components\Services\TransactionFactory;
+use WirecardShopwareElasticEngine\Components\Services\TransactionManager;
 use WirecardShopwareElasticEngine\Models\Transaction as TransactionModel;
 
 class NotificationHandlerTest extends TestCase
@@ -64,8 +64,8 @@ class NotificationHandlerTest extends TestCase
     /** @var BackendService|\PHPUnit_Framework_MockObject_MockObject */
     private $backendService;
 
-    /** @var TransactionFactory|\PHPUnit_Framework_MockObject_MockObject */
-    private $transactionFactory;
+    /** @var TransactionManager|\PHPUnit_Framework_MockObject_MockObject */
+    private $transactionManager;
 
     /** @var \sOrder|\PHPUnit_Framework_MockObject_MockObject */
     private $shopwareOrder;
@@ -97,7 +97,7 @@ class NotificationHandlerTest extends TestCase
         $this->logger = $this->createMock(LoggerInterface::class);
 
         $this->backendService     = $this->createMock(BackendService::class);
-        $this->transactionFactory = $this->createMock(TransactionFactory::class);
+        $this->transactionManager = $this->createMock(TransactionManager::class);
         $this->shopwareOrder      = $this->createMock(\sOrder::class);
 
         $this->handler = new NotificationHandler(
@@ -105,7 +105,7 @@ class NotificationHandlerTest extends TestCase
             $this->router,
             $this->logger,
             $this->config,
-            $this->transactionFactory
+            $this->transactionManager
         );
     }
 
@@ -139,7 +139,7 @@ class NotificationHandlerTest extends TestCase
         $this->backendService->method('process')->willReturn($response);
 
         $transactionEntity = $this->createMock(TransactionModel::class);
-        $this->transactionFactory->method('create')->willReturn($transactionEntity);
+        $this->transactionManager->method('create')->willReturn($transactionEntity);
 
         $success = $this->handler->execute(
             $this->shopwareOrder,

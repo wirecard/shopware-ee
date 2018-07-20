@@ -32,6 +32,7 @@
 namespace WirecardShopwareElasticEngine\Components\Services;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\Response;
@@ -39,7 +40,7 @@ use Wirecard\PaymentSdk\Response\SuccessResponse;
 use WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
-class TransactionFactory
+class TransactionManager
 {
     /**
      * @var EntityManagerInterface
@@ -116,19 +117,79 @@ class TransactionFactory
     }
 
     /**
-     * @param Transaction $initialTransaction
-     * @param Response    $response
+     * @param Transaction    $initialTransaction
+     * @param Response       $response
+     * @param BackendService $backendService
      *
-     * @return Transaction|null
+     * @return Transaction
      */
-    public function createNotify(Transaction $initialTransaction, Response $response)
+    public function createNotify(Transaction $initialTransaction, Response $response, BackendService $backendService)
     {
         $transaction = new Transaction(Transaction::TYPE_NOTIFY);
         $transaction->setPaymentUniqueId($initialTransaction->getPaymentUniqueId());
         $transaction->setOrderNumber($initialTransaction->getOrderNumber());
         $transaction->setResponse($response);
+        $transaction = $this->persist($transaction);
 
-        return $this->persist($transaction);
+        $parentTransaction = $this->em->getRepository(Transaction::class)->findOneBy([
+            'transactionId' => $transaction->getParentTransactionId(),
+            'type'          => Transaction::TYPE_NOTIFY,
+        ]);
+
+        if ($parentTransaction && $backendService->isFinal($response->getTransactionType())) {
+            $transaction->setState(Transaction::STATE_CLOSED);
+            $this->em->flush();
+        }
+
+        return $transaction;
+    }
+
+    /**
+     * Create a backend transaction and set the state of the parent transaction to "closed" if the requested-amount
+     * has been reached.
+     *
+     * @param SuccessResponse $response
+     *
+     * @return Transaction|null
+     * @throws InitialTransactionNotFoundException
+     */
+    public function createBackend(SuccessResponse $response)
+    {
+        $initialTransaction = $this->getInitialTransaction($response);
+
+        $transaction = new Transaction(Transaction::TYPE_BACKEND);
+        $transaction->setPaymentUniqueId($initialTransaction->getPaymentUniqueId());
+        $transaction->setOrderNumber($initialTransaction->getOrderNumber());
+        $transaction->setResponse($response);
+
+        $transaction = $this->persist($transaction);
+
+        $repo              = $this->em->getRepository(Transaction::class);
+        $parentTransaction = $repo->findOneBy([
+            'transactionId' => $transaction->getParentTransactionId(),
+            'type'          => Transaction::TYPE_NOTIFY,
+        ]);
+
+        if (! $parentTransaction) {
+            return $transaction;
+        }
+
+        $childTransactions = $repo->findBy([
+            'parentTransactionId' => $transaction->getParentTransactionId(),
+            'transactionType'     => $transaction->getTransactionType(),
+        ]);
+
+        $totalAmount = (float)$parentTransaction->getAmount();
+
+        foreach ($childTransactions as $childTransaction) {
+            $totalAmount -= (float)$childTransaction->getAmount();
+        }
+
+        if ($totalAmount <= 0) {
+            $parentTransaction->setState(Transaction::STATE_CLOSED);
+            $this->em->flush();
+        }
+        return $transaction;
     }
 
     private function persist(Transaction $transaction)
