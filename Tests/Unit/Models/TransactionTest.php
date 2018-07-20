@@ -31,9 +31,14 @@
 
 namespace WirecardShopwareElasticEngine\Tests\Unit\Models;
 
+use Shopware\Models\Order\Status;
 use Wirecard\PaymentSdk\Entity\Amount;
+use Wirecard\PaymentSdk\Exception\MalformedResponseException;
+use Wirecard\PaymentSdk\Response\FormInteractionResponse;
+use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
+use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Models\Transaction;
 use WirecardShopwareElasticEngine\Tests\Unit\ModelTestCase;
@@ -59,6 +64,8 @@ class TransactionTest extends ModelTestCase
     {
         $this->assertTrue($this->model->isInitial());
         $this->assertGetterAndSetter('orderNumber', 1337);
+        $this->assertGetterAndSetter('basketSignature', 'unique-signature');
+        $this->assertGetterAndSetter('paymentStatus', Status::PAYMENT_STATE_COMPLETELY_PAID);
         $this->assertGetterAndSetter('state', Transaction::STATE_CLOSED, Transaction::STATE_OPEN);
         $this->assertGetterAndSetter('createdAt', new \DateTime(), $this->model->getCreatedAt());
 
@@ -94,6 +101,8 @@ class TransactionTest extends ModelTestCase
         $this->assertNull($transaction->getProviderTransactionReference());
         $this->assertNull($transaction->getRequestId());
         $this->assertNull($transaction->getAmount());
+        $this->assertNull($transaction->getBasketSignature());
+        $this->assertNull($transaction->getPaymentStatus());
         $this->assertNull($transaction->getCurrency());
         $this->assertEquals(Transaction::TYPE_INITIAL_RESPONSE, $transaction->getType());
         $this->assertEquals(Transaction::STATE_OPEN, $transaction->getState());
@@ -118,10 +127,14 @@ class TransactionTest extends ModelTestCase
         $transaction->setResponse($response);
         $this->assertEquals([], $transaction->getResponse());
 
+        $this->assertNull($transaction->getPaymentUniqueId());
+        $transaction->setPaymentUniqueId('payunique-id');
+        $this->assertEquals('payunique-id', $transaction->getPaymentUniqueId());
+
         $this->assertEquals([
             'id'                           => null,
             'orderNumber'                  => null,
-            'paymentUniqueId'              => null,
+            'paymentUniqueId'              => 'payunique-id',
             'paymentMethod'                => null,
             'transactionType'              => 'trans-type',
             'transactionId'                => null,
@@ -191,6 +204,130 @@ class TransactionTest extends ModelTestCase
                 'request-id'     => 'req-id',
             ],
             'request'                      => null,
+        ], $transaction->toArray());
+    }
+
+    public function testWithInteractionResponse()
+    {
+        $transaction = new Transaction(Transaction::TYPE_RETURN);
+        $this->assertEquals(Transaction::TYPE_RETURN, $transaction->getType());
+        $this->assertEquals(Transaction::STATE_OPEN, $transaction->getState());
+        $this->assertFalse($transaction->isInitial());
+
+        $this->assertNull($transaction->getPaymentUniqueId());
+        $transaction->setPaymentUniqueId('payunique-id');
+        $this->assertEquals('payunique-id', $transaction->getPaymentUniqueId());
+
+        /** @var InteractionResponse|\PHPUnit_Framework_MockObject_MockObject $response */
+        $response = $this->createMock(InteractionResponse::class);
+        $response->expects($this->atLeastOnce())->method('getRequestId')->willReturn('req-id');
+        $response->expects($this->atLeastOnce())->method('getTransactionType')->willReturn('trans-type');
+        $response->expects($this->atLeastOnce())->method('getTransactionId')->willReturn('trans-id');
+        $response->expects($this->atLeastOnce())->method('getRequestedAmount')->willReturn(null);
+        $response->expects($this->never())->method('findElement')->willReturn('order-num');
+        $response->expects($this->atLeastOnce())->method('getData')->willReturn([]);
+        $transaction->setResponse($response);
+        $this->assertEquals([], $transaction->getResponse());
+
+        $this->assertEquals([
+            'id'                           => null,
+            'orderNumber'                  => null,
+            'paymentUniqueId'              => 'payunique-id',
+            'paymentMethod'                => null,
+            'transactionType'              => 'trans-type',
+            'transactionId'                => 'trans-id',
+            'parentTransactionId'          => null,
+            'providerTransactionId'        => null,
+            'providerTransactionReference' => null,
+            'requestId'                    => 'req-id',
+            'type'                         => Transaction::TYPE_RETURN,
+            'amount'                       => null,
+            'currency'                     => null,
+            'createdAt'                    => $transaction->getCreatedAt(),
+            'state'                        => Transaction::STATE_OPEN,
+            'response'                     => [],
+            'request'                      => null,
+        ], $transaction->toArray());
+    }
+
+
+    public function testWithFormInteractionResponse()
+    {
+        $transaction = new Transaction(Transaction::TYPE_RETURN);
+        $this->assertEquals(Transaction::TYPE_RETURN, $transaction->getType());
+        $this->assertEquals(Transaction::STATE_OPEN, $transaction->getState());
+        $this->assertFalse($transaction->isInitial());
+
+        /** @var FormInteractionResponse|\PHPUnit_Framework_MockObject_MockObject $response */
+        $response = $this->createMock(FormInteractionResponse::class);
+        $response->expects($this->atLeastOnce())->method('getRequestId')->willReturn('req-id');
+        $response->expects($this->atLeastOnce())->method('getTransactionType')->willReturn('trans-type');
+        $response->expects($this->atLeastOnce())->method('getTransactionId')->willReturn('trans-id');
+        $response->expects($this->atLeastOnce())->method('getRequestedAmount')->willReturn(null);
+        $response->expects($this->atLeastOnce())->method('findElement')
+                 ->willThrowException(new MalformedResponseException());
+        $response->expects($this->atLeastOnce())->method('getData')->willReturn([]);
+        $transaction->setResponse($response);
+        $this->assertEquals([], $transaction->getResponse());
+
+        $this->assertNull($transaction->getPaymentUniqueId());
+        $this->assertEquals([
+            'id'                           => null,
+            'orderNumber'                  => null,
+            'paymentUniqueId'              => null,
+            'paymentMethod'                => null,
+            'transactionType'              => 'trans-type',
+            'transactionId'                => 'trans-id',
+            'parentTransactionId'          => null,
+            'providerTransactionId'        => null,
+            'providerTransactionReference' => null,
+            'requestId'                    => 'req-id',
+            'type'                         => Transaction::TYPE_RETURN,
+            'amount'                       => null,
+            'currency'                     => null,
+            'createdAt'                    => $transaction->getCreatedAt(),
+            'state'                        => Transaction::STATE_OPEN,
+            'response'                     => [],
+            'request'                      => null,
+        ], $transaction->toArray());
+    }
+
+    public function testWithRequest()
+    {
+        $transaction = new Transaction(Transaction::TYPE_INITIAL_REQUEST);
+        $this->assertEquals(Transaction::TYPE_INITIAL_REQUEST, $transaction->getType());
+        $this->assertEquals(Transaction::STATE_OPEN, $transaction->getState());
+        $this->assertTrue($transaction->isInitial());
+
+        /** @var SuccessResponse|\PHPUnit_Framework_MockObject_MockObject $response */
+        $request = [
+            TransactionService::REQUEST_ID => 'req-id',
+            'transaction_type'             => Payment::TRANSACTION_TYPE_AUTHORIZATION,
+            'requested_amount'             => 10.12,
+            'requested_amount_currency'    => 'USD',
+            'payment_method'               => 'paymethod',
+        ];
+        $transaction->setRequest($request);
+        $this->assertEquals($request, $transaction->getRequest());
+
+        $this->assertEquals([
+            'id'                           => null,
+            'orderNumber'                  => null,
+            'paymentUniqueId'              => null,
+            'paymentMethod'                => 'paymethod',
+            'transactionType'              => Payment::TRANSACTION_TYPE_AUTHORIZATION,
+            'transactionId'                => null,
+            'parentTransactionId'          => null,
+            'providerTransactionId'        => null,
+            'providerTransactionReference' => null,
+            'requestId'                    => 'req-id',
+            'type'                         => Transaction::TYPE_INITIAL_REQUEST,
+            'amount'                       => 10.12,
+            'currency'                     => 'USD',
+            'createdAt'                    => $transaction->getCreatedAt(),
+            'state'                        => Transaction::STATE_OPEN,
+            'response'                     => null,
+            'request'                      => $request,
         ], $transaction->toArray());
     }
 }
