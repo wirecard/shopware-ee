@@ -57,11 +57,6 @@ class FrontendSubscriber implements SubscriberInterface
     private $paymentFactory;
 
     /**
-     * @var SessionHandler
-     */
-    private $sessionHandler;
-
-    /**
      * @param string                    $pluginDirectory
      * @param \Enlight_Template_Manager $templateManager
      * @param PaymentFactory            $paymentFactory

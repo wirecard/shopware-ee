@@ -70,18 +70,17 @@ class BackendOperationHandler extends Handler
             return new ErrorAction(ErrorAction::PROCESSING_FAILED, 'Transaction processing failed');
         }
 
+        $message = 'BackendOperationFailedUnknownResponse';
         if ($response instanceof FailureResponse) {
             $errors = [];
             foreach ($response->getStatusCollection() as $status) {
                 /** @var Status $status */
                 $errors[] = $status->getDescription();
             }
-
-            $this->logger->error('Backend operation failed with FailureResponse', $response->getData());
-            return new ErrorAction(ErrorAction::BACKEND_OPERATION_FAILED, join("\n", $errors));
+            $message = join("\n", $errors);
         }
 
         $this->logger->error('Backend operation failed', $response->getData());
-        return new ErrorAction(ErrorAction::BACKEND_OPERATION_FAILED, 'BackendOperationFailedUnknownResponse');
+        return new ErrorAction(ErrorAction::BACKEND_OPERATION_FAILED, $message);
     }
 }

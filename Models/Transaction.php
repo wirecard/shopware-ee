@@ -262,11 +262,17 @@ class Transaction extends ModelEntity
     }
 
     /**
+     * Return payment method. If null, fallback to first payment method in response data.
+     * (PaymentSDK only provides getPaymentMethod() in SuccessResponse class)
+     *
      * @return string
      */
     public function getPaymentMethod()
     {
-        return $this->paymentMethod;
+        if ($this->paymentMethod) {
+            return $this->paymentMethod;
+        }
+        return isset($this->response['payment-methods.0.name']) ? $this->response['payment-methods.0.name'] : null;
     }
 
     /**
@@ -328,6 +334,7 @@ class Transaction extends ModelEntity
             try {
                 $this->setPaymentUniqueId($response->findElement('order-number'));
             } catch (MalformedResponseException $e) {
+                // the response does not contain an 'order-number'
             }
         }
 

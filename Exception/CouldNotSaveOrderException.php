@@ -31,8 +31,6 @@
 
 namespace WirecardShopwareElasticEngine\Exception;
 
-use Throwable;
-
 class CouldNotSaveOrderException extends \Exception
 {
     public function __construct($transactionId, $paymentUniqueId, $paymentStatus)

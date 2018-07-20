@@ -74,7 +74,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * @throws ArrayKeyNotFoundException
      * @throws UnknownActionException
      * @throws UnknownPaymentException
-     * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
      */
     public function indexAction()
     {

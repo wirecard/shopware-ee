@@ -31,7 +31,6 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
-use Shopware\Models\Order\Order;
 use Shopware\Models\Shop\Shop;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Response\FailureResponse;
@@ -45,7 +44,6 @@ use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
-use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
 
 class PaymentHandler extends Handler
 {
@@ -59,7 +57,6 @@ class PaymentHandler extends Handler
      *
      * @return Action
      * @throws ArrayKeyNotFoundException
-     * @throws OrderNotFoundException
      */
     public function execute(
         OrderSummary $orderSummary,

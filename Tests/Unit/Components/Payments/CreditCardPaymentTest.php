@@ -32,8 +32,6 @@
 namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Payments;
 
 use Doctrine\ORM\EntityRepository;
-use Shopware\Models\Order\Repository;
-use Shopware\Models\Shop\Currency;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;

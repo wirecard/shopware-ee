@@ -111,7 +111,7 @@ interface PaymentInterface
     /**
      * Returns payment specific settings for additional payment form fields
      *
-     * @return Array|null
+     * @return array|null
      */
     public function getAdditionalFormFields();
 

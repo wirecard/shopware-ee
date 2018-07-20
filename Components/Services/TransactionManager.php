@@ -209,7 +209,7 @@ class TransactionManager
     public function getInitialTransaction(SuccessResponse $response)
     {
         try {
-            // try to get paymentUniqueId from response
+            // try to get paymentUniqueId from response field 'order-number'
             $paymentUniqueId = $response->findElement('order-number');
             if ($paymentUniqueId) {
                 $transaction = $this->em->getRepository(Transaction::class)
@@ -219,6 +219,7 @@ class TransactionManager
                 }
             }
         } catch (MalformedResponseException $e) {
+            // the response does not contain an 'order-number', try to find the initial transaction recursively
         }
         $transaction = $this->findInitialTransaction($response->getParentTransactionId(), $response->getRequestId());
         if (! $transaction) {
@@ -231,7 +232,7 @@ class TransactionManager
      * @param string|null $parentTransactionId
      * @param string|null $requestId
      *
-     * @return null|object|Transaction
+     * @return Transaction|null
      */
     private function findInitialTransaction($parentTransactionId, $requestId)
     {
@@ -239,18 +240,22 @@ class TransactionManager
         if ($parentTransactionId) {
             $transaction = $repo->findOneBy(['transactionId' => $parentTransactionId]);
             if ($transaction) {
-                if (! $transaction->getParentTransactionId() && $transaction->isInitial()) {
-                    return $transaction;
-                }
-                return $this->findInitialTransaction(
-                    $transaction->getParentTransactionId(),
-                    $transaction->getRequestId()
-                );
+                return $this->returnInitialTransaction($transaction);
             }
         }
         if (! $requestId || ! ($transaction = $repo->findOneBy(['requestId' => $requestId]))) {
             return null;
         }
+        return $this->returnInitialTransaction($transaction);
+    }
+
+    /**
+     * @param Transaction $transaction
+     *
+     * @return Transaction|null
+     */
+    private function returnInitialTransaction(Transaction $transaction)
+    {
         if (! $transaction->getParentTransactionId() && $transaction->isInitial()) {
             return $transaction;
         }

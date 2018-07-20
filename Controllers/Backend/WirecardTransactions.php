@@ -138,10 +138,9 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
 
         foreach ($transactions as $transaction) {
             /** @var Transaction $transaction */
-            $response           = $transaction->getResponse();
             $paymentTransaction = $payment->getBackendTransaction(
                 $transaction->getTransactionType(),
-                $response['payment-methods.0.name']
+                $transaction->getPaymentMethod()
             );
 
             $paymentTransaction->setParentTransactionId($transaction->getTransactionId());
