@@ -132,14 +132,18 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
             $shop->getCurrency()->getCurrency()
         );
         $backendService     = new BackendService($config, $this->getLogger());
-        $paymentTransaction = $payment->getTransaction();
-
         $result = [
             'transactions' => [],
         ];
 
         foreach ($transactions as $transaction) {
             /** @var Transaction $transaction */
+            $response = $transaction->getResponse();
+            $paymentTransaction = $payment->getBackendTransaction(
+                $transaction->getTransactionType(),
+                $response['payment-methods.0.name']
+            );
+
             $paymentTransaction->setParentTransactionId($transaction->getTransactionId());
 
             $result['transactions'][] = array_merge($transaction->toArray(), [
@@ -177,7 +181,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         );
         $backendService = new BackendService($config, $this->getLogger());
 
-        $transaction = $payment->getTransaction();
+        $transaction = $payment->getBackendTransaction($operation, null);
         $transaction->setParentTransactionId($transactionId);
 
         if ($amount) {

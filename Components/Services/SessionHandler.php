@@ -34,6 +34,7 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 class SessionHandler
 {
     const ORDER = 'WirecardElasticEngineOrder';
+    const PAYMENT_DATA = 'WirecardElasticEnginePaymentData';
 
     const ORDER_NUMBER = 'orderNumber';
     const BASKET_SIGNATURE = 'basketSignature';
@@ -87,5 +88,28 @@ class SessionHandler
     public function clearOrder()
     {
         $this->session->offsetSet(self::ORDER, []);
+    }
+
+    /**
+     * @param array $additionalData
+     */
+    public function storeAdditionalPaymentData(array $additionalData)
+    {
+        $this->session->offsetSet(self::PAYMENT_DATA, [
+            'additionalData' => $additionalData
+        ]);
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getAdditionalPaymentData()
+    {
+        if (! $this->session->offsetExists(self::PAYMENT_DATA)) {
+            return null;
+        }
+
+        $store = $this->session->offsetGet(self::PAYMENT_DATA);
+        return isset($store['additionalData']) ? $store['additionalData'] : null;
     }
 }

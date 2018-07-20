@@ -74,6 +74,11 @@ abstract class Payment implements PaymentInterface
     protected $router;
 
     /**
+     * @var array
+     */
+    protected $additionalData;
+
+    /**
      * @var \Enlight_Event_EventManager
      */
     protected $eventManager;
@@ -175,6 +180,30 @@ abstract class Payment implements PaymentInterface
         $config->setPluginInfo($plugin->getName(), $plugin->getVersion());
 
         return $config;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getBackendTransaction($operation, $paymentMethod)
+    {
+        return $this->getTransaction();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getAdditionalFormFields()
+    {
+        return null;
+    }
+
+    /**
+     * @param array $additionalData
+     */
+    public function setAdditionalPaymentData(array $additionalData)
+    {
+        $this->additionalData = $additionalData;
     }
 
     /**

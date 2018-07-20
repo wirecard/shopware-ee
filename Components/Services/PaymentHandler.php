@@ -35,12 +35,14 @@ use Shopware\Models\Order\Order;
 use Shopware\Models\Shop\Shop;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Response\FailureResponse;
+use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
+use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
@@ -98,6 +100,14 @@ class PaymentHandler extends Handler
             'summary'  => $orderSummary->toArray(),
             'response' => $response->getData(),
         ]);
+
+        if ($response instanceof FormInteractionResponse) {
+            return new ViewAction('payment_redirect.tpl', [
+                'method'       => $response->getMethod(),
+                'formFields'   => $response->getFormFields(),
+                'url'          => $response->getUrl(),
+            ]);
+        }
 
         switch (true) {
             case $response instanceof SuccessResponse:
