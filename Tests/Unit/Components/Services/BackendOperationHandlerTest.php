@@ -138,8 +138,9 @@ class BackendOperationHandlerTest extends TestCase
         $response->method('getTransactionId')->willReturn('foo-bar-id');
         $this->backendService->method('process')->willReturn($response);
 
-        $transactionEntity = $this->createMock(TransactionModel::class);
-        $this->transactionManager->method('create')->willReturn($transactionEntity);
+        $transactionEntity        = $this->createMock(TransactionModel::class);
+        $this->transactionManager->expects($this->atLeastOnce())->method('createBackend')
+                                 ->willReturn($transactionEntity);
 
         /** @var ViewAction $action */
         $action = $this->handler->execute(

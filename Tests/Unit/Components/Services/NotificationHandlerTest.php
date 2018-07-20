@@ -138,8 +138,12 @@ class NotificationHandlerTest extends TestCase
         $response->method('getTransactionId')->willReturn('foo-bar-id');
         $this->backendService->method('process')->willReturn($response);
 
-        $transactionEntity = $this->createMock(TransactionModel::class);
-        $this->transactionManager->method('create')->willReturn($transactionEntity);
+        $initialTransactionEntity = $this->createMock(TransactionModel::class);
+        $transactionEntity        = $this->createMock(TransactionModel::class);
+        $this->transactionManager->expects($this->atLeastOnce())->method('getInitialTransaction')
+                                 ->willReturn($initialTransactionEntity);
+        $this->transactionManager->expects($this->atLeastOnce())->method('createNotify')
+                                 ->willReturn($transactionEntity);
 
         $success = $this->handler->execute(
             $this->shopwareOrder,

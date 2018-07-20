@@ -32,6 +32,7 @@
 namespace WirecardShopwareElasticEngine\Tests\Unit\Subscriber;
 
 use PHPUnit\Framework\TestCase;
+use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
 use WirecardShopwareElasticEngine\Subscriber\FrontendSubscriber;
 
 class FrontendSubscriberTest extends TestCase
@@ -48,9 +49,11 @@ class FrontendSubscriberTest extends TestCase
     public function testOnPreDispatch()
     {
         /** @var \Enlight_Template_Manager|\PHPUnit_Framework_MockObject_MockObject $templateManager */
+        /** @var PaymentFactory|\PHPUnit_Framework_MockObject_MockObject $paymentFactory */
         $templateManager = $this->createMock(\Enlight_Template_Manager::class);
+        $paymentFactory  = $this->createMock(PaymentFactory::class);
 
-        $subscriber = new FrontendSubscriber('', $templateManager);
+        $subscriber = new FrontendSubscriber('', $templateManager, $paymentFactory);
 
         /** @var \Enlight_Controller_ActionEventArgs|\PHPUnit_Framework_MockObject_MockObject $args */
         $args = $this->createMock(\Enlight_Controller_ActionEventArgs::class);
@@ -60,18 +63,22 @@ class FrontendSubscriberTest extends TestCase
     public function testOnCollectLessFiles()
     {
         /** @var \Enlight_Template_Manager|\PHPUnit_Framework_MockObject_MockObject $templateManager */
+        /** @var PaymentFactory|\PHPUnit_Framework_MockObject_MockObject $paymentFactory */
         $templateManager = $this->createMock(\Enlight_Template_Manager::class);
+        $paymentFactory  = $this->createMock(PaymentFactory::class);
 
-        $subscriber = new FrontendSubscriber('', $templateManager);
+        $subscriber = new FrontendSubscriber('', $templateManager, $paymentFactory);
         $subscriber->onCollectLessFiles();
     }
 
     public function testOnPostDispatchCheckout()
     {
         /** @var \Enlight_Template_Manager|\PHPUnit_Framework_MockObject_MockObject $templateManager */
+        /** @var PaymentFactory|\PHPUnit_Framework_MockObject_MockObject $paymentFactory */
         $templateManager = $this->createMock(\Enlight_Template_Manager::class);
+        $paymentFactory  = $this->createMock(PaymentFactory::class);
 
-        $subscriber = new FrontendSubscriber('', $templateManager);
+        $subscriber = new FrontendSubscriber('', $templateManager, $paymentFactory);
 
         $view       = $this->createMock(\Enlight_View_Default::class);
         $request    = $this->createMock(\Enlight_Controller_Request_Request::class);

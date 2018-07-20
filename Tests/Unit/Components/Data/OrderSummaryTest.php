@@ -97,14 +97,14 @@ class OrderSummaryTest extends TestCase
         $amount->method('mappedProperties')->willReturn(['amount']);
 
         $order = new OrderSummary(
-            20000,
+            '1532083067-uniqueId',
             $payment,
             $user,
             $basket,
             $amount
         );
         $this->assertEquals([
-            'orderNumber' => 20000,
+            'paymentUniqueId' => '1532083067-uniqueId',
             'payment'     => [
                 'name'          => 'paymentName',
                 'paymentConfig' => ['paymentConfig'],

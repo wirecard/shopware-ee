@@ -73,7 +73,8 @@ class BasketMapperTest extends TestCase
                 ],
             ],
         ];
-        $mapper      = new BasketMapper($basketArray, 'EUR', $articles, $transaction);
+        $mapper      = new BasketMapper($basketArray, 'SIGNATURE', 'EUR', $articles, $transaction);
+        $this->assertEquals('SIGNATURE', $mapper->getSignature());
         $this->assertEquals($basketArray, $mapper->getShopwareBasket());
         $this->assertEquals(implode("\n", [
             'foo - 10 - 999.99999 - EUR - 1 - 15%',
@@ -129,7 +130,7 @@ class BasketMapperTest extends TestCase
             'sShippingcostsWithTax' => 10,
             'sShippingcostsTax'     => 2,
         ];
-        $mapper      = new BasketMapper($basketArray, 'USD', $articles, $transaction);
+        $mapper      = new BasketMapper($basketArray, 'SIGNATURE', 'USD', $articles, $transaction);
         $this->assertEquals($basketArray, $mapper->getShopwareBasket());
         $this->assertEquals(implode("\n", [
             'foo - 10 - 1000 - USD - 1 - 20%',
@@ -173,7 +174,7 @@ class BasketMapperTest extends TestCase
             'sShippingcostsNet'     => 5,
             'sShippingcostsTax'     => 2,
         ];
-        $mapper      = new BasketMapper($basketArray, 'USD', $articles, $transaction);
+        $mapper      = new BasketMapper($basketArray, 'SIGNATURE', 'USD', $articles, $transaction);
         $this->assertEquals($basketArray, $mapper->getShopwareBasket());
         $this->assertEquals(implode("\n", [
             'Shipping - shipping - 10 USD - 2',
@@ -216,7 +217,7 @@ class BasketMapperTest extends TestCase
                     'price'       => 1000,
                 ],
             ],
-        ], 'EUR', $articles, $transaction);
+        ], 'SIGNATURE', 'EUR', $articles, $transaction);
     }
 
     public function testBasketArticleOutOfStock()
@@ -243,7 +244,7 @@ class BasketMapperTest extends TestCase
                     'price'       => 1000,
                 ],
             ],
-        ], 'EUR', $articles, $transaction);
+        ], 'SIGNATURE', 'EUR', $articles, $transaction);
     }
 
     public function testInvalidBasketException()
@@ -254,7 +255,7 @@ class BasketMapperTest extends TestCase
         $transaction = $this->createMock(Transaction::class);
 
         $this->expectException(InvalidBasketException::class);
-        new BasketMapper([], 'EUR', $articles, $transaction);
+        new BasketMapper([], 'SIGNATURE', 'EUR', $articles, $transaction);
     }
 
     /**
