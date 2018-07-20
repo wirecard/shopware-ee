@@ -1,7 +1,7 @@
 // {block name="backend/wirecard_extend_order/view/backend_operation_window"}
 Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
     extend: 'Enlight.app.Window',
-    alias: 'widget.wirecard-extend-order-backend-operation-window',
+    alias: 'widget.wirecardee-extend-order-backend-operation-window',
     height: 600,
     title: 'BackendOperationWindow',
     layout: 'anchor',
@@ -105,7 +105,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
 
         me.operationHistory = Ext.create('Ext.panel.Panel', {
             title: me.snippets.operationHistory,
-            alias: 'wirecard-backend-operation-history',
+            alias: 'wirecardee-backend-operation-history',
             bodyPadding: 10,
             flex: 1,
             paddingRight: 5,
@@ -197,7 +197,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.BackendOperationWindow', {
 
         return Ext.create('Ext.panel.Panel', {
             title: me.snippets.processOperation,
-            alias: 'wirecard-backend-process-operation',
+            alias: 'wirecardee-backend-process-operation',
             bodyPadding: 10,
             flex: 1,
             paddingRight: 5,
