@@ -40,6 +40,7 @@ class BackendSubscriberTest extends TestCase
     {
         $this->assertEquals([
             'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch',
+            'Enlight_Controller_Action_PostDispatchSecure_Backend_Index' => 'onLoadBackendIndex'
         ], BackendSubscriber::getSubscribedEvents());
     }
 

@@ -46,6 +46,7 @@ use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Services\BackendOperationHandler;
+use WirecardShopwareElasticEngine\Components\Services\SessionHandler;
 use WirecardShopwareElasticEngine\Components\Services\TransactionManager;
 use WirecardShopwareElasticEngine\Models\Transaction as TransactionModel;
 
@@ -68,6 +69,9 @@ class BackendOperationHandlerTest extends TestCase
 
     /** @var TransactionManager|\PHPUnit_Framework_MockObject_MockObject */
     private $transactionManager;
+
+    /** @var SessionHandler|\PHPUnit_Framework_MockObject_MockObject */
+    private $sessionHandler;
 
     /** @var BackendOperationHandler */
     private $handler;
@@ -94,13 +98,15 @@ class BackendOperationHandlerTest extends TestCase
 
         $this->backendService     = $this->createMock(BackendService::class);
         $this->transactionManager = $this->createMock(TransactionManager::class);
+        $this->sessionHandler = $this->createMock(SessionHandler::class);
 
         $this->handler = new BackendOperationHandler(
             $this->em,
             $this->router,
             $this->logger,
             $this->config,
-            $this->transactionManager
+            $this->transactionManager,
+            $this->sessionHandler
         );
     }
 
