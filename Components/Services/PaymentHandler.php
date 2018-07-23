@@ -156,6 +156,7 @@ class PaymentHandler extends Handler
 
         if ($paymentConfig->hasFraudPrevention()) {
             $transaction->setIpAddress($orderSummary->getUserMapper()->getClientIp());
+            $transaction->setConsumerId($orderSummary->getUserMapper()->getCustomerNumber());
             $transaction->setAccountHolder($orderSummary->getUserMapper()->getWirecardBillingAccountHolder());
             $transaction->setShipping($orderSummary->getUserMapper()->getWirecardShippingAccountHolder());
             $transaction->setLocale($orderSummary->getUserMapper()->getLocale());

@@ -37,6 +37,7 @@ use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 
 class UserMapper extends ArrayMapper
 {
+    const CUSTOMER_NUMBER = 'customernumber';
     const FIRST_NAME = 'firstname';
     const LAST_NAME = 'lastname';
     const EMAIL = 'email';
@@ -184,6 +185,14 @@ class UserMapper extends ArrayMapper
     public function getLastName()
     {
         return $this->get([self::ADDITIONAL, self::ADDITIONAL_USER, self::LAST_NAME]);
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCustomerNumber()
+    {
+        return $this->getOptional([self::ADDITIONAL, self::ADDITIONAL_USER, self::CUSTOMER_NUMBER]);
     }
 
     /**
@@ -368,6 +377,7 @@ class UserMapper extends ArrayMapper
     public function toArray()
     {
         return [
+            'customerNumber'            => $this->getCustomerNumber(),
             'firstName'                 => $this->getFirstName(),
             'lastName'                  => $this->getLastName(),
             'email'                     => $this->getEmail(),
