@@ -2,6 +2,22 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/config.xsd">
     <elements>
+        <!-- Gerneral -->
+        <element type="button" scope="shop">
+            <name>wirecardElasticEngineGeneralChat</name>
+            <label lang="de">LiveChat mit Support</label>
+            <label lang="en">LiveChat with Support</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    Ext.util.CSS.createStyleSheet('#lz_overlay_wm {display: inherit !important;}');
+}
+                    ]]>
+                </handler>
+            </options>
+        </element>
+        <!-- Gerneral End -->
         <!-- Credit Card -->
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardServer</name>

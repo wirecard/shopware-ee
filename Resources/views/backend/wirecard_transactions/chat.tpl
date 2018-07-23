@@ -1,3 +1,10 @@
+{block name="backend/base/header/css"}
+    {$smarty.block.parent}
+    <style type="text/css">
+        #lz_overlay_wm { display: none !important; }
+    </style>
+{/block}
+
 {block name="backend/base/header/javascript"}
     {$smarty.block.parent}
     <!-- livezilla.net PLACE SOMEWHERE IN BODY -->
