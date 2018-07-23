@@ -99,6 +99,11 @@ class PaymentHandler extends Handler
         ]);
 
         if ($response instanceof FormInteractionResponse) {
+            $this->transactionManager->createInitial(
+                $orderSummary->getPaymentUniqueId(),
+                $orderSummary->getBasketMapper()->getSignature(),
+                $response
+            );
             return new ViewAction('payment_redirect.tpl', [
                 'method'     => $response->getMethod(),
                 'formFields' => $response->getFormFields(),
@@ -106,27 +111,24 @@ class PaymentHandler extends Handler
             ]);
         }
 
-        switch (true) {
-            case $response instanceof SuccessResponse:
-            case $response instanceof InteractionResponse:
-                $this->transactionManager->createInitial(
-                    $orderSummary->getPaymentUniqueId(),
-                    $orderSummary->getBasketMapper()->getSignature(),
-                    $response
-                );
+        if ($response instanceof SuccessResponse
+            || $response instanceof InteractionResponse) {
+            $this->transactionManager->createInitial(
+                $orderSummary->getPaymentUniqueId(),
+                $orderSummary->getBasketMapper()->getSignature(),
+                $response
+            );
 
-                return new RedirectAction($response->getRedirectUrl());
-
-            case $response instanceof FailureResponse:
-                $this->logger->error('Failure response', $response->getData());
-
-                return new ErrorAction(ErrorAction::FAILURE_RESPONSE, 'Failure response');
-
-            default:
-                $this->logger->error('Processing failed', $response->getData());
-
-                return new ErrorAction(ErrorAction::PROCESSING_FAILED, 'Payment processing failed');
+            return new RedirectAction($response->getRedirectUrl());
         }
+
+        if ($response instanceof FailureResponse) {
+            $this->logger->error('Failure response', $response->getData());
+
+            return new ErrorAction(ErrorAction::FAILURE_RESPONSE, 'Failure response');
+        }
+
+        return new ErrorAction(ErrorAction::PROCESSING_FAILED, 'Payment processing failed');
     }
 
     /**
