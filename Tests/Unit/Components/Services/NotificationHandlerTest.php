@@ -44,6 +44,7 @@ use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardShopwareElasticEngine\Components\Services\NotificationHandler;
+use WirecardShopwareElasticEngine\Components\Services\SessionHandler;
 use WirecardShopwareElasticEngine\Components\Services\TransactionManager;
 use WirecardShopwareElasticEngine\Models\Transaction as TransactionModel;
 
@@ -66,6 +67,9 @@ class NotificationHandlerTest extends TestCase
 
     /** @var TransactionManager|\PHPUnit_Framework_MockObject_MockObject */
     private $transactionManager;
+
+    /** @var SessionHandler|\PHPUnit_Framework_MockObject_MockObject */
+    private $sessionHandler;
 
     /** @var \sOrder|\PHPUnit_Framework_MockObject_MockObject */
     private $shopwareOrder;
@@ -99,13 +103,15 @@ class NotificationHandlerTest extends TestCase
         $this->backendService     = $this->createMock(BackendService::class);
         $this->transactionManager = $this->createMock(TransactionManager::class);
         $this->shopwareOrder      = $this->createMock(\sOrder::class);
+        $this->sessionHandler     = $this->createMock(SessionHandler::class);
 
         $this->handler = new NotificationHandler(
             $this->em,
             $this->router,
             $this->logger,
             $this->config,
-            $this->transactionManager
+            $this->transactionManager,
+            $this->sessionHandler
         );
     }
 
