@@ -143,7 +143,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * Generate a sortable paymentUniqueId (used as internal order number sent to wirecard) that is stored with each
      * transaction and the shopware order as `temporaryId` (paymentUniqueId). The actual order number will be generated
      * in the returnAction.
-     * Format: "[timestamp]-[uniqueId]"
+     * Format: "[timestamp][uniqueId]", length: timestamp=10, uniqueId=5 (important for sepa mandate id)
      *
      * @return string
      * @throws Exception
@@ -152,7 +152,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     {
         $repo = $this->getModelManager()->getRepository(Transaction::class);
         do {
-            $id = time() . '-' . uniqid();
+            $id = time() . substr(uniqid(), 0, 5);
         } while ($repo->findOneBy(['paymentUniqueId' => $id]));
         return $id;
     }

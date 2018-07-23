@@ -208,14 +208,23 @@ class SepaPayment extends Payment
             $transaction->setBic($this->additionalData['sepaBic']);
         }
 
-        $mandate = new Mandate($this->generateMandate($orderSummary));
+        $mandate = new Mandate($this->generateMandateId($orderSummary));
         $transaction->setMandate($mandate);
     }
 
-    private function generateMandate(OrderSummary $orderSummary)
+    /**
+     * Generate sepa mandate id: Format "[creditorId]-[orderNumber]-[timestamp]"
+     * [timestamp] is already part of the paymentUniqueId (first 10 characters). The remaining 5 characters of
+     * paymentUniqueId can be used as [orderNumber], which has a max length of 5 anyway.
+     *
+     * @param OrderSummary $orderSummary
+     *
+     * @return string
+     */
+    private function generateMandateId(OrderSummary $orderSummary)
     {
         return $this->getPluginConfig('SepaCreditorId') . '-' .
-               $orderSummary->getPaymentUniqueId() . '-' .
-               time();
+               substr($orderSummary->getPaymentUniqueId(), 10, 5) . '-' .
+               substr($orderSummary->getPaymentUniqueId(), 0, 10);
     }
 }
