@@ -115,8 +115,8 @@ class CreditCardPaymentTest extends TestCase
         $this->assertEquals('dbc5a498-9a66-43b9-bf1d-a618dd399684', $config->getTransactionSecret());
         $this->assertEquals('pay', $config->getTransactionOperation());
         $this->assertEquals('dbc5a498-9a66-43b9-bf1d-a618dd399684', $config->getThreeDSecret());
-        $this->assertEquals(300, $config->getThreeDSslMaxLimit());
-        $this->assertEmpty($config->getThreeDSslMaxLimitCurrency());
+        $this->assertEquals(300, $config->getSslMaxLimit());
+        $this->assertEmpty($config->getSslMaxLimitCurrency());
         $this->assertEquals(100, $config->getThreeDMinLimit());
         $this->assertEmpty($config->getThreeDMinLimitCurrency());
         $this->assertEquals('508b8896-b37d-4614-845c-26bf8bf2c948', $config->getThreeDMAID());

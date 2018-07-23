@@ -56,12 +56,12 @@ class CreditCardPaymentConfig extends PaymentConfig
     /**
      * @var float
      */
-    protected $threeDSslMaxLimit;
+    protected $sslMaxLimit;
 
     /**
      * @var string
      */
-    protected $threeDSslMaxLimitCurrency;
+    protected $sslMaxLimitCurrency;
 
     /**
      * @return string
@@ -130,33 +130,33 @@ class CreditCardPaymentConfig extends PaymentConfig
     /**
      * @return string|float
      */
-    public function getThreeDSslMaxLimit()
+    public function getSslMaxLimit()
     {
-        return $this->threeDSslMaxLimit;
+        return $this->sslMaxLimit;
     }
 
     /**
-     * @param string|float $threeDSslMaxLimit
+     * @param string|float $sslMaxLimit
      */
-    public function setThreeDSslMaxLimit($threeDSslMaxLimit)
+    public function setSslMaxLimit($sslMaxLimit)
     {
-        $this->threeDSslMaxLimit = $threeDSslMaxLimit;
+        $this->sslMaxLimit = $sslMaxLimit;
     }
 
     /**
      * @return string
      */
-    public function getThreeDSslMaxLimitCurrency()
+    public function getSslMaxLimitCurrency()
     {
-        return $this->threeDSslMaxLimitCurrency;
+        return $this->sslMaxLimitCurrency;
     }
 
     /**
-     * @param string $threeDSslMaxLimitCurrency
+     * @param string $sslMaxLimitCurrency
      */
-    public function setThreeDSslMaxLimitCurrency($threeDSslMaxLimitCurrency)
+    public function setSslMaxLimitCurrency($sslMaxLimitCurrency)
     {
-        $this->threeDSslMaxLimitCurrency = $threeDSslMaxLimitCurrency;
+        $this->sslMaxLimitCurrency = $sslMaxLimitCurrency;
     }
 
     /**
@@ -167,11 +167,11 @@ class CreditCardPaymentConfig extends PaymentConfig
         return array_merge(
             parent::toArray(),
             [
-                'threeDMAID'                => $this->getThreeDMAID(),
-                'threeDMinLimit'            => $this->getThreeDMinLimit(),
-                'threeDMinLimitCurrency'    => $this->getThreeDMinLimitCurrency(),
-                'threeDSslMaxLimit'         => $this->getThreeDSslMaxLimit(),
-                'threeDSslMaxLimitCurrency' => $this->getThreeDSslMaxLimitCurrency(),
+                'threeDMAID'             => $this->getThreeDMAID(),
+                'threeDMinLimit'         => $this->getThreeDMinLimit(),
+                'threeDMinLimitCurrency' => $this->getThreeDMinLimitCurrency(),
+                'sslMaxLimit'            => $this->getSslMaxLimit(),
+                'sslMaxLimitCurrency'    => $this->getSslMaxLimitCurrency(),
             ]
         );
     }

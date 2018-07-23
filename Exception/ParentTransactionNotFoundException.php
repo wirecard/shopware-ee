@@ -35,7 +35,7 @@ class ParentTransactionNotFoundException extends \Exception
 {
     public function __construct($parentTransactionId, $transactionID)
     {
-        parent::__construct("Parent (ID '${parentTransactionId}') for transaction (ID '{$transactionID}') " .
+        parent::__construct("Parent (ID '$parentTransactionId') for transaction (ID '$transactionID') " .
                             "not found");
     }
 }

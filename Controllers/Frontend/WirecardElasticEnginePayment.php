@@ -181,7 +181,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
                     $this->container->getParameterBag(),
                     $this->getCurrencyShortName()
-                )),
+                ), $this->getLogger()),
                 $request
             );
 

@@ -56,7 +56,7 @@ class CreditCardPaymentTest extends PaymentTestCase
         $this->config->method('getByNamespace')->willReturnMap([
             [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineCreditCardMerchantId', null, 'CCMAID'],
             [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineCreditCardSecret', null, 'CCSecret'],
-            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineCreditCardThreeDSslMaxLimit', null, '300'],
+            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineCreditCardSslMaxLimit', null, '300'],
             [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineCreditCardThreeDMinLimit', null, '100'],
         ]);
 

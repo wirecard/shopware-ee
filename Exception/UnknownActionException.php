@@ -35,6 +35,6 @@ class UnknownActionException extends BasketException
 {
     public function __construct($actionName)
     {
-        parent::__construct("Action '${actionName}' not found");
+        parent::__construct("Action '$actionName' not found");
     }
 }

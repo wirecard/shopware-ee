@@ -126,7 +126,7 @@ function (button) {
             </store>
         </element>
         <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCardThreeDSslMaxLimit</name>
+            <name>wirecardElasticEngineCreditCardSslMaxLimit</name>
             <label lang="de">[Credit Card] 3DS-Pflicht Betrag</label>
             <label lang="en">[Credit Card] 3DS only amount</label>
             <value>300</value>
@@ -134,7 +134,7 @@ function (button) {
             <description lang="en">This amount forces usage of 3DS</description>
         </element>
         <element type="text" scope="shop">
-            <name>wirecardElasticEngineCreditCardThreeDSslMaxLimitCurrency</name>
+            <name>wirecardElasticEngineCreditCardSslMaxLimitCurrency</name>
             <label lang="de">[Credit Card] 3DS-Pflicht Betrag Währung</label>
             <label lang="en">[Credit Card] 3DS only amount currency</label>
             <value></value>
