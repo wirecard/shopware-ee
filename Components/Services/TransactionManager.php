@@ -38,6 +38,7 @@ use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
+use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
@@ -57,17 +58,16 @@ class TransactionManager
     }
 
     /**
-     * @param string   $paymentUniqueId
-     * @param Response $response
-     * @param string   $basketSignature
+     * @param OrderSummary $orderSummary
+     * @param Response     $response
      *
      * @return Transaction|null
      */
-    public function createInitial($paymentUniqueId, $basketSignature, Response $response)
+    public function createInitial(OrderSummary $orderSummary, Response $response)
     {
         $transaction = new Transaction(Transaction::TYPE_INITIAL_RESPONSE);
-        $transaction->setPaymentUniqueId($paymentUniqueId);
-        $transaction->setBasketSignature($basketSignature);
+        $transaction->setPaymentUniqueId($orderSummary->getPaymentUniqueId());
+        $transaction->setBasketSignature($orderSummary->getBasketMapper()->getSignature());
         $transaction->setResponse($response);
 
         return $this->persist($transaction);

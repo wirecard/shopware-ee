@@ -101,35 +101,21 @@ class PaymentHandler extends Handler
         ]);
 
         if ($response instanceof FormInteractionResponse) {
-            $this->transactionManager->createInitial(
-                $orderSummary->getPaymentUniqueId(),
-                $orderSummary->getBasketMapper()->getSignature(),
-                $response
-            );
+            $this->transactionManager->createInitial($orderSummary, $response);
             return new ViewAction('payment_redirect.tpl', [
                 'method'     => $response->getMethod(),
                 'formFields' => $response->getFormFields(),
                 'url'        => $response->getUrl(),
             ]);
         }
-
-        if ($response instanceof SuccessResponse
-            || $response instanceof InteractionResponse) {
-            $this->transactionManager->createInitial(
-                $orderSummary->getPaymentUniqueId(),
-                $orderSummary->getBasketMapper()->getSignature(),
-                $response
-            );
-
+        if ($response instanceof SuccessResponse || $response instanceof InteractionResponse) {
+            $this->transactionManager->createInitial($orderSummary, $response);
             return new RedirectAction($response->getRedirectUrl());
         }
-
         if ($response instanceof FailureResponse) {
             $this->logger->error('Failure response', $response->getData());
-
             return new ErrorAction(ErrorAction::FAILURE_RESPONSE, 'Failure response');
         }
-
         return new ErrorAction(ErrorAction::PROCESSING_FAILED, 'Payment processing failed');
     }
 
@@ -185,6 +171,6 @@ class PaymentHandler extends Handler
     protected function getDescriptor($orderNumber)
     {
         $shopName = substr($this->shopwareConfig->get('shopName'), 0, 9);
-        return "${shopName} ${orderNumber}";
+        return substr("${shopName} ${orderNumber}", 0, 20);
     }
 }
