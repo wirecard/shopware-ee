@@ -16,7 +16,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.GeneralInformationWindow', {
         GeneralInformation: '{"{s name="Content"}{/s}"|escape|replace:"\n":"<br>"}'
     },
 
-    initComponent: function() {
+    initComponent: function () {
         var me = this;
 
         me.items = me.createItems();
@@ -24,7 +24,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.GeneralInformationWindow', {
         me.callParent(arguments);
     },
 
-    createItems: function() {
+    createItems: function () {
         var me = this;
 
         return [{
@@ -34,11 +34,11 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.GeneralInformationWindow', {
         }];
     },
 
-    createGeneralInformationTemplate: function() {
+    createGeneralInformationTemplate: function () {
         return Ext.create('Ext.XTemplate',
-                          '{literal}<tpl for=".">',
-                          '<p>{GeneralInformation}</p>',
-                          '</tpl>{/literal}'
+            '{literal}<tpl for=".">',
+            '<p>{GeneralInformation}</p>',
+            '</tpl>{/literal}'
         );
     }
 });

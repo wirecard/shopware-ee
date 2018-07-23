@@ -117,10 +117,15 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         }
 
         $action = $handler->execute(
-            new OrderSummary($this->generatePaymentUniqueId(), $payment, $userMapper, $basketMapper, $amount,
+            new OrderSummary(
+                $this->generatePaymentUniqueId(),
+                $payment,
+                $userMapper,
+                $basketMapper,
+                $amount,
                 $this->get('wirecard_elastic_engine.session_handler')
-                     ->getDeviceFingerprintId($payment->getPaymentConfig()
-                                                         ->getTransactionMAID())),
+                     ->getDeviceFingerprintId($payment->getPaymentConfig()->getTransactionMAID())
+            ),
             new TransactionService(
                 $payment->getTransactionConfig(
                     $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),

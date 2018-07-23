@@ -76,7 +76,7 @@ class FrontendSubscriber implements SubscriberInterface
         return [
             'Enlight_Controller_Action_PreDispatch'                          => 'onPreDispatch',
             'Theme_Compiler_Collect_Plugin_Less'                             => 'onCollectLessFiles',
-            'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchCheckout'
+            'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchCheckout',
         ];
     }
 
@@ -104,7 +104,7 @@ class FrontendSubscriber implements SubscriberInterface
 
         $params = $request->getParams();
 
-        if ($params['wirecardPayment'] && !empty($params['wirecardPayment'])) {
+        if ($params['wirecardPayment'] && ! empty($params['wirecardPayment'])) {
             $sessionHandler = $controller->get('wirecard_elastic_engine.session_handler');
             $sessionHandler->storePaymentData($params['wirecardPayment']);
         }
@@ -161,6 +161,7 @@ class FrontendSubscriber implements SubscriberInterface
 
     /**
      * @param \Enlight_View_Default $view
+     *
      * @throws \WirecardShopwareElasticEngine\Exception\UnknownPaymentException
      */
     private function assignAdditionalPaymentFields(\Enlight_View_Default $view)
@@ -179,6 +180,7 @@ class FrontendSubscriber implements SubscriberInterface
     /**
      * @param \Enlight_View_Default $view
      * @param SessionHandler        $sessionHandler
+     *
      * @throws \WirecardShopwareElasticEngine\Exception\UnknownPaymentException
      */
     private function assignDeviceFingerprint(\Enlight_View_Default $view, SessionHandler $sessionHandler)
@@ -191,7 +193,8 @@ class FrontendSubscriber implements SubscriberInterface
 
         if ($payment->getPaymentConfig()->hasFraudPrevention()) {
             $view->assign('includeDeviceFingerprintIFrame', true);
-            $view->assign('deviceFingerprintId',
+            $view->assign(
+                'deviceFingerprintId',
                 $sessionHandler->getDeviceFingerprintId($payment->getPaymentConfig()->getTransactionMAID())
             );
         }
