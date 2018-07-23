@@ -115,8 +115,8 @@ class CreditCardPayment extends Payment
         $creditCardConfig->addSslMaxLimit(
             $this->getLimit(
                 $selectedCurrency,
-                $paymentConfig->getThreeDSslMaxLimit(),
-                $paymentConfig->getThreeDSslMaxLimitCurrency()
+                $paymentConfig->getSslMaxLimit(),
+                $paymentConfig->getSslMaxLimitCurrency()
             )
         );
         $creditCardConfig->addThreeDMinLimit(
@@ -219,8 +219,8 @@ class CreditCardPayment extends Payment
 
         $paymentConfig->setThreeDMAID($this->getPluginConfig('CreditCardThreeDMAID'));
         $paymentConfig->setThreeDSecret($this->getPluginConfig('CreditCardThreeDSecret'));
-        $paymentConfig->setThreeDSslMaxLimit($this->getPluginConfig('CreditCardThreeDSslMaxLimit'));
-        $paymentConfig->setThreeDSslMaxLimitCurrency($this->getPluginConfig('CreditCardThreeDSslMaxLimitCurrency'));
+        $paymentConfig->setSslMaxLimit($this->getPluginConfig('CreditCardSslMaxLimit'));
+        $paymentConfig->setSslMaxLimitCurrency($this->getPluginConfig('CreditCardSslMaxLimitCurrency'));
         $paymentConfig->setThreeDMinLimit($this->getPluginConfig('CreditCardThreeDMinLimit'));
         $paymentConfig->setThreeDMinLimitCurrency($this->getPluginConfig('CreditCardThreeDMinLimitCurrency'));
 

@@ -32,8 +32,6 @@
 namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Payments;
 
 use Doctrine\ORM\EntityRepository;
-use Shopware\Models\Order\Repository;
-use Shopware\Models\Shop\Currency;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
@@ -58,7 +56,7 @@ class CreditCardPaymentTest extends PaymentTestCase
         $this->config->method('getByNamespace')->willReturnMap([
             [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineCreditCardMerchantId', null, 'CCMAID'],
             [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineCreditCardSecret', null, 'CCSecret'],
-            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineCreditCardThreeDSslMaxLimit', null, '300'],
+            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineCreditCardSslMaxLimit', null, '300'],
             [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineCreditCardThreeDMinLimit', null, '100'],
         ]);
 

@@ -55,41 +55,41 @@ class CreditCardPaymentConfigTest extends TestCase
         $this->assertNull($config->getThreeDSecret());
         $this->assertNull($config->getThreeDMinLimit());
         $this->assertNull($config->getThreeDMinLimitCurrency());
-        $this->assertNull($config->getThreeDSslMaxLimit());
-        $this->assertNull($config->getThreeDSslMaxLimitCurrency());
+        $this->assertNull($config->getSslMaxLimit());
+        $this->assertNull($config->getSslMaxLimitCurrency());
 
         $config->setThreeDMAID('three3d-maid');
         $config->setThreeDSecret('three3d-secret');
         $config->setThreeDMinLimit(50.0);
         $config->setThreeDMinLimitCurrency('EUR');
-        $config->setThreeDSslMaxLimit(200.0);
-        $config->setThreeDSslMaxLimitCurrency('USD');
+        $config->setSslMaxLimit(200.0);
+        $config->setSslMaxLimitCurrency('USD');
 
         $this->assertEquals('three3d-maid', $config->getThreeDMAID());
         $this->assertEquals('three3d-secret', $config->getThreeDSecret());
         $this->assertEquals(50.0, $config->getThreeDMinLimit());
         $this->assertEquals('EUR', $config->getThreeDMinLimitCurrency());
-        $this->assertEquals(200.0, $config->getThreeDSslMaxLimit());
-        $this->assertEquals('USD', $config->getThreeDSslMaxLimitCurrency());
+        $this->assertEquals(200.0, $config->getSslMaxLimit());
+        $this->assertEquals('USD', $config->getSslMaxLimitCurrency());
 
         $config->setThreeDMinLimit('500,0');
-        $config->setThreeDSslMaxLimit('2000,0');
+        $config->setSslMaxLimit('2000,0');
         $this->assertEquals('500,0', $config->getThreeDMinLimit());
-        $this->assertEquals('2000,0', $config->getThreeDSslMaxLimit());
+        $this->assertEquals('2000,0', $config->getSslMaxLimit());
 
         $this->assertEquals([
-            'baseUrl'                   => 'https://api-test.wirecard.com',
-            'httpUser'                  => 'foo',
-            'transactionMAID'           => 'transaction-maid',
-            'transactionOperation'      => Payment::TRANSACTION_OPERATION_PAY,
-            'sendBasket'                => false,
-            'fraudPrevention'           => false,
-            'sendDescriptor'            => false,
-            'threeDMAID'                => 'three3d-maid',
-            'threeDMinLimit'            => '500,0',
-            'threeDMinLimitCurrency'    => 'EUR',
-            'threeDSslMaxLimit'         => '2000,0',
-            'threeDSslMaxLimitCurrency' => 'USD',
+            'baseUrl'                => 'https://api-test.wirecard.com',
+            'httpUser'               => 'foo',
+            'transactionMAID'        => 'transaction-maid',
+            'transactionOperation'   => Payment::TRANSACTION_OPERATION_PAY,
+            'sendBasket'             => false,
+            'fraudPrevention'        => false,
+            'sendDescriptor'         => false,
+            'threeDMAID'             => 'three3d-maid',
+            'threeDMinLimit'         => '500,0',
+            'threeDMinLimitCurrency' => 'EUR',
+            'sslMaxLimit'            => '2000,0',
+            'sslMaxLimitCurrency'    => 'USD',
         ], $config->toArray());
     }
 }
