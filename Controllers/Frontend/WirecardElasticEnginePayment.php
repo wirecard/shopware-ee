@@ -158,11 +158,14 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         $payment = $this->getPaymentFactory()->create($request->getParam(self::ROUTER_METHOD));
 
-        $transactionService = new TransactionService($payment->getTransactionConfig(
-            $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
-            $this->container->getParameterBag(),
-            $this->getCurrencyShortName()
-        ));
+        $transactionService = new TransactionService(
+            $payment->getTransactionConfig(
+                $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
+                $this->container->getParameterBag(),
+                $this->getCurrencyShortName()
+            ),
+            $this->getLogger()
+        );
 
         /** @var ReturnHandler $returnHandler */
         $returnHandler = $this->get('wirecard_elastic_engine.return_handler');
