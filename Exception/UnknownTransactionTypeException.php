@@ -35,6 +35,6 @@ class UnknownTransactionTypeException extends \Exception
 {
     public function __construct($operation)
     {
-        parent::__construct("Unknown transaction type for operation (${operation})");
+        parent::__construct("Unknown transaction type for operation ($operation)");
     }
 }

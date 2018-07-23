@@ -35,6 +35,6 @@ class UnknownPaymentException extends \Exception
 {
     public function __construct($paymentName)
     {
-        parent::__construct("Unknown payment '${paymentName}'");
+        parent::__construct("Unknown payment '$paymentName'");
     }
 }
