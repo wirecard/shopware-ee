@@ -149,6 +149,8 @@ class SofortPayment extends Payment
         $paymentConfig->setBackendTransactionSecret($this->getPluginConfig('SepaBackendSecret'));
         $paymentConfig->setBackendCreditorId($this->getPluginConfig('SepaBackendCreditorId'));
 
+        $paymentConfig->setFraudPrevention($this->getPluginConfig('SofortFraudPrevention'));
+
         return $paymentConfig;
     }
 

@@ -125,6 +125,14 @@ function (button) {
                 </option>
             </store>
         </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineCreditCardFraudPrevention</name>
+            <label lang="de">[Credit Card] Zusätzliche Kundendaten</label>
+            <label lang="en">[Credit Card] Additional Consumer Data</label>
+            <value>true</value>
+            <description lang="de">Sende Kundendaten an Wirecard zur Betrugsprevention</description>
+            <description lang="en">Send consumer data to Wirecard for fraud prevention</description>
+        </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardSslMaxLimit</name>
             <label lang="de">[Credit Card] 3DS-Pflicht Betrag</label>
@@ -412,6 +420,14 @@ function (button) {
             </store>
         </element>
         <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineSepaFraudPrevention</name>
+            <label lang="de">[SEPA] Zusätzliche Kundendaten</label>
+            <label lang="en">[SEPA] Additional Consumer Data</label>
+            <value>true</value>
+            <description lang="de">Sende Kundendaten an Wirecard zur Betrugsprevention</description>
+            <description lang="en">Send consumer data to Wirecard for fraud prevention</description>
+        </element>
+        <element type="boolean" scope="shop">
             <name>wirecardElasticEngineSepaShowBic</name>
             <label lang="de">[SEPA] BIC anzeigen</label>
             <label lang="en">[SEPA] show BIC</label>
@@ -510,6 +526,14 @@ function (button) {
             <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
             <description lang="de">Geheimschlüssel für die digitale Signatur</description>
             <description lang="en">Secret key for digital signature</description>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineSofortFraudPrevention</name>
+            <label lang="de">[Sofort.] Zusätzliche Kundendaten</label>
+            <label lang="en">[Sofort.] Additional Consumer Data</label>
+            <value>true</value>
+            <description lang="de">Sende Kundendaten an Wirecard zur Betrugsprevention</description>
+            <description lang="en">Send consumer data to Wirecard for fraud prevention</description>
         </element>
         <element type="button" scope="shop">
             <name>wirecardElasticEngineSofortTestApi</name>

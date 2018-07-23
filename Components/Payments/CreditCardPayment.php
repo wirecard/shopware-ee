@@ -223,6 +223,8 @@ class CreditCardPayment extends Payment
         $paymentConfig->setThreeDMinLimit($this->getPluginConfig('CreditCardThreeDMinLimit'));
         $paymentConfig->setThreeDMinLimitCurrency($this->getPluginConfig('CreditCardThreeDMinLimitCurrency'));
 
+        $paymentConfig->setFraudPrevention($this->getPluginConfig('CreditCardFraudPrevention'));
+
         return $paymentConfig;
     }
 
