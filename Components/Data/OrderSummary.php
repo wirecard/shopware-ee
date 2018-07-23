@@ -32,6 +32,7 @@
 namespace WirecardShopwareElasticEngine\Components\Data;
 
 use Wirecard\PaymentSdk\Entity\Amount;
+use Wirecard\PaymentSdk\Entity\Device;
 use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
 use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
@@ -65,6 +66,11 @@ class OrderSummary
     protected $userMapper;
 
     /**
+     * @var string
+     */
+    protected $deviceFingerprintId;
+
+    /**
      * OrderDetails constructor.
      *
      * @param string           $paymentUniqueId
@@ -72,19 +78,22 @@ class OrderSummary
      * @param UserMapper       $userMapper
      * @param BasketMapper     $basketMapper
      * @param Amount           $amount
+     * @param string           $deviceFingerprintId
      */
     public function __construct(
         $paymentUniqueId,
         PaymentInterface $payment,
         UserMapper $userMapper,
         BasketMapper $basketMapper,
-        Amount $amount
+        Amount $amount,
+        $deviceFingerprintId
     ) {
-        $this->paymentUniqueId = $paymentUniqueId;
-        $this->payment         = $payment;
-        $this->userMapper      = $userMapper;
-        $this->amount          = $amount;
-        $this->basketMapper    = $basketMapper;
+        $this->paymentUniqueId     = $paymentUniqueId;
+        $this->payment             = $payment;
+        $this->userMapper          = $userMapper;
+        $this->amount              = $amount;
+        $this->basketMapper        = $basketMapper;
+        $this->deviceFingerprintId = $deviceFingerprintId;
     }
 
     /**
@@ -125,6 +134,24 @@ class OrderSummary
     public function getPaymentUniqueId()
     {
         return $this->paymentUniqueId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDeviceFingerprintId()
+    {
+        return $this->deviceFingerprintId;
+    }
+
+    /**
+     * @return Device
+     */
+    public function getWirecardDevice()
+    {
+        $device = new Device();
+        $device->setFingerprint($this->getDeviceFingerprintId());
+        return $device;
     }
 
     /**
