@@ -85,9 +85,6 @@ class PaymentHandlerTest extends TestCase
     /** @var TransactionManager|\PHPUnit_Framework_MockObject_MockObject */
     private $transactionManager;
 
-    /** @var SessionHandler|\PHPUnit_Framework_MockObject_MockObject */
-    private $sessionHandler;
-
     /** @var \sOrder|\PHPUnit_Framework_MockObject_MockObject */
     private $shopwareOrder;
 
@@ -118,15 +115,13 @@ class PaymentHandlerTest extends TestCase
         $this->transactionManager = $this->createMock(TransactionManager::class);
         $this->request            = $this->createMock(\Enlight_Controller_Request_Request::class);
         $this->shopwareOrder      = $this->createMock(\sOrder::class);
-        $this->sessionHandler     = $this->createMock(SessionHandler::class);
 
         $this->handler = new PaymentHandler(
             $this->em,
             $this->router,
             $this->logger,
             $this->config,
-            $this->transactionManager,
-            $this->sessionHandler
+            $this->transactionManager
         );
     }
 
