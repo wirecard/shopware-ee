@@ -17,6 +17,19 @@
                     <action>index</action>
                     <class>sprite-wirecard</class>
                 </entry>
+                <entry>
+                    <name>WirecardLiveChat</name>
+                    <label lang="en">LiveChat</label>
+                    <label lang="de">LiveChat</label>
+                    <controller>WirecardTransactions</controller>
+                    <action>livechat</action>
+                    <class>sprite-wirecard</class>
+                    <onclick>
+                        <![CDATA[
+                                 Ext.util.CSS.createStyleSheet('#lz_overlay_wm {display: inherit !important;}');
+                        ]]>
+                    </onclick>
+                </entry>
             </children>
         </entry>
     </entries>
