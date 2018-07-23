@@ -4,6 +4,21 @@
     <elements>
         <!-- Gerneral -->
         <element type="button" scope="shop">
+            <name>wirecardElasticEngineGeneralInformation</name>
+            <label lang="de">Allgemeine Informationen betreffend des Wirecard Shop Plugins</label>
+            <label lang="en">General Information regarding Wirecard Shop Plugins</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    var general = Ext.create('Shopware.apps.WirecardExtendOrder.view.GeneralInformationWindow');
+    general.show()
+}
+                    ]]>
+                </handler>
+            </options>
+        </element>
+        <element type="button" scope="shop">
             <name>wirecardElasticEngineGeneralChat</name>
             <label lang="de">LiveChat mit Support</label>
             <label lang="en">LiveChat with Support</label>
