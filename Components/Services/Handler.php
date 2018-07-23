@@ -66,32 +66,24 @@ abstract class Handler
     protected $transactionManager;
 
     /**
-     * @var SessionHandler
-     */
-    protected $sessionHandler;
-
-    /**
      * @param EntityManagerInterface      $em
      * @param RouterInterface             $router
      * @param LoggerInterface             $logger
      * @param \Shopware_Components_Config $config
      * @param TransactionManager          $transactionManager
-     * @param SessionHandler              $sessionHandler
      */
     public function __construct(
         EntityManagerInterface $em,
         RouterInterface $router,
         LoggerInterface $logger,
         \Shopware_Components_Config $config,
-        TransactionManager $transactionManager,
-        SessionHandler $sessionHandler
+        TransactionManager $transactionManager
     ) {
         $this->em                 = $em;
         $this->router             = $router;
         $this->logger             = $logger;
         $this->shopwareConfig     = $config;
         $this->transactionManager = $transactionManager;
-        $this->sessionHandler     = $sessionHandler;
     }
 
     /**

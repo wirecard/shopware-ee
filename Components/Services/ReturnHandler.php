@@ -108,7 +108,6 @@ class ReturnHandler extends Handler
      */
     public function handleSuccess(SuccessResponse $response, Transaction $initialTransaction)
     {
-        $this->sessionHandler->destroyDeviceFingerprintId();
         $this->transactionManager->createReturn($initialTransaction, $response);
 
         // `sUniqueID` should match the order temporaryId/paymentUniqueId to show proper information after redirect.

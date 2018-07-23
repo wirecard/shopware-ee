@@ -204,6 +204,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             );
 
             if ($response instanceof SuccessResponse) {
+                $this->getSessionHandler()->destroyDeviceFingerprintId();
+
                 $this->getLogger()->debug('Frontend::returnAction: Incoming success return');
 
                 $orderStatus        = Status::ORDER_STATE_OPEN;
