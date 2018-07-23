@@ -32,6 +32,8 @@
 namespace WirecardShopwareElasticEngine\Components\Services;
 
 use Shopware\Models\Shop\Shop;
+use Wirecard\PaymentSdk\Entity\CustomField;
+use Wirecard\PaymentSdk\Entity\CustomFieldCollection;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\FormInteractionResponse;
@@ -99,35 +101,21 @@ class PaymentHandler extends Handler
         ]);
 
         if ($response instanceof FormInteractionResponse) {
-            $this->transactionManager->createInitial(
-                $orderSummary->getPaymentUniqueId(),
-                $orderSummary->getBasketMapper()->getSignature(),
-                $response
-            );
+            $this->transactionManager->createInitial($orderSummary, $response);
             return new ViewAction('payment_redirect.tpl', [
                 'method'     => $response->getMethod(),
                 'formFields' => $response->getFormFields(),
                 'url'        => $response->getUrl(),
             ]);
         }
-
-        if ($response instanceof SuccessResponse
-            || $response instanceof InteractionResponse) {
-            $this->transactionManager->createInitial(
-                $orderSummary->getPaymentUniqueId(),
-                $orderSummary->getBasketMapper()->getSignature(),
-                $response
-            );
-
+        if ($response instanceof SuccessResponse || $response instanceof InteractionResponse) {
+            $this->transactionManager->createInitial($orderSummary, $response);
             return new RedirectAction($response->getRedirectUrl());
         }
-
         if ($response instanceof FailureResponse) {
             $this->logger->error('Failure response', $response->getData());
-
             return new ErrorAction(ErrorAction::FAILURE_RESPONSE, 'Failure response');
         }
-
         return new ErrorAction(ErrorAction::PROCESSING_FAILED, 'Payment processing failed');
     }
 
@@ -150,14 +138,19 @@ class PaymentHandler extends Handler
         $transaction->setRedirect($redirect);
         $transaction->setAmount($orderSummary->getAmount());
         $transaction->setNotificationUrl($notificationUrl);
-        $transaction->setOrderNumber($orderSummary->getPaymentUniqueId());
+
+        $customFields = new CustomFieldCollection();
+        $customFields->add(new CustomField('payment-unique-id', $orderSummary->getPaymentUniqueId()));
+        $transaction->setCustomFields($customFields);
 
         if ($paymentConfig->sendBasket() || $paymentConfig->hasFraudPrevention()) {
             $transaction->setBasket($orderSummary->getBasketMapper()->getWirecardBasket());
         }
 
         if ($paymentConfig->hasFraudPrevention()) {
+            $transaction->setOrderNumber($orderSummary->getPaymentUniqueId());
             $transaction->setIpAddress($orderSummary->getUserMapper()->getClientIp());
+            $transaction->setConsumerId($orderSummary->getUserMapper()->getCustomerNumber());
             $transaction->setAccountHolder($orderSummary->getUserMapper()->getWirecardBillingAccountHolder());
             $transaction->setShipping($orderSummary->getUserMapper()->getWirecardShippingAccountHolder());
             $transaction->setLocale($orderSummary->getUserMapper()->getLocale());
@@ -179,6 +172,6 @@ class PaymentHandler extends Handler
     protected function getDescriptor($orderNumber)
     {
         $shopName = substr($this->shopwareConfig->get('shopName'), 0, 9);
-        return "${shopName} ${orderNumber}";
+        return substr("${shopName} ${orderNumber}", 0, 20);
     }
 }

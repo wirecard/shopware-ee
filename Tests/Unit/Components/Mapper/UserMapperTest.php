@@ -42,10 +42,11 @@ class UserMapperTest extends TestCase
     protected $user = [
         'additional'      => [
             'user'            => [
-                'firstname' => 'First Name',
-                'lastname'  => 'Last Name',
-                'email'     => 'test@example.com',
-                'birthday'  => '1.1.1990',
+                'customernumber' => '10001',
+                'firstname'      => 'First Name',
+                'lastname'       => 'Last Name',
+                'email'          => 'test@example.com',
+                'birthday'       => '1.1.1990',
             ],
             'countryShipping' => [
                 'countryiso' => 'DE',
@@ -93,6 +94,7 @@ class UserMapperTest extends TestCase
 
     public function testGetWirecardBillingAccountHolderWithAllFields()
     {
+        $this->assertEquals('10001', $this->mapper->getCustomerNumber());
         $this->assertEquals('First Name', $this->mapper->getFirstName());
         $this->assertEquals('Last Name', $this->mapper->getLastName());
         $this->assertEquals('test@example.com', $this->mapper->getEmail());
@@ -277,7 +279,8 @@ class UserMapperTest extends TestCase
 
     public function getBillingAddressAdditional()
     {
-        $this->assertEquals($this->user['billingaddress']['additionalAddressLine1'], $this->mapper->getBillingAddressAdditional());
+        $this->assertEquals($this->user['billingaddress']['additionalAddressLine1'],
+            $this->mapper->getBillingAddressAdditional());
 
         $this->expectException(ArrayKeyNotFoundException::class);
         $mapper = new UserMapper([], '', '');
@@ -295,8 +298,10 @@ class UserMapperTest extends TestCase
         $this->assertEquals($this->user['shippingaddress']['city'], $this->mapper->getShippingAddressCity());
         $this->assertEquals($this->user['shippingaddress']['street'], $this->mapper->getShippingAddressStreet());
         $this->assertEquals($this->user['shippingaddress']['zipcode'], $this->mapper->getShippingAddressZip());
-        $this->assertEquals($this->user['shippingaddress']['additionalAddressLine1'], $this->mapper->getShippingAddressAdditional());
-        $this->assertEquals($this->user['additional']['countryShipping']['countryiso'], $this->mapper->getShippingAddressCountryIso());
+        $this->assertEquals($this->user['shippingaddress']['additionalAddressLine1'],
+            $this->mapper->getShippingAddressAdditional());
+        $this->assertEquals($this->user['additional']['countryShipping']['countryiso'],
+            $this->mapper->getShippingAddressCountryIso());
     }
 
     public function testGetClientIp()
@@ -312,6 +317,7 @@ class UserMapperTest extends TestCase
     public function testToArray()
     {
         $this->assertEquals([
+            'customerNumber'            => '10001',
             'firstName'                 => 'First Name',
             'lastName'                  => 'Last Name',
             'email'                     => 'test@example.com',
@@ -338,6 +344,7 @@ class UserMapperTest extends TestCase
     public function testNullGetters()
     {
         $mapper = new UserMapper([], '', '');
+        $this->assertNull($mapper->getCustomerNumber());
         $this->assertNull($mapper->getBirthday());
         $this->assertNull($mapper->getCountryIso());
         $this->assertNull($mapper->getShippingAddressCity());

@@ -38,6 +38,7 @@ use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
+use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
@@ -57,17 +58,16 @@ class TransactionManager
     }
 
     /**
-     * @param string   $paymentUniqueId
-     * @param Response $response
-     * @param string   $basketSignature
+     * @param OrderSummary $orderSummary
+     * @param Response     $response
      *
      * @return Transaction|null
      */
-    public function createInitial($paymentUniqueId, $basketSignature, Response $response)
+    public function createInitial(OrderSummary $orderSummary, Response $response)
     {
         $transaction = new Transaction(Transaction::TYPE_INITIAL_RESPONSE);
-        $transaction->setPaymentUniqueId($paymentUniqueId);
-        $transaction->setBasketSignature($basketSignature);
+        $transaction->setPaymentUniqueId($orderSummary->getPaymentUniqueId());
+        $transaction->setBasketSignature($orderSummary->getBasketMapper()->getSignature());
         $transaction->setResponse($response);
 
         return $this->persist($transaction);
@@ -201,6 +201,8 @@ class TransactionManager
     }
 
     /**
+     * Find and return the initial transaction entity related to the given response.
+     *
      * @param SuccessResponse $response
      *
      * @return Transaction
@@ -209,18 +211,23 @@ class TransactionManager
     public function getInitialTransaction(SuccessResponse $response)
     {
         try {
-            // try to get paymentUniqueId from response field 'order-number'
+            // first try to get paymentUniqueId from response field 'order-number'
             $paymentUniqueId = $response->findElement('order-number');
-            if ($paymentUniqueId) {
-                $transaction = $this->em->getRepository(Transaction::class)
-                                        ->findOneBy(['paymentUniqueId' => $paymentUniqueId]);
-                if ($transaction && $transaction->isInitial()) {
-                    return $transaction;
-                }
-            }
         } catch (MalformedResponseException $e) {
-            // the response does not contain an 'order-number', try to find the initial transaction recursively
+            // response doesn't contain 'order-number', try to get paymentUniqueId from custom field 'payment-unique-id'
+            $customFields    = $response->getCustomFields();
+            $paymentUniqueId = $customFields->get('payment-unique-id');
         }
+
+        if ($paymentUniqueId) {
+            $transaction = $this->em->getRepository(Transaction::class)
+                                    ->findOneBy(['paymentUniqueId' => $paymentUniqueId]);
+            if ($transaction && $transaction->isInitial()) {
+                return $transaction;
+            }
+        }
+
+        // still no initial transaction found: try to find it recursively via parent-transaction-id and/or requestId
         $transaction = $this->findInitialTransaction($response->getParentTransactionId(), $response->getRequestId());
         if (! $transaction) {
             throw new InitialTransactionNotFoundException($response);

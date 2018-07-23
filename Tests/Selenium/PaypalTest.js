@@ -33,7 +33,7 @@
 const { expect } = require('chai');
 const { Builder, By, until } = require('selenium-webdriver');
 
-describe('paypal test', () => {
+describe('PayPal test', () => {
     const driver = new Builder()
         .forBrowser('chrome')
         .build();
@@ -84,9 +84,6 @@ describe('paypal test', () => {
 
         // Go to payment selection page, check if wirecard payments are present and select paypal
         await driver.findElement(By.className('btn--change-payment')).click();
-        ['payment_mean7', 'payment_mean8'].forEach(async id => {
-            await driver.findElement(By.id(id));
-        });
         await driver.findElement(By.xpath("//*[contains(text(), '" + paymentLabel + "')]")).click();
 
         // Go back to checkout page and test if payment method has been selected
@@ -124,6 +121,7 @@ describe('paypal test', () => {
         await driver.wait(until.elementLocated(By.id('confirmButtonTop')));
         await driver.wait(driver.findElement(By.id('confirmButtonTop')).click());
 
+        // Check confirmation page
         await driver.wait(until.elementLocated(By.className('teaser--btn-print')));
         const panelTitle = await driver.findElement(By.className('panel--title')).getText();
         expect(panelTitle).to.include('Vielen Dank');
