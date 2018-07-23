@@ -41,9 +41,9 @@ abstract class ArrayMapper
     protected $arrayEntity = [];
 
     /**
-     * Returns a key from an array. If the key doesn't exist an exception is thrown.
+     * Returns a key from an (multidimensional) array. If the key doesn't exist an exception is thrown.
      *
-     * @param string|array $keys
+     * @param string|array $keys Single key or a key chain for multidimensional arrays
      *
      * @return mixed
      * @throws ArrayKeyNotFoundException
@@ -62,9 +62,9 @@ abstract class ArrayMapper
     }
 
     /**
-     * Returns if an array key exists.
+     * Returns if an array key exists in an (multidimensional) array.
      *
-     * @param string|array $keys
+     * @param string|array $keys Single key or a key chain for multidimensional arrays
      *
      * @return bool
      */
@@ -82,9 +82,9 @@ abstract class ArrayMapper
     }
 
     /**
-     * Returns a key from an array. If the key doesn't exist the fallback value is returned.
+     * Returns a key from an (multidimensional) array. If the key doesn't exist the fallback value is returned.
      *
-     * @param string|array $keys
+     * @param string|array $keys Single key or a key chain for multidimensional arrays
      * @param null $fallback
      *
      * @return mixed|null
