@@ -72,12 +72,24 @@ class BasketMapper extends ArrayMapper
     protected $currency;
 
     /**
+     * @var \Shopware_Components_Snippet_Manager
+     */
+    protected $snippetManager;
+
+    /**
+     * @var array|null
+     */
+    protected $shippingMethod;
+
+    /**
      * BasketMapper constructor.
      *
-     * @param array       $shopwareBasket
-     * @param string      $currency
-     * @param \sArticles  $articles
-     * @param Transaction $transaction
+     * @param array                                $shopwareBasket
+     * @param string                               $currency
+     * @param \sArticles                           $articles
+     * @param Transaction                          $transaction
+     * @param \Shopware_Components_Snippet_Manager $snippetManager
+     * @param array|null                           $shippingMethod
      *
      * @throws ArrayKeyNotFoundException
      * @throws InvalidBasketException
@@ -85,12 +97,20 @@ class BasketMapper extends ArrayMapper
      * @throws NotAvailableBasketException
      * @throws OutOfStockBasketException
      */
-    public function __construct(array $shopwareBasket, $currency, \sArticles $articles, Transaction $transaction)
-    {
+    public function __construct(
+        array $shopwareBasket,
+        $currency,
+        \sArticles $articles,
+        Transaction $transaction,
+        \Shopware_Components_Snippet_Manager $snippetManager,
+        $shippingMethod
+    ) {
         $this->arrayEntity    = $shopwareBasket;
         $this->currency       = $currency;
         $this->articles       = $articles;
         $this->transaction    = $transaction;
+        $this->snippetManager = $snippetManager;
+        $this->shippingMethod = $shippingMethod;
         $this->wirecardBasket = $this->createWirecardBasket();
     }
 
@@ -181,8 +201,12 @@ class BasketMapper extends ArrayMapper
 
             $shippingTaxValue = $shippingCosts - $this->getOptional(self::SHIPPING_COSTS_NET, 0.0);
 
-            $basketItem = new Item('Shipping', $shippingAmount, 1);
-            $basketItem->setDescription('Shipping');
+            $shippingName = $this->snippetManager->getNamespace('backend/order/main')
+                                                 ->get('overview/shipping/title', 'Shipping');
+            $description  = isset($this->shippingMethod['name']) ? $this->shippingMethod['name'] : $shippingName;
+
+            $basketItem = new Item($shippingName, $shippingAmount, 1);
+            $basketItem->setDescription($description);
             $basketItem->setArticleNumber('shipping');
             $basketItem->setTaxAmount(new Amount(self::numberFormat($shippingTaxValue), $this->currency));
             $basketItem->setTaxRate($this->getOptional(self::SHIPPING_COSTS_TAX, 0.0));

@@ -92,7 +92,9 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $this->getBasket(),
                 $this->getCurrencyShortName(),
                 $this->getModules()->Articles(),
-                $payment->getTransaction()
+                $payment->getTransaction(),
+                $this->get('snippets'),
+                $this->getShippingMethod()
             );
             $amount       = new Amount(BasketMapper::numberFormat($this->getAmount()), $this->getCurrencyShortName());
         } catch (BasketException $e) {
@@ -140,6 +142,19 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         );
 
         return $this->handleAction($action);
+    }
+
+    /**
+     * Returns the shipping/dispatch data as array.
+     *
+     * @return array|null
+     */
+    public function getShippingMethod()
+    {
+        if (empty(Shopware()->Session()->sOrderVariables['sDispatch'])) {
+            return null;
+        }
+        return Shopware()->Session()->sOrderVariables['sDispatch'];
     }
 
     /**

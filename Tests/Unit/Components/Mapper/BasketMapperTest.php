@@ -52,6 +52,8 @@ class BasketMapperTest extends TestCase
         ]);
         /** @var Transaction|\PHPUnit_Framework_MockObject_MockObject $transaction */
         $transaction = $this->createMock(Transaction::class);
+        /** @var \Shopware_Components_Snippet_Manager|\PHPUnit_Framework_MockObject_MockObject $snippetManager */
+        $snippetManager = $this->createMock(\Shopware_Components_Snippet_Manager::class);
 
         $basketArray = [
             'content' => [
@@ -73,7 +75,7 @@ class BasketMapperTest extends TestCase
                 ],
             ],
         ];
-        $mapper      = new BasketMapper($basketArray, 'EUR', $articles, $transaction);
+        $mapper      = new BasketMapper($basketArray, 'EUR', $articles, $transaction, $snippetManager, null);
         $this->assertEquals($basketArray, $mapper->getShopwareBasket());
         $this->assertEquals(implode("\n", [
             'foo - 10 - 999.99999 - EUR - 1 - 15%',
@@ -114,8 +116,13 @@ class BasketMapperTest extends TestCase
         ]);
         /** @var Transaction|\PHPUnit_Framework_MockObject_MockObject $transaction */
         $transaction = $this->createMock(Transaction::class);
+        /** @var \Shopware_Components_Snippet_Manager|\PHPUnit_Framework_MockObject_MockObject $snippetManager */
+        $snippetManager = $this->createMock(\Shopware_Components_Snippet_Manager::class);
+        $snippet = $this->createMock(\Enlight_Components_Snippet_Namespace::class);
+        $snippet->expects($this->atLeastOnce())->method('get')->willReturn('Shipping Name');
+        $snippetManager->expects($this->atLeastOnce())->method('getNamespace')->willReturn($snippet);
 
-        $basketArray = [
+        $basketArray    = [
             'content'               => [
                 [
                     'articlename' => 'foo',
@@ -129,7 +136,17 @@ class BasketMapperTest extends TestCase
             'sShippingcostsWithTax' => 10,
             'sShippingcostsTax'     => 2,
         ];
-        $mapper      = new BasketMapper($basketArray, 'USD', $articles, $transaction);
+        $shippingMethod = [
+            'name' => 'Shipping Description',
+        ];
+        $mapper         = new BasketMapper(
+            $basketArray,
+            'USD',
+            $articles,
+            $transaction,
+            $snippetManager,
+            $shippingMethod
+        );
         $this->assertEquals($basketArray, $mapper->getShopwareBasket());
         $this->assertEquals(implode("\n", [
             'foo - 10 - 1000 - USD - 1 - 20%',
@@ -147,10 +164,10 @@ class BasketMapperTest extends TestCase
                     'tax-rate'       => 20,
                 ],
                 [
-                    'name'           => 'Shipping',
+                    'name'           => 'Shipping Name',
                     'quantity'       => 1,
                     'amount'         => ['currency' => 'USD', 'value' => 10.0],
-                    'description'    => 'Shipping',
+                    'description'    => 'Shipping Description',
                     'article-number' => 'shipping',
                     'tax-rate'       => 2,
                 ],
@@ -165,6 +182,11 @@ class BasketMapperTest extends TestCase
         $articles = $this->createMock(\sArticles::class);
         /** @var Transaction|\PHPUnit_Framework_MockObject_MockObject $transaction */
         $transaction = $this->createMock(Transaction::class);
+        /** @var \Shopware_Components_Snippet_Manager|\PHPUnit_Framework_MockObject_MockObject $snippetManager */
+        $snippetManager = $this->createMock(\Shopware_Components_Snippet_Manager::class);
+        $snippet = $this->createMock(\Enlight_Components_Snippet_Namespace::class);
+        $snippet->expects($this->atLeastOnce())->method('get')->willReturn('Shipping Name');
+        $snippetManager->expects($this->atLeastOnce())->method('getNamespace')->willReturn($snippet);
 
         // sShippingcostsNet has no effect here. See comment in BasketMapper::createWirecardBasket
         $basketArray = [
@@ -173,7 +195,7 @@ class BasketMapperTest extends TestCase
             'sShippingcostsNet'     => 5,
             'sShippingcostsTax'     => 2,
         ];
-        $mapper      = new BasketMapper($basketArray, 'USD', $articles, $transaction);
+        $mapper      = new BasketMapper($basketArray, 'USD', $articles, $transaction, $snippetManager, null);
         $this->assertEquals($basketArray, $mapper->getShopwareBasket());
         $this->assertEquals(implode("\n", [
             'Shipping - shipping - 10 USD - 2',
@@ -182,10 +204,10 @@ class BasketMapperTest extends TestCase
         $this->assertEquals([
             'order-item' => [
                 [
-                    'name'           => 'Shipping',
+                    'name'           => 'Shipping Name',
                     'quantity'       => 1,
                     'amount'         => ['currency' => 'USD', 'value' => 10.0],
-                    'description'    => 'Shipping',
+                    'description'    => 'Shipping Name',
                     'article-number' => 'shipping',
                     'tax-rate'       => 2,
                 ],
@@ -203,6 +225,8 @@ class BasketMapperTest extends TestCase
         ]);
         /** @var Transaction|\PHPUnit_Framework_MockObject_MockObject $transaction */
         $transaction = $this->createMock(Transaction::class);
+        /** @var \Shopware_Components_Snippet_Manager|\PHPUnit_Framework_MockObject_MockObject $snippetManager */
+        $snippetManager = $this->createMock(\Shopware_Components_Snippet_Manager::class);
 
         $this->expectException(NotAvailableBasketException::class);
         new BasketMapper([
@@ -216,7 +240,7 @@ class BasketMapperTest extends TestCase
                     'price'       => 1000,
                 ],
             ],
-        ], 'EUR', $articles, $transaction);
+        ], 'EUR', $articles, $transaction, $snippetManager, []);
     }
 
     public function testBasketArticleOutOfStock()
@@ -230,6 +254,8 @@ class BasketMapperTest extends TestCase
         ]);
         /** @var Transaction|\PHPUnit_Framework_MockObject_MockObject $transaction */
         $transaction = $this->createMock(Transaction::class);
+        /** @var \Shopware_Components_Snippet_Manager|\PHPUnit_Framework_MockObject_MockObject $snippetManager */
+        $snippetManager = $this->createMock(\Shopware_Components_Snippet_Manager::class);
 
         $this->expectException(OutOfStockBasketException::class);
         new BasketMapper([
@@ -243,7 +269,7 @@ class BasketMapperTest extends TestCase
                     'price'       => 1000,
                 ],
             ],
-        ], 'EUR', $articles, $transaction);
+        ], 'EUR', $articles, $transaction, $snippetManager, null);
     }
 
     public function testInvalidBasketException()
@@ -252,9 +278,11 @@ class BasketMapperTest extends TestCase
         $articles = $this->createMock(\sArticles::class);
         /** @var Transaction|\PHPUnit_Framework_MockObject_MockObject $transaction */
         $transaction = $this->createMock(Transaction::class);
+        /** @var \Shopware_Components_Snippet_Manager|\PHPUnit_Framework_MockObject_MockObject $snippetManager */
+        $snippetManager = $this->createMock(\Shopware_Components_Snippet_Manager::class);
 
         $this->expectException(InvalidBasketException::class);
-        new BasketMapper([], 'EUR', $articles, $transaction);
+        new BasketMapper([], 'EUR', $articles, $transaction, $snippetManager, null);
     }
 
     /**
