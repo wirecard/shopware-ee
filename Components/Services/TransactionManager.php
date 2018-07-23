@@ -218,7 +218,7 @@ class TransactionManager
             $customFields    = $response->getCustomFields();
             $paymentUniqueId = $customFields->get('payment-unique-id');
         }
-        
+
         if ($paymentUniqueId) {
             $transaction = $this->em->getRepository(Transaction::class)
                                     ->findOneBy(['paymentUniqueId' => $paymentUniqueId]);

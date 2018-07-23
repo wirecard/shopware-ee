@@ -163,6 +163,9 @@ class SofortPayment extends Payment
         \Enlight_Controller_Request_Request $request,
         \sOrder $shopwareOrder
     ) {
+        $transaction = $this->getTransaction();
+        $transaction->setOrderNumber($orderSummary->getPaymentUniqueId());
+
         return null;
     }
 }
