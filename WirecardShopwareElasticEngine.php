@@ -42,40 +42,34 @@ use Shopware\Components\Plugin\Context\DeactivateContext;
 use Shopware\Components\Plugin\Context\InstallContext;
 use Shopware\Components\Plugin\Context\UninstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
-use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
-use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
-
+use Shopware\Models\Plugin\Plugin as PluginModel;
+use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
 use WirecardShopwareElasticEngine\Models\Transaction;
-
 use Doctrine\ORM\Tools\SchemaTool;
 
 class WirecardShopwareElasticEngine extends Plugin
 {
+    const NAME = 'WirecardShopwareElasticEngine';
+
     public function install(InstallContext $context)
     {
-        $this->registerPayments();
-
-        $entityManager = $this->container->get('models');
-        $schemaTool = new SchemaTool($entityManager);
-
-        $schemaTool->updateSchema(
-            [ $entityManager->getClassMetadata(Transaction::class) ],
-            true
-        );
+        $this->registerPayments($context->getPlugin());
+        $this->updateDatabase();
     }
 
     public function uninstall(UninstallContext $context)
     {
         parent::uninstall($context);
 
-        if ($context->keepUserData()) {
-            return;
-        }
+        $this->deactivatePayments($context->getPlugin());
     }
 
     public function update(UpdateContext $context)
     {
         parent::update($context);
+
+        $this->updatePayments($context->getPlugin());
+        $this->updateDatabase();
     }
 
     public function activate(ActivateContext $context)
@@ -86,24 +80,72 @@ class WirecardShopwareElasticEngine extends Plugin
     public function deactivate(DeactivateContext $context)
     {
         parent::deactivate($context);
+
+        $this->deactivatePayments($context->getPlugin());
     }
 
-    protected function registerPayments()
+    protected function updateDatabase()
+    {
+        $entityManager = $this->container->get('models');
+        $schemaTool    = new SchemaTool($entityManager);
+
+        $schemaTool->updateSchema(
+            [
+                $entityManager->getClassMetadata(Transaction::class),
+            ],
+            true
+        );
+    }
+
+    protected function registerPayments(PluginModel $plugin)
     {
         $installer = $this->container->get('shopware.plugin_payment_installer');
 
         foreach ($this->getSupportedPayments() as $payment) {
-            $installer->createOrUpdate($payment->getName(), $payment->getPaymentOptions());
+            $installer->createOrUpdate($plugin->getName(), $payment->getPaymentOptions());
         }
     }
 
-    /**
-     * @return PaymentInterface[]
-     */
-    protected function getSupportedPayments()
+    protected function updatePayments(PluginModel $plugin)
     {
-        return [
-            new PaypalPayment()
-        ];
+        $installer = $this->container->get('shopware.plugin_payment_installer');
+
+        $payments = [];
+        foreach ($plugin->getPayments() as $payment) {
+            $payments[$payment->getName()] = $payment;
+        }
+
+        foreach ($this->getSupportedPayments() as $payment) {
+            if (isset($payments[$payment->getName()])) {
+                continue;
+            }
+            $installer->createOrUpdate($plugin->getName(), $payment->getPaymentOptions());
+        }
+    }
+
+    private function deactivatePayments(PluginModel $plugin)
+    {
+        foreach ($plugin->getPayments() as $payment) {
+            $payment->setActive(false);
+        }
+
+        $em = $this->container->get('models');
+        $em->flush();
+    }
+
+    /**
+     * @return Components\Payments\PaymentInterface[]
+     * @throws Exception\UnknownPaymentException
+     */
+    public function getSupportedPayments()
+    {
+        $paymentFactory = new PaymentFactory(
+            $this->container->get('models'),
+            $this->container->get('config'),
+            $this->container->get('shopware_plugininstaller.plugin_manager'),
+            $this->container->get('router'),
+            $this->container->get('events')
+        );
+        return $paymentFactory->getSupportedPayments();
     }
 }

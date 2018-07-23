@@ -29,27 +29,36 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Functional;
+namespace WirecardShopwareElasticEngine\Tests\Unit;
 
-use Shopware\Components\Test\Plugin\TestCase;
-use Wirecard\PaymentSdk\Config\Config;
-use Wirecard\PaymentSdk\TransactionService;
-
-class ExampleTest extends TestCase
+abstract class ModelTestCase extends \PHPUnit_Framework_TestCase
 {
-    const API_TEST_URL = 'https://api-test.wirecard.com';
-    const HTTP_USER = '70000-APITEST-AP';
-    const HTTP_PASSWORD = 'qD2wzQ_hrc!8';
+    protected $model;
 
-    protected static $ensureLoadedPlugins = [
-        'WirecardShopwareElasticEngine',
-    ];
+    abstract public function getModel();
 
-    public function testCredentials()
+    public function setUp()
     {
-        $testConfig         = new Config(self::API_TEST_URL, self::HTTP_USER, self::HTTP_PASSWORD);
-        $transactionService = new TransactionService($testConfig);
+        $this->model = $this->getModel();
+    }
 
-        $this->assertTrue($transactionService->checkCredentials());
+    public function assertGetterAndSetter($property, $value, $initialValue = null, $setter = null, $getter = null)
+    {
+        if (! $setter) {
+            $setter = 'set' . ucfirst($property);
+        }
+
+        if (! $getter) {
+            $getter = 'get' . ucfirst($property);
+        }
+
+        if (! method_exists($this->model, $setter) || ! method_exists($this->model, $getter)) {
+            throw new \Exception('Getter or setter not defined for ' . get_class($this->model) . " ($property)");
+        }
+
+        $this->assertEquals($initialValue, $this->model->$getter());
+
+        $this->model->$setter($value);
+        $this->assertSame($this->model->$getter(), $value);
     }
 }

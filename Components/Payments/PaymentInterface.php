@@ -31,9 +31,16 @@
 
 namespace WirecardShopwareElasticEngine\Components\Payments;
 
+use Shopware\Models\Shop\Shop;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
+use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Response\Response;
-use WirecardShopwareElasticEngine\Models\Transaction;
+use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Actions\Action;
+use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
+use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
+use WirecardShopwareElasticEngine\Components\Services\PaymentHandler;
 
 interface PaymentInterface
 {
@@ -48,56 +55,83 @@ interface PaymentInterface
     public function getName();
 
     /**
+     * @return int
+     */
+    public function getPosition();
+
+    /**
+     * Returns the config (in form of an array) for registering payments in Shopware.
+     *
      * @return array
      */
     public function getPaymentOptions();
 
     /**
-     * Start Transaction
-     *
-     * @param array $paymentData
-     * @return array
-     */
-    public function processPayment(array $paymentData);
-
-    /**
-     * Creates Transaction entry and returns it
-     *
-     * @return Transaction
-     */
-    public function createElasticEngineTransaction();
-
-    /**
-     * @param array $request
-     * @return Response
-     */
-    public function getPaymentResponse(array $request);
-
-    /**
-     * @param string $request
-     * @return Response
-     */
-    public function getPaymentNotification($request);
-
-    /**
-     * Returns payment specific transaction object
+     * Returns payment specific transaction object.
      *
      * @return \Wirecard\PaymentSdk\Transaction\Transaction
      */
     public function getTransaction();
 
     /**
-     * Returns transaction config
+     * Returns the transaction type from `getPaymentOptions`.
      *
-     * @param array $configData
-     * @return Config
+     * @return string
      */
-    public function getConfig(array $configData);
+    public function getTransactionType();
 
     /**
-     * Returns payment specific configuration
+     * Returns transaction config.
      *
-     * @return array
+     * @param Shop                  $shop
+     * @param ParameterBagInterface $parameterBag
+     * @param string                $selectedCurrency
+     *
+     * @return Config
      */
-    public function getConfigData();
+    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag, $selectedCurrency);
+
+    /**
+     * Returns payment specific configuration.
+     *
+     * @return PaymentConfig
+     */
+    public function getPaymentConfig();
+
+    /**
+     * Payment specific processing. This method either returns an `Action` (which is directly returned to the handler)
+     * or `null`. Returning `null` leads to the handler executing the transaction via the `TransactionService`. In case
+     * of returning an `Action` execution of the transaction (via the `TransactionService`) probably needs to get
+     * called manually within this method.
+     *
+     * @see PaymentHandler
+     *
+     * @param OrderSummary                        $orderSummary
+     * @param TransactionService                  $transactionService
+     * @param Shop                                $shop
+     * @param Redirect                            $redirect
+     * @param \Enlight_Controller_Request_Request $request
+     * @param \sOrder                             $shopwareOrder
+     *
+     * @return Action|null
+     */
+    public function processPayment(
+        OrderSummary $orderSummary,
+        TransactionService $transactionService,
+        Shop $shop,
+        Redirect $redirect,
+        \Enlight_Controller_Request_Request $request,
+        \sOrder $shopwareOrder
+    );
+
+    /**
+     * @param TransactionService                  $transactionService
+     * @param \Enlight_Controller_Request_Request $request
+     *
+     * @return Response
+     */
+    public function processReturn(
+        TransactionService $transactionService,
+        \Enlight_Controller_Request_Request $request
+    );
 }

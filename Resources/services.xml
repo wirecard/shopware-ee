@@ -3,18 +3,72 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
-        <service id="wirecard_elastic_engine.paypal_payment_service"
-                 class="WirecardElasticEngine\Component\Payments\PaypalPayment">
+        <!-- Factories -->
+        <service id="wirecard_elastic_engine.payment_factory"
+                 class="WirecardShopwareElasticEngine\Components\Services\PaymentFactory">
+            <argument type="service" id="models"/>
+            <argument type="service" id="config"/>
+            <argument type="service" id="shopware_plugininstaller.plugin_manager"/>
+            <argument type="service" id="router"/>
+            <argument type="service" id="events"/>
         </service>
-        <service id="wirecard_elastic_engine.subscriber.frontend" 
+        <service id="wirecard_elastic_engine.transaction_factory"
+                 class="WirecardShopwareElasticEngine\Components\Services\TransactionFactory">
+            <argument type="service" id="models"/>
+        </service>
+
+        <!-- Handler -->
+        <service id="wirecard_elastic_engine.handler"
+                 class="WirecardShopwareElasticEngine\Components\Services\Handler"
+                 abstract="true">
+            <argument type="service" id="models"/>
+            <argument type="service" id="router"/>
+            <argument type="service" id="pluginlogger"/>
+            <argument type="service" id="config"/>
+            <argument type="service" id="wirecard_elastic_engine.transaction_factory"/>
+        </service>
+        <service id="wirecard_elastic_engine.notification_handler"
+                 class="WirecardShopwareElasticEngine\Components\Services\NotificationHandler"
+                 parent="wirecard_elastic_engine.handler">
+        </service>
+        <service id="wirecard_elastic_engine.return_handler"
+                 class="WirecardShopwareElasticEngine\Components\Services\ReturnHandler"
+                 parent="wirecard_elastic_engine.handler">
+        </service>
+        <service id="wirecard_elastic_engine.payment_handler"
+                 class="WirecardShopwareElasticEngine\Components\Services\PaymentHandler"
+                 parent="wirecard_elastic_engine.handler">
+        </service>
+        <service id="wirecard_elastic_engine.backend_operation_handler"
+                 class="WirecardShopwareElasticEngine\Components\Services\BackendOperationHandler"
+                 parent="wirecard_elastic_engine.handler">
+        </service>
+        <service id="wirecard_elastic_engine.session_handler"
+                 class="WirecardShopwareElasticEngine\Components\Services\SessionHandler">
+            <argument type="service" id="session"/>
+        </service>
+
+        <!-- Subscriber -->
+        <service id="wirecard_elastic_engine.subscriber.frontend"
                  class="WirecardShopwareElasticEngine\Subscriber\FrontendSubscriber">
             <argument>%wirecard_shopware_elastic_engine.plugin_dir%</argument>
             <argument type="service" id="template"/>
             <tag name="shopware.event_subscriber"/>
         </service>
-        <service id="wirecard_elast_engine_order.subscriber.templates" class="WirecardShopwareElasticEngine\Subscriber\ExtendOrder">
+        <service id="wirecard_elastic_engine.subscriber.backend"
+                 class="WirecardShopwareElasticEngine\Subscriber\BackendSubscriber">
             <argument>%wirecard_shopware_elastic_engine.plugin_dir%</argument>
             <tag name="shopware.event_subscriber"/>
+        </service>
+        <service id="wirecard_elastic_engine.subscriber.order_send_mail"
+                 class="WirecardShopwareElasticEngine\Subscriber\OrderSubscriber">
+            <tag name="shopware.event_subscriber"/>
+        </service>
+
+        <!-- Commands -->
+        <service id="wirecard_elastic_engine.commands.payment_activate"
+                 class="WirecardShopwareElasticEngine\Commands\PaymentActivate">
+            <tag name="console.command"/>
         </service>
     </services>
 </container>

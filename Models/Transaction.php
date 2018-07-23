@@ -32,7 +32,6 @@
 namespace WirecardShopwareElasticEngine\Models;
 
 use Shopware\Components\Model\ModelEntity;
-use Shopware\Models\Order\Order;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -41,6 +40,14 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Transaction extends ModelEntity
 {
+    const TYPE_INITIAL = 'initial';
+    const TYPE_BACKEND = 'backend';
+    const TYPE_RETURN = 'return';
+    const TYPE_NOTIFY = 'notify';
+
+    const STATE_OPEN = 'open';
+    const STATE_CLOSED = 'closed';
+
     /**
      * @var int
      *
@@ -52,20 +59,19 @@ class Transaction extends ModelEntity
 
     /**
      * @var string
-     * @ORM\Column(name="order_number", type="string", nullable=true)
+     * @ORM\Column(name="order_number", type="string", nullable=false)
      */
     private $orderNumber;
 
     /**
-     * @var Order
-     * @ORM\OneToOne(targetEntity="Shopware\Models\Order\Order")
-     * @ORM\JoinColumn(name="order_number", referencedColumnName="ordernumber")
+     * @var string
+     * @ORM\Column(name="parent_transaction_id", type="string", nullable=true)
      */
-    private $order;
+    private $parentTransactionId;
 
     /**
      * @var string
-     * @ORM\Column(name="transaction_id", type="string", nullable=true)
+     * @ORM\Column(name="transaction_id", type="string", nullable=false)
      */
     private $transactionId;
 
@@ -77,24 +83,65 @@ class Transaction extends ModelEntity
 
     /**
      * @var string
-     * @ORM\Column(name="return_response", type="text", nullable=true)
+     * @ORM\Column(name="provider_transaction_reference", type="string", nullable=true)
      */
-    private $returnResponse;
+    private $providerTransactionReference;
 
     /**
      * @var string
-     * @ORM\Column(name="notification_response", type="text", nullable=true)
+     * @ORM\Column(name="transaction_type", type="string", nullable=true)
      */
-    private $notificationResponse;
+    private $transactionType;
+
+    /**
+     * @var float
+     * @ORM\Column(name="amount", type="float", nullable=true)
+     */
+    private $amount;
 
     /**
      * @var string
-     * @ORM\Column(name="payment_status", type="string", nullable=true)
+     * @ORM\Column(name="currency", type="string", nullable=true)
      */
-    private $paymentStatus;
+    private $currency;
 
     /**
-     * @return int
+     * @var array
+     * @ORM\Column(name="response", type="array", nullable=true)
+     */
+    private $response;
+
+    /**
+     * @var string
+     * @ORM\Column(name="type", type="string", nullable=true)
+     */
+    private $type;
+
+    /**
+     * @var string
+     * @ORM\Column(name="request_id", type="string", nullable=true)
+     */
+    private $requestId;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(name="created_at", type="datetime", nullable=false)
+     */
+    private $createdAt;
+
+    /**
+     * @var string
+     * @ORM\Column(name="state", type="string")
+     */
+    private $state;
+
+    public function __construct()
+    {
+        $this->setState(self::STATE_OPEN);
+    }
+
+    /**
+     * @return int|null
      */
     public function getId()
     {
@@ -102,7 +149,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string|null
+     * @return string
      */
     public function getOrderNumber()
     {
@@ -118,23 +165,23 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return Order|null
-     */
-    public function getOrder()
-    {
-        return $this->order;
-    }
-
-    /**
-     * @param Order $order
-     */
-    public function setOrder(Order $order)
-    {
-        $this->order = $order;
-    }
-
-    /**
      * @return string|null
+     */
+    public function getParentTransactionId()
+    {
+        return $this->parentTransactionId;
+    }
+
+    /**
+     * @param string $parentTransactionId
+     */
+    public function setParentTransactionId($parentTransactionId = null)
+    {
+        $this->parentTransactionId = $parentTransactionId;
+    }
+
+    /**
+     * @return string
      */
     public function getTransactionId()
     {
@@ -158,9 +205,9 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param $providerTransactionId
+     * @param string $providerTransactionId
      */
-    public function setProviderTransactionId($providerTransactionId)
+    public function setProviderTransactionId($providerTransactionId = null)
     {
         $this->providerTransactionId = $providerTransactionId;
     }
@@ -168,48 +215,164 @@ class Transaction extends ModelEntity
     /**
      * @return string|null
      */
-    public function getReturnResponse()
+    public function getProviderTransactionReference()
     {
-        return $this->returnResponse;
+        return $this->providerTransactionReference;
     }
 
     /**
-     * @param $returnResponse
+     * @param string $providerTransactionReference
      */
-    public function setReturnResponse($returnResponse)
+    public function setProviderTransactionReference($providerTransactionReference = null)
     {
-        $this->returnResponse = $returnResponse;
+        $this->providerTransactionReference = $providerTransactionReference;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTransactionType()
+    {
+        return $this->transactionType;
+    }
+
+    /**
+     * @param string $transactionType
+     */
+    public function setTransactionType($transactionType)
+    {
+        $this->transactionType = $transactionType;
+    }
+
+    /**
+     * @return float|null
+     */
+    public function getAmount()
+    {
+        return $this->amount;
+    }
+
+    /**
+     * @param float $amount
+     */
+    public function setAmount($amount = null)
+    {
+        $this->amount = $amount;
     }
 
     /**
      * @return string|null
      */
-    public function getNotificationResponse()
+    public function getCurrency()
     {
-        return $this->notificationResponse;
+        return $this->currency;
     }
 
     /**
-     * @param string $notificationResponse
+     * @param string $currency
      */
-    public function setNotificationResponse($notificationResponse)
+    public function setCurrency($currency = null)
     {
-        $this->notificationResponse = $notificationResponse;
+        $this->currency = $currency;
+    }
+
+    /**
+     * @return array
+     */
+    public function getResponse()
+    {
+        return $this->response;
+    }
+
+    /**
+     * @param array $response
+     */
+    public function setResponse(array $response)
+    {
+        $this->response = $response;
     }
 
     /**
      * @return string|null
      */
-    public function getPaymentStatus()
+    public function getType()
     {
-        return $this->paymentStatus;
+        return $this->type;
     }
 
     /**
-     * @param string $paymentStatus
+     * @param string $type
      */
-    public function setPaymentStatus($paymentStatus)
+    public function setType($type = null)
     {
-        $this->paymentStatus = $paymentStatus;
+        $this->type = $type;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getRequestId()
+    {
+        return $this->requestId;
+    }
+
+    /**
+     * @param string $requestId
+     */
+    public function setRequestId($requestId)
+    {
+        $this->requestId = $requestId;
+    }
+
+    /**
+     * @param \DateTime
+     */
+    public function setCreatedAt(\DateTime $createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @return string
+     */
+    public function getState()
+    {
+        return $this->state;
+    }
+
+    /**
+     * @param string $state
+     */
+    public function setState($state)
+    {
+        $this->state = $state;
+    }
+
+    public function toArray()
+    {
+        return [
+            'id'                           => $this->getId(),
+            'orderNumber'                  => $this->getOrderNumber(),
+            'transactionType'              => $this->getTransactionType(),
+            'transactionId'                => $this->getTransactionId(),
+            'parentTransactionId'          => $this->getParentTransactionId(),
+            'providerTransactionId'        => $this->getProviderTransactionId(),
+            'providerTransactionReference' => $this->getProviderTransactionReference(),
+            'requestId'                    => $this->getRequestId(),
+            'type'                         => $this->getType(),
+            'amount'                       => $this->getAmount(),
+            'currency'                     => $this->getCurrency(),
+            'createdAt'                    => $this->getCreatedAt(),
+            'response'                     => $this->getResponse(),
+            'state'                        => $this->getState(),
+        ];
     }
 }

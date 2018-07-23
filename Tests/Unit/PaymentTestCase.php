@@ -31,23 +31,56 @@
 
 namespace WirecardShopwareElasticEngine\Tests\Unit;
 
+use Doctrine\ORM\EntityManagerInterface;
+use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Shopware\Components\Routing\RouterInterface;
+use Shopware\Models\Plugin\Plugin;
+
 abstract class PaymentTestCase extends \PHPUnit_Framework_TestCase
 {
-    public function assertPaymentOptions(array $paymentMethod, $name, $description)
+    /** @var EntityManagerInterface|\PHPUnit_Framework_MockObject_MockObject */
+    protected $em;
+
+    /** @var \Shopware_Components_Config|\PHPUnit_Framework_MockObject_MockObject */
+    protected $config;
+
+    /** @var InstallerService|\PHPUnit_Framework_MockObject_MockObject */
+    protected $installer;
+
+    /** @var RouterInterface|\PHPUnit_Framework_MockObject_MockObject */
+    protected $router;
+
+    /** @var \Enlight_Event_EventManager|\PHPUnit_Framework_MockObject_MockObject */
+    protected $eventManager;
+
+    public function setUp()
+    {
+        parent::setUp();
+        $this->em           = $this->createMock(EntityManagerInterface::class);
+        $this->config       = $this->createMock(\Shopware_Components_Config::class);
+        $this->installer    = $this->createMock(InstallerService::class);
+        $this->router       = $this->createMock(RouterInterface::class);
+        $this->eventManager = $this->createMock(\Enlight_Event_EventManager::class);
+
+        $plugin = $this->createMock(Plugin::class);
+        $this->installer->method('getPluginByName')->willReturn($plugin);
+    }
+
+    public function assertPaymentOptions(array $paymentMethod, $name, $description, $position)
     {
         $this->assertEquals([
             'name'                  => $name,
             'description'           => $description,
             'action'                => 'WirecardElasticEnginePayment',
             'active'                => 0,
-            'position'              => 0,
+            'position'              => $position,
             'additionalDescription' => '',
         ], $paymentMethod);
     }
 
     public function assertConfigData(array $expected, array $actual)
     {
-        $this->assertTrue($this->assertArraysAreSimilar($expected, $actual));
+        $this->assertTrue($this->getArraysAreSimilar($expected, $actual));
     }
 
     /**
@@ -55,16 +88,17 @@ abstract class PaymentTestCase extends \PHPUnit_Framework_TestCase
      *
      * @param array $expected
      * @param array $actual
+     *
      * @return bool
      */
-    protected function assertArraysAreSimilar(array $expected, array $actual)
+    protected function getArraysAreSimilar(array $expected, array $actual)
     {
-        if(count(array_diff_assoc($expected, $actual))) {
+        if (count(array_diff_assoc($expected, $actual))) {
             return false;
         }
 
-        foreach($expected as $key => $value) {
-            if($value !== $actual[$key]) {
+        foreach ($expected as $key => $value) {
+            if ($value !== $actual[$key]) {
                 return false;
             }
         }

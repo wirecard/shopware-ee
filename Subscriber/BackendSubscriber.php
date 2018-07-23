@@ -29,32 +29,50 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components;
+namespace WirecardShopwareElasticEngine\Subscriber;
 
-class StatusCodes
+use Enlight\Event\SubscriberInterface;
+
+class BackendSubscriber implements SubscriberInterface
 {
     /**
-     * User canceled payment
+     * @var string
      */
-    const CANCELED_BY_USER = 1;
+    private $pluginDirectory;
 
     /**
-     * Payment couldn't get started
+     * @param string $pluginDirectory
      */
-    const ERROR_STARTING_PROCESS_FAILED = 2;
+    public function __construct($pluginDirectory)
+    {
+        $this->pluginDirectory = $pluginDirectory;
+    }
 
     /**
-     * Paymethod does not exist
+     * {@inheritdoc}
      */
-    const ERROR_NOT_A_VALID_METHOD = 3;
+    public static function getSubscribedEvents()
+    {
+        return [
+            'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch',
+        ];
+    }
 
-    /**
-     * Payment got rejected
-     */
-    const ERROR_FAILURE_RESPONSE = 4;
+    public function onOrderPostDispatch(\Enlight_Controller_ActionEventArgs $args)
+    {
+        $controller = $args->getSubject();
 
-    /**
-     * Critical error - order could not get saved
-     */
-    const ERROR_CRITICAL_NO_ORDER = 5;
+        $view    = $controller->View();
+        $request = $controller->Request();
+
+        $view->addTemplateDir($this->pluginDirectory . '/Resources/views');
+
+        if ($request->getActionName() === 'index') {
+            $view->extendsTemplate('backend/wirecard_extend_order/app.js');
+        }
+
+        if ($request->getActionName() === 'load') {
+            $view->extendsTemplate('backend/wirecard_extend_order/view/detail/window.js');
+        }
+    }
 }

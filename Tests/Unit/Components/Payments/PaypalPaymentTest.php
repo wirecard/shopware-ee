@@ -29,46 +29,115 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Payments;
+namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Payments;
 
+use Shopware\Models\Shop\Shop;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Wirecard\PaymentSdk\Config\Config;
+use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
-use WirecardShopwareElasticEngine\Components\Payments\Payment;
-use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
+use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
+use WirecardShopwareElasticEngine\Exception\UnknownTransactionTypeException;
 use WirecardShopwareElasticEngine\Tests\Unit\PaymentTestCase;
+use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
 
 class PaypalPaymentTest extends PaymentTestCase
 {
-    /** @var PaymentInterface */
-    protected $payment;
+    /** @var PaypalPayment */
+    private $payment;
 
     public function setUp()
     {
-        $this->payment = new PaypalPayment();
+        parent::setUp();
+
+        $this->config->method('getByNamespace')->willReturnMap([
+            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalMerchantId', null, 'MAID'],
+            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalSecret', null, 'Secret'],
+        ]);
+
+        $this->payment = new PaypalPayment(
+            $this->em,
+            $this->config,
+            $this->installer,
+            $this->router,
+            $this->eventManager
+        );
     }
 
     public function testGetPaymentOptions()
     {
-        $this->assertPaymentOptions($this->payment->getPaymentOptions(), 'wirecard_elastic_engine_paypal', 'Wirecard PayPal');
+        $this->assertEquals('Wirecard PayPal', $this->payment->getLabel());
+        $this->assertEquals('wirecard_elastic_engine_paypal', $this->payment->getName());
+        $this->assertEquals(1, $this->payment->getPosition());
+        $this->assertPaymentOptions(
+            $this->payment->getPaymentOptions(),
+            'wirecard_elastic_engine_paypal',
+            'Wirecard PayPal',
+            1
+        );
     }
 
     public function testGetTransaction()
     {
-        $this->assertInstanceOf(PayPalTransaction::class, $this->payment->getTransaction());
+        $transaction = $this->payment->getTransaction();
+        $this->assertInstanceOf(PayPalTransaction::class, $transaction);
+        $this->assertSame($transaction, $this->payment->getTransaction());
     }
 
-    public function testGetConfigData()
+    public function testGetPaymentConfig()
     {
-        $this->assertConfigData([
-            'baseUrl'         => 'https://api-test.wirecard.com',
-            'httpUser'        => '70000-APITEST-AP',
-            'httpPass'        => 'qD2wzQ_hrc!8',
-            'transactionMAID' => '2a0e9351-24ed-4110-9a1b-fd0fee6bec26',
-            'transactionKey'  => 'dbc5a498-9a66-43b9-bf1d-a618dd399684',
-            'transactionType' => Payment::TRANSACTION_TYPE_PURCHASE,
-            'sendBasket'      => true,
-            'fraudPrevention' => true,
-            'descriptor'      => true
-        ], $this->payment->getConfigData());
+        $config = $this->payment->getPaymentConfig();
+
+        $this->assertInstanceOf(PaymentConfig::class, $config);
+        $this->assertNull($config->getBaseUrl());
+        $this->assertNull($config->getHttpUser());
+        $this->assertNull($config->getHttpPassword());
+    }
+
+    public function testGetTransactionConfig()
+    {
+        /** @var Shop|\PHPUnit_Framework_MockObject_MockObject $shop */
+        /** @var ParameterBagInterface|\PHPUnit_Framework_MockObject_MockObject $parameters */
+
+        $shop       = $this->createMock(Shop::class);
+        $parameters = $this->createMock(ParameterBagInterface::class);
+
+        $config = $this->payment->getTransactionConfig($shop, $parameters, 'EUR');
+
+        $this->assertInstanceOf(Config::class, $config);
+        $this->assertNull($config->getBaseUrl());
+        $this->assertNull($config->getHttpUser());
+        $this->assertNull($config->getHttpPassword());
+
+        $paymentMethodConfig = $config->get(PayPalTransaction::NAME);
+        $this->assertInstanceOf(PaymentMethodConfig::class, $paymentMethodConfig);
+        $this->assertEquals('MAID', $paymentMethodConfig->getMerchantAccountId());
+        $this->assertEquals('Secret', $paymentMethodConfig->getSecret());
+        $this->assertEquals(PayPalTransaction::NAME, $paymentMethodConfig->getPaymentMethodName());
+    }
+
+    public function testGetTransactionTypeException()
+    {
+        $this->expectException(UnknownTransactionTypeException::class);
+        $this->assertEquals('', $this->payment->getTransactionType());
+    }
+
+    public function testGetTransactionType()
+    {
+        /** @var \Shopware_Components_Config|\PHPUnit_Framework_MockObject_MockObject $config */
+        $config = $this->createMock(\Shopware_Components_Config::class);
+        $config->method('getByNamespace')->willReturnMap([
+            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalTransactionType', null, 'pay'],
+        ]);
+        $payment = new PaypalPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
+        $this->assertEquals('purchase', $payment->getTransactionType());
+
+        $config = $this->createMock(\Shopware_Components_Config::class);
+        $config->method('getByNamespace')->willReturnMap([
+            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalTransactionType', null, 'reserve'],
+        ]);
+        $payment = new PaypalPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
+        $this->assertEquals('authorization', $payment->getTransactionType());
     }
 }

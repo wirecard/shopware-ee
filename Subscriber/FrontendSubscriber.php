@@ -50,7 +50,7 @@ class FrontendSubscriber implements SubscriberInterface
     private $templateManager;
 
     /**
-     * @param $pluginDirectory
+     * @param string                    $pluginDirectory
      * @param \Enlight_Template_Manager $templateManager
      */
     public function __construct($pluginDirectory, \Enlight_Template_Manager $templateManager)
@@ -62,8 +62,8 @@ class FrontendSubscriber implements SubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            'Enlight_Controller_Action_PreDispatch' => 'onPreDispatch',
-            'Theme_Compiler_Collect_Plugin_Less' => 'onCollectLessFiles',
+            'Enlight_Controller_Action_PreDispatch'                          => 'onPreDispatch',
+            'Theme_Compiler_Collect_Plugin_Less'                             => 'onCollectLessFiles',
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchCheckout',
         ];
     }
@@ -72,7 +72,6 @@ class FrontendSubscriber implements SubscriberInterface
     {
         $this->templateManager->addTemplateDir($this->pluginDirectory . '/Resources/views');
     }
-
 
     public function onCollectLessFiles()
     {
@@ -88,50 +87,51 @@ class FrontendSubscriber implements SubscriberInterface
     public function onPostDispatchCheckout(\Enlight_Controller_ActionEventArgs $args)
     {
         $controller = $args->getSubject();
-        $request = $controller->Request();
+        $request    = $controller->Request();
+        $view       = $controller->View();
+
+        if ($request->getActionName() === 'finish') {
+            $this->assignPaymentStatus($view);
+        }
 
         $errorCode = $request->getParam('wirecard_elastic_engine_error_code');
-        $errorMsg = $request->getParam('wirecard_elastic_engine_error_msg');
-        $updateCart = $request->getParam('wirecard_elastic_engine_update_cart');
-
-        $view = $controller->View();
-        $actionName = $request->getActionName();
-
-        if ($actionName === 'finish') {
-            $payment = $view->getAssign('sPayment');
-            if (strpos($payment['name'], 'wirecard_elastic_engine') !== null) {
-                $sOrderNumber = $view->getAssign('sOrderNumber');
-                if ($sOrderNumber) {
-                    $order = Shopware()->Models()->getRepository(Order::class)
-                                                 ->findOneBy(['number' => $sOrderNumber]);
-
-                    if ($order) {
-                        $view->assign('wirecardElasticEnginePayment', true);
-
-                        switch ($order->getPaymentStatus()->getId()) {
-                            case Status::PAYMENT_STATE_OPEN:
-                                $paymentStatusStr = 'pending';
-                                break;
-                            case Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED:
-                                $paymentStatusStr = 'canceled';
-                                break;
-                            default:
-                                $paymentStatusStr = 'success';
-                        }
-
-                        $view->assign('wirecardElasticEnginePaymentStatus', $paymentStatusStr);
-                    }
-                }
-            }
-        }
-
         if ($errorCode) {
             $view->assign('wirecardElasticEngineErrorCode', $errorCode);
-            $view->assign('wirecardElasticEngineErrorMessage', $errorMsg);
+            $view->assign('wirecardElasticEngineErrorMessage', $request->getParam('wirecard_elastic_engine_error_msg'));
         }
 
-        if ($updateCart) {
+        if ($request->getParam('wirecard_elastic_engine_update_cart')) {
             $view->assign('wirecardElasticEngineUpdateCart', true);
         }
+    }
+
+    private function assignPaymentStatus(\Enlight_View_Default $view)
+    {
+        if (strpos($view->getAssign('sPayment'), 'wirecard_elastic_engine') === false) {
+            return;
+        }
+        $sOrderNumber = $view->getAssign('sOrderNumber');
+        if (! $sOrderNumber) {
+            return;
+        }
+        /** @var Order $order */
+        $order = Shopware()->Models()->getRepository(Order::class)->findOneBy(['number' => $sOrderNumber]);
+        if (! $order) {
+            return;
+        }
+
+        switch ($order->getPaymentStatus()->getId()) {
+            case Status::PAYMENT_STATE_OPEN:
+                $paymentStatus = 'pending';
+                break;
+            case Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED:
+                $paymentStatus = 'canceled';
+                break;
+            default:
+                $paymentStatus = 'success';
+        }
+
+        $view->assign('wirecardElasticEnginePayment', true);
+        $view->assign('wirecardElasticEnginePaymentStatus', $paymentStatus);
     }
 }

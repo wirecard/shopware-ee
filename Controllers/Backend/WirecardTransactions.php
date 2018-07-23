@@ -30,12 +30,19 @@
  */
 
 use Shopware\Components\CSRFWhitelistAware;
-
-use Shopware\Components\Model\QueryBuilder;
 use Shopware\Models\Order\Order;
-
+use Shopware\Models\Shop\Shop;
+use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Config\Config;
+use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Actions\Action;
+use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
+use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
+use WirecardShopwareElasticEngine\Components\Services\BackendOperationHandler;
+use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
+use WirecardShopwareElasticEngine\Exception\UnknownActionException;
+use WirecardShopwareElasticEngine\Exception\MissingCredentialsException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
 // @codingStandardsIgnoreStart
@@ -46,36 +53,51 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
     /**
      * @var string
      */
-    protected $model = Order::class;
+    protected $model = Transaction::class;
 
     /**
      * @var string
      */
-    protected $alias = 'sOrder';
+    protected $alias = 'transaction';
 
     /**
-     * Checks credential to wirecard
+     * Check credentials against wirecard server
      */
     public function testSettingsAction()
     {
-        $config = $this->Request()->getParams();
+        $params = $this->Request()->getParams();
+        $method = $params['method'];
+        $prefix = 'wirecardElasticEngine' . $method;
 
-        if (empty($config['wirecardElasticEnginePaypalServer'])
-            || empty($config['wirecardElasticEnginePaypalHttpUser'])
-            || empty($config['wirecardElasticEnginePaypalHttpPassword'])) {
-            return $this->View()->assign(['status' => 'failed']);
+        try {
+            if (empty($params[$prefix . 'Server'])
+                || empty($params[$prefix . 'HttpUser'])
+                || empty($params[$prefix . 'HttpPassword'])
+            ) {
+                throw new MissingCredentialsException(
+                    'Missing credentials. Please check Server, HttpUser and HttpPassword.'
+                );
+            }
+
+            $testConfig         = new Config(
+                $params[$prefix . 'Server'],
+                $params[$prefix . 'HttpUser'],
+                $params[$prefix . 'HttpPassword']
+            );
+            $transactionService = new TransactionService($testConfig, $this->getLogger());
+
+            $success = $transactionService->checkCredentials();
+        } catch (\Exception $e) {
+            return $this->View()->assign([
+                'status' => 'failed',
+                'msg'    => $e->getMessage(),
+            ]);
         }
 
-        $wirecardUrl = $config['wirecardElasticEnginePaypalServer'];
-        $httpUser = $config['wirecardElasticEnginePaypalHttpUser'];
-        $httpPassword = $config['wirecardElasticEnginePaypalHttpPassword'];
-
-        $testConfig = new Config($wirecardUrl, $httpUser, $httpPassword);
-        $transactionService = new TransactionService($testConfig, Shopware()->PluginLogger());
-
-        $data['status'] = $transactionService->checkCredentials() ? 'success' : 'failed';
-
-        return $this->View()->assign($data);
+        return $this->View()->assign([
+            'status' => $success ? 'success' : 'failed',
+            'method' => $method,
+        ]);
     }
 
     /**
@@ -83,60 +105,169 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
      */
     public function detailsAction()
     {
-        $params = $this->Request()->getParams();
+        /** @var PaymentFactory $paymentFactory */
+        $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
+        $payment        = $paymentFactory->create($this->Request()->getParam('payment'));
 
-        $orderNumber = $params['orderNumber'];
+        $orderNumber = $this->Request()->getParam('orderNumber');
 
-        if (!$orderNumber) {
-            return $this->View()->assign(['success' => false]);
+        if (! $orderNumber) {
+            return $this->handleError('Order number not found');
         }
 
-        $builder = $this->getManager()->createQueryBuilder();
-        $builder->select('transaction')
-                ->from(Transaction::class, 'transaction')
-                ->where('transaction.orderNumber = :orderNumber')
-                ->setParameter('orderNumber', $orderNumber);
+        $transactions = $this->get('models')
+                             ->getRepository(Transaction::class)
+                             ->findBy([
+                                 'orderNumber' => $orderNumber,
+                             ]);
 
-        $query = $builder->getQuery();
-        $result = $query->getArrayResult();
-
-        if (!$result || empty($result)) {
-            return $this->View()->assign(['success' => false]);
+        if (! $transactions) {
+            return $this->handleError('No transactions found');
         }
 
-        return $this->View()->assign(['success' => true, 'params' => $params, 'data' => $result]);
+        $shop               = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
+        $config             = $payment->getTransactionConfig(
+            $shop,
+            $this->container->getParameterBag(),
+            $shop->getCurrency()->getCurrency()
+        );
+        $backendService     = new BackendService($config, $this->getLogger());
+        $paymentTransaction = $payment->getTransaction();
+
+        $result = [
+            'transactions' => [],
+        ];
+
+        foreach ($transactions as $transaction) {
+            /** @var Transaction $transaction */
+            $paymentTransaction->setParentTransactionId($transaction->getTransactionId());
+
+            $result['transactions'][] = array_merge($transaction->toArray(), [
+                'backendOperations' => $backendService->retrieveBackendOperations($paymentTransaction, true),
+                'isFinal'           => $backendService->isFinal($transaction->getTransactionType()),
+            ]);
+        }
+
+        return $this->handleSuccess([
+            'data' => $result,
+        ]);
+    }
+
+    public function processBackendOperationsAction()
+    {
+        $operation     = $this->Request()->getParam('operation');
+        $transactionId = $this->Request()->getParam('transactionId');
+
+        $amount   = $this->Request()->getParam('amount');
+        $currency = $this->Request()->getParam('currency');
+
+        if (! $operation) {
+            return $this->handleError('BackendOperationFailed');
+        }
+
+        /** @var PaymentFactory $paymentFactory */
+        $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
+        $payment        = $paymentFactory->create($this->Request()->getParam('payment'));
+
+        $shop           = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
+        $config         = $payment->getTransactionConfig(
+            $shop,
+            $this->container->getParameterBag(),
+            $shop->getCurrency()->getCurrency()
+        );
+        $backendService = new BackendService($config, $this->getLogger());
+
+        $transaction = $payment->getTransaction();
+        $transaction->setParentTransactionId($transactionId);
+
+        if ($amount) {
+            $transaction->setAmount(new Amount($amount, $currency));
+        }
+
+        /** @var BackendOperationHandler $backendOperationHandler */
+        $backendOperationHandler = $this->get('wirecard_elastic_engine.backend_operation_handler');
+        $action                  = $backendOperationHandler->execute(
+            $transaction,
+            $backendService,
+            $operation
+        );
+
+        return $this->handleAction($action);
+    }
+
+    /**
+     * @param Action $action
+     *
+     * @throws Exception
+     */
+    protected function handleAction(Action $action)
+    {
+        if ($action instanceof ViewAction) {
+            // we're not able to render templates here, so ignore `$action->getTemplate()` here
+            foreach ($action->getAssignments() as $key => $value) {
+                $this->View()->assign($key, $value);
+            }
+            return;
+        }
+
+        if ($action instanceof ErrorAction) {
+            $this->handleError($action->getMessage());
+            return;
+        }
+
+        throw new UnknownActionException(get_class($action));
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function getListQuery()
+    protected function getList($offset, $limit, $sort = [], $filter = [], array $wholeParams = [])
     {
-        return $this->prepareOrderQueryBuilder(parent::getListQuery());
+        $result = parent::getList($offset, $limit, $sort, $filter, $wholeParams);
+
+        foreach ($result['data'] as $key => $current) {
+            $order = $this->getManager()->getRepository(Order::class)
+                          ->findOneBy(['number' => $current['orderNumber']]);
+
+            /** @var Shopware\Models\Payment\Payment $payment */
+            $payment = $order ? $order->getPayment() : null;
+            /** @var Shopware\Models\Order\Status $status */
+            $status = $order ? $order->getOrderStatus() : null;
+
+            $result['data'][$key]['orderId']       = $order ? $order->getId() : 0;
+            $result['data'][$key]['orderStatus']   = $status ? $status->getId() : 0;
+            $result['data'][$key]['paymentMethod'] = $payment ? $payment->getDescription() : 'N/A';
+        }
+
+        return $result;
     }
 
     /**
-     * ignores empty orders in query for Order View
+     * @param array $assignments
      *
-     * @param QueryBuilder $builder
-     * @return QueryBuilder
-     * @throws Enlight_Exception
+     * @return Enlight_View|Enlight_View_Default
      */
-    private function prepareOrderQueryBuilder(QueryBuilder $builder)
+    private function handleSuccess(array $assignments)
     {
-        $builder->leftJoin('sOrder.languageSubShop', 'languageSubShop')
-                ->leftJoin('sOrder.orderStatus', 'orderStatus')
-                ->leftJoin('sOrder.paymentStatus', 'paymentStatus')
-                ->leftJoin('sOrder.payment', 'payment')
-                ->addSelect('payment')
-                ->addSelect('orderStatus')
-                ->addSelect('paymentStatus')
-                ->where('sOrder.number != 0');
+        return $this->View()->assign(array_merge([
+            'success' => true,
+        ], $assignments));
+    }
 
-        $query = $builder->getQuery();
-        Shopware()->PluginLogger()->notice($query->getSQL());
+    /**
+     * @param string $message
+     *
+     * @return Enlight_View|Enlight_View_Default
+     * @throws Exception
+     */
+    private function handleError($message = '')
+    {
+        $this->getLogger()->error($message, $this->Request()->getParams());
 
-        return $builder;
+        return $this->View()->assign([
+            'success' => false,
+            'message' => $message,
+        ]);
     }
 
     /**
@@ -144,6 +275,15 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
      */
     public function getWhitelistedCSRFActions()
     {
-        return array('testSettings');
+        return ['notify', 'testSettings'];
+    }
+
+    /**
+     * @return \Shopware\Components\Logger
+     * @throws Exception
+     */
+    private function getLogger()
+    {
+        return $this->get('pluginlogger');
     }
 }
