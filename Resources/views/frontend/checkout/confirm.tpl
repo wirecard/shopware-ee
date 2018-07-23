@@ -12,6 +12,16 @@
             </div>
         </div>
     {/if}
+
+    {if $includeDeviceFingerprintIFrame}
+        <script type="text/javascript"
+                src="https://h.wirecard.com/fp/tags.js?org_id=6xxznhva&session_id={$deviceFingerprintId}">
+        </script>
+        <noscript>
+            <iframe style="width: 100px; height: 100px; border: 0; position: absolute; top: -5000px;"
+                    src="https://h.wirecard.com/tags?org_id=6xxznhva&session_id={$deviceFingerprintId}"></iframe>
+        </noscript>
+    {/if}
 {/block}
 
 {block name="frontend_index_javascript_async_ready"}

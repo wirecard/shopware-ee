@@ -34,6 +34,7 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 class SessionHandler
 {
     const PAYMENT_DATA = 'WirecardElasticEnginePaymentData';
+    const DEVICE_FINGERPRINT_ID = 'fingerprint_id';
 
     /**
      * @var \Enlight_Components_Session_Namespace
@@ -62,5 +63,25 @@ class SessionHandler
             return null;
         }
         return $this->session->offsetGet(self::PAYMENT_DATA);
+    }
+
+    /**
+     * @param string $maid
+     * @return string
+     */
+    public function getDeviceFingerprintId($maid)
+    {
+        if (! $this->session->get(self::DEVICE_FINGERPRINT_ID)) {
+            $this->session->offsetSet(self::DEVICE_FINGERPRINT_ID, md5($maid . '_' . microtime()));
+        }
+
+        return $this->session->get(self::DEVICE_FINGERPRINT_ID);
+    }
+
+    public function destroyDeviceFingerprintId()
+    {
+        if ($this->session->offsetExists(self::DEVICE_FINGERPRINT_ID)) {
+            $this->session->offsetUnset(self::DEVICE_FINGERPRINT_ID);
+        }
     }
 }

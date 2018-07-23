@@ -152,7 +152,7 @@ class PaymentHandler extends Handler
         $transaction->setNotificationUrl($notificationUrl);
         $transaction->setOrderNumber($orderSummary->getPaymentUniqueId());
 
-        if ($paymentConfig->sendBasket()) {
+        if ($paymentConfig->sendBasket() || $paymentConfig->hasFraudPrevention()) {
             $transaction->setBasket($orderSummary->getBasketMapper()->getWirecardBasket());
         }
 
@@ -161,6 +161,7 @@ class PaymentHandler extends Handler
             $transaction->setAccountHolder($orderSummary->getUserMapper()->getWirecardBillingAccountHolder());
             $transaction->setShipping($orderSummary->getUserMapper()->getWirecardShippingAccountHolder());
             $transaction->setLocale($orderSummary->getUserMapper()->getLocale());
+            $transaction->setDevice($orderSummary->getWirecardDevice());
         }
 
         if ($paymentConfig->sendDescriptor()) {
