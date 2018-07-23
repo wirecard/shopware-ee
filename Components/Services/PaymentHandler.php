@@ -32,6 +32,8 @@
 namespace WirecardShopwareElasticEngine\Components\Services;
 
 use Shopware\Models\Shop\Shop;
+use Wirecard\PaymentSdk\Entity\CustomField;
+use Wirecard\PaymentSdk\Entity\CustomFieldCollection;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\FormInteractionResponse;
@@ -150,13 +152,17 @@ class PaymentHandler extends Handler
         $transaction->setRedirect($redirect);
         $transaction->setAmount($orderSummary->getAmount());
         $transaction->setNotificationUrl($notificationUrl);
-        $transaction->setOrderNumber($orderSummary->getPaymentUniqueId());
+
+        $customFields = new CustomFieldCollection();
+        $customFields->add(new CustomField('payment-unique-id', $orderSummary->getPaymentUniqueId()));
+        $transaction->setCustomFields($customFields);
 
         if ($paymentConfig->sendBasket()) {
             $transaction->setBasket($orderSummary->getBasketMapper()->getWirecardBasket());
         }
 
         if ($paymentConfig->hasFraudPrevention()) {
+            $transaction->setOrderNumber($orderSummary->getPaymentUniqueId());
             $transaction->setIpAddress($orderSummary->getUserMapper()->getClientIp());
             $transaction->setConsumerId($orderSummary->getUserMapper()->getCustomerNumber());
             $transaction->setAccountHolder($orderSummary->getUserMapper()->getWirecardBillingAccountHolder());
