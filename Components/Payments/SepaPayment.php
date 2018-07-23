@@ -130,7 +130,7 @@ class SepaPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * @return SepaPaymentConfig
      */
     public function getPaymentConfig()
     {
@@ -161,10 +161,6 @@ class SepaPayment extends Payment
     public function getAdditionalFormFields()
     {
         $paymentConfig = $this->getPaymentConfig();
-
-        if (! $paymentConfig instanceof SepaPaymentConfig) {
-            return null;
-        }
 
         return [
             'method'          => $this->getName(),
