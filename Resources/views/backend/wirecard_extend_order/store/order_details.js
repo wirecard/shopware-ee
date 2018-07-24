@@ -1,8 +1,8 @@
-// {block name="backend/wirecard_extend_order/store/wirecard_order_details"}
-Ext.define('Shopware.apps.WirecardExtendOrder.store.WirecardOrderDetails', {
+// {block name="backend/wirecard_extend_order/store/order_details"}
+Ext.define('Shopware.apps.WirecardExtendOrder.store.OrderDetails', {
     extend: 'Ext.data.Store',
 
-    model: 'Shopware.apps.WirecardExtendOrder.model.WirecardOrderDetails',
+    model: 'Shopware.apps.WirecardExtendOrder.model.OrderDetails',
 
     proxy: {
         type: 'ajax',

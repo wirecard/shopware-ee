@@ -1,3 +1,4 @@
+// {namespace name="backend/wirecard_elastic_engine/transactions_window"}
 Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
     extend: 'Shopware.grid.Panel',
     alias: 'widget.wirecardee-transactions-grid',
@@ -8,19 +9,23 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
     },
 
     snippets: {
-        OrderNumber: '{s name="OrderNumber" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        PaymentUniqueId: '{s name="PaymentUniqueId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        Type: '{s name="Type" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        TransactionId: '{s name="TransactionId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        ParentTransactionId: '{s name="ParentTransactionId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        ProviderTransactionId: '{s name="ProviderTransactionId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        TransactionType: '{s name="TransactionType" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        TransactionState: '{s name="TransactionState" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        PaymentMethod: '{s name="PaymentMethod" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        Amount: '{s name="Amount" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        Currency: '{s name="Currency" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        OrderCanceledErrorTitle: '{s name="OrderCanceledErrorTitle" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        OrderCanceledErrorText: '{s name="OrderCanceledErrorText" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}'
+        OrderNumber: '{s name="OrderNumber"}{/s}',
+        PaymentUniqueId: '{s name="PaymentUniqueId"}{/s}',
+        Type: '{s name="Type"}{/s}',
+        TransactionId: '{s name="TransactionId"}{/s}',
+        ParentTransactionId: '{s name="ParentTransactionId"}{/s}',
+        ProviderTransactionId: '{s name="ProviderTransactionId"}{/s}',
+        TransactionType: '{s name="TransactionType"}{/s}',
+        TransactionState: '{s name="TransactionState"}{/s}',
+        PaymentMethod: '{s name="PaymentMethod"}{/s}',
+        Amount: '{s name="Amount"}{/s}',
+        Currency: '{s name="Currency"}{/s}',
+        OrderCanceledErrorTitle: '{s name="OrderCanceledErrorTitle"}{/s}',
+        OrderCanceledErrorText: '{s name="OrderCanceledErrorText"}{/s}',
+        OpenTransactionTooltip: '{s name="OpenTransactionTooltip"}{/s}',
+        OpenOrderTooltip: '{s name="OpenOrderTooltip"}{/s}',
+        NoOrderNumber: '{s name="NoOrderNumber"}{/s}',
+        OrderCanceled: '{s name="OrderCanceled"}{/s}'
     },
 
     configure: function () {
@@ -98,16 +103,16 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
 
         items.push({
             iconCls: 'sprite-magnifier-medium',
-            tooltip: 'Open transaction details',
+            tooltip: me.snippets.OpenTransactionTooltip,
             handler: function (view, rowIndex, colIndex, item, opts, record) {
-                var historyWindow = Ext.create('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', { record: record });
-                historyWindow.show();
+                var detailsWindow = Ext.create('Shopware.apps.WirecardExtendOrder.view.TransactionDetailsWindow', { record: record });
+                detailsWindow.show();
             }
         });
 
         items.push({
             iconCls: 'sprite-pencil',
-            tooltip: 'Open order details',
+            tooltip: me.snippets.OpenOrderTooltip,
             handler: function (view, rowIndex, colIndex, item, opts, record) {
                 if (!record.get('orderId') || record.get('orderStatus') < 0) {
                     Shopware.Notification.createStickyGrowlMessage({
@@ -138,14 +143,15 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
      * @returns { String }
      */
     orderNumberRenderer: function (value, style, row) {
+        var me = this;
         if (value === Ext.undefined) {
             return value;
         }
         if (!row.data.orderId) {
-            return '(no order)';
+            return me.snippets.NoOrderNumber;
         }
         if (!row.data.orderId || row.data.orderStatus < 0) {
-            return value + ' (canceled)';
+            return value + ' ' + me.snippets.OrderCanceled;
         }
         return value;
     },

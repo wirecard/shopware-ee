@@ -1,9 +1,10 @@
-// {block name="backend/wirecard_extend_order/view/history_window"}
-Ext.define('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', {
+// {block name="backend/wirecard_extend_order/view/transaction_details_window"}
+// {namespace name="backend/wirecard_elastic_engine/transactions_window"}
+Ext.define('Shopware.apps.WirecardExtendOrder.view.TransactionDetailsWindow', {
     extend: 'Enlight.app.Window',
-    alias: 'widget.wirecardee-extend-order-history-window',
+    alias: 'widget.wirecardee-extend-order-transaction-details-window',
     height: 600,
-    title: 'Wirecard Transaction',
+    title: '{s name="DetailsWindowTitle"}{/s}',
     layout: 'anchor',
     bodyPadding: 10,
     autoScroll: true,
@@ -13,24 +14,24 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', {
     },
 
     snippets: {
-        CreatedAt: '{s name="CreatedAt" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        OrderNumber: '{s name="OrderNumber" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        PaymentUniqueId: '{s name="PaymentUniqueId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        Type: '{s name="Type" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        TransactionId: '{s name="TransactionId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        ParentTransactionId: '{s name="ParentTransactionId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        ProviderTransactionId: '{s name="ProviderTransactionId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        ProviderTransactionReference: '{s name="ProviderTransactionReference" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        TransactionType: '{s name="TransactionType" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        TransactionState: '{s name="TransactionState" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        PaymentMethod: '{s name="PaymentMethod" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        Amount: '{s name="Amount" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        Currency: '{s name="Currency" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        Response: '{s name="Response" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        RequestId: '{s name="RequestId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        Request: '{s name="Request" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        OrderCanceledErrorTitle: '{s name="OrderCanceledErrorTitle" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
-        OrderCanceledErrorText: '{s name="OrderCanceledErrorText" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}'
+        CreatedAt: '{s name="CreatedAt"}{/s}',
+        OrderNumber: '{s name="OrderNumber"}{/s}',
+        PaymentUniqueId: '{s name="PaymentUniqueId"}{/s}',
+        Type: '{s name="Type"}{/s}',
+        TransactionId: '{s name="TransactionId"}{/s}',
+        ParentTransactionId: '{s name="ParentTransactionId"}{/s}',
+        ProviderTransactionId: '{s name="ProviderTransactionId"}{/s}',
+        ProviderTransactionReference: '{s name="ProviderTransactionReference"}{/s}',
+        TransactionType: '{s name="TransactionType"}{/s}',
+        TransactionState: '{s name="TransactionState"}{/s}',
+        PaymentMethod: '{s name="PaymentMethod"}{/s}',
+        Amount: '{s name="Amount"}{/s}',
+        Currency: '{s name="Currency"}{/s}',
+        Response: '{s name="Response"}{/s}',
+        RequestId: '{s name="RequestId"}{/s}',
+        Request: '{s name="Request"}{/s}',
+        OrderCanceledErrorTitle: '{s name="OrderCanceledErrorTitle"}{/s}',
+        OrderCanceledErrorText: '{s name="OrderCanceledErrorText"}{/s}'
     },
 
     initComponent: function () {
@@ -56,7 +57,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', {
 
         return Ext.create('Ext.XTemplate',
             '{literal}<tpl for=".">',
-            '<div class="wirecard-history-entry-pnl">',
+            '<div class="wirecardee-transaction-details-entry-pnl">',
             '<p><label class="x-form-item-label">' + me.snippets.CreatedAt + ':</label> {createdAt}</p>',
             '<p><label class="x-form-item-label">' + me.snippets.OrderNumber + ':</label> {orderNumber}</p>',
             '<p><label class="x-form-item-label">' + me.snippets.PaymentUniqueId + ':</label> {paymentUniqueId}</p>',
