@@ -2,7 +2,7 @@
 
 {block name='frontend_checkout_finish_teaser_actions'}
     {if $wirecardElasticEnginePayment}
-        <p class="wirecard--payment-message">
+        <p class="wirecardee--payment-message">
             {if $wirecardElasticEnginePaymentStatus == 'pending'}
                 {s name='PaymentStatusPendingMessage' namespace='frontend/wirecard_elastic_engine/checkout'}{/s}
             {elseif $wirecardElasticEnginePaymentStatus == 'success'}

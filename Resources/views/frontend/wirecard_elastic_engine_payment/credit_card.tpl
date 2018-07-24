@@ -11,7 +11,7 @@
         </div>
         {if $threeDSecure}
             <div class="content content--checkout">
-                <h2>{s name="CreditCard3DSTitle" namespace="frontend/wirecard_elastic_engine/checkout"}Wirecard3DSecureInformation{/s}</h2>
+                <h2>{s name="CreditCard3DSTitle" namespace="frontend/wirecard_elastic_engine/checkout"}{/s}</h2>
                 <form id="wirecardee-credit-card--redirect-form" method="{$method}" action="{$url}">
                     {foreach from=$formFields item='field' key='key'}
                         <input type="hidden" name="{$key}" value="{$field}"/>
