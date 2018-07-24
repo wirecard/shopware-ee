@@ -31,16 +31,19 @@
 
 namespace WirecardShopwareElasticEngine\Tests\Functional\Controllers\Frontend;
 
+use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ */
 class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_TestCase
 {
     const USER_AGENT = 'Mozilla/5.0 (Android; Tablet; rv:14.0) Gecko/14.0 Firefox/14.0';
 
     public function testIndexAction()
     {
-        $this->markTestIncomplete();
-
         $this->reset();
         $this->Request()->setMethod('GET');
         $this->Request()->setHeader('User-Agent', self::USER_AGENT);
@@ -77,7 +80,7 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
         $orderVariables['sUserData'] = [
             'additional'      => [
                 'user'    => [
-                    'paymentID' => 2,
+                    'paymentID' => 7,
                     'firstname' => 'First Name',
                     'lastname'  => 'Last Name',
                     'email'     => 'test@example.com',
@@ -86,14 +89,8 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
                     'name' => PaypalPayment::PAYMETHOD_IDENTIFIER,
                 ],
             ],
-            'billingaddress'  => [
-                'userID'    => 1,
-                'countryID' => 1,
-            ],
-            'shippingaddress' => [
-                'userID'    => 1,
-                'countryID' => 1,
-            ],
+            'billingaddress'  => ['userID' => 1, 'countryID' => 1],
+            'shippingaddress' => ['userID' => 1, 'countryID' => 1],
         ];
 
         Shopware()->Session()->offsetSet('sOrderVariables', $orderVariables);
@@ -105,5 +102,97 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
         $locationHeader = $response->getHeaders()[0];
         $this->assertEquals('Location', $locationHeader['name']);
         $this->assertContains('sandbox.paypal.com', $locationHeader['value']);
+    }
+
+    public function testIndexActionBasketException()
+    {
+        $this->reset();
+        $this->Request()->setMethod('GET');
+        $this->Request()->setHeader('User-Agent', self::USER_AGENT);
+
+        $orderVariables              = new \ArrayObject();
+        $orderVariables['sBasket']   = [
+            'content'          => [
+                [
+                    'articlename' => 'Foo',
+                    'id'          => 1,
+                    'articleID'   => 1,
+                    'ordernumber' => 1,
+                    'tax'         => 10,
+                    'tax_rate'    => 20,
+                    'quantity'    => 100000,
+                    'price'       => 50,
+                ],
+            ],
+            'AmountNetNumeric' => 100.0,
+            'sAmount'          => 100.0,
+            'sAmountTax'       => 20.0,
+            'sCurrencyId'      => 1,
+        ];
+        $orderVariables['sUserData'] = [
+            'additional'      => [
+                'user'    => [
+                    'paymentID' => 7,
+                    'firstname' => 'First Name',
+                    'lastname'  => 'Last Name',
+                    'email'     => 'test@example.com',
+                ],
+                'payment' => [
+                    'name' => PaypalPayment::PAYMETHOD_IDENTIFIER,
+                ],
+            ],
+            'billingaddress'  => ['userID' => 1, 'countryID' => 1],
+            'shippingaddress' => ['userID' => 1, 'countryID' => 1],
+        ];
+
+        Shopware()->Session()->offsetSet('sOrderVariables', $orderVariables);
+
+        $response = $this->dispatch('/WirecardElasticEnginePayment');
+
+        $this->assertTrue($response->isRedirect());
+        $this->assertEquals(302, $response->getHttpResponseCode());
+        $locationHeader = $response->getHeaders()[0];
+        $this->assertEquals('Location', $locationHeader['name']);
+        $this->assertContains('checkout/shippingPayment/wirecard_elastic_engine_error_code/2',
+            $locationHeader['value']);
+    }
+
+    public function testReturnAction()
+    {
+        $this->markTestIncomplete();
+        
+        $this->reset();
+        $this->Request()->setMethod('GET');
+        $this->Request()->setHeader('User-Agent', self::USER_AGENT);
+
+        $payload = json_decode(file_get_contents(__DIR__ . '/return-payload.json'), true);
+        $this->Request()->setParams($payload);
+
+        $response = $this->dispatch('/WirecardElasticEnginePayment/return/method/'
+                                    . CreditCardPayment::PAYMETHOD_IDENTIFIER);
+
+        $this->assertTrue($response->isRedirect());
+        $this->assertEquals(302, $response->getHttpResponseCode());
+        $locationHeader = $response->getHeaders()[0];
+        $this->assertEquals('Location', $locationHeader['name']);
+        $this->assertContains('checkout/shippingPayment/wirecard_elastic_engine_error_code/3',
+            $locationHeader['value']);
+    }
+
+    public function testReturnActionMissingPayload()
+    {
+        $this->reset();
+        $this->Request()->setMethod('GET');
+        $this->Request()->setHeader('User-Agent', self::USER_AGENT);
+
+        $response = $this->dispatch('/WirecardElasticEnginePayment/return/method/'
+                                    . CreditCardPayment::PAYMETHOD_IDENTIFIER);
+
+        $this->assertTrue($response->isRedirect());
+        $this->assertEquals(302, $response->getHttpResponseCode());
+        $locationHeader = $response->getHeaders()[0];
+        $this->assertEquals('Location', $locationHeader['name']);
+        $this->assertContains('checkout/shippingPayment/wirecard_elastic_engine_error_code/1',
+            $locationHeader['value']);
     }
 }

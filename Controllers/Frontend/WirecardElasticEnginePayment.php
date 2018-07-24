@@ -197,6 +197,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $request            = $this->Request();
         $payment            = $this->getPaymentFactory()->create($request->getParam(self::ROUTER_METHOD));
 
+        //$this->getLogger()->debug('Frontend::returnAction: request: ' . json_encode($request->getParams()));
+
         try {
             $response = $returnHandler->execute(
                 $payment,
