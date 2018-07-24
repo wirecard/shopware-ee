@@ -111,20 +111,24 @@ class CreditCardPayment extends Payment
             );
         }
 
-        $creditCardConfig->addSslMaxLimit(
-            $this->getLimit(
-                $selectedCurrency,
-                $paymentConfig->getSslMaxLimit(),
-                $paymentConfig->getSslMaxLimitCurrency()
-            )
-        );
-        $creditCardConfig->addThreeDMinLimit(
-            $this->getLimit(
-                $selectedCurrency,
-                $paymentConfig->getThreeDMinLimit(),
-                $paymentConfig->getThreeDMinLimitCurrency()
-            )
-        );
+        if (strtolower($paymentConfig->getSslMaxLimit()) !== 'null') {
+            $creditCardConfig->addSslMaxLimit(
+                $this->getLimit(
+                    $selectedCurrency,
+                    $paymentConfig->getSslMaxLimit(),
+                    $paymentConfig->getSslMaxLimitCurrency()
+                )
+            );
+        }
+        if (strtolower($paymentConfig->getThreeDMinLimit()) !== 'null') {
+            $creditCardConfig->addThreeDMinLimit(
+                $this->getLimit(
+                    $selectedCurrency,
+                    $paymentConfig->getThreeDMinLimit(),
+                    $paymentConfig->getThreeDMinLimitCurrency()
+                )
+            );
+        }
 
         $transactionConfig->add($creditCardConfig);
         $this->getTransaction()->setConfig($creditCardConfig);
