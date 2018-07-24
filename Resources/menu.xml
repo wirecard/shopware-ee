@@ -26,7 +26,7 @@
                     <class>sprite-wirecard</class>
                     <onclick>
                         <![CDATA[
-                                 Ext.util.CSS.createStyleSheet('#lz_overlay_wm {display: inherit !important;}');
+                            Ext.util.CSS.createStyleSheet('#lz_overlay_wm {display: inherit !important;}');
                         ]]>
                     </onclick>
                 </entry>

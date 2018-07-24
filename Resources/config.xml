@@ -102,20 +102,6 @@ function (button) {
                 payment.
             </description>
         </element>
-        <element type="button" scope="shop">
-            <name>wirecardElasticEngineCreditCardTestApi</name>
-            <label lang="de">[Kreditkarte] Konfiguration testen</label>
-            <label lang="en">[Credit Card] Test configuration</label>
-            <options>
-                <handler>
-                    <![CDATA[
-function (button) {
-    wirecardeeTestPaymentCredentials(button, 'CreditCard', 'Wirecard Credit Card Test');
-}
-                    ]]>
-                </handler>
-            </options>
-        </element>
         <element type="select" scope="shop">
             <name>wirecardElasticEngineCreditCardTransactionType</name>
             <label lang="de">[Kreditkarte] Zahlungsaktion</label>
@@ -199,6 +185,20 @@ function (button) {
             <description lang="en">Leave blank for default shop currency.</description>
         </element>
         <element type="button" scope="shop">
+            <name>wirecardElasticEngineCreditCardTestApi</name>
+            <label lang="de">[Kreditkarte] Konfiguration testen</label>
+            <label lang="en">[Credit Card] Test configuration</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    wirecardeeTestPaymentCredentials(button, 'CreditCard', 'Wirecard Credit Card Test');
+}
+                    ]]>
+                </handler>
+            </options>
+        </element>
+        <element type="button" scope="shop">
             <name>wirecardElasticEngineCreditCardThreeDDescription</name>
             <label lang="de">[Kreditkarte] Erklärung zu Non 3-D Secure und 3-D Secure Limits öffnen</label>
             <label lang="en">[Credit Card] Open explanation regarding Non 3-D Secure and 3-D Secure limits</label>
@@ -257,20 +257,6 @@ function (button) {
             <description lang="en">Secret Key is mandatory to calculate the Digital Signature for payments.
             </description>
         </element>
-        <element type="button" scope="shop">
-            <name>wirecardElasticEngineTestApi</name>
-            <label lang="de">[PayPal] Konfiguration testen</label>
-            <label lang="en">[PayPal] Test configuration</label>
-            <options>
-                <handler>
-                    <![CDATA[
-function (button) {
-    wirecardeeTestPaymentCredentials(button, 'Paypal', 'Wirecard PayPal Test');
-}
-                    ]]>
-                </handler>
-            </options>
-        </element>
         <element type="select" scope="shop">
             <name>wirecardElasticEnginePaypalTransactionType</name>
             <label lang="de">[PayPal] Zahlungsaktion</label>
@@ -328,6 +314,20 @@ function (button) {
                 financial service provider.
             </description>
         </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEngineTestApi</name>
+            <label lang="de">[PayPal] Konfiguration testen</label>
+            <label lang="en">[PayPal] Test configuration</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    wirecardeeTestPaymentCredentials(button, 'Paypal', 'Wirecard PayPal Test');
+}
+                    ]]>
+                </handler>
+            </options>
+        </element>
         <!-- PayPal End -->
         <!-- SEPA Direct Debit -->
         <element type="text" scope="shop">
@@ -372,20 +372,6 @@ function (button) {
             </description>
             <description lang="en">Secret Key is mandatory to calculate the Digital Signature for payments.
             </description>
-        </element>
-        <element type="button" scope="shop">
-            <name>wirecardElasticEngineSepaTestApi</name>
-            <label lang="de">[SEPA-Lastschrift] Konfiguration testen</label>
-            <label lang="en">[SEPA Direct Debit] Test configuration</label>
-            <options>
-                <handler>
-                    <![CDATA[
-function (button) {
-    wirecardeeTestPaymentCredentials(button, 'Sepa', 'Wirecard SEPA Direct Debit Test');
-}
-                    ]]>
-                </handler>
-            </options>
         </element>
         <element type="select" scope="shop">
             <name>wirecardElasticEngineSepaTransactionType</name>
@@ -464,6 +450,20 @@ function (button) {
             </description>
             <description lang="en">SEPA requires a Creditor Address for display on the SEPA Direct Debit Mandate page.
             </description>
+        </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEngineSepaTestApi</name>
+            <label lang="de">[SEPA-Lastschrift] Konfiguration testen</label>
+            <label lang="en">[SEPA Direct Debit] Test configuration</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    wirecardeeTestPaymentCredentials(button, 'Sepa', 'Wirecard SEPA Direct Debit Test');
+}
+                    ]]>
+                </handler>
+            </options>
         </element>
         <!-- SEPA Direct Debit End -->
         <!-- SEPA Credit Transfer -->
