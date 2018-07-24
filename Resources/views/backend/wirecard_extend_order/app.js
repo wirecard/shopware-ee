@@ -5,5 +5,5 @@
 //     {include file="backend/wirecard_extend_order/view/general_information_window.js"}
 //     {include file="backend/wirecard_extend_order/model/order_details.js"}
 //     {include file="backend/wirecard_extend_order/store/order_details.js"}
-//     {include file="backend/wirecard_extend_order/controller/extend_order_controller.js"}
+//     {include file="backend/wirecard_extend_order/controller/extend_order.js"}
 // {/block}

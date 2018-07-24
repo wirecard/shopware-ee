@@ -6,6 +6,5 @@ Ext.define('Shopware.apps.WirecardExtendOrder.model.OrderDetails', {
         'transactions',
         'backendOperations'
     ]
-
 });
 // {/block}

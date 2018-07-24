@@ -5,20 +5,19 @@
 {/block}
 
 {block name="frontend_index_content"}
-    <div class="credit-card" style="padding-top: 50px;">
-        <div class="wirecard-credit-card-error-message" style="display: none;">
-            {include file='frontend/_includes/messages.tpl' type='error' content="test"}
-        </div>
+    <div class="wirecardee-redirect" style="padding-top: 50px;">
         <div class="content content--checkout">
-            <h2>WirecardRedirect</h2>
-            <form id="redirect--form" method="{$method}" action="{$url}">
+            <h2>{s name="PaymentRedirectHeader" namespace="frontend/wirecard_elastic_engine/checkout"}WirecardRedirect{/s}</h2>
+            <form id="wirecardee-redirect--form" method="{$method}" action="{$url}">
                 {foreach from=$formFields item='field' key='key'}
-                    <input type="hidden" name="{$key}" value="{$field}" />
+                    <input type="hidden" name="{$key}" value="{$field}"/>
                 {/foreach}
-                <button class="btn is--primary is--large right is--icon-right" type="submit">Senden</button>
+                <button class="btn is--primary is--large right" type="submit">
+                    {s name="PaymentRedirectButton" namespace="frontend/wirecard_elastic_engine/checkout"}Send{/s}
+                </button>
             </form>
             <script type="text/javascript">
-             document.getElementById('redirect--form').submit();
+                document.getElementById('wirecardee-redirect--form').submit();
             </script>
         </div>
     </div>

@@ -7,7 +7,6 @@ Ext.define('Shopware.apps.WirecardExtendOrder.store.OrderDetails', {
     proxy: {
         type: 'ajax',
         url: '{url controller="wirecardTransactions" action="details"}',
-
         reader: {
             type: 'json',
             root: 'data'

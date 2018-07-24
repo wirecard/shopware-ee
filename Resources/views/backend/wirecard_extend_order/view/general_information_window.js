@@ -2,7 +2,7 @@
 // {namespace name="backend/wirecard_elastic_engine/general_information"}
 Ext.define('Shopware.apps.WirecardExtendOrder.view.GeneralInformationWindow', {
     extend: 'Enlight.app.Window',
-    alias: 'widget.wirecard-extend-order-general-information-window',
+    alias: 'widget.wirecardee-extend-order-general-information-window',
     height: 600,
     title: '{s name="Title"}{/s}',
     layout: 'anchor',

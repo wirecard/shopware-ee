@@ -5,14 +5,14 @@
 {/block}
 
 {block name="frontend_index_content"}
-    <div class="credit-card" style="padding-top: 50px;">
+    <div class="wirecardee-credit-card" style="padding-top: 50px;">
         <div class="wirecardee-credit-card-error-message" style="display: none; margin-bottom: 20px;">
             {include file='frontend/_includes/messages.tpl' type='error' content="error"}
         </div>
         {if $threeDSecure}
             <div class="content content--checkout">
                 <h2>{s name="CreditCard3DSTitle" namespace="frontend/wirecard_elastic_engine/checkout"}Wirecard3DSecureInformation{/s}</h2>
-                <form id="wirecardee-redirect--form" method="{$method}" action="{$url}">
+                <form id="wirecardee-credit-card--redirect-form" method="{$method}" action="{$url}">
                     {foreach from=$formFields item='field' key='key'}
                         <input type="hidden" name="{$key}" value="{$field}"/>
                     {/foreach}
@@ -21,7 +21,7 @@
                     </button>
                 </form>
                 <script type="text/javascript">
-                    document.getElementById('wirecardee-redirect--form').submit();
+                    document.getElementById('wirecardee-credit-card--redirect-form').submit();
                 </script>
             </div>
         {else}

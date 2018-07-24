@@ -11,7 +11,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.Window', {
         var me = this,
             result = me.callParent();
 
-        result.push(Ext.create('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab'));
+        result.push(Ext.create('Shopware.apps.WirecardExtendOrder.view.detail.InfoTab'));
 
         return result;
     },
@@ -21,7 +21,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.Window', {
             payment = me.record.getPayment().first();
 
         if (payment.get('name').substr(0, 23) === 'wirecard_elastic_engine') {
-            result.add(Ext.create('Shopware.apps.WirecardExtendOrder.view.detail.WirecardInfoTab', {
+            result.add(Ext.create('Shopware.apps.WirecardExtendOrder.view.detail.InfoTab', {
                 record: me.record,
                 orderStatusStore: me.orderStatusStore,
                 paymentStatusStore: me.paymentStatusStore
