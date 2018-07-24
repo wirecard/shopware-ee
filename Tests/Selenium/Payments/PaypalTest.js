@@ -32,35 +32,27 @@
 
 const { expect } = require('chai');
 const { Builder, By, until } = require('selenium-webdriver');
+const { config } = require('../config');
+const {
+    loginWithExampleAccount,
+    waitUntilOverlayIsStale,
+    waitUntilOverlayIsNotVisible,
+    checkConfirmationPage
+} = require('../common');
 
-describe('SEPA Direct Debit test', () => {
+describe('PayPal test', () => {
     const driver = new Builder()
         .forBrowser('chrome')
         .build();
 
-    const url = 'http://localhost:8000';
-    const mail = 'test@example.com';
-    const password = 'shopware';
-    const paymentLabel = 'Wirecard SEPA Direct Debit';
-    const sepaFields = {
-        'wirecardee-sepa--first-name': 'Firstname',
-        'wirecardee-sepa--last-name': 'Lastname',
-        'wirecardee-sepa--iban': 'DE42512308000000060004'
-    };
+    const paymentLabel = config.payments.paypal.label;
+    const formFields = config.payments.paypal.fields;
 
-    it('should check the sepa payment process', async () => {
-        // Log in with example account
-        await driver.get(`${url}/account`);
-        await driver.wait(until.elementLocated(By.name('email')));
-        await driver.findElement(By.name('email')).sendKeys(mail);
-        await driver.findElement(By.name('password')).sendKeys(password);
-        await driver.findElement(By.className('register--login-btn')).click();
-
-        // Check if login has succeeded
-        await driver.wait(until.elementLocated(By.className('account--welcome')));
+    it('should check the paypal payment process', async () => {
+        await loginWithExampleAccount(driver);
 
         // Go to a product and buy it
-        await driver.get(`${url}/genusswelten/tees-und-zubeh/tee-zubehoer/24/glas-teekaennchen`);
+        await driver.get(`${config.url}/genusswelten/tees-und-zubeh/tee-zubehoer/24/glas-teekaennchen`);
         await driver.findElement(By.className('buybox--button')).click();
 
         // Wait for the cart to be shown
@@ -69,39 +61,46 @@ describe('SEPA Direct Debit test', () => {
         // Go to checkout page
         await driver.findElement(By.className('button--checkout')).click();
 
-        // Go to payment selection page, check if wirecard payments are present and select credit card
+        // Go to payment selection page, check if wirecard payments are present and select paypal
         await driver.findElement(By.className('btn--change-payment')).click();
         await driver.findElement(By.xpath("//*[contains(text(), '" + paymentLabel + "')]")).click();
 
         // Go back to checkout page and test if payment method has been selected
-        const overlay = await driver.findElements(By.className('js--overlay'));
-        if (overlay.length) {
-            await driver.wait(until.stalenessOf(overlay[0]));
-        }
+        await waitUntilOverlayIsStale(driver, By.className('js--overlay'));
         await driver.findElement(By.className('main--actions')).click();
         const paymentDescription = await driver.findElement(By.className('payment--description')).getText();
         expect(paymentDescription).to.include(paymentLabel);
-
-        // Fill sepa fields
-        Object.keys(sepaFields).forEach(async field => {
-            await driver.findElement(By.id(field)).sendKeys(sepaFields[field]);
-        });
 
         // Check AGB and confirm order
         await driver.findElement(By.id('sAGB')).click();
         await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
 
-        // Confirm sepa mandate in modal dialog
-        await driver.wait(until.elementLocated(By.className('wirecardee--sepa-mandate')));
-        await driver.findElement(By.id('wirecardee-sepa--confirm-check')).click();
-        await driver.findElement(By.id('wirecardee-sepa--confirm-button')).click();
+        // Log in to paypal
+        await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
 
-        // Check confirmation page
-        await driver.wait(until.elementLocated(By.className('teaser--btn-print')));
-        const panelTitle = await driver.findElement(By.className('panel--title')).getText();
-        expect(panelTitle).to.include('Vielen Dank');
-        const paymentContent = await driver.findElement(By.className('payment--content')).getText();
-        expect(paymentContent).to.include(paymentLabel);
+        await driver.wait(until.elementLocated(By.id('loginSection')));
+        await driver.wait(driver.findElement(By.css('#loginSection .btn')).click());
+
+        await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
+
+        await driver.wait(until.elementLocated(By.id('btnNext')));
+        await driver.wait(until.elementLocated(By.id('email')));
+        await driver.findElement(By.id('email')).sendKeys(formFields.email);
+        await driver.wait(driver.findElement(By.id('btnNext')).click());
+
+        await waitUntilOverlayIsNotVisible(driver, By.className('spinnerWithLockIcon'));
+
+        await driver.wait(until.elementLocated(By.id('btnLogin')));
+        await driver.wait(until.elementLocated(By.id('password')));
+        await driver.findElement(By.id('password')).sendKeys(formFields.password);
+        await driver.wait(driver.findElement(By.id('btnLogin')).click());
+
+        await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
+
+        await driver.wait(until.elementLocated(By.id('confirmButtonTop')));
+        await driver.wait(driver.findElement(By.id('confirmButtonTop')).click());
+
+        await checkConfirmationPage(driver, paymentLabel);
     });
 
     after(async () => driver.quit());

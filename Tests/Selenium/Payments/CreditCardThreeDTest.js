@@ -32,36 +32,22 @@
 
 const { expect } = require('chai');
 const { Builder, By, until, Key } = require('selenium-webdriver');
+const { config } = require('../config');
+const { loginWithExampleAccount, waitUntilOverlayIsStale, checkConfirmationPage } = require('../common');
 
-describe('Sofort. test', () => {
+describe('Credit Card 3-D Secure test', () => {
     const driver = new Builder()
         .forBrowser('chrome')
         .build();
 
-    const url = 'http://localhost:8000';
-    const mail = 'test@example.com';
-    const password = 'shopware';
-    const paymentLabel = 'Wirecard Sofort.';
-    const sofortFields = {
-        bankCode: '00000',
-        userId: '1234',
-        password: 'passwd',
-        tan: '12345'
-    };
+    const paymentLabel = config.payments.creditCardThreeD.label;
+    const formFields = config.payments.creditCardThreeD.fields;
 
-    it('should check the sofort payment process', async () => {
-        // Log in with example account
-        await driver.get(`${url}/account`);
-        await driver.wait(until.elementLocated(By.name('email')));
-        await driver.findElement(By.name('email')).sendKeys(mail);
-        await driver.findElement(By.name('password')).sendKeys(password);
-        await driver.findElement(By.className('register--login-btn')).click();
-
-        // Check if login has succeeded
-        await driver.wait(until.elementLocated(By.className('account--welcome')));
+    it('should check the credit card 3ds payment process', async () => {
+        await loginWithExampleAccount(driver);
 
         // Go to a product and buy it
-        await driver.get(`${url}/genusswelten/tees-und-zubeh/tee-zubehoer/24/glas-teekaennchen`);
+        await driver.get(`${config.url}/wohnwelten/moebel/68/kommode-shabby-chic`);
         await driver.findElement(By.className('buybox--button')).click();
 
         // Wait for the cart to be shown
@@ -75,10 +61,7 @@ describe('Sofort. test', () => {
         await driver.findElement(By.xpath("//*[contains(text(), '" + paymentLabel + "')]")).click();
 
         // Go back to checkout page and test if payment method has been selected
-        const overlay = await driver.findElements(By.className('js--overlay'));
-        if (overlay.length) {
-            await driver.wait(until.stalenessOf(overlay[0]));
-        }
+        await waitUntilOverlayIsStale(driver, By.className('js--overlay'));
         await driver.findElement(By.className('main--actions')).click();
         const paymentDescription = await driver.findElement(By.className('payment--description')).getText();
         expect(paymentDescription).to.include(paymentLabel);
@@ -87,28 +70,23 @@ describe('Sofort. test', () => {
         await driver.findElement(By.id('sAGB')).click();
         await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
 
-        // Wait for Sofort. page and fill out forms
-        await driver.wait(until.elementLocated(By.id('MultipaysSessionSenderCountryId')));
-        await driver.findElement(By.css('#MultipaysSessionSenderCountryId > option[value=\'AT\']')).click();
-        await driver.findElement(By.id('BankCodeSearch')).sendKeys(sofortFields.bankCode, Key.ENTER);
+        // Fill out credit card iframe
+        await driver.wait(until.elementLocated(By.className('wirecard-seamless-frame')));
+        await driver.wait(until.ableToSwitchToFrame(By.className('wirecard-seamless-frame')));
+        await driver.wait(until.elementLocated(By.id('account_number')));
+        Object.keys(formFields).forEach(async field => {
+            await driver.findElement(By.id(field)).sendKeys(formFields[field]);
+        });
+        await driver.findElement(By.css('#expiration_month_list > option[value=\'01\']')).click();
+        await driver.findElement(By.css('#expiration_year_list > option[value=\'2019\']')).click();
 
-        await driver.wait(until.elementLocated(By.id('BackendFormLOGINNAMEUSERID')));
-        await driver.findElement(By.id('BackendFormLOGINNAMEUSERID')).sendKeys(sofortFields.userId);
-        await driver.findElement(By.id('BackendFormUSERPIN')).sendKeys(sofortFields.password, Key.ENTER);
+        driver.switchTo().defaultContent();
+        await driver.findElement(By.id('wirecardee-credit-card--form-submit')).click();
 
-        await driver.wait(until.elementLocated(By.id('account-1')));
-        await driver.findElement(By.id('account-1')).click();
-        await driver.findElement(By.id('WizardForm')).submit();
+        await driver.wait(until.elementLocated(By.id('password')));
+        await driver.findElement(By.id('password')).sendKeys(config.payments.creditCardThreeD.password, Key.ENTER);
 
-        await driver.wait(until.elementLocated(By.id('BackendFormTAN')));
-        await driver.findElement(By.id('BackendFormTAN')).sendKeys(sofortFields.tan, Key.ENTER);
-
-        // Check confirmation page
-        await driver.wait(until.elementLocated(By.className('teaser--btn-print')));
-        const panelTitle = await driver.findElement(By.className('panel--title')).getText();
-        expect(panelTitle).to.include('Vielen Dank');
-        const paymentContent = await driver.findElement(By.className('payment--content')).getText();
-        expect(paymentContent).to.include(paymentLabel);
+        await checkConfirmationPage(driver, paymentLabel);
     });
 
     after(async () => driver.quit());
