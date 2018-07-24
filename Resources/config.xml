@@ -11,8 +11,7 @@
                 <handler>
                     <![CDATA[
 function (button) {
-    var general = Ext.create('Shopware.apps.WirecardExtendOrder.view.GeneralInformationWindow');
-    general.show()
+    Ext.create('Shopware.apps.WirecardExtendOrder.view.GeneralInformationWindow').show();
 }
                     ]]>
                 </handler>
@@ -36,7 +35,7 @@ function (button) {
         <!-- Credit Card -->
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardServer</name>
-            <label lang="de">[Credit Card] Wirecard Server Url</label>
+            <label lang="de">[Kreditkarte] Wirecard Server Url</label>
             <label lang="en">[Credit Card] Wirecard Server Url</label>
             <value>https://api-test.wirecard.com</value>
             <description lang="de">Wirecard Basis Url (z.B. http://api-test.wirecard.com)</description>
@@ -44,7 +43,7 @@ function (button) {
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardHttpUser</name>
-            <label lang="de">[Credit Card] HTTP Benutzer</label>
+            <label lang="de">[Kreditkarte] HTTP Benutzer</label>
             <label lang="en">[Credit Card] HTTP User</label>
             <value>70000-APITEST-AP</value>
             <description lang="de">HTTP Benutzer</description>
@@ -52,7 +51,7 @@ function (button) {
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardHttpPassword</name>
-            <label lang="de">[Credit Card] HTTP Passwort</label>
+            <label lang="de">[Kreditkarte] HTTP Passwort</label>
             <label lang="en">[Credit Card] HTTP Password</label>
             <value>qD2wzQ_hrc!8</value>
             <description lang="de">HTTP Passwort</description>
@@ -60,7 +59,7 @@ function (button) {
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardMerchantId</name>
-            <label lang="de">[Credit Card] Händler ID</label>
+            <label lang="de">[Kreditkarte] Händler ID</label>
             <label lang="en">[Credit Card] Merchant ID</label>
             <value>53f2895a-e4de-4e82-a813-0d87a10e55e6</value>
             <description lang="de">Eindeutige Händler-ID Ihres Wirecard Konto</description>
@@ -68,7 +67,7 @@ function (button) {
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardSecret</name>
-            <label lang="de">[Credit Card] Geheimschlüssel</label>
+            <label lang="de">[Kreditkarte] Geheimschlüssel</label>
             <label lang="en">[Credit Card] Secret Key</label>
             <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
             <description lang="de">Geheimschlüssel für die digitale Signatur</description>
@@ -76,7 +75,7 @@ function (button) {
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardThreeDMAID</name>
-            <label lang="de">[Credit Card] 3DS Händler ID</label>
+            <label lang="de">[Kreditkarte] 3DS Händler ID</label>
             <label lang="en">[Credit Card] 3DS Merchant ID</label>
             <value>508b8896-b37d-4614-845c-26bf8bf2c948</value>
             <description lang="de">Eindeutige 3DS Händler-ID Ihres Wirecard Konto. Tragen Sie "null" ein, um 3DS zu deaktivieren.</description>
@@ -84,7 +83,7 @@ function (button) {
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardThreeDSecret</name>
-            <label lang="de">[Credit Card] 3DS Geheimschlüssel</label>
+            <label lang="de">[Kreditkarte] 3DS Geheimschlüssel</label>
             <label lang="en">[Credit Card] 3DS Secret Key</label>
             <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
             <description lang="de">3DS Geheimschlüssel für die digitale Signatur</description>
@@ -92,47 +91,13 @@ function (button) {
         </element>
         <element type="button" scope="shop">
             <name>wirecardElasticEngineCreditCardTestApi</name>
-            <label lang="de">[Credit Card] Konfiguration testen</label>
+            <label lang="de">[Kreditkarte] Konfiguration testen</label>
             <label lang="en">[Credit Card] Test settings</label>
             <options>
                 <handler>
                     <![CDATA[
 function (button) {
-    var url = document.location.pathname + 'wirecardTransactions/testSettings',
-        btn = button,
-        panel = button.up('panel'),
-        formFields = panel.query('[isFormField]'),
-        values = {};
-
-    Ext.Array.each(formFields, function(el, i) {
-        var val = el.getSubmitValue();
-        values[el.elementName] = val;
-    });
-
-    values['method'] = 'CreditCard';
-
-    Ext.Ajax.request({
-        url: url,
-        params: values,
-        success: function (response) {
-            var data = Ext.decode(response.responseText);
-
-            if ( data.status == 'success' ) {
-                text = '<span style=\"color: green;font-weight: bold;\">Test successfull</span>';
-            } else {
-                text = '<span style=\"color: red;font-weight: bold;\">Test failed</span>';
-                if ( data.msg ) {
-                    text += '<br>' + data.msg;
-                }
-            }
-            Shopware.Notification.createStickyGrowlMessage({
-                title: "Wirecard Credit Card test",
-                text: text,
-                width: 440,
-                log: false,
-            });
-        }
-    })
+    wirecardeeTestPaymentCredentials(button, 'CreditCard', 'Wirecard Credit Card Test');
 }
                     ]]>
                 </handler>
@@ -140,13 +105,15 @@ function (button) {
         </element>
         <element type="select" scope="shop">
             <name>wirecardElasticEngineCreditCardTransactionType</name>
-            <label lang="de">[Credit Card] Transaktionsart</label>
+            <label lang="de">[Kreditkarte] Transaktionsart</label>
             <label lang="en">[Credit Card] Transaction Type</label>
             <value>pay</value>
+            <description lang="de">Wählen Sie zwischen "Purchase" um automatisch eine Buchung durchzuführen oder "Authorization" um eine manuelle Buchung zu ermöglichen.</description>
+            <description lang="en">Select between "Purchase" to capture/invoice your order automatically or "Authorization" to capture/invoice manually.</description>
             <store>
                 <option>
                     <value>reserve</value>
-                    <label lang="de">Authorisierung</label>
+                    <label lang="de">Authorization</label>
                     <label lang="en">Authorization</label>
                 </option>
                 <option>
@@ -158,7 +125,7 @@ function (button) {
         </element>
         <element type="boolean" scope="shop">
             <name>wirecardElasticEngineCreditCardFraudPrevention</name>
-            <label lang="de">[Credit Card] Zusätzliche Kundendaten</label>
+            <label lang="de">[Kreditkarte] Zusätzliche Kundendaten</label>
             <label lang="en">[Credit Card] Additional Consumer Data</label>
             <value>true</value>
             <description lang="de">Sende Kundendaten an Wirecard zur Betrugsprevention</description>
@@ -166,7 +133,7 @@ function (button) {
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardSslMaxLimit</name>
-            <label lang="de">[Credit Card] 3DS-Pflicht Betrag</label>
+            <label lang="de">[Kreditkarte] 3DS-Pflicht Betrag</label>
             <label lang="en">[Credit Card] 3DS only amount</label>
             <value>300</value>
             <description lang="de">Ab diesem Betrag wird die Benutzung von 3DS erzwungen</description>
@@ -174,7 +141,7 @@ function (button) {
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardSslMaxLimitCurrency</name>
-            <label lang="de">[Credit Card] 3DS-Pflicht Betrag Währung</label>
+            <label lang="de">[Kreditkarte] 3DS-Pflicht Betrag Währung</label>
             <label lang="en">[Credit Card] 3DS only amount currency</label>
             <value></value>
             <description lang="de">Leer lassen für Standardwährung.</description>
@@ -182,15 +149,15 @@ function (button) {
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardThreeDMinLimit</name>
-            <label lang="de">[Credit Card] 3DS-Versuch Betrag</label>
+            <label lang="de">[Kreditkarte] 3DS-Versuch Betrag</label>
             <label lang="en">[Credit Card] 3DS attempt amount</label>
             <value>100</value>
             <description lang="de">Ab diesem Betrag wird 3DS versucht zu verwenden.</description>
-            <description lang="en">This amount attemps usage of 3DS.</description>
+            <description lang="en">This amount attempts usage of 3DS.</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardThreeDMinLimitCurrency</name>
-            <label lang="de">[Credit Card] 3DS-Versuch Betrag Währung</label>
+            <label lang="de">[Kreditkarte] 3DS-Versuch Betrag Währung</label>
             <label lang="en">[Credit Card] 3DS only amount currency</label>
             <value></value>
             <description lang="de">Leer lassen für Standardwährung.</description>
@@ -198,7 +165,7 @@ function (button) {
         </element>
         <element type="button" scope="shop">
             <name>wirecardElasticEngineCreditCardThreeDDescription</name>
-            <label lang="de">[Credit Card] Erklärung zu 3DS</label>
+            <label lang="de">[Kreditkarte] Erklärung zu 3DS</label>
             <label lang="en">[Credit Card] Description about 3DS</label>
             <options>
                 <handler>
@@ -260,41 +227,7 @@ function (button) {
                 <handler>
                     <![CDATA[
 function (button) {
-    var url = document.location.pathname + 'wirecardTransactions/testSettings',
-        btn = button,
-        panel = button.up('panel'),
-        formFields = panel.query('[isFormField]'),
-        values = {};
-
-    Ext.Array.each(formFields, function(el, i) {
-        var val = el.getSubmitValue();
-        values[el.elementName] = val;
-    });
-
-    values['method'] = 'Paypal';
-
-    Ext.Ajax.request({
-        url: url,
-        params: values,
-        success: function (response) {
-            var data = Ext.decode(response.responseText);
-
-            if( data.status == 'success' ) {
-                text = '<span style=\"color: green;font-weight: bold;\">Test successfull</span>';
-            } else {
-                text = '<span style=\"color: red;font-weight: bold;\">Test failed</span>';
-                if ( data.msg ) {
-                    text += '<br>' + data.msg;
-                }
-            }
-            Shopware.Notification.createStickyGrowlMessage({
-                title: "Wirecard PayPal test",
-                text: text,
-                width: 440,
-                log: false,
-            });
-        }
-    })
+    wirecardeeTestPaymentCredentials(button, 'Paypal', 'Wirecard Paypal Test');
 }
                     ]]>
                 </handler>
@@ -305,6 +238,8 @@ function (button) {
             <label lang="de">[PayPal] Transaktionsart</label>
             <label lang="en">[PayPal] Transaction Type</label>
             <value>pay</value>
+            <description lang="de">Wählen Sie zwischen "Purchase" um automatisch eine Buchung durchzuführen oder "Authorization" um eine manuelle Buchung zu ermöglichen.</description>
+            <description lang="en">Select between "Purchase" to capture/invoice your order automatically or "Authorization" to capture/invoice manually.</description>
             <store>
                 <option>
                     <value>reserve</value>
@@ -343,90 +278,56 @@ function (button) {
             <description lang="en">Send descriptor</description>
         </element>
         <!-- PayPal End -->
-        <!-- Sepa -->
+        <!-- SEPA Direct Debit -->
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaServer</name>
-            <label lang="de">[SEPA] Wirecard Server Url</label>
-            <label lang="en">[SEPA] Wirecard Server Url</label>
+            <label lang="de">[SEPA-Lastschrift] Wirecard Server Url</label>
+            <label lang="en">[SEPA Direct Debit] Wirecard Server Url</label>
             <value>https://api-test.wirecard.com</value>
             <description lang="de">Wirecard Basis Url (z.B. http://api-test.wirecard.com)</description>
             <description lang="en">Wirecard Base Url (e.g. http://api-test.wirecard.com)</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaHttpUser</name>
-            <label lang="de">[SEPA] HTTP Benutzer</label>
-            <label lang="en">[SEPA] HTTP User</label>
+            <label lang="de">[SEPA-Lastschrift] HTTP Benutzer</label>
+            <label lang="en">[SEPA Direct Debit] HTTP User</label>
             <value>16390-testing</value>
             <description lang="de">HTTP Benutzer</description>
             <description lang="en">HTTP User</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaHttpPassword</name>
-            <label lang="de">[SEPA] HTTP Passwort</label>
-            <label lang="en">[SEPA] HTTP Password</label>
+            <label lang="de">[SEPA-Lastschrift] HTTP Passwort</label>
+            <label lang="en">[SEPA Direct Debit] HTTP Password</label>
             <value>3!3013=D3fD8X7</value>
             <description lang="de">HTTP Passwort</description>
             <description lang="en">HTTP Password</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaMerchantId</name>
-            <label lang="de">[SEPA] Händler ID</label>
-            <label lang="en">[SEPA] Merchant ID</label>
+            <label lang="de">[SEPA-Lastschrift] Händler ID</label>
+            <label lang="en">[SEPA Direct Debit] Merchant ID</label>
             <value>933ad170-88f0-4c3d-a862-cff315ecfbc0</value>
             <description lang="de">Eindeutige Händler-ID Ihres Wirecard Konto</description>
             <description lang="en">Unique merchant account id to Wirecard</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaSecret</name>
-            <label lang="de">[SEPA] Geheimschlüssel</label>
-            <label lang="en">[SEPA] Secret Key</label>
+            <label lang="de">[SEPA-Lastschrift] Geheimschlüssel</label>
+            <label lang="en">[SEPA Direct Debit] Secret Key</label>
             <value>ecdf5990-0372-47cd-a55d-037dccfe9d25</value>
             <description lang="de">Geheimschlüssel für die digitale Signatur</description>
             <description lang="en">Secret key for digital signature</description>
         </element>
         <element type="button" scope="shop">
             <name>wirecardElasticEngineSepaTestApi</name>
-            <label lang="de">[SEPA] Konfiguration testen</label>
-            <label lang="en">[SEPA] Test settings</label>
+            <label lang="de">[SEPA-Lastschrift] Konfiguration testen</label>
+            <label lang="en">[SEPA Direct Debit] Test settings</label>
             <options>
                 <handler>
                     <![CDATA[
 function (button) {
-    var url = document.location.pathname + 'wirecardTransactions/testSettings',
-        btn = button,
-        panel = button.up('panel'),
-        formFields = panel.query('[isFormField]'),
-        values = {};
-
-    Ext.Array.each(formFields, function(el, i) {
-        var val = el.getSubmitValue();
-        values[el.elementName] = val;
-    });
-
-    values['method'] = 'Sepa';
-
-    Ext.Ajax.request({
-        url: url,
-        params: values,
-        success: function (response) {
-            var data = Ext.decode(response.responseText);
-
-            if( data.status == 'success' ) {
-                text = '<span style=\"color: green;font-weight: bold;\">Test successfull</span>';
-            } else {
-                text = '<span style=\"color: red;font-weight: bold;\">Test failed</span>';
-                if ( data.msg ) {
-                    text += '<br>' + data.msg;
-                }
-            }
-            Shopware.Notification.createStickyGrowlMessage({
-                title: "Wirecard Sepa test",
-                text: text,
-                width: 440,
-                log: false,
-            });
-        }
-    })
+    wirecardeeTestPaymentCredentials(button, 'Sepa', 'Wirecard SEPA Direct Debit Test');
 }
                     ]]>
                 </handler>
@@ -434,9 +335,11 @@ function (button) {
         </element>
         <element type="select" scope="shop">
             <name>wirecardElasticEngineSepaTransactionType</name>
-            <label lang="de">[SEPA] Transaktionsart</label>
-            <label lang="en">[SEPA] Transaction Type</label>
+            <label lang="de">[SEPA-Lastschrift] Transaktionsart</label>
+            <label lang="en">[SEPA Direct Debit] Transaction Type</label>
             <value>pay</value>
+            <description lang="de">Wählen Sie zwischen "Purchase" um automatisch eine Buchung durchzuführen oder "Authorization" um eine manuelle Buchung zu ermöglichen.</description>
+            <description lang="en">Select between "Purchase" to capture/invoice your order automatically or "Authorization" to capture/invoice manually.</description>
             <store>
                 <option>
                     <value>reserve</value>
@@ -452,71 +355,71 @@ function (button) {
         </element>
         <element type="boolean" scope="shop">
             <name>wirecardElasticEngineSepaFraudPrevention</name>
-            <label lang="de">[SEPA] Zusätzliche Kundendaten</label>
-            <label lang="en">[SEPA] Additional Consumer Data</label>
+            <label lang="de">[SEPA-Lastschrift] Zusätzliche Kundendaten</label>
+            <label lang="en">[SEPA Direct Debit] Additional Consumer Data</label>
             <value>true</value>
             <description lang="de">Sende Kundendaten an Wirecard zur Betrugsprevention</description>
             <description lang="en">Send consumer data to Wirecard for fraud prevention</description>
         </element>
         <element type="boolean" scope="shop">
             <name>wirecardElasticEngineSepaShowBic</name>
-            <label lang="de">[SEPA] BIC anzeigen</label>
-            <label lang="en">[SEPA] show BIC</label>
+            <label lang="de">[SEPA-Lastschrift] BIC anzeigen</label>
+            <label lang="en">[SEPA Direct Debit] Show BIC</label>
             <value>false</value>
-            <description lang="de"></description>
-            <description lang="en"></description>
+            <description lang="de">BIC Eingabefeld anzeigen</description>
+            <description lang="en">Show BIC input field on checkout page</description>
         </element>
         <element required="true" type="text" scope="shop">
             <name>wirecardElasticEngineSepaCreditorId</name>
-            <label lang="de">[SEPA] Creditor ID</label>
-            <label lang="en">[SEPA] Creditor ID</label>
+            <label lang="de">[SEPA-Lastschrift] Creditor ID</label>
+            <label lang="en">[SEPA Direct Debit] Creditor ID</label>
             <value>DE98ZZZ09999999999</value>
             <description lang="de">Die Creditor ID wird benötigt, um das SEPA-Lastschrift-Mandat zu erstellen. Die Creditor ID muss beim zuständigen Bankinstitut angefordert werden.</description>
             <description lang="en">SEPA requires Creditor ID to create SEPA Direct Debit Mandate. To get a Creditor ID apply at the responsible bank institute.</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaCreditorName</name>
-            <label lang="de">[SEPA] Creditor Name</label>
-            <label lang="en">[SEPA] Creditor Name</label>
+            <label lang="de">[SEPA-Lastschrift] Creditor Name</label>
+            <label lang="en">[SEPA Direct Debit] Creditor Name</label>
             <value></value>
             <description lang="de">Für das SEPA-Lastschrift-Mandat wird der Name des Zahlungsempfängers (Creditor) benötigt.</description>
             <description lang="en">SEPA requires a Creditor Name for display on the SEPA Direct Debit Mandate page.</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaCreditorAddress</name>
-            <label lang="de">[SEPA] Creditor Adresse</label>
-            <label lang="en">[SEPA] Creditor Address</label>
+            <label lang="de">[SEPA-Lastschrift] Creditor Adresse</label>
+            <label lang="en">[SEPA Direct Debit] Creditor Address</label>
             <value></value>
             <description lang="de">Für das SEPA-Lastschrift-Mandat wird die Adresse des Zahlungsempfängers (Creditor) benötigt.</description>
             <description lang="en">SEPA requires a Creditor Address for display on the SEPA Direct Debit Mandate page.</description>
         </element>
-        <!-- Sepa End -->
-        <!-- Sepa Backend -->
+        <!-- SEPA Direct Debit End -->
+        <!-- SEPA Credit Transfer -->
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaBackendMerchantId</name>
-            <label lang="de">[SEPA Backend] Händler ID</label>
-            <label lang="en">[SEPA Backend] Merchant ID</label>
+            <label lang="de">[SEPA Credit Transfer] Händler ID</label>
+            <label lang="en">[SEPA Credit Transfer] Merchant ID</label>
             <value>59a01668-693b-49f0-8a1f-f3c1ba025d45</value>
             <description lang="de">Eindeutige Händler-ID Ihres Wirecard Konto</description>
             <description lang="en">Unique merchant account id to Wirecard</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaBackendSecret</name>
-            <label lang="de">[SEPA Backend] Geheimschlüssel</label>
-            <label lang="en">[SEPA Backend] Secret Key</label>
+            <label lang="de">[SEPA Credit Transfer] Geheimschlüssel</label>
+            <label lang="en">[SEPA Credit Transfer] Secret Key</label>
             <value>ecdf5990-0372-47cd-a55d-037dccfe9d25</value>
             <description lang="de">Geheimschlüssel für die digitale Signatur</description>
             <description lang="en">Secret key for digital signature</description>
         </element>
         <element required="true" type="text" scope="shop">
             <name>wirecardElasticEngineSepaBackendCreditorId</name>
-            <label lang="de">[SEPA Backend] Creditor ID</label>
-            <label lang="en">[SEPA Backend] Creditor ID</label>
+            <label lang="de">[SEPA Credit Transfer] Creditor ID</label>
+            <label lang="en">[SEPA Credit Transfer] Creditor ID</label>
             <value>DE98ZZZ09999999999</value>
             <description lang="de">Die Creditor ID wird benötigt, um das SEPA-Lastschrift-Mandat zu erstellen. Die Creditor ID muss beim zuständigen Bankinstitut angefordert werden.</description>
             <description lang="en">SEPA requires Creditor ID to create SEPA Direct Debit Mandate. To get a Creditor ID apply at the responsible bank institute.</description>
         </element>
-        <!-- Sepa Backend End -->
+        <!-- SEPA Credit Transfer End -->
         <!-- Sofort. -->
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSofortServer</name>
@@ -568,47 +471,13 @@ function (button) {
         </element>
         <element type="button" scope="shop">
             <name>wirecardElasticEngineSofortTestApi</name>
-            <label lang="de">[Sofort] Konfiguration testen</label>
-            <label lang="en">[Sofort] Test settings</label>
+            <label lang="de">[Sofort.] Konfiguration testen</label>
+            <label lang="en">[Sofort.] Test settings</label>
             <options>
                 <handler>
                     <![CDATA[
 function (button) {
-    var url = document.location.pathname + 'wirecardTransactions/testSettings',
-        btn = button,
-        panel = button.up('panel'),
-        formFields = panel.query('[isFormField]'),
-        values = {};
-
-    Ext.Array.each(formFields, function(el, i) {
-        var val = el.getSubmitValue();
-        values[el.elementName] = val;
-    });
-
-    values['method'] = 'Sofort';
-
-    Ext.Ajax.request({
-        url: url,
-        params: values,
-        success: function (response) {
-            var data = Ext.decode(response.responseText);
-
-            if( data.status == 'success' ) {
-                text = '<span style=\"color: green;font-weight: bold;\">Test successfull</span>';
-            } else {
-                text = '<span style=\"color: red;font-weight: bold;\">Test failed</span>';
-                if ( data.msg ) {
-                    text += '<br>' + data.msg;
-                }
-            }
-            Shopware.Notification.createStickyGrowlMessage({
-                title: "Wirecard Sofort test",
-                text: text,
-                width: 440,
-                log: false,
-            });
-        }
-    })
+    wirecardeeTestPaymentCredentials(button, 'Sofort', 'Wirecard Sofort. Test');
 }
                     ]]>
                 </handler>
