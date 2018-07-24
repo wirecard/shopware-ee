@@ -63,7 +63,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
     /**
      * Check credentials against wirecard server
      */
-    public function testSettingsAction()
+    public function testCredentialsAction()
     {
         $params = $this->Request()->getParams();
         $method = $params['method'];
@@ -278,7 +278,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
      */
     public function getWhitelistedCSRFActions()
     {
-        return ['notify', 'testSettings'];
+        return ['notify', 'testCredentials'];
     }
 
     /**
