@@ -20,8 +20,6 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
         PaymentMethod: '{s name="PaymentMethod"}{/s}',
         Amount: '{s name="Amount"}{/s}',
         Currency: '{s name="Currency"}{/s}',
-        OrderCanceledErrorTitle: '{s name="OrderCanceledErrorTitle"}{/s}',
-        OrderCanceledErrorText: '{s name="OrderCanceledErrorText"}{/s}',
         OpenTransactionTooltip: '{s name="OpenTransactionTooltip"}{/s}',
         OpenOrderTooltip: '{s name="OpenOrderTooltip"}{/s}',
         NoOrderNumber: '{s name="NoOrderNumber"}{/s}',
@@ -115,12 +113,6 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
             tooltip: me.snippets.OpenOrderTooltip,
             handler: function (view, rowIndex, colIndex, item, opts, record) {
                 if (!record.get('orderId') || record.get('orderStatus') < 0) {
-                    Shopware.Notification.createStickyGrowlMessage({
-                        title: me.snippets.OrderCanceledErrorTitle,
-                        text: me.snippets.OrderCanceledErrorText,
-                        width: 440,
-                        log: false
-                    });
                     return;
                 }
                 Shopware.app.Application.addSubApplication({
@@ -130,6 +122,11 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
                         orderId: record.get('orderId')
                     }
                 });
+            },
+            getClass: function (value, meta, record) {
+                if (!record.get('orderId') || record.get('orderStatus') < 0) {
+                    return 'x-hide-display';
+                }
             }
         });
 
