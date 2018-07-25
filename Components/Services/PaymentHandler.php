@@ -31,20 +31,21 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
-use Shopware\Models\Order\Order;
 use Shopware\Models\Shop\Shop;
+use Wirecard\PaymentSdk\Entity\CustomField;
+use Wirecard\PaymentSdk\Entity\CustomFieldCollection;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Response\FailureResponse;
+use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
+use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
-use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
-use WirecardShopwareElasticEngine\Models\Transaction;
 
 class PaymentHandler extends Handler
 {
@@ -58,7 +59,6 @@ class PaymentHandler extends Handler
      *
      * @return Action
      * @throws ArrayKeyNotFoundException
-     * @throws OrderNotFoundException
      */
     public function execute(
         OrderSummary $orderSummary,
@@ -70,8 +70,7 @@ class PaymentHandler extends Handler
     ) {
         $this->prepareTransaction($orderSummary, $redirect, $notificationUrl);
 
-        $payment     = $orderSummary->getPayment();
-        $transaction = $payment->getTransaction();
+        $payment = $orderSummary->getPayment();
 
         try {
             $action = $payment->processPayment(
@@ -88,7 +87,7 @@ class PaymentHandler extends Handler
             }
 
             $response = $transactionService->process(
-                $transaction,
+                $payment->getTransaction(),
                 $payment->getPaymentConfig()->getTransactionOperation()
             );
         } catch (\Exception $e) {
@@ -101,52 +100,23 @@ class PaymentHandler extends Handler
             'response' => $response->getData(),
         ]);
 
-        switch (true) {
-            case $response instanceof SuccessResponse:
-            case $response instanceof InteractionResponse:
-                $this->updateOrder($response->getTransactionId(), $orderSummary);
-                $this->transactionFactory->create(
-                    $orderSummary->getOrderNumber(),
-                    $response,
-                    Transaction::TYPE_INITIAL
-                );
-
-                return new RedirectAction($response->getRedirectUrl());
-
-            case $response instanceof FailureResponse:
-                $this->logger->error('Failure response', $response->getData());
-
-                return new ErrorAction(ErrorAction::FAILURE_RESPONSE, 'Failure response');
-
-            default:
-                $this->logger->error('Processing failed', $response->getData());
-
-                return new ErrorAction(ErrorAction::PROCESSING_FAILED, 'Payment processing failed');
+        if ($response instanceof FormInteractionResponse) {
+            $this->transactionManager->createInitial($orderSummary, $response);
+            return new ViewAction('payment_redirect.tpl', [
+                'method'     => $response->getMethod(),
+                'formFields' => $response->getFormFields(),
+                'url'        => $response->getUrl(),
+            ]);
         }
-    }
-
-    /**
-     * Updates the shopware order by setting the proper transaction ID.
-     *
-     * @param string       $transactionId
-     * @param OrderSummary $orderSummary
-     *
-     * @throws OrderNotFoundException
-     */
-    private function updateOrder($transactionId, OrderSummary $orderSummary)
-    {
-        $order = $this->em->getRepository(Order::class)
-                          ->findOneBy([
-                              'number' => $orderSummary->getOrderNumber(),
-                          ]);
-
-        if (! $order) {
-            throw new OrderNotFoundException($orderSummary->getOrderNumber(), $transactionId);
+        if ($response instanceof SuccessResponse || $response instanceof InteractionResponse) {
+            $this->transactionManager->createInitial($orderSummary, $response);
+            return new RedirectAction($response->getRedirectUrl());
         }
-
-        $order->setTransactionId($transactionId);
-
-        $this->em->flush();
+        if ($response instanceof FailureResponse) {
+            $this->logger->error('Failure response', $response->getData());
+            return new ErrorAction(ErrorAction::FAILURE_RESPONSE, 'Failure response');
+        }
+        return new ErrorAction(ErrorAction::PROCESSING_FAILED, 'Payment processing failed');
     }
 
     /**
@@ -164,26 +134,31 @@ class PaymentHandler extends Handler
         $payment       = $orderSummary->getPayment();
         $paymentConfig = $payment->getPaymentConfig();
         $transaction   = $payment->getTransaction();
-        $orderNumber   = $this->getOrderNumberForTransaction($orderSummary->getOrderNumber());
 
         $transaction->setRedirect($redirect);
         $transaction->setAmount($orderSummary->getAmount());
         $transaction->setNotificationUrl($notificationUrl);
-        $transaction->setOrderNumber($orderNumber);
 
-        if ($paymentConfig->sendBasket()) {
+        $customFields = new CustomFieldCollection();
+        $customFields->add(new CustomField('payment-unique-id', $orderSummary->getPaymentUniqueId()));
+        $transaction->setCustomFields($customFields);
+
+        if ($paymentConfig->sendBasket() || $paymentConfig->hasFraudPrevention()) {
             $transaction->setBasket($orderSummary->getBasketMapper()->getWirecardBasket());
         }
 
         if ($paymentConfig->hasFraudPrevention()) {
+            $transaction->setOrderNumber($orderSummary->getPaymentUniqueId());
             $transaction->setIpAddress($orderSummary->getUserMapper()->getClientIp());
+            $transaction->setConsumerId($orderSummary->getUserMapper()->getCustomerNumber());
             $transaction->setAccountHolder($orderSummary->getUserMapper()->getWirecardBillingAccountHolder());
             $transaction->setShipping($orderSummary->getUserMapper()->getWirecardShippingAccountHolder());
             $transaction->setLocale($orderSummary->getUserMapper()->getLocale());
+            $transaction->setDevice($orderSummary->getWirecardDevice());
         }
 
         if ($paymentConfig->sendDescriptor()) {
-            $transaction->setDescriptor($this->getDescriptor($orderNumber));
+            $transaction->setDescriptor($this->getDescriptor($orderSummary->getPaymentUniqueId()));
         }
     }
 
@@ -197,6 +172,6 @@ class PaymentHandler extends Handler
     protected function getDescriptor($orderNumber)
     {
         $shopName = substr($this->shopwareConfig->get('shopName'), 0, 9);
-        return "${shopName} ${orderNumber}";
+        return substr("${shopName} ${orderNumber}", 0, 20);
     }
 }

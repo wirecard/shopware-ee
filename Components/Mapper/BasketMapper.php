@@ -72,6 +72,11 @@ class BasketMapper extends ArrayMapper
     protected $currency;
 
     /**
+     * @var string
+     */
+    protected $signature;
+
+    /**
      * @var \Shopware_Components_Snippet_Manager
      */
     protected $snippetManager;
@@ -85,6 +90,7 @@ class BasketMapper extends ArrayMapper
      * BasketMapper constructor.
      *
      * @param array                                $shopwareBasket
+     * @param string                               $signature
      * @param string                               $currency
      * @param \sArticles                           $articles
      * @param Transaction                          $transaction
@@ -99,6 +105,7 @@ class BasketMapper extends ArrayMapper
      */
     public function __construct(
         array $shopwareBasket,
+        $signature,
         $currency,
         \sArticles $articles,
         Transaction $transaction,
@@ -106,6 +113,7 @@ class BasketMapper extends ArrayMapper
         $shippingMethod
     ) {
         $this->arrayEntity    = $shopwareBasket;
+        $this->signature      = $signature;
         $this->currency       = $currency;
         $this->articles       = $articles;
         $this->transaction    = $transaction;
@@ -258,6 +266,14 @@ class BasketMapper extends ArrayMapper
     public function toArray()
     {
         return $this->getShopwareBasket();
+    }
+
+    /**
+     * @return string
+     */
+    public function getSignature()
+    {
+        return $this->signature;
     }
 
     /**

@@ -46,7 +46,8 @@ use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Services\BackendOperationHandler;
-use WirecardShopwareElasticEngine\Components\Services\TransactionFactory;
+use WirecardShopwareElasticEngine\Components\Services\SessionHandler;
+use WirecardShopwareElasticEngine\Components\Services\TransactionManager;
 use WirecardShopwareElasticEngine\Models\Transaction as TransactionModel;
 
 class BackendOperationHandlerTest extends TestCase
@@ -66,8 +67,8 @@ class BackendOperationHandlerTest extends TestCase
     /** @var BackendService|\PHPUnit_Framework_MockObject_MockObject */
     private $backendService;
 
-    /** @var TransactionFactory|\PHPUnit_Framework_MockObject_MockObject */
-    private $transactionFactory;
+    /** @var TransactionManager|\PHPUnit_Framework_MockObject_MockObject */
+    private $transactionManager;
 
     /** @var BackendOperationHandler */
     private $handler;
@@ -93,14 +94,14 @@ class BackendOperationHandlerTest extends TestCase
         $this->logger = $this->createMock(LoggerInterface::class);
 
         $this->backendService     = $this->createMock(BackendService::class);
-        $this->transactionFactory = $this->createMock(TransactionFactory::class);
+        $this->transactionManager = $this->createMock(TransactionManager::class);
 
         $this->handler = new BackendOperationHandler(
             $this->em,
             $this->router,
             $this->logger,
             $this->config,
-            $this->transactionFactory
+            $this->transactionManager
         );
     }
 
@@ -138,8 +139,9 @@ class BackendOperationHandlerTest extends TestCase
         $response->method('getTransactionId')->willReturn('foo-bar-id');
         $this->backendService->method('process')->willReturn($response);
 
-        $transactionEntity = $this->createMock(TransactionModel::class);
-        $this->transactionFactory->method('create')->willReturn($transactionEntity);
+        $transactionEntity        = $this->createMock(TransactionModel::class);
+        $this->transactionManager->expects($this->atLeastOnce())->method('createBackend')
+                                 ->willReturn($transactionEntity);
 
         /** @var ViewAction $action */
         $action = $this->handler->execute(

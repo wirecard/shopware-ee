@@ -32,6 +32,7 @@
 namespace WirecardShopwareElasticEngine\Components\Data;
 
 use Wirecard\PaymentSdk\Entity\Amount;
+use Wirecard\PaymentSdk\Entity\Device;
 use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
 use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
@@ -40,9 +41,9 @@ use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 class OrderSummary
 {
     /**
-     * @var int
+     * @var string
      */
-    protected $orderNumber;
+    protected $paymentUniqueId;
 
     /**
      * @var Payment
@@ -65,26 +66,34 @@ class OrderSummary
     protected $userMapper;
 
     /**
+     * @var string
+     */
+    protected $deviceFingerprintId;
+
+    /**
      * OrderDetails constructor.
      *
-     * @param int              $orderNumber
+     * @param string           $paymentUniqueId
      * @param PaymentInterface $payment
      * @param UserMapper       $userMapper
      * @param BasketMapper     $basketMapper
      * @param Amount           $amount
+     * @param string           $deviceFingerprintId
      */
     public function __construct(
-        $orderNumber,
+        $paymentUniqueId,
         PaymentInterface $payment,
         UserMapper $userMapper,
         BasketMapper $basketMapper,
-        Amount $amount
+        Amount $amount,
+        $deviceFingerprintId
     ) {
-        $this->orderNumber  = $orderNumber;
-        $this->payment      = $payment;
-        $this->userMapper   = $userMapper;
-        $this->amount       = $amount;
-        $this->basketMapper = $basketMapper;
+        $this->paymentUniqueId     = $paymentUniqueId;
+        $this->payment             = $payment;
+        $this->userMapper          = $userMapper;
+        $this->amount              = $amount;
+        $this->basketMapper        = $basketMapper;
+        $this->deviceFingerprintId = $deviceFingerprintId;
     }
 
     /**
@@ -120,11 +129,29 @@ class OrderSummary
     }
 
     /**
-     * @return int
+     * @return string
      */
-    public function getOrderNumber()
+    public function getPaymentUniqueId()
     {
-        return $this->orderNumber;
+        return $this->paymentUniqueId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDeviceFingerprintId()
+    {
+        return $this->deviceFingerprintId;
+    }
+
+    /**
+     * @return Device
+     */
+    public function getWirecardDevice()
+    {
+        $device = new Device();
+        $device->setFingerprint($this->getDeviceFingerprintId());
+        return $device;
     }
 
     /**
@@ -134,15 +161,15 @@ class OrderSummary
     public function toArray()
     {
         return [
-            'orderNumber' => $this->getOrderNumber(),
-            'payment'     => [
+            'paymentUniqueId' => $this->getPaymentUniqueId(),
+            'payment'         => [
                 'name'          => $this->getPayment()->getName(),
                 'paymentConfig' => $this->getPayment()->getPaymentConfig()->toArray(),
                 'transaction'   => $this->getPayment()->getTransaction()->mappedProperties(),
             ],
-            'user'        => $this->getUserMapper()->toArray(),
-            'basket'      => $this->getBasketMapper()->toArray(),
-            'amount'      => $this->getAmount()->mappedProperties(),
+            'user'            => $this->getUserMapper()->toArray(),
+            'basket'          => $this->getBasketMapper()->toArray(),
+            'amount'          => $this->getAmount()->mappedProperties(),
         ];
     }
 }

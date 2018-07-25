@@ -54,10 +54,24 @@ class BackendSubscriber implements SubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch',
+            'Enlight_Controller_Action_PostDispatchSecure_Backend_Index' => 'onLoadBackendIndex',
+            'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch'
         ];
     }
 
+    /**
+     * @param ActionEventArgs $args
+     */
+    public function onLoadBackendIndex(\Enlight_Controller_ActionEventArgs $args)
+    {
+        $view = $args->getSubject()->View();
+        $view->addTemplateDir($this->pluginDirectory . '/Resources/views/');
+        $view->extendsTemplate('backend/wirecard_transactions/chat.tpl');
+    }
+
+    /**
+     * @param ActionEventArgs $args
+     */
     public function onOrderPostDispatch(\Enlight_Controller_ActionEventArgs $args)
     {
         $controller = $args->getSubject();

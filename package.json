@@ -3,9 +3,13 @@
   "version": "0.1.0",
   "scripts": {
     "lint": "node_modules/.bin/eslint -c ../../../themes/.eslintrc.js **/*.js **/*.js --ignore-path .eslintignore",
-    "test": "node_modules/.bin/mocha Tests/Selenium/**/*Test.js --timeout 120000",
-    "test:creditcard": "node_modules/.bin/mocha Tests/Selenium/CreditCardTest.js --timeout 120000",
-    "test:paypal": "node_modules/.bin/mocha Tests/Selenium/PaypalTest.js --timeout 120000"
+    "test": "node_modules/.bin/mocha Tests/Selenium/**/*Test.js --timeout 220000",
+    "test:default": "node_modules/.bin/mocha Tests/Selenium/DefaultTest.js --timeout 30000",
+    "test:creditcard": "node_modules/.bin/mocha Tests/Selenium/CreditCardTest.js --timeout 30000",
+    "test:creditcard3ds": "node_modules/.bin/mocha Tests/Selenium/CreditCardThreeDTest.js --timeout 40000",
+    "test:paypal": "node_modules/.bin/mocha Tests/Selenium/PaypalTest.js --timeout 120000",
+    "test:sepa": "node_modules/.bin/mocha Tests/Selenium/SepaTest.js --timeout 30000",
+    "test:sofort": "node_modules/.bin/mocha Tests/Selenium/SofortTest.js --timeout 60000"
   },
   "private": true,
   "license": "GPL-3.0",

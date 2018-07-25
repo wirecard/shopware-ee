@@ -41,6 +41,12 @@ describe('default test', () => {
     const url = 'http://localhost:8000';
     const mail = 'test@example.com';
     const password = 'shopware';
+    const wirecardPaymentLabels = [
+        'Wirecard Credit Card',
+        'Wirecard PayPal',
+        'Wirecard SEPA Direct Debit',
+        'Wirecard Sofort.'
+    ];
 
     it('should check the default checkout', async () => {
         // Log in with example account
@@ -65,7 +71,11 @@ describe('default test', () => {
 
         // Go to payment selection page select "prepayment"
         await driver.findElement(By.className('btn--change-payment')).click();
-        await driver.findElement(By.id('payment_mean5')).click();
+        // Check if all wirecard payments are present
+        wirecardPaymentLabels.forEach(async paymentLabel => {
+            await driver.findElement(By.xpath("//*[contains(text(), '" + paymentLabel + "')]"));
+        });
+        await driver.findElement(By.xpath("//*[contains(text(), 'Vorkasse')]")).click();
 
         // Go back to checkout page and test if payment method has been selected
         const overlay = await driver.findElements(By.className('js--overlay'));

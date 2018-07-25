@@ -75,7 +75,16 @@ class BasketMapperTest extends TestCase
                 ],
             ],
         ];
-        $mapper      = new BasketMapper($basketArray, 'EUR', $articles, $transaction, $snippetManager, null);
+        $mapper      = new BasketMapper(
+            $basketArray,
+            'SIGNATURE',
+            'EUR',
+            $articles,
+            $transaction,
+            $snippetManager,
+            null
+        );
+        $this->assertEquals('SIGNATURE', $mapper->getSignature());
         $this->assertEquals($basketArray, $mapper->getShopwareBasket());
         $this->assertEquals(implode("\n", [
             'foo - 10 - 999.99999 - EUR - 1 - 15%',
@@ -118,7 +127,7 @@ class BasketMapperTest extends TestCase
         $transaction = $this->createMock(Transaction::class);
         /** @var \Shopware_Components_Snippet_Manager|\PHPUnit_Framework_MockObject_MockObject $snippetManager */
         $snippetManager = $this->createMock(\Shopware_Components_Snippet_Manager::class);
-        $snippet = $this->createMock(\Enlight_Components_Snippet_Namespace::class);
+        $snippet        = $this->createMock(\Enlight_Components_Snippet_Namespace::class);
         $snippet->expects($this->atLeastOnce())->method('get')->willReturn('Shipping Name');
         $snippetManager->expects($this->atLeastOnce())->method('getNamespace')->willReturn($snippet);
 
@@ -141,6 +150,7 @@ class BasketMapperTest extends TestCase
         ];
         $mapper         = new BasketMapper(
             $basketArray,
+            'SIGNATURE',
             'USD',
             $articles,
             $transaction,
@@ -184,7 +194,7 @@ class BasketMapperTest extends TestCase
         $transaction = $this->createMock(Transaction::class);
         /** @var \Shopware_Components_Snippet_Manager|\PHPUnit_Framework_MockObject_MockObject $snippetManager */
         $snippetManager = $this->createMock(\Shopware_Components_Snippet_Manager::class);
-        $snippet = $this->createMock(\Enlight_Components_Snippet_Namespace::class);
+        $snippet        = $this->createMock(\Enlight_Components_Snippet_Namespace::class);
         $snippet->expects($this->atLeastOnce())->method('get')->willReturn('Shipping Name');
         $snippetManager->expects($this->atLeastOnce())->method('getNamespace')->willReturn($snippet);
 
@@ -195,7 +205,15 @@ class BasketMapperTest extends TestCase
             'sShippingcostsNet'     => 5,
             'sShippingcostsTax'     => 2,
         ];
-        $mapper      = new BasketMapper($basketArray, 'USD', $articles, $transaction, $snippetManager, null);
+        $mapper      = new BasketMapper(
+            $basketArray,
+            'SIGNATURE',
+            'USD',
+            $articles,
+            $transaction,
+            $snippetManager,
+            null
+        );
         $this->assertEquals($basketArray, $mapper->getShopwareBasket());
         $this->assertEquals(implode("\n", [
             'Shipping - shipping - 10 USD - 2',
@@ -240,7 +258,7 @@ class BasketMapperTest extends TestCase
                     'price'       => 1000,
                 ],
             ],
-        ], 'EUR', $articles, $transaction, $snippetManager, []);
+        ], 'SIGNATURE', 'EUR', $articles, $transaction, $snippetManager, []);
     }
 
     public function testBasketArticleOutOfStock()
@@ -269,7 +287,7 @@ class BasketMapperTest extends TestCase
                     'price'       => 1000,
                 ],
             ],
-        ], 'EUR', $articles, $transaction, $snippetManager, null);
+        ], 'SIGNATURE', 'EUR', $articles, $transaction, $snippetManager, null);
     }
 
     public function testInvalidBasketException()
@@ -282,7 +300,7 @@ class BasketMapperTest extends TestCase
         $snippetManager = $this->createMock(\Shopware_Components_Snippet_Manager::class);
 
         $this->expectException(InvalidBasketException::class);
-        new BasketMapper([], 'EUR', $articles, $transaction, $snippetManager, null);
+        new BasketMapper([], 'SIGNATURE', 'EUR', $articles, $transaction, $snippetManager, null);
     }
 
     /**

@@ -33,6 +33,12 @@ namespace WirecardShopwareElasticEngine\Models;
 
 use Shopware\Components\Model\ModelEntity;
 use Doctrine\ORM\Mapping as ORM;
+use Wirecard\PaymentSdk\Exception\MalformedResponseException;
+use Wirecard\PaymentSdk\Response\FormInteractionResponse;
+use Wirecard\PaymentSdk\Response\InteractionResponse;
+use Wirecard\PaymentSdk\Response\Response;
+use Wirecard\PaymentSdk\Response\SuccessResponse;
+use Wirecard\PaymentSdk\TransactionService;
 
 /**
  * @ORM\Entity
@@ -40,17 +46,20 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Transaction extends ModelEntity
 {
-    const TYPE_INITIAL = 'initial';
+    const TYPE_INITIAL_RESPONSE = 'initial-response';
+    const TYPE_INITIAL_REQUEST = 'initial-request';
     const TYPE_BACKEND = 'backend';
     const TYPE_RETURN = 'return';
+    const TYPE_INTERACTION = 'interaction';
     const TYPE_NOTIFY = 'notify';
 
     const STATE_OPEN = 'open';
     const STATE_CLOSED = 'closed';
 
+    const NOTIFY_PAYMENT_STATUS = 'notify-payment-status';
+
     /**
      * @var int
-     *
      * @ORM\Column(name="id", type="integer", nullable=false)
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
@@ -59,9 +68,15 @@ class Transaction extends ModelEntity
 
     /**
      * @var string
-     * @ORM\Column(name="order_number", type="string", nullable=false)
+     * @ORM\Column(name="order_number", type="string", nullable=true)
      */
     private $orderNumber;
+
+    /**
+     * @var string
+     * @ORM\Column(name="payment_unique_id", type="string", nullable=true)
+     */
+    private $paymentUniqueId;
 
     /**
      * @var string
@@ -71,7 +86,7 @@ class Transaction extends ModelEntity
 
     /**
      * @var string
-     * @ORM\Column(name="transaction_id", type="string", nullable=false)
+     * @ORM\Column(name="transaction_id", type="string", nullable=true)
      */
     private $transactionId;
 
@@ -94,6 +109,12 @@ class Transaction extends ModelEntity
     private $transactionType;
 
     /**
+     * @var string
+     * @ORM\Column(name="payment_method", type="string", nullable=true)
+     */
+    private $paymentMethod;
+
+    /**
      * @var float
      * @ORM\Column(name="amount", type="float", nullable=true)
      */
@@ -110,6 +131,12 @@ class Transaction extends ModelEntity
      * @ORM\Column(name="response", type="array", nullable=true)
      */
     private $response;
+
+    /**
+     * @var array
+     * @ORM\Column(name="request", type="array", nullable=true)
+     */
+    private $request;
 
     /**
      * @var string
@@ -135,9 +162,23 @@ class Transaction extends ModelEntity
      */
     private $state;
 
-    public function __construct()
+    /**
+     * @var string
+     * @ORM\Column(name="basket_signature", type="string", nullable=true)
+     */
+    private $basketSignature;
+
+    /**
+     * @var int
+     * @ORM\Column(name="payment_status", type="integer", nullable=true)
+     */
+    private $paymentStatus;
+
+    public function __construct($type)
     {
+        $this->type = $type;
         $this->setState(self::STATE_OPEN);
+        $this->setCreatedAt(new \DateTime());
     }
 
     /**
@@ -149,7 +190,7 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getOrderNumber()
     {
@@ -157,11 +198,27 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param string orderNumber
+     * @param string|null orderNumber
      */
     public function setOrderNumber($orderNumber)
     {
         $this->orderNumber = $orderNumber;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPaymentUniqueId()
+    {
+        return $this->paymentUniqueId;
+    }
+
+    /**
+     * @param string|null $paymentUniqueId
+     */
+    public function setPaymentUniqueId($paymentUniqueId)
+    {
+        $this->paymentUniqueId = $paymentUniqueId;
     }
 
     /**
@@ -173,27 +230,11 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param string $parentTransactionId
-     */
-    public function setParentTransactionId($parentTransactionId = null)
-    {
-        $this->parentTransactionId = $parentTransactionId;
-    }
-
-    /**
      * @return string
      */
     public function getTransactionId()
     {
         return $this->transactionId;
-    }
-
-    /**
-     * @param string $transactionId
-     */
-    public function setTransactionId($transactionId)
-    {
-        $this->transactionId = $transactionId;
     }
 
     /**
@@ -205,27 +246,11 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param string $providerTransactionId
-     */
-    public function setProviderTransactionId($providerTransactionId = null)
-    {
-        $this->providerTransactionId = $providerTransactionId;
-    }
-
-    /**
      * @return string|null
      */
     public function getProviderTransactionReference()
     {
         return $this->providerTransactionReference;
-    }
-
-    /**
-     * @param string $providerTransactionReference
-     */
-    public function setProviderTransactionReference($providerTransactionReference = null)
-    {
-        $this->providerTransactionReference = $providerTransactionReference;
     }
 
     /**
@@ -237,11 +262,25 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param string $transactionType
+     * Return payment method. If null, fallback to first payment method in response data.
+     * (PaymentSDK only provides getPaymentMethod() in SuccessResponse class)
+     *
+     * @return string
      */
-    public function setTransactionType($transactionType)
+    public function getPaymentMethod()
     {
-        $this->transactionType = $transactionType;
+        if ($this->paymentMethod) {
+            return $this->paymentMethod;
+        }
+        return isset($this->response['payment-methods.0.name']) ? $this->response['payment-methods.0.name'] : null;
+    }
+
+    /**
+     * @param string $paymentMethod
+     */
+    private function setPaymentMethod($paymentMethod)
+    {
+        $this->paymentMethod = $paymentMethod;
     }
 
     /**
@@ -253,27 +292,11 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param float $amount
-     */
-    public function setAmount($amount = null)
-    {
-        $this->amount = $amount;
-    }
-
-    /**
      * @return string|null
      */
     public function getCurrency()
     {
         return $this->currency;
-    }
-
-    /**
-     * @param string $currency
-     */
-    public function setCurrency($currency = null)
-    {
-        $this->currency = $currency;
     }
 
     /**
@@ -285,11 +308,69 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param array $response
+     * @param Response $response
      */
-    public function setResponse(array $response)
+    public function setResponse(Response $response)
     {
-        $this->response = $response;
+        $this->requestId       = $response->getRequestId();
+        $this->transactionType = $response->getTransactionType();
+
+        if ($response instanceof SuccessResponse) {
+            $this->transactionId                = $response->getTransactionId();
+            $this->parentTransactionId          = $response->getParentTransactionId();
+            $this->providerTransactionId        = $response->getProviderTransactionId();
+            $this->providerTransactionReference = $response->getProviderTransactionReference();
+            $this->setPaymentMethod($response->getPaymentMethod());
+        } elseif ($response instanceof InteractionResponse || $response instanceof FormInteractionResponse) {
+            $this->transactionId = $response->getTransactionId();
+        }
+
+        if ($response->getRequestedAmount()) {
+            $this->currency = $response->getRequestedAmount()->getCurrency();
+            $this->amount   = $response->getRequestedAmount()->getValue();
+        }
+
+        if (! $this->getPaymentUniqueId()) {
+            try {
+                $this->setPaymentUniqueId($response->findElement('order-number'));
+            } catch (MalformedResponseException $e) {
+                // the response does not contain an 'order-number'
+            }
+        }
+
+        $this->response = $response->getData();
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getRequest()
+    {
+        return $this->request;
+    }
+
+    /**
+     * @param array $request
+     */
+    public function setRequest(array $request)
+    {
+        if (isset($request[TransactionService::REQUEST_ID])) {
+            $this->requestId = $request[TransactionService::REQUEST_ID];
+        }
+        if (isset($request['transaction_type'])) {
+            $this->transactionType = $request['transaction_type'];
+        }
+        if (isset($request['requested_amount'])) {
+            $this->amount = $request['requested_amount'];
+        }
+        if (isset($request['requested_amount_currency'])) {
+            $this->currency = $request['requested_amount_currency'];
+        }
+        if (isset($request['payment_method'])) {
+            $this->setPaymentMethod($request['payment_method']);
+        }
+
+        $this->request = $request;
     }
 
     /**
@@ -301,27 +382,11 @@ class Transaction extends ModelEntity
     }
 
     /**
-     * @param string $type
-     */
-    public function setType($type = null)
-    {
-        $this->type = $type;
-    }
-
-    /**
      * @return string|null
      */
     public function getRequestId()
     {
         return $this->requestId;
-    }
-
-    /**
-     * @param string $requestId
-     */
-    public function setRequestId($requestId)
-    {
-        $this->requestId = $requestId;
     }
 
     /**
@@ -356,12 +421,51 @@ class Transaction extends ModelEntity
         $this->state = $state;
     }
 
+    /**
+     * @return string|null
+     */
+    public function getBasketSignature()
+    {
+        return $this->basketSignature;
+    }
+
+    /**
+     * @param string|null $basketSignature
+     */
+    public function setBasketSignature($basketSignature)
+    {
+        $this->basketSignature = $basketSignature;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getPaymentStatus()
+    {
+        return $this->paymentStatus;
+    }
+
+    /**
+     * @param int $paymentStatusId
+     */
+    public function setPaymentStatus($paymentStatusId)
+    {
+        $this->paymentStatus = $paymentStatusId;
+    }
+
+    public function isInitial()
+    {
+        return $this->getType() === self::TYPE_INITIAL_REQUEST || $this->getType() === self::TYPE_INITIAL_RESPONSE;
+    }
+
     public function toArray()
     {
         return [
             'id'                           => $this->getId(),
             'orderNumber'                  => $this->getOrderNumber(),
+            'paymentUniqueId'              => $this->getPaymentUniqueId(),
             'transactionType'              => $this->getTransactionType(),
+            'paymentMethod'                => $this->getPaymentMethod(),
             'transactionId'                => $this->getTransactionId(),
             'parentTransactionId'          => $this->getParentTransactionId(),
             'providerTransactionId'        => $this->getProviderTransactionId(),
@@ -372,6 +476,7 @@ class Transaction extends ModelEntity
             'currency'                     => $this->getCurrency(),
             'createdAt'                    => $this->getCreatedAt(),
             'response'                     => $this->getResponse(),
+            'request'                      => $this->getRequest(),
             'state'                        => $this->getState(),
         ];
     }

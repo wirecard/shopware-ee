@@ -33,10 +33,8 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 
 class SessionHandler
 {
-    const ORDER = 'WirecardElasticEngineOrder';
-
-    const ORDER_NUMBER = 'orderNumber';
-    const BASKET_SIGNATURE = 'basketSignature';
+    const PAYMENT_DATA = 'WirecardElasticEnginePaymentData';
+    const DEVICE_FINGERPRINT_ID = 'fingerprint_id';
 
     /**
      * @var \Enlight_Components_Session_Namespace
@@ -49,43 +47,41 @@ class SessionHandler
     }
 
     /**
-     * @param string $orderNumber
-     * @param string $basketSignature
+     * @param array $paymentData
      */
-    public function storeOrder($orderNumber, $basketSignature)
+    public function storePaymentData(array $paymentData)
     {
-        $this->session->offsetSet(self::ORDER, [
-            self::ORDER_NUMBER     => $orderNumber,
-            self::BASKET_SIGNATURE => $basketSignature,
-        ]);
+        $this->session->offsetSet(self::PAYMENT_DATA, $paymentData);
     }
 
     /**
-     * @return string|null
+     * @return array|null
      */
-    public function getOrderNumber()
+    public function getPaymentData()
     {
-        if (! $this->session->offsetExists(self::ORDER)) {
+        if (! $this->session->offsetExists(self::PAYMENT_DATA)) {
             return null;
         }
-        $store = $this->session->offsetGet(self::ORDER);
-        return isset($store[self::ORDER_NUMBER]) ? $store[self::ORDER_NUMBER] : null;
+        return $this->session->offsetGet(self::PAYMENT_DATA);
     }
 
     /**
-     * @return string|null
+     * @param string $maid
+     * @return string
      */
-    public function getBasketSignature()
+    public function getDeviceFingerprintId($maid)
     {
-        if (! $this->session->offsetExists(self::ORDER)) {
-            return null;
+        if (! $this->session->get(self::DEVICE_FINGERPRINT_ID)) {
+            $this->session->offsetSet(self::DEVICE_FINGERPRINT_ID, md5($maid . '_' . microtime()));
         }
-        $store = $this->session->offsetGet(self::ORDER);
-        return isset($store[self::BASKET_SIGNATURE]) ? $store[self::BASKET_SIGNATURE] : null;
+
+        return $this->session->get(self::DEVICE_FINGERPRINT_ID);
     }
 
-    public function clearOrder()
+    public function destroyDeviceFingerprintId()
     {
-        $this->session->offsetSet(self::ORDER, []);
+        if ($this->session->offsetExists(self::DEVICE_FINGERPRINT_ID)) {
+            $this->session->offsetUnset(self::DEVICE_FINGERPRINT_ID);
+        }
     }
 }

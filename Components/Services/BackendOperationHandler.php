@@ -39,7 +39,6 @@ use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
-use WirecardShopwareElasticEngine\Models\Transaction as TransactionModel;
 
 class BackendOperationHandler extends Handler
 {
@@ -49,7 +48,6 @@ class BackendOperationHandler extends Handler
      * @param string         $operation
      *
      * @return Action
-     * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
      */
     public function execute(
         Transaction $transaction,
@@ -58,76 +56,31 @@ class BackendOperationHandler extends Handler
     ) {
         try {
             $response = $transactionService->process($transaction, $operation);
+
+            if ($response instanceof SuccessResponse) {
+                $this->transactionManager->createBackend($response);
+
+                return new ViewAction(null, [
+                    'success'       => true,
+                    'transactionId' => $response->getTransactionId(),
+                ]);
+            }
         } catch (\Exception $e) {
             $this->logger->error('Transaction service process failed: ' . $e->getMessage());
             return new ErrorAction(ErrorAction::PROCESSING_FAILED, 'Transaction processing failed');
         }
 
-        if ($response instanceof SuccessResponse) {
-            $transaction = $this->transactionFactory->create(
-                $this->getOrderFromResponse($response)->getNumber(),
-                $response,
-                TransactionModel::TYPE_BACKEND
-            );
-
-            $this->updateTransactionState($transaction);
-
-            return new ViewAction(null, [
-                'success'       => true,
-                'transactionId' => $response->getTransactionId(),
-            ]);
-        }
-
+        $message = 'BackendOperationFailedUnknownResponse';
         if ($response instanceof FailureResponse) {
-            $this->logger->error('Backend operation failed', $response->getData());
-
             $errors = [];
             foreach ($response->getStatusCollection() as $status) {
                 /** @var Status $status */
                 $errors[] = $status->getDescription();
             }
-
-            return new ErrorAction(ErrorAction::BACKEND_OPERATION_FAILED, join("\n", $errors));
+            $message = join("\n", $errors);
         }
 
         $this->logger->error('Backend operation failed', $response->getData());
-        return new ErrorAction(ErrorAction::BACKEND_OPERATION_FAILED, 'BackendOperationFailedUnknownResponse');
-    }
-
-    /**
-     * @param TransactionModel $transaction
-     */
-    private function updateTransactionState(TransactionModel $transaction)
-    {
-        $parentTransaction = $this->em
-            ->getRepository(TransactionModel::class)
-            ->findOneBy([
-                'transactionId' => $transaction->getParentTransactionId(),
-                'type'          => TransactionModel::TYPE_NOTIFY
-            ]);
-
-        if (! $parentTransaction) {
-            return;
-        }
-
-        $childTransactions = $this->em
-            ->getRepository(TransactionModel::class)
-            ->findBy([
-                'parentTransactionId' => $transaction->getParentTransactionId(),
-                'transactionType'     => $transaction->getTransactionType(),
-            ]);
-
-        $totalAmount = (float)$parentTransaction->getAmount();
-
-        foreach ($childTransactions as $childTransaction) {
-            $totalAmount -= (float)$childTransaction->getAmount();
-        }
-
-        if ($totalAmount > 0) {
-            return;
-        }
-
-        $parentTransaction->setState(TransactionModel::STATE_CLOSED);
-        $this->em->flush();
+        return new ErrorAction(ErrorAction::BACKEND_OPERATION_FAILED, $message);
     }
 }

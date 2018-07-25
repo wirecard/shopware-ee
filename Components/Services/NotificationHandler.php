@@ -31,12 +31,12 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
+use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
-use WirecardShopwareElasticEngine\Exception\ParentTransactionNotFoundException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
 class NotificationHandler extends Handler
@@ -47,16 +47,23 @@ class NotificationHandler extends Handler
      * @param BackendService $backendService
      *
      * @return bool
-     * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
+     * @throws \WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException
      */
     public function execute(\sOrder $shopwareOrder, Response $notification, BackendService $backendService)
     {
         if ($notification instanceof SuccessResponse) {
-            return $this->handleSuccess($shopwareOrder, $notification, $backendService);
+            $initialTransaction = $this->handleSuccess($shopwareOrder, $notification, $backendService);
+
+            $this->transactionManager->createNotify($initialTransaction, $notification, $backendService);
+
+            return true;
         }
+
         if ($notification instanceof FailureResponse) {
-            return $this->handleFailure($notification);
+            $this->logger->error("Failure response", $notification->getData());
+            return false;
         }
+
         $this->logger->error("Unexpected notification response", [
             'class'    => get_class($notification),
             'response' => $notification->getData(),
@@ -69,85 +76,94 @@ class NotificationHandler extends Handler
      * @param SuccessResponse $notification
      * @param BackendService  $backendService
      *
-     * @return bool
-     * @throws \WirecardShopwareElasticEngine\Exception\OrderNotFoundException
+     * @return Transaction
+     * @throws \WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException
      */
     protected function handleSuccess(
         \sOrder $shopwareOrder,
         SuccessResponse $notification,
         BackendService $backendService
     ) {
-        $order = $this->getOrderFromResponse($notification);
+        $this->logger->info('Incoming success notification', $notification->getData());
 
-        $this->logger->info('Incoming notification', $notification->getData());
+        $paymentStatusId    = $this->getPaymentStatusId($backendService, $notification);
+        $initialTransaction = $this->transactionManager->getInitialTransaction($notification);
+        if ($paymentStatusId === Status::PAYMENT_STATE_OPEN) {
+            return $initialTransaction;
+        }
+        $initialTransaction->setPaymentStatus($paymentStatusId);
+        $this->em->flush();
+        $this->logger->debug("NotificationHandler::handleSuccess: flushed initial transaction " .
+                             "{$initialTransaction->getId()} with payment status $paymentStatusId");
 
-        try {
-            // We try to get the parent transaction for later usage and log a failed attempt for now
-            $this->getParentTransaction($notification);
-        } catch (ParentTransactionNotFoundException $e) {
-            $this->logger->warning(
-                "Parent transaction in notification not found: " . $e->getMessage(),
-                $notification->getData()
-            );
+        /** @var Order $order */
+        $order = $this->em->getRepository(Order::class)->findOneBy([
+            'temporaryId' => $initialTransaction->getPaymentUniqueId(),
+        ]);
+
+        // if we already have an order, we can update the payment status directly
+        if ($order) {
+            $this->logger->debug('NotificationHandler::handleSuccess: order found, save payment status '
+                                 . $paymentStatusId);
+            $this->savePaymentStatus($shopwareOrder, $order, $paymentStatusId);
+            return $initialTransaction;
+        }
+        $this->logger->debug('NotificationHandler::handleSuccess: no order');
+
+        // otherwise, lets save the payment status to the initial transaction (see returnAction)
+        $this->em->refresh($initialTransaction);
+        $this->logger->debug('NotificationHandler::handleSuccess: refreshed initial transaction');
+
+        // check again if order exists and try to update payment status
+        $order = $this->em->getRepository(Order::class)->findOneBy([
+            'temporaryId' => $initialTransaction->getPaymentUniqueId(),
+        ]);
+        $this->logger->debug('NotificationHandler::handleSuccess: order: ' . ($order ? ' found' : ' not found'));
+        if ($order) {
+            $this->savePaymentStatus($shopwareOrder, $order, $paymentStatusId);
         }
 
-        $transaction = $this->transactionFactory->create($order->getNumber(), $notification, Transaction::TYPE_NOTIFY);
-        $this->updateTransactionState($transaction, $backendService->isFinal($notification->getTransactionType()));
+        $this->logger->debug('NotificationHandler::handleSuccess: finished');
+        return $initialTransaction;
+    }
 
+    /**
+     * @param \sOrder $shopwareOrder
+     * @param Order   $order
+     * @param int     $paymentStatusId
+     */
+    private function savePaymentStatus(\sOrder $shopwareOrder, Order $order, $paymentStatusId)
+    {
+        // payment status has already been changed, do nothing
         if ($order->getPaymentStatus()->getId() !== Status::PAYMENT_STATE_OPEN) {
-            return true;
-        }
-
-        switch ($backendService->getOrderState($notification->getTransactionType())) {
-            case BackendService::TYPE_AUTHORIZED:
-                $paymentState = Status::PAYMENT_STATE_RESERVED;
-                break;
-            case BackendService::TYPE_CANCELLED:
-                $paymentState = Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED;
-                break;
-            case BackendService::TYPE_PROCESSING:
-                $paymentState = Status::PAYMENT_STATE_COMPLETELY_PAID;
-                break;
-            case BackendService::TYPE_REFUNDED:
-                $paymentState = Status::PAYMENT_STATE_RE_CREDITING;
-                break;
-            default:
-                $paymentState = Status::PAYMENT_STATE_OPEN;
-        }
-
-        $shopwareOrder->setPaymentStatus($order->getId(), $paymentState, true);
-        return true;
-    }
-
-    /**
-     * @param FailureResponse $notification
-     *
-     * @return bool
-     */
-    protected function handleFailure(FailureResponse $notification)
-    {
-        $this->logger->error("Failure response", $notification->getData());
-        return false;
-    }
-
-    /**
-     * @param Transaction $transaction
-     * @param bool        $isFinal
-     */
-    private function updateTransactionState(Transaction $transaction, $isFinal)
-    {
-        $parentTransaction = $this->em
-            ->getRepository(Transaction::class)
-            ->findOneBy([
-                'transactionId' => $transaction->getParentTransactionId(),
-                'type'          => Transaction::TYPE_NOTIFY,
-            ]);
-
-        if (! $parentTransaction || ! $isFinal) {
             return;
         }
+        $shopwareOrder->setPaymentStatus($order->getId(), $paymentStatusId, false);
+        return;
+    }
 
-        $transaction->setState(Transaction::STATE_CLOSED);
-        $this->em->flush();
+    /**
+     * @param BackendService $backendService
+     * @param Response       $notification
+     *
+     * @return int
+     */
+    private function getPaymentStatusId($backendService, $notification)
+    {
+        if ($notification->getTransactionType() === 'check-payer-response') {
+            return Status::PAYMENT_STATE_OPEN;
+        }
+        switch ($backendService->getOrderState($notification->getTransactionType())) {
+            case BackendService::TYPE_AUTHORIZED:
+                return Status::PAYMENT_STATE_RESERVED;
+            case BackendService::TYPE_CANCELLED:
+                return Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED;
+            case BackendService::TYPE_PROCESSING:
+                return Status::PAYMENT_STATE_COMPLETELY_PAID;
+            case BackendService::TYPE_REFUNDED:
+                return Status::PAYMENT_STATE_RE_CREDITING;
+            default:
+                return Status::PAYMENT_STATE_OPEN;
+        }
     }
 }

@@ -42,7 +42,6 @@ use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
-use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
 class ReturnHandler extends Handler
@@ -52,30 +51,31 @@ class ReturnHandler extends Handler
      * @param TransactionService                  $transactionService
      * @param \Enlight_Controller_Request_Request $request
      *
-     * @return Action
-     * @throws OrderNotFoundException
+     * @return Response
      */
     public function execute(
         Payment $payment,
         TransactionService $transactionService,
         \Enlight_Controller_Request_Request $request
     ) {
-        try {
-            $response = $payment->processReturn($transactionService, $request);
+        $response = $payment->processReturn($transactionService, $request);
 
-            if (! $response) {
-                $response = $transactionService->handleResponse($request->getParams());
-            }
-        } catch (\Exception $e) {
-            $this->logger->error('Return processing failed: ' . $e->getMessage());
-            return new ErrorAction(ErrorAction::PROCESSING_FAILED, 'Return processing failed');
+        if (! $response) {
+            $response = $transactionService->handleResponse($request->getParams());
         }
 
+        return $response;
+    }
+
+    /**
+     * @param Response $response
+     *
+     * @return Action|ViewAction
+     */
+    public function handleResponse(Response $response)
+    {
         if ($response instanceof FormInteractionResponse) {
             return $this->handleFormInteraction($response);
-        }
-        if ($response instanceof SuccessResponse) {
-            return $this->handleSuccess($response);
         }
         if ($response instanceof InteractionResponse) {
             return $this->handleInteraction($response);
@@ -90,12 +90,7 @@ class ReturnHandler extends Handler
      */
     protected function handleFormInteraction(FormInteractionResponse $response)
     {
-        try {
-            $order = $this->getOrderFromResponse($response);
-            $this->transactionFactory->create($order->getNumber(), $response, Transaction::TYPE_RETURN);
-        } catch (OrderNotFoundException $e) {
-            $this->logger->notice('Could not create transaction for FormInteractionResponse: ' . $e->getMessage());
-        }
+        $this->transactionManager->createInteraction($response);
 
         return new ViewAction('credit_card.tpl', [
             'threeDSecure' => true,
@@ -107,25 +102,20 @@ class ReturnHandler extends Handler
 
     /**
      * @param SuccessResponse $response
+     * @param Transaction     $initialTransaction
      *
      * @return Action
-     * @throws OrderNotFoundException
      */
-    protected function handleSuccess(SuccessResponse $response)
+    public function handleSuccess(SuccessResponse $response, Transaction $initialTransaction)
     {
-        $order = $this->getOrderFromResponse($response);
+        $this->transactionManager->createReturn($initialTransaction, $response);
 
-        // TemporaryID is set to the order number, since the returned `RedirectAction` will contain this ID
-        // as `sUniqueID` to get information about what order has been processed and show proper information.
-        $order->setTemporaryId($order->getNumber());
-
-        $this->transactionFactory->create($order->getNumber(), $response, Transaction::TYPE_RETURN);
-
+        // `sUniqueID` should match the order temporaryId/paymentUniqueId to show proper information after redirect.
         return new RedirectAction($this->router->assemble([
             'module'     => 'frontend',
             'controller' => 'checkout',
             'action'     => 'finish',
-            'sUniqueID'  => $order->getTemporaryId(),
+            'sUniqueID'  => $initialTransaction->getPaymentUniqueId(),
         ]));
     }
 
@@ -136,12 +126,7 @@ class ReturnHandler extends Handler
      */
     protected function handleInteraction(InteractionResponse $response)
     {
-        try {
-            $order = $this->getOrderFromResponse($response);
-            $this->transactionFactory->create($order->getNumber(), $response, Transaction::TYPE_RETURN);
-        } catch (OrderNotFoundException $e) {
-            $this->logger->notice('Could not create transaction for InteractionResponse: ' . $e->getMessage());
-        }
+        $this->transactionManager->createInteraction($response);
 
         return new RedirectAction($response->getRedirectUrl());
     }

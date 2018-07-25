@@ -34,18 +34,12 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\Routing\RouterInterface;
-use Shopware\Models\Order\Order;
-use Wirecard\PaymentSdk\Exception\MalformedResponseException;
-use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
-use WirecardShopwareElasticEngine\Exception\OrderNotFoundException;
 use WirecardShopwareElasticEngine\Exception\ParentTransactionNotFoundException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
 abstract class Handler
 {
-    protected $devEnvironments = ['dev', 'development', 'testing'];
-
     /**
      * @var EntityManagerInterface
      */
@@ -67,75 +61,29 @@ abstract class Handler
     protected $shopwareConfig;
 
     /**
-     * @var TransactionFactory
+     * @var TransactionManager
      */
-    protected $transactionFactory;
+    protected $transactionManager;
 
     /**
      * @param EntityManagerInterface      $em
      * @param RouterInterface             $router
      * @param LoggerInterface             $logger
      * @param \Shopware_Components_Config $config
-     * @param TransactionFactory          $transactionFactory
+     * @param TransactionManager          $transactionManager
      */
     public function __construct(
         EntityManagerInterface $em,
         RouterInterface $router,
         LoggerInterface $logger,
         \Shopware_Components_Config $config,
-        TransactionFactory $transactionFactory
+        TransactionManager $transactionManager
     ) {
         $this->em                 = $em;
         $this->router             = $router;
         $this->logger             = $logger;
         $this->shopwareConfig     = $config;
-        $this->transactionFactory = $transactionFactory;
-    }
-
-    /**
-     * @param int $orderNumber
-     *
-     * @return string
-     */
-    protected function getOrderNumberForTransaction($orderNumber)
-    {
-        if (in_array(getenv('SHOPWARE_ENV'), $this->devEnvironments)) {
-            $orderNumber = uniqid() . '-' . $orderNumber;
-        }
-
-        return $orderNumber;
-    }
-
-    /**
-     * @param Response $response
-     *
-     * @return Order
-     * @throws OrderNotFoundException
-     */
-    protected function getOrderFromResponse(Response $response)
-    {
-        try {
-            $orderNumber = $response->findElement('order-number');
-
-            if (in_array(getenv('SHOPWARE_ENV'), $this->devEnvironments) && strpos($orderNumber, '-') >= 0) {
-                $orderNumber = explode('-', $orderNumber)[1];
-            }
-            $order = $this->em->getRepository(Order::class)->findOneBy([
-                'number' => $orderNumber,
-            ]);
-        } catch (MalformedResponseException $e) {
-            // In case we're not finding our `order-number` in the response we'll try to find it via the requestId.
-            $orderNumber = $response->getRequestId();
-            $order       = $this->em->getRepository(Order::class)->findOneBy([
-                'transactionId' => $orderNumber,
-            ]);
-        }
-
-        if (! $order) {
-            throw new OrderNotFoundException($orderNumber);
-        }
-
-        return $order;
+        $this->transactionManager = $transactionManager;
     }
 
     /**

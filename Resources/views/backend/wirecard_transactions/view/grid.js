@@ -3,8 +3,13 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
     alias: 'widget.wirecardee-transactions-grid',
     region: 'center',
 
+    viewConfig: {
+        enableTextSelection: true
+    },
+
     snippets: {
         OrderNumber: '{s name="OrderNumber" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
+        PaymentUniqueId: '{s name="PaymentUniqueId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
         Type: '{s name="Type" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
         TransactionId: '{s name="TransactionId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
         ParentTransactionId: '{s name="ParentTransactionId" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
@@ -42,7 +47,11 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
             orderNumber: {
                 header: me.snippets.OrderNumber,
                 draggable: false,
-                renderer: me.orderColumnRenderer
+                renderer: me.orderNumberRenderer
+            },
+            paymentUniqueId: {
+                header: me.snippets.PaymentUniqueId,
+                draggable: false
             },
             type: {
                 header: me.snippets.Type,
@@ -66,7 +75,8 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
             },
             paymentMethod: {
                 header: me.snippets.PaymentMethod,
-                draggable: false
+                draggable: false,
+                renderer: me.paymentMethodRenderer
             },
             amount: {
                 header: me.snippets.Amount,
@@ -85,6 +95,15 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
     createActionColumnItems: function () {
         var me = this,
             items = me.callParent(arguments);
+
+        items.push({
+            iconCls: 'sprite-magnifier-medium',
+            tooltip: 'Open transaction details',
+            handler: function (view, rowIndex, colIndex, item, opts, record) {
+                var historyWindow = Ext.create('Shopware.apps.WirecardExtendOrder.view.HistoryWindow', { record: record });
+                historyWindow.show();
+            }
+        });
 
         items.push({
             iconCls: 'sprite-pencil',
@@ -118,14 +137,33 @@ Ext.define('Shopware.apps.WirecardTransactions.view.Grid', {
      * @param { Object } row
      * @returns { String }
      */
-    orderColumnRenderer: function (value, style, row) {
+    orderNumberRenderer: function (value, style, row) {
         if (value === Ext.undefined) {
             return value;
+        }
+        if (!row.data.orderId) {
+            return '(no order)';
         }
         if (!row.data.orderId || row.data.orderStatus < 0) {
             return value + ' (canceled)';
         }
         return value;
+    },
+
+    /**
+     * @param { String } value
+     * @param { Object } style
+     * @param { Object } row
+     * @returns { String }
+     */
+    paymentMethodRenderer: function (value, style, row) {
+        if (row.data.orderPaymentMethod) {
+            return row.data.orderPaymentMethod;
+        }
+        if (value) {
+            return value;
+        }
+        return '';
     },
 
     /**

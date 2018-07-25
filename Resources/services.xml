@@ -12,8 +12,8 @@
             <argument type="service" id="router"/>
             <argument type="service" id="events"/>
         </service>
-        <service id="wirecard_elastic_engine.transaction_factory"
-                 class="WirecardShopwareElasticEngine\Components\Services\TransactionFactory">
+        <service id="wirecard_elastic_engine.transaction_manager"
+                 class="WirecardShopwareElasticEngine\Components\Services\TransactionManager">
             <argument type="service" id="models"/>
         </service>
 
@@ -25,7 +25,7 @@
             <argument type="service" id="router"/>
             <argument type="service" id="pluginlogger"/>
             <argument type="service" id="config"/>
-            <argument type="service" id="wirecard_elastic_engine.transaction_factory"/>
+            <argument type="service" id="wirecard_elastic_engine.transaction_manager"/>
         </service>
         <service id="wirecard_elastic_engine.notification_handler"
                  class="WirecardShopwareElasticEngine\Components\Services\NotificationHandler"
@@ -53,6 +53,7 @@
                  class="WirecardShopwareElasticEngine\Subscriber\FrontendSubscriber">
             <argument>%wirecard_shopware_elastic_engine.plugin_dir%</argument>
             <argument type="service" id="template"/>
+            <argument type="service" id="wirecard_elastic_engine.payment_factory"/>
             <tag name="shopware.event_subscriber"/>
         </service>
         <service id="wirecard_elastic_engine.subscriber.backend"

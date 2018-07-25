@@ -115,7 +115,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
             return $this->handleError('Order number not found');
         }
 
-        $transactions = $this->get('models')
+        $transactions = $this->getModelManager()
                              ->getRepository(Transaction::class)
                              ->findBy([
                                  'orderNumber' => $orderNumber,
@@ -125,21 +125,24 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
             return $this->handleError('No transactions found');
         }
 
-        $shop               = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
-        $config             = $payment->getTransactionConfig(
+        $shop           = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
+        $config         = $payment->getTransactionConfig(
             $shop,
             $this->container->getParameterBag(),
             $shop->getCurrency()->getCurrency()
         );
-        $backendService     = new BackendService($config, $this->getLogger());
-        $paymentTransaction = $payment->getTransaction();
-
-        $result = [
+        $backendService = new BackendService($config, $this->getLogger());
+        $result         = [
             'transactions' => [],
         ];
 
         foreach ($transactions as $transaction) {
             /** @var Transaction $transaction */
+            $paymentTransaction = $payment->getBackendTransaction(
+                $transaction->getTransactionType(),
+                $transaction->getPaymentMethod()
+            );
+
             $paymentTransaction->setParentTransactionId($transaction->getTransactionId());
 
             $result['transactions'][] = array_merge($transaction->toArray(), [
@@ -177,7 +180,7 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         );
         $backendService = new BackendService($config, $this->getLogger());
 
-        $transaction = $payment->getTransaction();
+        $transaction = $payment->getBackendTransaction($operation, null);
         $transaction->setParentTransactionId($transactionId);
 
         if ($amount) {
@@ -234,9 +237,9 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
             /** @var Shopware\Models\Order\Status $status */
             $status = $order ? $order->getOrderStatus() : null;
 
-            $result['data'][$key]['orderId']       = $order ? $order->getId() : 0;
-            $result['data'][$key]['orderStatus']   = $status ? $status->getId() : 0;
-            $result['data'][$key]['paymentMethod'] = $payment ? $payment->getDescription() : 'N/A';
+            $result['data'][$key]['orderId']            = $order ? $order->getId() : 0;
+            $result['data'][$key]['orderStatus']        = $status ? $status->getId() : 0;
+            $result['data'][$key]['orderPaymentMethod'] = $payment ? $payment->getDescription() : null;
         }
 
         return $result;

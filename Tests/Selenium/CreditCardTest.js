@@ -33,7 +33,7 @@
 const { expect } = require('chai');
 const { Builder, By, until } = require('selenium-webdriver');
 
-describe('credit card test', () => {
+describe('Credit Card test', () => {
     const driver = new Builder()
         .forBrowser('chrome')
         .build();
@@ -102,6 +102,7 @@ describe('credit card test', () => {
         driver.switchTo().defaultContent();
         await driver.findElement(By.id('wirecardee-credit-card--form-submit')).click();
 
+        // Check confirmation page
         await driver.wait(until.elementLocated(By.className('teaser--btn-print')));
         const panelTitle = await driver.findElement(By.className('panel--title')).getText();
         expect(panelTitle).to.include('Vielen Dank');

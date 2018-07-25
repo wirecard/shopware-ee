@@ -33,6 +33,7 @@ namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Data;
 
 use PHPUnit\Framework\TestCase;
 use Wirecard\PaymentSdk\Entity\Amount;
+use Wirecard\PaymentSdk\Entity\Device;
 use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
@@ -59,14 +60,19 @@ class OrderSummaryTest extends TestCase
             $payment,
             $user,
             $basket,
-            $amount
+            $amount,
+            'device-fingerprint'
         );
 
-        $this->assertSame(20001, $order->getOrderNumber());
+        $this->assertSame(20001, $order->getPaymentUniqueId());
         $this->assertSame($payment, $order->getPayment());
         $this->assertSame($user, $order->getUserMapper());
         $this->assertSame($basket, $order->getBasketMapper());
         $this->assertSame($amount, $order->getAmount());
+        $this->assertSame('device-fingerprint', $order->getDeviceFingerprintId());
+        $device = $order->getWirecardDevice();
+        $this->assertInstanceOf(Device::class, $device);
+        $this->assertEquals('device-fingerprint', $device->getFingerprint());
     }
 
     public function testToArray()
@@ -97,22 +103,23 @@ class OrderSummaryTest extends TestCase
         $amount->method('mappedProperties')->willReturn(['amount']);
 
         $order = new OrderSummary(
-            20000,
+            '1532083067-uniqueId',
             $payment,
             $user,
             $basket,
-            $amount
+            $amount,
+            'device-fingerprint'
         );
         $this->assertEquals([
-            'orderNumber' => 20000,
-            'payment'     => [
+            'paymentUniqueId' => '1532083067-uniqueId',
+            'payment'         => [
                 'name'          => 'paymentName',
                 'paymentConfig' => ['paymentConfig'],
                 'transaction'   => ['transaction'],
             ],
-            'user'        => ['user'],
-            'basket'      => ['basket'],
-            'amount'      => ['amount'],
+            'user'            => ['user'],
+            'basket'          => ['basket'],
+            'amount'          => ['amount'],
         ], $order->toArray());
     }
 }
