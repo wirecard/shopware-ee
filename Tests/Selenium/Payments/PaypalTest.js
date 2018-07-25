@@ -76,9 +76,8 @@ describe('PayPal test', () => {
         await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
 
         // Log in to paypal
-        await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
-
         await driver.wait(until.elementLocated(By.id('loginSection')));
+        await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
         await driver.wait(driver.findElement(By.css('#loginSection .btn')).click());
 
         await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));

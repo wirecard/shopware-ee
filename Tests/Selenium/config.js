@@ -38,7 +38,7 @@ exports.config = {
         paypal: {
             label: 'Wirecard PayPal',
             fields: {
-                email: 'paypal.buyer2@wirecard.com',
+                email: 'paypal.shopware.buyer@wirecard.com',
                 password: 'Wirecardbuyer'
             }
         },
