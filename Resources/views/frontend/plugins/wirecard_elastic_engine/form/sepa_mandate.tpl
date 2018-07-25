@@ -16,7 +16,8 @@
             <tr>
                 <td class="text11justify">
                     <i>{s name="Creditor"}{/s}</i><br/>
-                    {$wirecardFormFields.creditorName} {$wirecardFormFields.creditorAddress} <br/>
+                    {$wirecardFormFields.creditorName}{if $wirecardFormFields.creditorName and $wirecardFormFields.creditorAddress}, {/if}
+                    {$wirecardFormFields.creditorAddress}<br/>
                     {s name="CreditorID"}{/s}: {$wirecardFormFields.creditorId}<br/>
                 </td>
             </tr>
