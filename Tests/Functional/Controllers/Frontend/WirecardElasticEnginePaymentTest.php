@@ -32,7 +32,7 @@
 namespace WirecardShopwareElasticEngine\Tests\Functional\Controllers\Frontend;
 
 use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
-use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
+use WirecardShopwareElasticEngine\Models\Transaction;
 
 /**
  * @runTestsInSeparateProcesses
@@ -42,58 +42,23 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
 {
     const USER_AGENT = 'Mozilla/5.0 (Android; Tablet; rv:14.0) Gecko/14.0 Firefox/14.0';
 
+    public function setUp()
+    {
+        parent::setUp();
+        $this->reset();
+    }
+
     public function testIndexAction()
     {
-        $this->reset();
-        $this->Request()->setMethod('GET');
-        $this->Request()->setHeader('User-Agent', self::USER_AGENT);
+        $basketData = require __DIR__ . '/testdata/index-basket.php';
 
         $orderVariables              = new \ArrayObject();
-        $orderVariables['sBasket']   = [
-            'content'          => [
-                [
-                    'articlename' => 'Foo',
-                    'id'          => 1,
-                    'articleID'   => 1,
-                    'ordernumber' => 1,
-                    'tax'         => 10,
-                    'tax_rate'    => 20,
-                    'quantity'    => 1,
-                    'price'       => 50,
-                ],
-                [
-                    'articlename' => 'Bar',
-                    'id'          => 2,
-                    'articleID'   => 2,
-                    'ordernumber' => 2,
-                    'tax'         => 10,
-                    'tax_rate'    => 20,
-                    'quantity'    => 1,
-                    'price'       => 50,
-                ],
-            ],
-            'AmountNetNumeric' => 100.0,
-            'sAmount'          => 100.0,
-            'sAmountTax'       => 20.0,
-            'sCurrencyId'      => 1,
-        ];
-        $orderVariables['sUserData'] = [
-            'additional'      => [
-                'user'    => [
-                    'paymentID' => 7,
-                    'firstname' => 'First Name',
-                    'lastname'  => 'Last Name',
-                    'email'     => 'test@example.com',
-                ],
-                'payment' => [
-                    'name' => PaypalPayment::PAYMETHOD_IDENTIFIER,
-                ],
-            ],
-            'billingaddress'  => ['userID' => 1, 'countryID' => 1],
-            'shippingaddress' => ['userID' => 1, 'countryID' => 1],
-        ];
-
+        $orderVariables['sBasket']   = $basketData['sBasket'];
+        $orderVariables['sUserData'] = $basketData['sUserData'];
         Shopware()->Session()->offsetSet('sOrderVariables', $orderVariables);
+
+        $this->Request()->setMethod('GET');
+        $this->Request()->setHeader('User-Agent', self::USER_AGENT);
 
         $response = $this->dispatch('/WirecardElasticEnginePayment');
 
@@ -106,46 +71,18 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
 
     public function testIndexActionBasketException()
     {
-        $this->reset();
-        $this->Request()->setMethod('GET');
-        $this->Request()->setHeader('User-Agent', self::USER_AGENT);
+        $basketData = require __DIR__ . '/testdata/index-basket.php';
+
+        // Quantity causes BasketException thrown in basket validation
+        $basketData['sBasket']['content'][0]['quantity'] = 10000;
 
         $orderVariables              = new \ArrayObject();
-        $orderVariables['sBasket']   = [
-            'content'          => [
-                [
-                    'articlename' => 'Foo',
-                    'id'          => 1,
-                    'articleID'   => 1,
-                    'ordernumber' => 1,
-                    'tax'         => 10,
-                    'tax_rate'    => 20,
-                    'quantity'    => 100000,
-                    'price'       => 50,
-                ],
-            ],
-            'AmountNetNumeric' => 100.0,
-            'sAmount'          => 100.0,
-            'sAmountTax'       => 20.0,
-            'sCurrencyId'      => 1,
-        ];
-        $orderVariables['sUserData'] = [
-            'additional'      => [
-                'user'    => [
-                    'paymentID' => 7,
-                    'firstname' => 'First Name',
-                    'lastname'  => 'Last Name',
-                    'email'     => 'test@example.com',
-                ],
-                'payment' => [
-                    'name' => PaypalPayment::PAYMETHOD_IDENTIFIER,
-                ],
-            ],
-            'billingaddress'  => ['userID' => 1, 'countryID' => 1],
-            'shippingaddress' => ['userID' => 1, 'countryID' => 1],
-        ];
-
+        $orderVariables['sBasket']   = $basketData['sBasket'];
+        $orderVariables['sUserData'] = $basketData['sUserData'];
         Shopware()->Session()->offsetSet('sOrderVariables', $orderVariables);
+
+        $this->Request()->setMethod('GET');
+        $this->Request()->setHeader('User-Agent', self::USER_AGENT);
 
         $response = $this->dispatch('/WirecardElasticEnginePayment');
 
@@ -157,16 +94,37 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
             $locationHeader['value']);
     }
 
-    public function testReturnAction()
+    public function testReturnActionSuccess()
     {
-        $this->markTestIncomplete();
-        
-        $this->reset();
+        $initialRequest  = json_decode(file_get_contents(__DIR__ . '/testdata/initial-request.json'), true);
+        $returnPayload   = json_decode(file_get_contents(__DIR__ . '/testdata/return-payload.json'), true);
+        $basketData      = require __DIR__ . '/testdata/return-basket.php';
+        $basketSignature = '3691c683586000115ef63cb81ada7e7ade4d5b9d0242b020d01e88ff559ffc9a';
+        $paymentUniqueId = '1532501234exxxf';
+
+        // prepare initial transaction
+        $em          = Shopware()->Container()->get('models');
+        $transaction = $em->getRepository(Transaction::class)
+                          ->findOneBy(['requestId' => '249XXXXXXXXXxxxXXXXXXXXXxxxXXXXXXXXXxxxXXXXXXXXXXXXXXXXxxxXXXc87']);
+        if (! $transaction) {
+            $transaction = new Transaction(Transaction::TYPE_INITIAL_REQUEST);
+            $transaction->setPaymentUniqueId($paymentUniqueId);
+            $transaction->setBasketSignature($basketSignature);
+            $transaction->setRequest($initialRequest);
+            $em->persist($transaction);
+            $em->flush();
+        }
+
+        // delete order from a previous test
+        Shopware()->Db()->delete('s_order', "temporaryID='$paymentUniqueId' AND status!=-1");
+
+        // prepare shopware basket
+        $persister = Shopware()->Container()->get('basket_persister');
+        $persister->persist($basketSignature, $basketData);
+
         $this->Request()->setMethod('GET');
         $this->Request()->setHeader('User-Agent', self::USER_AGENT);
-
-        $payload = json_decode(file_get_contents(__DIR__ . '/return-payload.json'), true);
-        $this->Request()->setParams($payload);
+        $this->Request()->setParams($returnPayload);
 
         $response = $this->dispatch('/WirecardElasticEnginePayment/return/method/'
                                     . CreditCardPayment::PAYMETHOD_IDENTIFIER);
@@ -175,13 +133,12 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
         $this->assertEquals(302, $response->getHttpResponseCode());
         $locationHeader = $response->getHeaders()[0];
         $this->assertEquals('Location', $locationHeader['name']);
-        $this->assertContains('checkout/shippingPayment/wirecard_elastic_engine_error_code/3',
+        $this->assertContains('checkout/finish/sUniqueID/' . $paymentUniqueId,
             $locationHeader['value']);
     }
 
     public function testReturnActionMissingPayload()
     {
-        $this->reset();
         $this->Request()->setMethod('GET');
         $this->Request()->setHeader('User-Agent', self::USER_AGENT);
 
