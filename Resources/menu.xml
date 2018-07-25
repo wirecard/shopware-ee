@@ -30,6 +30,14 @@
                         ]]>
                     </onclick>
                 </entry>
+                <entry>
+                    <name>WirecardEmailSupport</name>
+                    <label lang="en">Mail support</label>
+                    <label lang="de">E-Mail Support</label>
+                    <controller>WirecardTransactions</controller>
+                    <action>mailSupport</action>
+                    <class>sprite-wirecard</class>
+                </entry>
             </children>
         </entry>
     </entries>

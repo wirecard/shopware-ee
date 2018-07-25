@@ -199,6 +199,27 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
     }
 
     /**
+     * Submit support mail to wirecard
+     */
+    public function submitMailAction()
+    {
+        $senderAddress = $this->Request()->getParam('address');
+        $message = $this->Request()->getParam('message');
+        $replyTo = $this->Request()->getParam('replyTo');
+
+        $supportMail = $this->get('wirecard_elastic_engine.support_mail');
+
+        return $this->View()->assign([
+            'success' => $supportMail->sendSupportMail(
+                $this->container->getParameterBag(),
+                $senderAddress,
+                $message,
+                $replyTo
+            )
+        ]);
+    }
+
+    /**
      * @param Action $action
      *
      * @throws Exception

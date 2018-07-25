@@ -10,7 +10,10 @@ Ext.define('Shopware.apps.WirecardTransactions', {
     ],
     views: [
         'Window',
-        'Grid'
+        'Grid',
+        'MailSupportWindow',
+        'MailToolbar',
+        'MailSupportForm'
     ],
     models: [
         'Transaction'
