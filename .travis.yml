@@ -68,9 +68,9 @@ script:
   - npm run test:default
   - npm run test:creditcard
   - npm run test:creditcard3ds
-  - npm run test:paypal
   - npm run test:sepa
   - npm run test:sofort
+  - npm run test:paypal
 
 after_script:
   - travis_retry composer upload-coverage
