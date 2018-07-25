@@ -160,7 +160,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     {
         $repo = $this->getModelManager()->getRepository(Transaction::class);
         do {
-            $id = time() . substr(uniqid(), 0, 5);
+            $id = time() . substr(md5(uniqid('', true)), 0, 5);
         } while ($repo->findOneBy(['paymentUniqueId' => $id]));
         return $id;
     }
