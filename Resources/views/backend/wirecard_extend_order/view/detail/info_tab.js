@@ -274,6 +274,28 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.InfoTab', {
                             renderData: transaction
                         });
                     }
+                    if (transaction.type === 'initial-response' && transaction.paymentMethod === 'sepadirectdebit') {
+                        infoPanel.add({
+                            xtype: 'container',
+                            renderTpl: Ext.create('Ext.XTemplate',
+                                '{literal}<tpl for=".">',
+                                '<div class="wirecardee-info-panel-sepa">',
+                                '<h3>SEPA Direct Debit Mandate Data</h3>',
+                                '<p><label class="x-form-item-label">Creditor Id:</label> {creditorId}</p>',
+                                '<p><label class="x-form-item-label">Due Date:</label> {dueDate}</p>',
+                                '<p><label class="x-form-item-label">Mandate Id:</label> {mandateId}</p>',
+                                '<p><label class="x-form-item-label">Mandate Signature Date:</label> {mandateSignedDate}</p>',
+                                '</div>',
+                                '</tpl>{/literal}'
+                            ),
+                            renderData: {
+                                creditorId: transaction.response['creditor-id'],
+                                dueDate: transaction.response['due-date'],
+                                mandateId: transaction.response['mandate.0.mandate-id'],
+                                mandateSignedDate: transaction.response['mandate.0.signed-date']
+                            }
+                        });
+                    }
                 });
 
                 me.transactionsStore.loadData(data.transactions, false);
