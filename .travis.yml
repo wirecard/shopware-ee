@@ -53,6 +53,7 @@ before_script:
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:plugin:install ${PLUGIN_NAME}
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:plugin:activate ${PLUGIN_NAME}
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:cache:clear
+  - php ${SHOPWARE_DIRECTORY}/bin/console sw:theme:initialize
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:theme:cache:generate
   - cd ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
   - php -S localhost:${WEBSERVER_PORT} server.php &
@@ -64,7 +65,12 @@ script:
   - composer cs-check
   - npm run lint
   - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
-  - npm run test
+  - npm run test:default
+  - npm run test:creditcard
+  - npm run test:creditcard3ds
+  - npm run test:paypal
+  - npm run test:sepa
+  - npm run test:sofort
 
 after_script:
   - travis_retry composer upload-coverage
