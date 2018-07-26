@@ -31,6 +31,13 @@
 
 namespace WirecardShopwareElasticEngine\Components\Actions;
 
+/**
+ * Returned by Handlers to extend the current view (or a specific template) with given variables.
+ *
+ * @package WirecardShopwareElasticEngine\Components\Actions
+ *
+ * @since   1.0.0
+ */
 class ViewAction implements Action
 {
     /**
@@ -44,10 +51,10 @@ class ViewAction implements Action
     protected $template;
 
     /**
-     * ViewAction constructor.
+     * @param string|null $template    Template path; if null the current view is used.
+     * @param array       $assignments View variables which are assigned to the view.
      *
-     * @param string|null $template
-     * @param array       $assignments
+     * @since 1.0.0
      */
     public function __construct($template, array $assignments = [])
     {
@@ -57,6 +64,8 @@ class ViewAction implements Action
 
     /**
      * @return array
+     *
+     * @since 1.0.0
      */
     public function getAssignments()
     {
@@ -65,6 +74,8 @@ class ViewAction implements Action
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getTemplate()
     {

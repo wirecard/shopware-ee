@@ -32,7 +32,12 @@
 namespace WirecardShopwareElasticEngine\Components\Actions;
 
 /**
- * An `Action` represents what's going to happen after a payment is processed.
+ * Actions are returned by Handlers to indicate what should happen after the Handler is done (e.g. redirection,
+ * error handling, ...).
+ *
+ * @package WirecardShopwareElasticEngine\Components\Actions
+ *
+ * @since   1.0.0
  */
 interface Action
 {

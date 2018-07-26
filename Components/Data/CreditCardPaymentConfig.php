@@ -31,6 +31,13 @@
 
 namespace WirecardShopwareElasticEngine\Components\Data;
 
+/**
+ * Credit Card specific payment configuration.
+ *
+ * @package WirecardShopwareElasticEngine\Components\Data
+ *
+ * @since   1.0.0
+ */
 class CreditCardPaymentConfig extends PaymentConfig
 {
     /**
@@ -60,11 +67,15 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @var string
+     *
+     * @since 1.0.0
      */
     protected $sslMaxLimitCurrency;
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getThreeDMAID()
     {
@@ -73,6 +84,8 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @param string $threeDMAID
+     *
+     * @since 1.0.0
      */
     public function setThreeDMAID($threeDMAID)
     {
@@ -81,6 +94,8 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @return string|float
+     *
+     * @since 1.0.0
      */
     public function getThreeDMinLimit()
     {
@@ -89,6 +104,8 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @param string|float $threeDMinLimit
+     *
+     * @since 1.0.0
      */
     public function setThreeDMinLimit($threeDMinLimit)
     {
@@ -97,6 +114,8 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getThreeDMinLimitCurrency()
     {
@@ -105,6 +124,8 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @param string $threeDMinLimitCurrency
+     *
+     * @since 1.0.0
      */
     public function setThreeDMinLimitCurrency($threeDMinLimitCurrency)
     {
@@ -113,6 +134,8 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getThreeDSecret()
     {
@@ -121,6 +144,8 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @param string $threeDSecret
+     *
+     * @since 1.0.0
      */
     public function setThreeDSecret($threeDSecret)
     {
@@ -129,6 +154,8 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @return string|float
+     *
+     * @since 1.0.0
      */
     public function getSslMaxLimit()
     {
@@ -137,6 +164,8 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @param string|float $sslMaxLimit
+     *
+     * @since 1.0.0
      */
     public function setSslMaxLimit($sslMaxLimit)
     {
@@ -145,6 +174,8 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getSslMaxLimitCurrency()
     {
@@ -153,6 +184,8 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @param string $sslMaxLimitCurrency
+     *
+     * @since 1.0.0
      */
     public function setSslMaxLimitCurrency($sslMaxLimitCurrency)
     {
@@ -160,7 +193,7 @@ class CreditCardPaymentConfig extends PaymentConfig
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function toArray()
     {

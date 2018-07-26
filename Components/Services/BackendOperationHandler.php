@@ -35,19 +35,34 @@ use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Entity\Status;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
+use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 
+/**
+ * Responsible for handling backend operations. Backend operations should be retrieved from `retrieveBackendOperations`
+ * from the `BackendService` and directly passed to this handler.
+ *
+ * @package WirecardShopwareElasticEngine\Components\Services
+ *
+ * @since   1.0.0
+ */
 class BackendOperationHandler extends Handler
 {
     /**
+     * Executes the backend operation and returns a proper `Action`.
+     *
+     * @see   Operation Possible operations
+     *
      * @param Transaction    $transaction
      * @param BackendService $transactionService
      * @param string         $operation
      *
      * @return Action
+     *
+     * @since 1.0.0
      */
     public function execute(
         Transaction $transaction,

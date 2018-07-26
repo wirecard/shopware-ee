@@ -38,6 +38,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
 
+/**
+ * Enables all Wirecard payments methods.
+ * For testing purposes all Wirecard related payments requires to be activated, hence this command is usually only
+ * called in testing environments.
+ *
+ * @package WirecardShopwareElasticEngine\Commands
+ * @since   1.0.0
+ */
 class PaymentActivate extends ShopwareCommand
 {
     /**

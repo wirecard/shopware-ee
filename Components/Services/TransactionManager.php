@@ -42,6 +42,11 @@ use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
+/**
+ * @package WirecardShopwareElasticEngine\Components\Services
+ *
+ * @since   1.0.0
+ */
 class TransactionManager
 {
     /**
@@ -51,6 +56,8 @@ class TransactionManager
 
     /**
      * @param EntityManagerInterface $em
+     *
+     * @since 1.0.0
      */
     public function __construct(EntityManagerInterface $em)
     {
@@ -62,6 +69,8 @@ class TransactionManager
      * @param Response     $response
      *
      * @return Transaction|null
+     *
+     * @since 1.0.0
      */
     public function createInitial(OrderSummary $orderSummary, Response $response)
     {
@@ -77,6 +86,8 @@ class TransactionManager
      * @param InteractionResponse|FormInteractionResponse $response
      *
      * @return Transaction|null
+     *
+     * @since 1.0.0
      */
     public function createInteraction($response)
     {
@@ -98,6 +109,8 @@ class TransactionManager
      * @param Response    $response
      *
      * @return Transaction|null
+     *
+     * @since 1.0.0
      */
     public function createReturn(Transaction $initialTransaction, Response $response)
     {
@@ -123,6 +136,8 @@ class TransactionManager
      * @param BackendService $backendService
      *
      * @return Transaction
+     *
+     * @since 1.0.0
      */
     public function createNotify(Transaction $initialTransaction, Response $response, BackendService $backendService)
     {
@@ -153,6 +168,8 @@ class TransactionManager
      *
      * @return Transaction|null
      * @throws InitialTransactionNotFoundException
+     *
+     * @since 1.0.0
      */
     public function createBackend(SuccessResponse $response)
     {
@@ -193,6 +210,12 @@ class TransactionManager
         return $transaction;
     }
 
+    /**
+     * @param Transaction $transaction
+     * @return Transaction
+     *
+     * @since 1.0.0
+     */
     private function persist(Transaction $transaction)
     {
         $this->em->persist($transaction);
@@ -207,6 +230,8 @@ class TransactionManager
      *
      * @return Transaction
      * @throws InitialTransactionNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getInitialTransaction(SuccessResponse $response)
     {
@@ -240,6 +265,8 @@ class TransactionManager
      * @param string|null $requestId
      *
      * @return Transaction|null
+     *
+     * @since 1.0.0
      */
     private function findInitialTransaction($parentTransactionId, $requestId)
     {
@@ -260,6 +287,8 @@ class TransactionManager
      * @param Transaction $transaction
      *
      * @return Transaction|null
+     *
+     * @since 1.0.0
      */
     private function returnInitialTransaction(Transaction $transaction)
     {
