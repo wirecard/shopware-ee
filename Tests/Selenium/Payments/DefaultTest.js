@@ -30,7 +30,6 @@
 
 /* eslint-env mocha */
 
-const { expect } = require('chai');
 const { Builder, By, until } = require('selenium-webdriver');
 const { config } = require('../config');
 const { loginWithExampleAccount, waitUntilOverlayIsStale, checkConfirmationPage } = require('../common');
