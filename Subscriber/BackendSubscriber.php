@@ -66,8 +66,8 @@ class BackendSubscriber implements SubscriberInterface
     {
         $view = $args->getSubject()->View();
         $view->addTemplateDir($this->pluginDirectory . '/Resources/views/');
-        $view->extendsTemplate('backend/wirecard_transactions/chat.tpl');
-        $view->extendsTemplate('backend/wirecard_transactions/test_credentials.tpl');
+        $view->extendsTemplate('backend/wirecard_elastic_engine_transactions/chat.tpl');
+        $view->extendsTemplate('backend/wirecard_elastic_engine_transactions/test_credentials.tpl');
     }
 
     /**
@@ -83,11 +83,11 @@ class BackendSubscriber implements SubscriberInterface
         $view->addTemplateDir($this->pluginDirectory . '/Resources/views');
 
         if ($request->getActionName() === 'index') {
-            $view->extendsTemplate('backend/wirecard_extend_order/app.js');
+            $view->extendsTemplate('backend/wirecard_elastic_engine_extend_order/app.js');
         }
 
         if ($request->getActionName() === 'load') {
-            $view->extendsTemplate('backend/wirecard_extend_order/view/detail/window.js');
+            $view->extendsTemplate('backend/wirecard_elastic_engine_extend_order/view/detail/window.js');
         }
     }
 }

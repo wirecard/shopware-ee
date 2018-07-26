@@ -48,7 +48,7 @@ class BackendSubscriberTest extends TestCase
     {
         $view = $this->createMock(\Enlight_View_Default::class);
         $view->expects($this->once())->method('addTemplateDir')->with('fooDir/Resources/views');
-        $view->expects($this->once())->method('extendsTemplate')->with('backend/wirecard_extend_order/app.js');
+        $view->expects($this->once())->method('extendsTemplate')->with('backend/wirecard_elastic_engine_extend_order/app.js');
 
         $request = $this->createMock(\Enlight_Controller_Request_Request::class);
         $request->method('getActionName')->willReturn('index');
@@ -69,7 +69,7 @@ class BackendSubscriberTest extends TestCase
     {
         $view = $this->createMock(\Enlight_View_Default::class);
         $view->expects($this->once())->method('extendsTemplate')
-             ->with('backend/wirecard_extend_order/view/detail/window.js');
+             ->with('backend/wirecard_elastic_engine_extend_order/view/detail/window.js');
 
         $request = $this->createMock(\Enlight_Controller_Request_Request::class);
         $request->method('getActionName')->willReturn('load');

@@ -14,7 +14,7 @@
             });
 
             Ext.Ajax.request({
-                url: document.location.pathname + 'wirecardTransactions/testCredentials',
+                url: document.location.pathname + 'wirecardElasticEngineTransactions/testCredentials',
                 params: values,
                 success: function (response) {
                     var data = Ext.decode(response.responseText);

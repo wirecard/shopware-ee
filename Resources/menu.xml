@@ -10,18 +10,18 @@
             <parent identifiedBy="controller">Payments</parent>
             <children>
                 <entry>
-                    <name>WirecardTransactions</name>
+                    <name>WirecardElasticEngineTransactions</name>
                     <label lang="en">Transactions</label>
                     <label lang="de">Transaktionen</label>
-                    <controller>WirecardTransactions</controller>
+                    <controller>WirecardElasticEngineTransactions</controller>
                     <action>index</action>
                     <class>sprite-wirecard</class>
                 </entry>
                 <entry>
-                    <name>WirecardLiveChat</name>
+                    <name>WirecardElasticEngineLiveChat</name>
                     <label lang="en">LiveChat</label>
                     <label lang="de">LiveChat</label>
-                    <controller>WirecardTransactions</controller>
+                    <controller>WirecardElasticEngineTransactions</controller>
                     <action>livechat</action>
                     <class>sprite-wirecard</class>
                     <onclick>

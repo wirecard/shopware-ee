@@ -1,6 +1,36 @@
-// {block name="backend/wirecard_extend_order/view/detail/info_tab"}
+/**
+ * Shop System Plugins - Terms of Use
+ *
+ * The plugins offered are provided free of charge by Wirecard AG and are explicitly not part
+ * of the Wirecard AG range of products and services.
+ *
+ * They have been tested and approved for full functionality in the standard configuration
+ * (status on delivery) of the corresponding shop system. They are under General Public
+ * License version 3 (GPLv3) and can be used, developed and passed on to third parties under
+ * the same terms.
+ *
+ * However, Wirecard AG does not provide any guarantee or accept any liability for any errors
+ * occurring when used in an enhanced, customized shop system configuration.
+ *
+ * Operation in an enhanced, customized configuration is at your own risk and requires a
+ * comprehensive test phase by the user of the plugin.
+ *
+ * Customers use the plugins at their own risk. Wirecard AG does not guarantee their full
+ * functionality neither does Wirecard AG assume liability for any disadvantages related to
+ * the use of the plugins. Additionally, Wirecard AG does not guarantee the full functionality
+ * for customized shop systems or installed plugins of other vendors of plugins within the same
+ * shop system.
+ *
+ * Customers are responsible for testing the plugin's functionality before starting productive
+ * operation.
+ *
+ * By installing the plugin into the shop system the customer agrees to these terms of use.
+ * Please do not use the plugin if you do not agree to these terms of use!
+ */
+
+// {block name="backend/wirecard_elastic_engine_extend_order/view/detail/info_tab"}
 // {namespace name="backend/wirecard_elastic_engine/order_info_tab"}
-Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.InfoTab', {
+Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab', {
     extend: 'Ext.container.Container',
     padding: 10,
     title: '{s name="TabTitle"}{/s}',
@@ -72,7 +102,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.InfoTab', {
         var me = this;
 
         me.transactionsStore = Ext.create('Ext.data.Store', {
-            storeId: 'transactionsStore',
+            storeId: 'wirecardElasticEngineTransactionsStore',
             fields: [
                 'orderNumber',
                 'paymentUniqueId',
@@ -124,7 +154,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.InfoTab', {
                         tooltip: me.snippets.buttons.openTransaction,
 
                         handler: function (view, rowIndex, colIndex, item, opts, record) {
-                            var detailsWindow = Ext.create('Shopware.apps.WirecardExtendOrder.view.TransactionDetailsWindow', { record: record });
+                            var detailsWindow = Ext.create('Shopware.apps.WirecardElasticEngineExtendOrder.view.TransactionDetailsWindow', { record: record });
                             detailsWindow.show();
                         }
                     }, {
@@ -235,7 +265,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.InfoTab', {
     loadData: function (record) {
         var data = record.data,
             payment = record.getPayment().first().get('name');
-        this.detailsStore = Ext.create('Shopware.apps.WirecardExtendOrder.store.OrderDetails');
+        this.detailsStore = Ext.create('Shopware.apps.WirecardElasticEngineExtendOrder.store.OrderDetails');
 
         this.detailsStore.getProxy().extraParams = {
             orderNumber: data.number,
@@ -310,7 +340,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.detail.InfoTab', {
     processBackendOperation(transaction, operation, amount) {
         var me = this;
         return Ext.Ajax.request({
-            url: '{url controller="wirecardTransactions" action="processBackendOperations"}',
+            url: '{url controller="wirecardElasticEngineTransactions" action="processBackendOperations"}',
             params: {
                 operation: operation,
                 payment: me.record.getPayment().first().get('name'),
