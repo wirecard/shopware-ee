@@ -33,6 +33,11 @@ namespace WirecardShopwareElasticEngine\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
 
+/**
+ * @package WirecardShopwareElasticEngine\Subscriber
+ *
+ * @since 1.0.0
+ */
 class BackendSubscriber implements SubscriberInterface
 {
     /**
@@ -42,6 +47,8 @@ class BackendSubscriber implements SubscriberInterface
 
     /**
      * @param string $pluginDirectory
+     *
+     * @since 1.0.0
      */
     public function __construct($pluginDirectory)
     {
@@ -60,7 +67,9 @@ class BackendSubscriber implements SubscriberInterface
     }
 
     /**
-     * @param ActionEventArgs $args
+     * @param \Enlight_Controller_ActionEventArgs $args
+     *
+     * @since 1.0.0
      */
     public function onLoadBackendIndex(\Enlight_Controller_ActionEventArgs $args)
     {
@@ -71,7 +80,9 @@ class BackendSubscriber implements SubscriberInterface
     }
 
     /**
-     * @param ActionEventArgs $args
+     * @param \Enlight_Controller_ActionEventArgs $args
+     *
+     * @since 1.0.0
      */
     public function onOrderPostDispatch(\Enlight_Controller_ActionEventArgs $args)
     {

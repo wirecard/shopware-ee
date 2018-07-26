@@ -34,6 +34,11 @@ namespace WirecardShopwareElasticEngine\Subscriber;
 use Enlight\Event\SubscriberInterface;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 
+/**
+ * @package WirecardShopwareElasticEngine\Subscriber
+ *
+ * @since 1.0.0
+ */
 class OrderSubscriber implements SubscriberInterface
 {
     /**
@@ -46,6 +51,12 @@ class OrderSubscriber implements SubscriberInterface
         ];
     }
 
+    /**
+     * @param \Enlight_Event_EventArgs $args
+     * @return bool|null
+     *
+     * @since 1.0.0
+     */
     public function onOrderShouldSendMail(\Enlight_Event_EventArgs $args)
     {
         if (getenv('SHOPWARE_ENV') === 'testing') {
