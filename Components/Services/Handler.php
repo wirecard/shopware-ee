@@ -34,10 +34,15 @@ namespace WirecardShopwareElasticEngine\Components\Services;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\Routing\RouterInterface;
-use Wirecard\PaymentSdk\Response\SuccessResponse;
-use WirecardShopwareElasticEngine\Exception\ParentTransactionNotFoundException;
-use WirecardShopwareElasticEngine\Models\Transaction;
 
+/**
+ * Base class for handler implementations. Handlers are used to perform specific tasks, e.g. payment processing,
+ * handling return actions, etc..
+ *
+ * @package WirecardShopwareElasticEngine\Components\Services
+ *
+ * @since   1.0.0
+ */
 abstract class Handler
 {
     /**
@@ -71,6 +76,8 @@ abstract class Handler
      * @param LoggerInterface             $logger
      * @param \Shopware_Components_Config $config
      * @param TransactionManager          $transactionManager
+     *
+     * @since 1.0.0
      */
     public function __construct(
         EntityManagerInterface $em,
@@ -84,27 +91,5 @@ abstract class Handler
         $this->logger             = $logger;
         $this->shopwareConfig     = $config;
         $this->transactionManager = $transactionManager;
-    }
-
-    /**
-     * @param SuccessResponse $response
-     *
-     * @return Transaction
-     * @throws ParentTransactionNotFoundException
-     */
-    protected function getParentTransaction(SuccessResponse $response)
-    {
-        $parentTransaction = $this->em
-            ->getRepository(Transaction::class)
-            ->findOneBy(['transactionId' => $response->getParentTransactionId()]);
-
-        if (! $parentTransaction) {
-            throw new ParentTransactionNotFoundException(
-                $response->getParentTransactionId(),
-                $response->getTransactionId()
-            );
-        }
-
-        return $parentTransaction;
     }
 }

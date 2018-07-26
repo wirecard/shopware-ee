@@ -31,11 +31,33 @@
 
 namespace WirecardShopwareElasticEngine\Components\Actions;
 
+/**
+ * Returned by Handlers if an error occurred, containing an error code and message.
+ *
+ * @package WirecardShopwareElasticEngine\Components\Actions
+ *
+ * @since   1.0.0
+ */
 class ErrorAction implements Action
 {
+    /**
+     * Payment processing failed (e.g. due to an exception)
+     */
     const PROCESSING_FAILED = 1;
+
+    /**
+     * The API returned a `FailureResponse`
+     */
     const FAILURE_RESPONSE = 2;
+
+    /**
+     * Payment was cancelled by the consumer
+     */
     const PAYMENT_CANCELED = 3;
+
+    /**
+     * Backend-operation failed (e.g. due to an exception)
+     */
     const BACKEND_OPERATION_FAILED = 4;
 
     /**
@@ -49,10 +71,10 @@ class ErrorAction implements Action
     protected $message;
 
     /**
-     * ErrorAction constructor.
-     *
      * @param int    $code
      * @param string $message
+     *
+     * @since 1.0.0
      */
     public function __construct($code, $message)
     {
@@ -62,6 +84,8 @@ class ErrorAction implements Action
 
     /**
      * @return int
+     *
+     * @since 1.0.0
      */
     public function getCode()
     {
@@ -70,6 +94,8 @@ class ErrorAction implements Action
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getMessage()
     {

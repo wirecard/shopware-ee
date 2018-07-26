@@ -49,7 +49,8 @@ use WirecardShopwareElasticEngine\Components\Services\NotificationHandler;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
 use WirecardShopwareElasticEngine\Components\Services\PaymentHandler;
 use WirecardShopwareElasticEngine\Components\Services\ReturnHandler;
-use WirecardShopwareElasticEngine\Components\Services\SessionHandler;
+use WirecardShopwareElasticEngine\Components\Services\SessionManager;
+use WirecardShopwareElasticEngine\Components\Services\TransactionManager;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardShopwareElasticEngine\Exception\BasketException;
 use WirecardShopwareElasticEngine\Exception\CouldNotSaveOrderException;
@@ -74,18 +75,14 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * @throws ArrayKeyNotFoundException
      * @throws UnknownActionException
      * @throws UnknownPaymentException
+     *
+     * @since 1.0.0
      */
     public function indexAction()
     {
         /** @var PaymentHandler $handler */
         $handler = $this->get('wirecard_elastic_engine.payment_handler');
         $payment = $this->getPaymentFactory()->create($this->getPaymentShortName());
-
-        $additionalData = $this->getSessionHandler()->getPaymentData();
-
-        if ($additionalData) {
-            $payment->setAdditionalPaymentData($additionalData);
-        }
 
         try {
             $currency     = $this->getCurrencyShortName();
@@ -123,8 +120,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $userMapper,
                 $basketMapper,
                 $amount,
-                $this->get('wirecard_elastic_engine.session_handler')
-                     ->getDeviceFingerprintId($payment->getPaymentConfig()->getTransactionMAID())
+                $this->getSessionManager()->getDeviceFingerprintId($payment->getPaymentConfig()->getTransactionMAID()),
+                $this->getSessionManager()->getPaymentData()
             ),
             new TransactionService(
                 $payment->getTransactionConfig(
@@ -155,6 +152,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      *
      * @return string
      * @throws Exception
+     *
+     * @since 1.0.0
      */
     private function generatePaymentUniqueId()
     {
@@ -169,6 +168,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * Returns the shipping/dispatch data as array.
      *
      * @return array|null
+     *
+     * @since 1.0.0
      */
     public function getShippingMethod()
     {
@@ -186,6 +187,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      *
      * @throws UnknownActionException
      * @throws UnknownPaymentException
+     *
+     * @since 1.0.0
      */
     public function returnAction()
     {
@@ -193,6 +196,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         /** @var ReturnHandler $returnHandler */
         $returnHandler      = $this->get('wirecard_elastic_engine.return_handler');
+        /** @var TransactionManager $transactionManager */
         $transactionManager = $this->get('wirecard_elastic_engine.transaction_manager');
         $request            = $this->Request();
         $payment            = $this->getPaymentFactory()->create($request->getParam(self::ROUTER_METHOD));
@@ -200,7 +204,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         //$this->getLogger()->debug('Frontend::returnAction: request: ' . json_encode($request->getParams()));
 
         try {
-            $response = $returnHandler->execute(
+            $response = $returnHandler->handleRequest(
                 $payment,
                 new TransactionService($payment->getTransactionConfig(
                     $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
@@ -211,7 +215,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             );
 
             if ($response instanceof SuccessResponse) {
-                $this->getSessionHandler()->destroyDeviceFingerprintId();
+                $this->getSessionManager()->destroyDeviceFingerprintId();
 
                 $this->getLogger()->debug('Frontend::returnAction: Incoming success return');
 
@@ -296,6 +300,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * by the `ReturnHandler`.
      *
      * @throws UnknownPaymentException
+     *
+     * @since 1.0.0
      */
     public function notifyAction()
     {
@@ -314,7 +320,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             ));
             $notification   = $backendService->handleNotification(file_get_contents('php://input'));
 
-            $notificationHandler->execute(
+            $notificationHandler->handleResponse(
                 $this->getModules()->Order(),
                 $notification,
                 $backendService
@@ -329,6 +335,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * @param Action $action
      *
      * @throws UnknownActionException
+     *
+     * @since 1.0.0
      */
     protected function handleAction(Action $action)
     {
@@ -363,6 +371,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      *
      * @return string
      * @throws Exception
+     *
+     * @since 1.0.0
      */
     private function getRoute($action, $method)
     {
@@ -375,6 +385,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
     /**
      * User gets redirected to this action after canceling payment.
+     *
+     * @since 1.0.0
      */
     public function cancelAction()
     {
@@ -383,6 +395,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
     /**
      * User gets redirected to this action after failed payment attempt.
+     *
+     * @since 1.0.0
      */
     public function failureAction()
     {
@@ -394,6 +408,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * @param string $message
      *
      * @throws Exception
+     *
+     * @since 1.0.0
      */
     protected function handleError($code, $message = "")
     {
@@ -413,6 +429,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
     /**
      * @return array
+     *
+     * @since 1.0.0
      */
     public function getWhitelistedCSRFActions()
     {
@@ -425,6 +443,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * @param string $orderStatusComment
      *
      * @throws Exception
+     *
+     * @since 1.0.0
      */
     private function setOrderStatus($orderNumber, $orderStatusId, $orderStatusComment)
     {
@@ -439,6 +459,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * @param Exception $exception
      *
      * @throws Exception
+     *
+     * @since 1.0.0
      */
     private function logException($message, \Exception $exception)
     {
@@ -450,6 +472,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     /**
      * @return PaymentFactory
      * @throws Exception
+     *
+     * @since 1.0.0
      */
     private function getPaymentFactory()
     {
@@ -457,17 +481,21 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     }
 
     /**
-     * @return SessionHandler
+     * @return SessionManager
      * @throws Exception
+     *
+     * @since 1.0.0
      */
-    private function getSessionHandler()
+    private function getSessionManager()
     {
-        return $this->get('wirecard_elastic_engine.session_handler');
+        return $this->get('wirecard_elastic_engine.session_manager');
     }
 
     /**
      * @return Shopware_Components_Modules
      * @throws Exception
+     *
+     * @since 1.0.0
      */
     private function getModules()
     {
@@ -477,6 +505,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     /**
      * @return \Shopware\Components\Logger
      * @throws Exception
+     *
+     * @since 1.0.0
      */
     private function getLogger()
     {

@@ -33,6 +33,14 @@ namespace WirecardShopwareElasticEngine\Components\Mapper;
 
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 
+/**
+ * Base class for an Array mapper. Since Shopware handles a lot of things (basket, current user, ...) as arrays we're
+ * mapping them to objects for simplicity and architectural reasons.
+ *
+ * @package WirecardShopwareElasticEngine\Components\Mapper
+ *
+ * @since   1.0.0
+ */
 abstract class ArrayMapper
 {
     /**
@@ -47,6 +55,8 @@ abstract class ArrayMapper
      *
      * @return mixed
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     protected function get($keys)
     {
@@ -67,6 +77,8 @@ abstract class ArrayMapper
      * @param string|array $keys Single key or a key chain for multidimensional arrays
      *
      * @return bool
+     *
+     * @since 1.0.0
      */
     protected function has($keys)
     {
@@ -88,6 +100,8 @@ abstract class ArrayMapper
      * @param null $fallback
      *
      * @return mixed|null
+     *
+     * @since 1.0.0
      */
     protected function getOptional($keys, $fallback = null)
     {

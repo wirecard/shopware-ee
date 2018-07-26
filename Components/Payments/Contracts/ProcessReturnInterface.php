@@ -29,59 +29,30 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Services;
+namespace WirecardShopwareElasticEngine\Components\Payments\Contracts;
 
-class SessionHandler
+use Wirecard\PaymentSdk\Response\Response;
+use Wirecard\PaymentSdk\TransactionService;
+
+/**
+ * @package WirecardShopwareElasticEngine\Components\Payments\Interfaces
+ *
+ * @since   1.0.0
+ */
+interface ProcessReturnInterface
 {
-    const PAYMENT_DATA = 'WirecardElasticEnginePaymentData';
-    const DEVICE_FINGERPRINT_ID = 'fingerprint_id';
-
     /**
-     * @var \Enlight_Components_Session_Namespace
+     * Payment specific return processing, called by the `ReturnHandler`. This method either returns a `Response` (which
+     * is directly returned to the controller) or `null`. Returning `null` leads to the `TransactionService` taking
+     * care of handling the response (via `handleResponse`) which is then returned to the controller.
+     *
+     * @param TransactionService                  $transactionService
+     * @param \Enlight_Controller_Request_Request $request
+     *
+     * @return Response|null
      */
-    private $session;
-
-    public function __construct(\Enlight_Components_Session_Namespace $session)
-    {
-        $this->session = $session;
-    }
-
-    /**
-     * @param array $paymentData
-     */
-    public function storePaymentData(array $paymentData)
-    {
-        $this->session->offsetSet(self::PAYMENT_DATA, $paymentData);
-    }
-
-    /**
-     * @return array|null
-     */
-    public function getPaymentData()
-    {
-        if (! $this->session->offsetExists(self::PAYMENT_DATA)) {
-            return null;
-        }
-        return $this->session->offsetGet(self::PAYMENT_DATA);
-    }
-
-    /**
-     * @param string $maid
-     * @return string
-     */
-    public function getDeviceFingerprintId($maid)
-    {
-        if (! $this->session->get(self::DEVICE_FINGERPRINT_ID)) {
-            $this->session->offsetSet(self::DEVICE_FINGERPRINT_ID, md5($maid . '_' . microtime()));
-        }
-
-        return $this->session->get(self::DEVICE_FINGERPRINT_ID);
-    }
-
-    public function destroyDeviceFingerprintId()
-    {
-        if ($this->session->offsetExists(self::DEVICE_FINGERPRINT_ID)) {
-            $this->session->offsetUnset(self::DEVICE_FINGERPRINT_ID);
-        }
-    }
+    public function processReturn(
+        TransactionService $transactionService,
+        \Enlight_Controller_Request_Request $request
+    );
 }

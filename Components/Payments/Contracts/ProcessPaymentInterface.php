@@ -29,56 +29,47 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Actions;
+namespace WirecardShopwareElasticEngine\Components\Payments\Contracts;
+
+use Shopware\Models\Shop\Shop;
+use Wirecard\PaymentSdk\Entity\Redirect;
+use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Actions\Action;
+use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
+use WirecardShopwareElasticEngine\Components\Services\PaymentHandler;
 
 /**
- * Returned by Handlers to extend the current view (or a specific template) with given variables.
- *
- * @package WirecardShopwareElasticEngine\Components\Actions
+ * @package WirecardShopwareElasticEngine\Components\Payments\Interfaces
  *
  * @since   1.0.0
  */
-class ViewAction implements Action
+interface ProcessPaymentInterface
 {
     /**
-     * @var array
-     */
-    protected $assignments;
-
-    /**
-     * @var string
-     */
-    protected $template;
-
-    /**
-     * @param string|null $template    Template path; if null the current view is used.
-     * @param array       $assignments View variables which are assigned to the view.
+     * Payment specific processing. This method either returns an `Action` (which is directly returned to the Handler)
+     * or `null`. Returning `null` leads to the handler executing the transaction via the `TransactionService`. In case
+     * of returning an `Action` execution of the transaction (via the `TransactionService`) probably needs to get
+     * called manually within this method.
+     *
+     * @see   PaymentHandler
+     *
+     * @param OrderSummary                        $orderSummary
+     * @param TransactionService                  $transactionService
+     * @param Shop                                $shop
+     * @param Redirect                            $redirect
+     * @param \Enlight_Controller_Request_Request $request
+     * @param \sOrder                             $shopwareOrder
+     *
+     * @return Action|null
      *
      * @since 1.0.0
      */
-    public function __construct($template, array $assignments = [])
-    {
-        $this->template    = $template;
-        $this->assignments = $assignments;
-    }
-
-    /**
-     * @return array
-     *
-     * @since 1.0.0
-     */
-    public function getAssignments()
-    {
-        return $this->assignments;
-    }
-
-    /**
-     * @return string|null
-     *
-     * @since 1.0.0
-     */
-    public function getTemplate()
-    {
-        return $this->template;
-    }
+    public function processPayment(
+        OrderSummary $orderSummary,
+        TransactionService $transactionService,
+        Shop $shop,
+        Redirect $redirect,
+        \Enlight_Controller_Request_Request $request,
+        \sOrder $shopwareOrder
+    );
 }

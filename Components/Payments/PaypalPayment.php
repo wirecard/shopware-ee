@@ -39,8 +39,14 @@ use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
+use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 
-class PaypalPayment extends Payment
+/**
+ * @package WirecardShopwareElasticEngine\Components\Payments
+ *
+ * @since   1.0.0
+ */
+class PaypalPayment extends Payment implements ProcessPaymentInterface
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_paypal';
 
@@ -50,7 +56,7 @@ class PaypalPayment extends Payment
     private $transactionInstance;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getLabel()
     {
@@ -58,7 +64,7 @@ class PaypalPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getName()
     {
@@ -66,7 +72,7 @@ class PaypalPayment extends Payment
     }
 
     /**
-     * @return int
+     * {@inheritdoc}
      */
     public function getPosition()
     {
@@ -75,6 +81,8 @@ class PaypalPayment extends Payment
 
     /**
      * @return PayPalTransaction
+     *
+     * @since 1.0.0
      */
     public function getTransaction()
     {
@@ -85,7 +93,7 @@ class PaypalPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag, $selectedCurrency)
     {
@@ -101,7 +109,7 @@ class PaypalPayment extends Payment
 
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getPaymentConfig()
     {
@@ -122,7 +130,7 @@ class PaypalPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function processPayment(
         OrderSummary $orderSummary,

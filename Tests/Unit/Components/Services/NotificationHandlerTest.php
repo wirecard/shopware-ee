@@ -44,7 +44,6 @@ use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardShopwareElasticEngine\Components\Services\NotificationHandler;
-use WirecardShopwareElasticEngine\Components\Services\SessionHandler;
 use WirecardShopwareElasticEngine\Components\Services\TransactionManager;
 use WirecardShopwareElasticEngine\Models\Transaction as TransactionModel;
 
@@ -124,7 +123,7 @@ class NotificationHandlerTest extends TestCase
         $response = $this->createMock(Response::class);
         $response->expects($this->atLeastOnce())->method('getData')->willReturn([]);
 
-        $success = $this->handler->execute(
+        $success = $this->handler->handleResponse(
             $this->shopwareOrder,
             $response,
             $this->backendService
@@ -146,7 +145,7 @@ class NotificationHandlerTest extends TestCase
         $this->transactionManager->expects($this->atLeastOnce())->method('createNotify')
                                  ->willReturn($transactionEntity);
 
-        $success = $this->handler->execute(
+        $success = $this->handler->handleResponse(
             $this->shopwareOrder,
             $response,
             $this->backendService

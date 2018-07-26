@@ -31,6 +31,13 @@
 
 namespace WirecardShopwareElasticEngine\Components\Actions;
 
+/**
+ * Returned by Handlers if a redirect is required.
+ *
+ * @package WirecardShopwareElasticEngine\Components\Actions
+ *
+ * @since   1.0.0
+ */
 class RedirectAction implements Action
 {
     /**
@@ -39,9 +46,9 @@ class RedirectAction implements Action
     protected $url;
 
     /**
-     * RedirectAction constructor.
-     *
      * @param string $url
+     *
+     * @since 1.0.0
      */
     public function __construct($url)
     {
@@ -50,6 +57,8 @@ class RedirectAction implements Action
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getUrl()
     {

@@ -42,9 +42,16 @@ use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\CreditCardPaymentConfig;
+use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessReturnInterface;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
-class CreditCardPayment extends Payment
+/**
+ * @package WirecardShopwareElasticEngine\Components\Payments
+ *
+ * @since   1.0.0
+ */
+class CreditCardPayment extends Payment implements ProcessReturnInterface, ProcessPaymentInterface
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_credit_card';
 
@@ -54,7 +61,7 @@ class CreditCardPayment extends Payment
     private $transactionInstance;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getLabel()
     {
@@ -62,7 +69,7 @@ class CreditCardPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getName()
     {
@@ -70,7 +77,7 @@ class CreditCardPayment extends Payment
     }
 
     /**
-     * @return int
+     * {@inheritdoc}
      */
     public function getPosition()
     {
@@ -79,6 +86,8 @@ class CreditCardPayment extends Payment
 
     /**
      * @return CreditCardTransaction
+     *
+     * @since 1.0.0
      */
     public function getTransaction()
     {
@@ -89,7 +98,7 @@ class CreditCardPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag, $selectedCurrency)
     {
@@ -143,6 +152,8 @@ class CreditCardPayment extends Payment
      *
      * @return Amount
      * @throws \Enlight_Event_Exception
+     *
+     * @since 1.0.0
      */
     private function getLimit($selectedCurrency, $limitValue, $limitCurrency)
     {
@@ -169,6 +180,8 @@ class CreditCardPayment extends Payment
      * @param Amount $limit
      *
      * @return float
+     *
+     * @since 1.0.0
      */
     private function getCurrencyConversionFactor($selectedCurrency, Amount $limit)
     {
@@ -204,9 +217,9 @@ class CreditCardPayment extends Payment
     }
 
     /**
-     * Returns payment specific configuration.
-     *
      * @return CreditCardPaymentConfig
+     *
+     * @since 1.0.0
      */
     public function getPaymentConfig()
     {
@@ -233,7 +246,7 @@ class CreditCardPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function processPayment(
         OrderSummary $orderSummary,
@@ -270,7 +283,7 @@ class CreditCardPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function processReturn(
         TransactionService $transactionService,

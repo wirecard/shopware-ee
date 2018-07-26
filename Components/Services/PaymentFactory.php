@@ -41,7 +41,15 @@ use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 use WirecardShopwareElasticEngine\Components\Payments\SepaPayment;
 use WirecardShopwareElasticEngine\Components\Payments\SofortPayment;
 use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
+use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
 
+/**
+ * Responsible for creating payment objects based on their name.
+ *
+ * @package WirecardShopwareElasticEngine\Components\Services
+ *
+ * @since   1.0.0
+ */
 class PaymentFactory
 {
     /**
@@ -75,6 +83,8 @@ class PaymentFactory
      * @param InstallerService            $installerService
      * @param RouterInterface             $router
      * @param \Enlight_Event_EventManager $eventManager
+     *
+     * @since 1.0.0
      */
     public function __construct(
         EntityManagerInterface $em,
@@ -95,6 +105,8 @@ class PaymentFactory
      *
      * @return Payment
      * @throws UnknownPaymentException
+     *
+     * @since 1.0.0
      */
     public function create($paymentName)
     {
@@ -113,8 +125,14 @@ class PaymentFactory
     }
 
     /**
+     * Used to register payments in Shopware.
+     *
+     * @see   WirecardShopwareElasticEngine::getSupportedPayments()
+     *
      * @return PaymentInterface[]
      * @throws UnknownPaymentException
+     *
+     * @since 1.0.0
      */
     public function getSupportedPayments()
     {
@@ -128,7 +146,11 @@ class PaymentFactory
     }
 
     /**
+     * Contains a list of actual supported payments by the plugin.
+     *
      * @return array
+     *
+     * @since 1.0.0
      */
     private function getMappedPayments()
     {

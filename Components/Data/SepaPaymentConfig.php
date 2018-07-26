@@ -31,6 +31,13 @@
 
 namespace WirecardShopwareElasticEngine\Components\Data;
 
+/**
+ * SEPA specific payment configuration.
+ *
+ * @package WirecardShopwareElasticEngine\Components\Data
+ *
+ * @since   1.0.0
+ */
 class SepaPaymentConfig extends PaymentConfig
 {
     /**
@@ -80,7 +87,7 @@ class SepaPaymentConfig extends PaymentConfig
     {
         $this->showBic = $showBic;
     }
-    
+
     /**
      * @return bool
      */
@@ -203,7 +210,7 @@ class SepaPaymentConfig extends PaymentConfig
 
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function toArray()
     {
@@ -216,7 +223,6 @@ class SepaPaymentConfig extends PaymentConfig
                 'creditorAddress'          => $this->getCreditorAddress(),
                 'mandateText'              => $this->getMandateText(),
                 'backendTransactionMaid'   => $this->getBackendTransactionMAID(),
-                'backendTransactionSecret' => $this->getBackendTransactionSecret(),
                 'backendCreditorId'        => $this->getBackendCreditorId()
             ]
         );

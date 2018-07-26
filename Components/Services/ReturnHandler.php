@@ -41,9 +41,18 @@ use WirecardShopwareElasticEngine\Components\Actions\Action;
 use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
+use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessReturnInterface;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
+/**
+ * Responsible for handling return actions. Payments may implement their own way of handling returns by implementing
+ * the `ProcessReturnInterface` interface.
+ *
+ * @package WirecardShopwareElasticEngine\Components\Services
+ *
+ * @since   1.0.0
+ */
 class ReturnHandler extends Handler
 {
     /**
@@ -52,25 +61,31 @@ class ReturnHandler extends Handler
      * @param \Enlight_Controller_Request_Request $request
      *
      * @return Response
+     *
+     * @since 1.0.0
      */
-    public function execute(
+    public function handleRequest(
         Payment $payment,
         TransactionService $transactionService,
         \Enlight_Controller_Request_Request $request
     ) {
-        $response = $payment->processReturn($transactionService, $request);
+        if ($payment instanceof ProcessReturnInterface) {
+            $response = $payment->processReturn($transactionService, $request);
 
-        if (! $response) {
-            $response = $transactionService->handleResponse($request->getParams());
+            if ($response) {
+                return $response;
+            }
         }
 
-        return $response;
+        return $transactionService->handleResponse($request->getParams());
     }
 
     /**
      * @param Response $response
      *
-     * @return Action|ViewAction
+     * @return Action
+     *
+     * @since 1.0.0
      */
     public function handleResponse(Response $response)
     {
@@ -87,6 +102,8 @@ class ReturnHandler extends Handler
      * @param FormInteractionResponse $response
      *
      * @return ViewAction
+     *
+     * @since 1.0.0
      */
     protected function handleFormInteraction(FormInteractionResponse $response)
     {
@@ -105,6 +122,8 @@ class ReturnHandler extends Handler
      * @param Transaction     $initialTransaction
      *
      * @return Action
+     *
+     * @since 1.0.0
      */
     public function handleSuccess(SuccessResponse $response, Transaction $initialTransaction)
     {
@@ -123,6 +142,8 @@ class ReturnHandler extends Handler
      * @param InteractionResponse $response
      *
      * @return Action
+     *
+     * @since 1.0.0
      */
     protected function handleInteraction(InteractionResponse $response)
     {
@@ -135,6 +156,8 @@ class ReturnHandler extends Handler
      * @param FailureResponse|Response|mixed $response
      *
      * @return Action
+     *
+     * @since 1.0.0
      */
     protected function handleFailure($response)
     {

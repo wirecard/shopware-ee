@@ -43,8 +43,8 @@
                  class="WirecardShopwareElasticEngine\Components\Services\BackendOperationHandler"
                  parent="wirecard_elastic_engine.handler">
         </service>
-        <service id="wirecard_elastic_engine.session_handler"
-                 class="WirecardShopwareElasticEngine\Components\Services\SessionHandler">
+        <service id="wirecard_elastic_engine.session_manager"
+                 class="WirecardShopwareElasticEngine\Components\Services\SessionManager">
             <argument type="service" id="session"/>
         </service>
 

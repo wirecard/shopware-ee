@@ -41,6 +41,13 @@ use WirecardShopwareElasticEngine\Exception\InvalidBasketItemException;
 use WirecardShopwareElasticEngine\Exception\NotAvailableBasketException;
 use WirecardShopwareElasticEngine\Exception\OutOfStockBasketException;
 
+/**
+ * Represents the Shopware basket as object.
+ *
+ * @package WirecardShopwareElasticEngine\Components\Mapper
+ *
+ * @since   1.0.0
+ */
 class BasketMapper extends ArrayMapper
 {
     const CONTENT = 'content';
@@ -87,7 +94,7 @@ class BasketMapper extends ArrayMapper
     protected $shippingMethod;
 
     /**
-     * BasketMapper constructor.
+     * Additionally creates a Wirecard `Basket` object which can be retrieved via `getWirecardBasket()`.
      *
      * @param array                                $shopwareBasket
      * @param string                               $signature
@@ -102,6 +109,8 @@ class BasketMapper extends ArrayMapper
      * @throws InvalidBasketItemException
      * @throws NotAvailableBasketException
      * @throws OutOfStockBasketException
+     *
+     * @since 1.0.0
      */
     public function __construct(
         array $shopwareBasket,
@@ -124,6 +133,8 @@ class BasketMapper extends ArrayMapper
 
     /**
      * @return array
+     *
+     * @since 1.0.0
      */
     public function getShopwareBasket()
     {
@@ -132,6 +143,8 @@ class BasketMapper extends ArrayMapper
 
     /**
      * @return Basket
+     *
+     * @since 1.0.0
      */
     public function getWirecardBasket()
     {
@@ -141,6 +154,8 @@ class BasketMapper extends ArrayMapper
     /**
      * @return array
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     protected function getShopwareBasketContent()
     {
@@ -153,6 +168,8 @@ class BasketMapper extends ArrayMapper
      * @return string
      * @throws InvalidBasketItemException
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getBasketText()
     {
@@ -188,6 +205,8 @@ class BasketMapper extends ArrayMapper
      * @throws ArrayKeyNotFoundException
      * @throws OutOfStockBasketException
      * @throws NotAvailableBasketException
+     *
+     * @since 1.0.0
      */
     protected function createWirecardBasket()
     {
@@ -233,6 +252,8 @@ class BasketMapper extends ArrayMapper
      * @throws OutOfStockBasketException
      * @throws InvalidBasketException
      * @throws NotAvailableBasketException
+     *
+     * @since 1.0.0
      */
     private function validateBasket()
     {
@@ -262,6 +283,8 @@ class BasketMapper extends ArrayMapper
 
     /**
      * @return array
+     *
+     * @since 1.0.0
      */
     public function toArray()
     {
@@ -270,6 +293,8 @@ class BasketMapper extends ArrayMapper
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getSignature()
     {
@@ -277,9 +302,13 @@ class BasketMapper extends ArrayMapper
     }
 
     /**
+     * Helper function to format numbers throughout the plugin.
+     *
      * @param string|float $amount
      *
      * @return string
+     *
+     * @since 1.0.0
      */
     public static function numberFormat($amount)
     {

@@ -29,8 +29,21 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Exception;
+namespace WirecardShopwareElasticEngine\Components\Payments\Contracts;
 
-class MissingOrderNumberException extends \Exception
+/**
+ * @package WirecardShopwareElasticEngine\Components\Payments\Interfaces
+ *
+ * @since   1.0.0
+ */
+interface AdditionalViewAssignmentsInterface
 {
+    /**
+     * Some payments (e.g. SEPA) require additional view assignments (e.g. for displaying additional input fields).
+     *
+     * @return array
+     *
+     * @since 1.0.0
+     */
+    public function getAdditionalViewAssignments();
 }

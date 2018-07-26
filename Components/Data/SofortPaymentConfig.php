@@ -31,6 +31,13 @@
 
 namespace WirecardShopwareElasticEngine\Components\Data;
 
+/**
+ * Sofort. specific payment configuration.
+ *
+ * @package WirecardShopwareElasticEngine\Components\Data
+ *
+ * @since   1.0.0
+ */
 class SofortPaymentConfig extends PaymentConfig
 {
     /**
@@ -50,6 +57,8 @@ class SofortPaymentConfig extends PaymentConfig
 
     /**
      * @param string
+     *
+     * @since 1.0.0
      */
     public function setBackendTransactionMAID($backendTransactionMaid)
     {
@@ -58,6 +67,8 @@ class SofortPaymentConfig extends PaymentConfig
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getBackendTransactionMAID()
     {
@@ -66,6 +77,8 @@ class SofortPaymentConfig extends PaymentConfig
 
     /**
      * @param string
+     *
+     * @since 1.0.0
      */
     public function setBackendTransactionSecret($backendTransactionSecret)
     {
@@ -74,6 +87,8 @@ class SofortPaymentConfig extends PaymentConfig
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getBackendTransactionSecret()
     {
@@ -82,6 +97,8 @@ class SofortPaymentConfig extends PaymentConfig
 
     /**
      * @param string
+     *
+     * @since 1.0.0
      */
     public function setBackendCreditorId($backendCreditorId)
     {
@@ -90,6 +107,8 @@ class SofortPaymentConfig extends PaymentConfig
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getBackendCreditorId()
     {
@@ -98,7 +117,7 @@ class SofortPaymentConfig extends PaymentConfig
 
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function toArray()
     {
@@ -106,7 +125,6 @@ class SofortPaymentConfig extends PaymentConfig
             parent::toArray(),
             [
                 'backendTransactionMaid'   => $this->getBackendTransactionMAID(),
-                'backendTransactionSecret' => $this->getBackendTransactionSecret(),
                 'backendCreditorId'        => $this->getBackendCreditorId()
             ]
         );
