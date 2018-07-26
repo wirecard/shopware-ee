@@ -31,6 +31,13 @@
 
 namespace WirecardShopwareElasticEngine\Components\Data;
 
+/**
+ * Basic payment configuration class, which stores general data like http user, api url, merchant account id (maid), ...
+ *
+ * @package WirecardShopwareElasticEngine\Components\Data
+ *
+ * @since   1.0.0
+ */
 class PaymentConfig
 {
     /**
@@ -79,11 +86,11 @@ class PaymentConfig
     protected $sendDescriptor;
 
     /**
-     * PaymentConfig constructor.
-     *
      * @param string $baseUrl
      * @param string $httpUser
      * @param string $httpPassword
+     *
+     * @since 1.0.0
      */
     public function __construct($baseUrl, $httpUser, $httpPassword)
     {
@@ -94,6 +101,8 @@ class PaymentConfig
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getBaseUrl()
     {
@@ -102,6 +111,8 @@ class PaymentConfig
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getHttpUser()
     {
@@ -110,6 +121,8 @@ class PaymentConfig
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getHttpPassword()
     {
@@ -118,6 +131,8 @@ class PaymentConfig
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getTransactionMAID()
     {
@@ -126,6 +141,8 @@ class PaymentConfig
 
     /**
      * @param string $transactionMAID
+     *
+     * @since 1.0.0
      */
     public function setTransactionMAID($transactionMAID)
     {
@@ -134,6 +151,8 @@ class PaymentConfig
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getTransactionSecret()
     {
@@ -142,6 +161,8 @@ class PaymentConfig
 
     /**
      * @param string $transactionSecret
+     *
+     * @since 1.0.0
      */
     public function setTransactionSecret($transactionSecret)
     {
@@ -150,6 +171,8 @@ class PaymentConfig
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getTransactionOperation()
     {
@@ -158,6 +181,8 @@ class PaymentConfig
 
     /**
      * @param string $transactionOperation
+     *
+     * @since 1.0.0
      */
     public function setTransactionOperation($transactionOperation)
     {
@@ -166,6 +191,8 @@ class PaymentConfig
 
     /**
      * @return bool
+     *
+     * @since 1.0.0
      */
     public function sendBasket()
     {
@@ -174,6 +201,8 @@ class PaymentConfig
 
     /**
      * @param bool $sendBasket
+     *
+     * @since 1.0.0
      */
     public function setSendBasket($sendBasket)
     {
@@ -182,6 +211,8 @@ class PaymentConfig
 
     /**
      * @return bool
+     *
+     * @since 1.0.0
      */
     public function hasFraudPrevention()
     {
@@ -190,6 +221,8 @@ class PaymentConfig
 
     /**
      * @param bool $fraudPrevention
+     *
+     * @since 1.0.0
      */
     public function setFraudPrevention($fraudPrevention)
     {
@@ -198,6 +231,8 @@ class PaymentConfig
 
     /**
      * @return bool
+     *
+     * @since 1.0.0
      */
     public function sendDescriptor()
     {
@@ -206,6 +241,8 @@ class PaymentConfig
 
     /**
      * @param bool $sendDescriptor
+     *
+     * @since 1.0.0
      */
     public function setSendDescriptor($sendDescriptor)
     {
@@ -214,12 +251,13 @@ class PaymentConfig
 
     /**
      * @return array
+     *
+     * @since 1.0.0
      */
     public function toArray()
     {
         return [
             'baseUrl'                   => $this->getBaseUrl(),
-            'httpUser'                  => $this->getHttpUser(),
             'transactionMAID'           => $this->getTransactionMAID(),
             'transactionOperation'      => $this->getTransactionOperation(),
             'sendBasket'                => $this->sendBasket(),

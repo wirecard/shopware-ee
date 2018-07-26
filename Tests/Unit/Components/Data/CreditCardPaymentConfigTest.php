@@ -79,7 +79,6 @@ class CreditCardPaymentConfigTest extends TestCase
 
         $this->assertEquals([
             'baseUrl'                => 'https://api-test.wirecard.com',
-            'httpUser'               => 'foo',
             'transactionMAID'        => 'transaction-maid',
             'transactionOperation'   => Payment::TRANSACTION_OPERATION_PAY,
             'sendBasket'             => false,
