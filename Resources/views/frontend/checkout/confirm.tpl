@@ -2,7 +2,7 @@
 
 {block name='frontend_checkout_confirm_information_wrapper'}
     {$smarty.block.parent}
-    {if $wirecardFormFields and $wirecardFormFields.method == 'wirecard_elastic_engine_sepa'}
+    {if $wirecardElasticEngineViewAssignments and $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_sepa'}
         <div class="panel has--border wirecardee--additional-form-fields">
             <div class="panel--title primary is--underline">
                 {s name="SepaPaymentFormHeader" namespace="frontend/wirecard_elastic_engine/sepa"}{/s}
@@ -13,20 +13,20 @@
         </div>
     {/if}
 
-    {if $includeDeviceFingerprintIFrame}
+    {if $wirecardElasticEngineIncludeDeviceFingerprintIFrame}
         <script type="text/javascript"
-                src="https://h.wirecard.com/fp/tags.js?org_id=6xxznhva&session_id={$deviceFingerprintId}">
+                src="https://h.wirecard.com/fp/tags.js?org_id=6xxznhva&session_id={$wirecardElasticEngineDeviceFingerprintId}">
         </script>
         <noscript>
             <iframe style="width: 100px; height: 100px; border: 0; position: absolute; top: -5000px;"
-                    src="https://h.wirecard.com/tags?org_id=6xxznhva&session_id={$deviceFingerprintId}"></iframe>
+                    src="https://h.wirecard.com/tags?org_id=6xxznhva&session_id={$wirecardElasticEngineDeviceFingerprintId}"></iframe>
         </noscript>
     {/if}
 {/block}
 
 {block name="frontend_index_javascript_async_ready"}
     {$smarty.block.parent}
-    {if $wirecardFormFields and $wirecardFormFields.method == 'wirecard_elastic_engine_sepa'}
+    {if $wirecardElasticEngineViewAssignments and $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_sepa'}
         <div id="wirecardee-sepa--mandate-text" style="display:none;">
             {include file="frontend/plugins/wirecard_elastic_engine/form/sepa_mandate.tpl"}
         </div>

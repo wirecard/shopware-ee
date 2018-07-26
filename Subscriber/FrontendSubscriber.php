@@ -36,9 +36,15 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Shopware\Components\Theme\LessDefinition;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
+use WirecardShopwareElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
-use WirecardShopwareElasticEngine\Components\Services\SessionHandler;
+use WirecardShopwareElasticEngine\Components\Services\SessionManager;
 
+/**
+ * @package WirecardShopwareElasticEngine\Subscriber
+ *
+ * @since 1.0.0
+ */
 class FrontendSubscriber implements SubscriberInterface
 {
     /**
@@ -60,6 +66,8 @@ class FrontendSubscriber implements SubscriberInterface
      * @param string                    $pluginDirectory
      * @param \Enlight_Template_Manager $templateManager
      * @param PaymentFactory            $paymentFactory
+     *
+     * @since 1.0.0
      */
     public function __construct(
         $pluginDirectory,
@@ -71,6 +79,11 @@ class FrontendSubscriber implements SubscriberInterface
         $this->paymentFactory  = $paymentFactory;
     }
 
+    /**
+     * @return array
+     *
+     * @since 1.0.0
+     */
     public static function getSubscribedEvents()
     {
         return [
@@ -80,11 +93,21 @@ class FrontendSubscriber implements SubscriberInterface
         ];
     }
 
+    /**
+     * @param \Enlight_Controller_ActionEventArgs $args
+     *
+     * @since 1.0.0
+     */
     public function onPreDispatch(\Enlight_Controller_ActionEventArgs $args)
     {
         $this->templateManager->addTemplateDir($this->pluginDirectory . '/Resources/views');
     }
 
+    /**
+     * @return ArrayCollection
+     *
+     * @since 1.0.0
+     */
     public function onCollectLessFiles()
     {
         $less = new LessDefinition(
@@ -96,6 +119,13 @@ class FrontendSubscriber implements SubscriberInterface
         return new ArrayCollection([$less]);
     }
 
+    /**
+     * @param \Enlight_Controller_ActionEventArgs $args
+     *
+     * @throws \WirecardShopwareElasticEngine\Exception\UnknownPaymentException
+     *
+     * @since 1.0.0
+     */
     public function onPostDispatchCheckout(\Enlight_Controller_ActionEventArgs $args)
     {
         $controller = $args->getSubject();
@@ -104,18 +134,27 @@ class FrontendSubscriber implements SubscriberInterface
 
         $params = $request->getParams();
 
-        if ($params['wirecardPayment'] && ! empty($params['wirecardPayment'])) {
-            $sessionHandler = $controller->get('wirecard_elastic_engine.session_handler');
-            $sessionHandler->storePaymentData($params['wirecardPayment']);
+        // In case additional payment data is provided it is stored in the session and later passed to
+        // the `OrderSummary` by the controller. Keep in mind that this additional payment data should be passed as
+        // an array named `wirecardElasticEngine`.
+        // Example: <input type="text" name="wirecardElasticEngine[yourAdditionalFieldName]">
+        if (! empty($params['wirecardElasticEngine'])) {
+            $sessionManager = $controller->get('wirecard_elastic_engine.session_manager');
+            $sessionManager->storePaymentData($params['wirecardElasticEngine']);
         }
 
+        // Display payment status on finish page.
         if ($request->getActionName() === 'finish') {
             $this->assignPaymentStatus($view);
         }
 
         if ($request->getActionName() === 'confirm') {
-            $this->assignDeviceFingerprint($view, $controller->get('wirecard_elastic_engine.session_handler'));
-            $this->assignAdditionalPaymentFields($view);
+            // Assigns the device fingerprint id to the view in case the payment has fraud prevention enabled.
+            $this->assignDeviceFingerprint($view, $controller->get('wirecard_elastic_engine.session_manager'));
+
+            // Some payments may require additional view assignments (e.g. SEPA input fields) which will be assigned
+            // here.
+            $this->assignAdditionalViewAssignments($view);
         }
 
         $errorCode = $request->getParam('wirecard_elastic_engine_error_code');
@@ -129,6 +168,11 @@ class FrontendSubscriber implements SubscriberInterface
         }
     }
 
+    /**
+     * @param \Enlight_View_Default $view
+     *
+     * @since 1.0.0
+     */
     private function assignPaymentStatus(\Enlight_View_Default $view)
     {
         if (strpos($view->getAssign('sPayment'), 'wirecard_elastic_engine') === false) {
@@ -163,27 +207,30 @@ class FrontendSubscriber implements SubscriberInterface
      * @param \Enlight_View_Default $view
      *
      * @throws \WirecardShopwareElasticEngine\Exception\UnknownPaymentException
+     *
+     * @since 1.0.0
      */
-    private function assignAdditionalPaymentFields(\Enlight_View_Default $view)
+    private function assignAdditionalViewAssignments(\Enlight_View_Default $view)
     {
         $sPayment = $view->getAssign('sPayment');
         if (strpos($sPayment['name'], 'wirecard_elastic_engine') === false) {
             return;
         }
         $payment = $this->paymentFactory->create($sPayment['name']);
-        if ($payment) {
-            $additionalFormFields = $payment->getAdditionalFormFields();
-            $view->assign('wirecardFormFields', $additionalFormFields);
+        if ($payment instanceof AdditionalViewAssignmentsInterface) {
+            $view->assign('wirecardElasticEngineViewAssignments', $payment->getAdditionalViewAssignments());
         }
     }
 
     /**
      * @param \Enlight_View_Default $view
-     * @param SessionHandler        $sessionHandler
+     * @param SessionManager        $sessionManager
      *
      * @throws \WirecardShopwareElasticEngine\Exception\UnknownPaymentException
+     *
+     * @since 1.0.0
      */
-    private function assignDeviceFingerprint(\Enlight_View_Default $view, SessionHandler $sessionHandler)
+    private function assignDeviceFingerprint(\Enlight_View_Default $view, SessionManager $sessionManager)
     {
         $sPayment = $view->getAssign('sPayment');
         if (strpos($sPayment['name'], 'wirecard_elastic_engine') === false) {
@@ -192,10 +239,10 @@ class FrontendSubscriber implements SubscriberInterface
         $payment = $this->paymentFactory->create($sPayment['name']);
 
         if ($payment->getPaymentConfig()->hasFraudPrevention()) {
-            $view->assign('includeDeviceFingerprintIFrame', true);
+            $view->assign('wirecardElasticEngineIncludeDeviceFingerprintIFrame', true);
             $view->assign(
-                'deviceFingerprintId',
-                $sessionHandler->getDeviceFingerprintId($payment->getPaymentConfig()->getTransactionMAID())
+                'wirecardElasticEngineDeviceFingerprintId',
+                $sessionManager->getDeviceFingerprintId($payment->getPaymentConfig()->getTransactionMAID())
             );
         }
     }

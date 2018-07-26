@@ -43,9 +43,16 @@ use Wirecard\PaymentSdk\Transaction\SepaDirectDebitTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\SepaPaymentConfig;
+use WirecardShopwareElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
+use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardShopwareElasticEngine\Exception\InsufficientDataException;
 
-class SepaPayment extends Payment
+/**
+ * @package WirecardShopwareElasticEngine\Components\Payments
+ *
+ * @since   1.0.0
+ */
+class SepaPayment extends Payment implements ProcessPaymentInterface, AdditionalViewAssignmentsInterface
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_sepa';
 
@@ -55,7 +62,7 @@ class SepaPayment extends Payment
     private $transactionInstance;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getLabel()
     {
@@ -63,13 +70,16 @@ class SepaPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getName()
     {
         return self::PAYMETHOD_IDENTIFIER;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getPosition()
     {
         return 8;
@@ -77,6 +87,8 @@ class SepaPayment extends Payment
 
     /**
      * @return SepaDirectDebitTransaction
+     *
+     * @since 1.0.0
      */
     public function getTransaction()
     {
@@ -94,6 +106,8 @@ class SepaPayment extends Payment
      * @param string|null $paymentMethod
      *
      * @return SepaDirectDebitTransaction|SepaCreditTransferTransaction
+     *
+     * @since 1.0.0
      */
     public function getBackendTransaction($operation, $paymentMethod)
     {
@@ -104,7 +118,7 @@ class SepaPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag, $selectedCurrency)
     {
@@ -131,6 +145,8 @@ class SepaPayment extends Payment
 
     /**
      * @return SepaPaymentConfig
+     *
+     * @since 1.0.0
      */
     public function getPaymentConfig()
     {
@@ -158,9 +174,9 @@ class SepaPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public function getAdditionalFormFields()
+    public function getAdditionalViewAssignments()
     {
         $paymentConfig = $this->getPaymentConfig();
 
@@ -170,12 +186,11 @@ class SepaPayment extends Payment
             'creditorId'      => $paymentConfig->getCreditorId(),
             'creditorName'    => $paymentConfig->getCreditorName(),
             'creditorAddress' => $paymentConfig->getCreditorAddress(),
-            'additionalText'  => $paymentConfig->getMandateText(),
         ];
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function processPayment(
         OrderSummary $orderSummary,
@@ -185,25 +200,27 @@ class SepaPayment extends Payment
         \Enlight_Controller_Request_Request $request,
         \sOrder $shopwareOrder
     ) {
-        if (! isset($this->additionalData['sepaConfirmMandate'])
-            || $this->additionalData['sepaConfirmMandate'] !== 'confirmed'
-            || ! isset($this->additionalData['sepaIban'])
-            || ! isset($this->additionalData['sepaFirstName'])
-            || ! isset($this->additionalData['sepaLastName'])) {
+        $additionalPaymentData = $orderSummary->getAdditionalPaymentData();
+
+        if (! isset($additionalPaymentData['sepaConfirmMandate'])
+            || $additionalPaymentData['sepaConfirmMandate'] !== 'confirmed'
+            || ! isset($additionalPaymentData['sepaIban'])
+            || ! isset($additionalPaymentData['sepaFirstName'])
+            || ! isset($additionalPaymentData['sepaLastName'])) {
             throw new InsufficientDataException('Insufficient Data for SEPA Transaction');
         }
 
         $transaction = $this->getTransaction();
 
         $accountHolder = new AccountHolder();
-        $accountHolder->setFirstName($this->additionalData['sepaFirstName']);
-        $accountHolder->setLastName($this->additionalData['sepaLastName']);
+        $accountHolder->setFirstName($additionalPaymentData['sepaFirstName']);
+        $accountHolder->setLastName($additionalPaymentData['sepaLastName']);
         $transaction->setAccountHolder($accountHolder);
 
-        $transaction->setIban($this->additionalData['sepaIban']);
+        $transaction->setIban($additionalPaymentData['sepaIban']);
 
-        if ($this->getPluginConfig('SepaShowBic') && isset($this->additionalData['sepaBic'])) {
-            $transaction->setBic($this->additionalData['sepaBic']);
+        if ($this->getPluginConfig('SepaShowBic') && isset($additionalPaymentData['sepaBic'])) {
+            $transaction->setBic($additionalPaymentData['sepaBic']);
         }
 
         $mandate = new Mandate($this->generateMandateId($orderSummary));
@@ -218,6 +235,8 @@ class SepaPayment extends Payment
      * @param OrderSummary $orderSummary
      *
      * @return string
+     *
+     * @since 1.0.0
      */
     private function generateMandateId(OrderSummary $orderSummary)
     {
