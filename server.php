@@ -37,7 +37,8 @@ if (isset($_SERVER['HTTP_CLIENT_IP'])
     exit('Forbidden');
 }
 
-$filePath = (getenv('SHOPWARE_TESTS_BASEDIR') ?: __DIR__ . '/../../..') . '/' . ltrim(explode('?', $_SERVER['REQUEST_URI'])[0], '/');
+$shopwareDir = (getenv('SHOPWARE_TESTS_BASEDIR') ?: __DIR__ . '/../../..');
+$filePath    = $shopwareDir . '/' . ltrim(explode('?', $_SERVER['REQUEST_URI'])[0], '/');
 
 if (preg_match('/\.(?:png|jpg|jpeg|gif|css|js|woff|woff2|eot|svg|tff|cur|ico|html)$/', $filePath)) {
     if (is_file($filePath)) {
@@ -54,4 +55,4 @@ if (preg_match('/\.(?:png|jpg|jpeg|gif|css|js|woff|woff2|eot|svg|tff|cur|ico|htm
     }
 }
 
-require_once (getenv('SHOPWARE_TESTS_BASEDIR') ?: __DIR__ . '/../../..') . '/shopware.php';
+require_once $shopwareDir . '/shopware.php';
