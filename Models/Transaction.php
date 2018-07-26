@@ -39,10 +39,20 @@ use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Services\TransactionManager;
 
 /**
  * @ORM\Entity
  * @ORM\Table(name="wirecard_elastic_engine_transactions")
+ *
+ * Every time a request or response to/from the Wirecard servers is done a new transaction is created in the database.
+ * For internal purposes transactions are separated in "types" (don't confuse with the real transaction type!), which
+ * are shown as "Source" in the browser.
+ * Transactions are mainly created respectively updated by the `TransactionManager`.
+ *
+ * @see TransactionManager
+ *
+ * @since 1.0.0
  */
 class Transaction extends ModelEntity
 {
