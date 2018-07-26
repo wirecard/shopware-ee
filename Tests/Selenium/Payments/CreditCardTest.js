@@ -81,7 +81,9 @@ describe('Credit Card test', () => {
         await driver.findElement(By.css('#expiration_month_list > option[value=\'01\']')).click();
         await driver.findElement(By.css('#expiration_year_list > option[value=\'2030\']')).click();
 
+        // Switch back from iframe and click Send button
         driver.switchTo().defaultContent();
+        await driver.wait(until.elementLocated(By.id('wirecardee-credit-card--form-submit')));
         await driver.findElement(By.id('wirecardee-credit-card--form-submit')).click();
 
         await checkConfirmationPage(driver, paymentLabel);

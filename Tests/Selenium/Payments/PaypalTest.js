@@ -31,7 +31,7 @@
 /* eslint-env mocha */
 
 const { expect } = require('chai');
-const { Builder, By, until } = require('selenium-webdriver');
+const { Builder, By, until, Key } = require('selenium-webdriver');
 const { config } = require('../config');
 const {
     loginWithExampleAccount,
@@ -76,24 +76,26 @@ describe('PayPal test', () => {
         await driver.findElement(By.id('sAGB')).click();
         await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
 
-        // Log in to paypal
-        await driver.wait(until.elementLocated(By.id('loginSection')));
-        await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
-        await driver.wait(driver.findElement(By.css('#loginSection .btn')).click());
+        try {
+            // Log in to PayPal
+            await driver.wait(until.elementLocated(By.id('loginSection')), 10000);
+            await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
+            await driver.wait(driver.findElement(By.css('#loginSection .btn')).click());
+            await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
+        } catch (e) {
+            console.log('PayPal skipped loginSection, proceed with credentials');
+        }
 
-        await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
-
+        // Enter PayPal credentials
         await driver.wait(until.elementLocated(By.id('btnNext')));
         await driver.wait(until.elementLocated(By.id('email')));
-        await driver.findElement(By.id('email')).sendKeys(formFields.email);
-        await driver.wait(driver.findElement(By.id('btnNext')).click());
+        await driver.findElement(By.id('email')).sendKeys(formFields.email, Key.ENTER);
 
         await waitUntilOverlayIsNotVisible(driver, By.className('spinnerWithLockIcon'));
 
         await driver.wait(until.elementLocated(By.id('btnLogin')));
         await driver.wait(until.elementLocated(By.id('password')));
-        await driver.findElement(By.id('password')).sendKeys(formFields.password);
-        await driver.wait(driver.findElement(By.id('btnLogin')).click());
+        await driver.findElement(By.id('password')).sendKeys(formFields.password, Key.ENTER);
 
         await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
 
