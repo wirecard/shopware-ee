@@ -31,7 +31,12 @@
 
 namespace WirecardShopwareElasticEngine\Components\Services;
 
-class SessionHandler
+/**
+ * @package WirecardShopwareElasticEngine\Components\Services
+ *
+ * @since   1.0.0
+ */
+class SessionManager
 {
     const PAYMENT_DATA = 'WirecardElasticEnginePaymentData';
     const DEVICE_FINGERPRINT_ID = 'fingerprint_id';
@@ -41,6 +46,11 @@ class SessionHandler
      */
     private $session;
 
+    /**
+     * @param \Enlight_Components_Session_Namespace $session
+     *
+     * @since 1.0.0
+     */
     public function __construct(\Enlight_Components_Session_Namespace $session)
     {
         $this->session = $session;
@@ -48,6 +58,8 @@ class SessionHandler
 
     /**
      * @param array $paymentData
+     *
+     * @since 1.0.0
      */
     public function storePaymentData(array $paymentData)
     {
@@ -56,6 +68,8 @@ class SessionHandler
 
     /**
      * @return array|null
+     *
+     * @since 1.0.0
      */
     public function getPaymentData()
     {
@@ -66,8 +80,15 @@ class SessionHandler
     }
 
     /**
+     * Returns the device fingerprint id from the session. In case no device fingerprint id was generated so far a new
+     * one will get generated and returned instead.
+     * Device fingerprint id format: md5 of [maid]_[microtime]
+     *
      * @param string $maid
+     *
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getDeviceFingerprintId($maid)
     {
@@ -78,6 +99,14 @@ class SessionHandler
         return $this->session->get(self::DEVICE_FINGERPRINT_ID);
     }
 
+    /**
+     * Removes the device fingerprint id from the session. This should only be called in the return action, since the
+     * id is valid until the payment is successfully done.
+     *
+     * @see \Shopware_Controllers_Frontend_WirecardElasticEnginePayment::returnAction()
+     *
+     * @since 1.0.0
+     */
     public function destroyDeviceFingerprintId()
     {
         if ($this->session->offsetExists(self::DEVICE_FINGERPRINT_ID)) {
