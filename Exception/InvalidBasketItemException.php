@@ -33,8 +33,22 @@ namespace WirecardShopwareElasticEngine\Exception;
 
 use WirecardShopwareElasticEngine\Components\Mapper\BasketItemMapper;
 
+/**
+ * Thrown by the `BasketItemMapper` if item validation fails.
+ *
+ * @see     BasketItemMapper::validateItem()
+ *
+ * @package WirecardShopwareElasticEngine\Exception
+ *
+ * @since   1.0.0
+ */
 class InvalidBasketItemException extends BasketException
 {
+    /**
+     * @param BasketItemMapper $item
+     *
+     * @since 1.0.0
+     */
     public function __construct(BasketItemMapper $item)
     {
         parent::__construct("Invalid basket item");

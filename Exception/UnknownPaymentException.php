@@ -31,8 +31,22 @@
 
 namespace WirecardShopwareElasticEngine\Exception;
 
+/**
+ * Thrown by the `PaymentFactory` if the payment could not be found.
+ *
+ * @see     \WirecardShopwareElasticEngine\Components\Services\PaymentFactory::create()
+ *
+ * @package WirecardShopwareElasticEngine\Exception
+ *
+ * @since 1.0.0
+ */
 class UnknownPaymentException extends \Exception
 {
+    /**
+     * @param string $paymentName
+     *
+     * @since 1.0.0
+     */
     public function __construct($paymentName)
     {
         parent::__construct("Unknown payment '$paymentName'");

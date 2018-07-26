@@ -31,8 +31,20 @@
 
 namespace WirecardShopwareElasticEngine\Exception;
 
+/**
+ * Thrown if actions returned by handlers are unknown / not implemented.
+ *
+ * @package WirecardShopwareElasticEngine\Exception
+ *
+ * @since   1.0.0
+ */
 class UnknownActionException extends BasketException
 {
+    /**
+     * @param string $actionName
+     *
+     * @since 1.0.0
+     */
     public function __construct($actionName)
     {
         parent::__construct("Action '$actionName' not found");

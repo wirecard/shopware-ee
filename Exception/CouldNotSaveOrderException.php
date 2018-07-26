@@ -31,8 +31,24 @@
 
 namespace WirecardShopwareElasticEngine\Exception;
 
+/**
+ * Thrown during the return action whenever an order could not be saved.
+ *
+ * @see     \Shopware_Controllers_Frontend_WirecardElasticEnginePayment::returnAction()
+ *
+ * @package WirecardShopwareElasticEngine\Exception
+ *
+ * @since   1.0.0
+ */
 class CouldNotSaveOrderException extends \Exception
 {
+    /**
+     * @param string $transactionId
+     * @param string $paymentUniqueId
+     * @param string $paymentStatus
+     *
+     * @since 1.0.0
+     */
     public function __construct($transactionId, $paymentUniqueId, $paymentStatus)
     {
         parent::__construct("Could not save order ($transactionId, $paymentUniqueId, $paymentStatus)");

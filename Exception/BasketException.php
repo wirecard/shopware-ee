@@ -31,6 +31,13 @@
 
 namespace WirecardShopwareElasticEngine\Exception;
 
+/**
+ * Parent exception class for basket exceptions.
+ *
+ * @package WirecardShopwareElasticEngine\Exception
+ *
+ * @since   1.0.0
+ */
 class BasketException extends \Exception
 {
 }

@@ -31,6 +31,15 @@
 
 namespace WirecardShopwareElasticEngine\Exception;
 
+/**
+ * Thrown by the backend controller if testing credentials fails.
+ *
+ * @see     \Shopware_Controllers_Backend_WirecardElasticEngineTransactions::testCredentialsAction()
+ *
+ * @package WirecardShopwareElasticEngine\Exception
+ *
+ * @since   1.0.0
+ */
 class MissingCredentialsException extends \Exception
 {
 }

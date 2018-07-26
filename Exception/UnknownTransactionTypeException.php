@@ -31,8 +31,18 @@
 
 namespace WirecardShopwareElasticEngine\Exception;
 
+/**
+ * @see     \WirecardShopwareElasticEngine\Components\Payments\Payment::getTransactionType()
+ *
+ * @package WirecardShopwareElasticEngine\Exception
+ *
+ * @since   1.0.0
+ */
 class UnknownTransactionTypeException extends \Exception
 {
+    /**
+     * @param string $operation
+     */
     public function __construct($operation)
     {
         parent::__construct("Unknown transaction type for operation ($operation)");

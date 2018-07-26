@@ -31,8 +31,22 @@
 
 namespace WirecardShopwareElasticEngine\Exception;
 
+/**
+ * Thrown by the `Mapper` class when a required array key is not existent.
+ *
+ * @package WirecardShopwareElasticEngine\Exception
+ *
+ * @since   1.0.0
+ */
 class ArrayKeyNotFoundException extends \Exception
 {
+    /**
+     * @param string $key
+     * @param string $className
+     * @param array  $arrayEntity
+     *
+     * @since 1.0.0
+     */
     public function __construct($key, $className, array $arrayEntity)
     {
         parent::__construct("Array key ($key) not found in $className: " . var_export($arrayEntity, true));

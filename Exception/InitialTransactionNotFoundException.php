@@ -33,8 +33,22 @@ namespace WirecardShopwareElasticEngine\Exception;
 
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 
+/**
+ * Thrown when the `TransactionManager` fails to find the initial transaction from a response.
+ *
+ * @see     \WirecardShopwareElasticEngine\Components\Services\TransactionManager::findInitialTransaction()
+ *
+ * @package WirecardShopwareElasticEngine\Exception
+ *
+ * @since   1.0.0
+ */
 class InitialTransactionNotFoundException extends \Exception
 {
+    /**
+     * @param SuccessResponse $response
+     *
+     * @since 1.0.0
+     */
     public function __construct(SuccessResponse $response)
     {
         parent::__construct(

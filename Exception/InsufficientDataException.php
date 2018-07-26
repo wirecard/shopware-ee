@@ -31,6 +31,13 @@
 
 namespace WirecardShopwareElasticEngine\Exception;
 
+/**
+ * Thrown when given data is insufficient.
+ *
+ * @package WirecardShopwareElasticEngine\Exception
+ *
+ * @since   1.0.0
+ */
 class InsufficientDataException extends \Exception
 {
 }
