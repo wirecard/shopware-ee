@@ -39,17 +39,31 @@ use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
+/**
+ * Handles notification responses. Notification responses are server-to-server, meaning you must NEVER access session
+ * data in here.
+ * Additionally notifications are the "source of truth", hence they are responsible for setting - respectively
+ * updating - the payment status.
+ *
+ * @package WirecardShopwareElasticEngine\Components\Services
+ *
+ * @since   1.0.0
+ */
 class NotificationHandler extends Handler
 {
     /**
+     * Handles a notification response.
+     *
      * @param \sOrder        $shopwareOrder
      * @param Response       $notification
      * @param BackendService $backendService
      *
      * @return bool
      * @throws \WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException
+     *
+     * @since 1.0.0
      */
-    public function execute(\sOrder $shopwareOrder, Response $notification, BackendService $backendService)
+    public function handleResponse(\sOrder $shopwareOrder, Response $notification, BackendService $backendService)
     {
         if ($notification instanceof SuccessResponse) {
             $initialTransaction = $this->handleSuccess($shopwareOrder, $notification, $backendService);
@@ -134,10 +148,6 @@ class NotificationHandler extends Handler
      */
     private function savePaymentStatus(\sOrder $shopwareOrder, Order $order, $paymentStatusId)
     {
-        // payment status has already been changed, do nothing
-        if ($order->getPaymentStatus()->getId() !== Status::PAYMENT_STATE_OPEN) {
-            return;
-        }
         $shopwareOrder->setPaymentStatus($order->getId(), $paymentStatusId, false);
         return;
     }
