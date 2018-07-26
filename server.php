@@ -37,9 +37,9 @@ if (isset($_SERVER['HTTP_CLIENT_IP'])
     exit('Forbidden');
 }
 
-$filePath = __DIR__ . '/../../../' . ltrim(explode('?', $_SERVER['REQUEST_URI'])[0], '/');
+$filePath = (getenv('SHOPWARE_TESTS_BASEDIR') ?: __DIR__ . '/../../..') . '/' . ltrim(explode('?', $_SERVER['REQUEST_URI'])[0], '/');
 
-if (preg_match('/\.(?:png|jpg|jpeg|gif|css|js|woff|tff)$/', $filePath)) {
+if (preg_match('/\.(?:png|jpg|jpeg|gif|css|js|woff|woff2|eot|svg|tff|cur|ico|html)$/', $filePath)) {
     if (is_file($filePath)) {
         // Workaround for `mime_content_type` returning `text/plain` for CSS files.
         $mimeType = substr($filePath, -4) === '.css' ? 'text/css' : mime_content_type($filePath);
@@ -54,4 +54,4 @@ if (preg_match('/\.(?:png|jpg|jpeg|gif|css|js|woff|tff)$/', $filePath)) {
     }
 }
 
-require_once __DIR__ . '/../../../shopware.php';
+require_once (getenv('SHOPWARE_TESTS_BASEDIR') ?: __DIR__ . '/../../..') . '/shopware.php';
