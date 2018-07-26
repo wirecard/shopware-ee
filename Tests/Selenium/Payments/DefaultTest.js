@@ -30,9 +30,13 @@
 
 /* eslint-env mocha */
 
-const { Builder, By, until } = require('selenium-webdriver');
-const { config } = require('../config');
-const { loginWithExampleAccount, waitUntilOverlayIsStale, checkConfirmationPage } = require('../common');
+const { Builder, By } = require('selenium-webdriver');
+const {
+    loginWithExampleAccount,
+    waitUntilOverlayIsStale,
+    checkConfirmationPage,
+    addProductToCartAndGotoCheckout
+} = require('../common');
 
 describe('default test', () => {
     const driver = new Builder()
@@ -49,16 +53,7 @@ describe('default test', () => {
 
     it('should check the default checkout', async () => {
         await loginWithExampleAccount(driver);
-
-        // Go to a product and buy it
-        await driver.get(`${config.url}/genusswelten/tees-und-zubeh/tee-zubehoer/24/glas-teekaennchen`);
-        await driver.findElement(By.className('buybox--button')).click();
-
-        // Wait for the cart to be shown
-        await driver.wait(until.elementLocated(By.className('button--checkout')));
-
-        // Go to checkout page
-        await driver.findElement(By.className('button--checkout')).click();
+        await addProductToCartAndGotoCheckout(driver, '/genusswelten/tees-und-zubeh/tee-zubehoer/24/glas-teekaennchen');
 
         // Go to payment selection page select "prepayment"
         await driver.findElement(By.className('btn--change-payment')).click();
@@ -74,6 +69,7 @@ describe('default test', () => {
 
         // Check AGB and confirm order
         await driver.findElement(By.id('sAGB')).click();
+        console.log('click button confirm--form');
         await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
 
         await checkConfirmationPage(driver, 'Vorkasse');

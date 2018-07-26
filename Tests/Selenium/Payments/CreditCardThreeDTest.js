@@ -30,10 +30,14 @@
 
 /* eslint-env mocha */
 
-const { expect } = require('chai');
 const { Builder, By, until, Key } = require('selenium-webdriver');
 const { config } = require('../config');
-const { loginWithExampleAccount, waitUntilOverlayIsStale, checkConfirmationPage } = require('../common');
+const {
+    loginWithExampleAccount,
+    checkConfirmationPage,
+    addProductToCartAndGotoCheckout,
+    selectPaymentMethod
+} = require('../common');
 
 describe('Credit Card 3-D Secure test', () => {
     const driver = new Builder()
@@ -46,34 +50,19 @@ describe('Credit Card 3-D Secure test', () => {
 
     it('should check the credit card 3ds payment process', async () => {
         await loginWithExampleAccount(driver);
+        await addProductToCartAndGotoCheckout(driver, '/wohnwelten/moebel/68/kommode-shabby-chic');
+        await selectPaymentMethod(driver, paymentLabel);
 
-        // Go to a product and buy it
-        await driver.get(`${config.url}/wohnwelten/moebel/68/kommode-shabby-chic`);
-        await driver.findElement(By.className('buybox--button')).click();
-
-        // Wait for the cart to be shown
-        await driver.wait(until.elementLocated(By.className('button--checkout')));
-
-        // Go to checkout page
-        await driver.findElement(By.className('button--checkout')).click();
-
-        // Go to payment selection page, check if wirecard payments are present and select credit card
-        await driver.findElement(By.className('btn--change-payment')).click();
-        await driver.findElement(By.xpath("//*[contains(text(), '" + paymentLabel + "')]")).click();
-
-        // Go back to checkout page and test if payment method has been selected
-        await waitUntilOverlayIsStale(driver, By.className('js--overlay'));
-        await driver.findElement(By.className('main--actions')).click();
-        const paymentDescription = await driver.findElement(By.className('payment--description')).getText();
-        expect(paymentDescription).to.include(paymentLabel);
-
-        // Check AGB and confirm order
-        await driver.findElement(By.id('sAGB')).click();
+        // Confirm order
+        console.log('click button confirm--form');
         await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
 
         // Fill out credit card iframe
+        console.log('wait for .wirecard-seamless-frame');
         await driver.wait(until.elementLocated(By.className('wirecard-seamless-frame')));
+        console.log('wait for switch to iframe .wirecard-seamless-frame');
         await driver.wait(until.ableToSwitchToFrame(By.className('wirecard-seamless-frame')));
+        console.log('wait for #account_number');
         await driver.wait(until.elementLocated(By.id('account_number')));
         Object.keys(formFields).forEach(async field => {
             await driver.findElement(By.id(field)).sendKeys(formFields[field]);
@@ -82,10 +71,14 @@ describe('Credit Card 3-D Secure test', () => {
         await driver.findElement(By.css('#expiration_year_list > option[value=\'2019\']')).click();
 
         // Switch back from iframe and click Send button
+        console.log('switch back from iframe to default content');
         driver.switchTo().defaultContent();
+        console.log('wait for #wirecardee-credit-card--form-submit');
         await driver.wait(until.elementLocated(By.id('wirecardee-credit-card--form-submit')));
+        console.log('click #wirecardee-credit-card--form-submit');
         await driver.findElement(By.id('wirecardee-credit-card--form-submit')).click();
 
+        console.log('wait for #password');
         await driver.wait(until.elementLocated(By.id('password')));
         await driver.findElement(By.id('password')).sendKeys(config.payments.creditCardThreeD.password, Key.ENTER);
 
