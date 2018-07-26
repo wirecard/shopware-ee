@@ -39,6 +39,7 @@ describe('Credit Card test', () => {
     const driver = new Builder()
         .forBrowser('chrome')
         .build();
+    driver.manage().deleteAllCookies();
 
     const paymentLabel = config.payments.creditCard.label;
     const formFields = config.payments.creditCard.fields;

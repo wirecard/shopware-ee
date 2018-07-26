@@ -39,6 +39,7 @@ describe('SEPA Direct Debit test', () => {
     const driver = new Builder()
         .forBrowser('chrome')
         .build();
+    driver.manage().deleteAllCookies();
 
     const paymentLabel = config.payments.sepa.label;
     const formFields = config.payments.sepa.fields;

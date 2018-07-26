@@ -24,5 +24,12 @@
                 clearInterval(wirecardeeChatButtonInterval);
             }
         }, 500);
+        var wirecardeeChatOpen = function () {
+            Ext.util.CSS.createStyleSheet('#lz_overlay_wm { display: inherit !important; }');
+            var button = document.getElementById('livezilla_wm');
+            if (button) {
+                button.click();
+            }
+        };
     </script>
 {/block}

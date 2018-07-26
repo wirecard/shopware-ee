@@ -44,6 +44,7 @@ describe('PayPal test', () => {
     const driver = new Builder()
         .forBrowser('chrome')
         .build();
+    driver.manage().deleteAllCookies();
 
     const paymentLabel = config.payments.paypal.label;
     const formFields = config.payments.paypal.fields;

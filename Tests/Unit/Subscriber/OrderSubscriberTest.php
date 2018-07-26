@@ -46,6 +46,10 @@ class OrderSubscriberTest extends TestCase
 
     public function testOnOrderShouldSendMail()
     {
+        // switch environment to skip "testing" env case
+        $env = getenv('SHOPWARE_ENV');
+        putenv("SHOPWARE_ENV=dev");
+
         $subscriber = new OrderSubscriber();
 
         $this->assertNull($subscriber->onOrderShouldSendMail(new \Enlight_Controller_ActionEventArgs()));
@@ -53,5 +57,8 @@ class OrderSubscriberTest extends TestCase
         $args = new \Enlight_Controller_ActionEventArgs();
         $args->set('variables', ['additional' => ['payment' => ['action' => Payment::ACTION]]]);
         $this->assertFalse($subscriber->onOrderShouldSendMail($args));
+
+        // restore previous environment
+        putenv("SHOPWARE_ENV=" . $env);
     }
 }
