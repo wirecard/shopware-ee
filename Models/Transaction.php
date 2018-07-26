@@ -174,6 +174,11 @@ class Transaction extends ModelEntity
      */
     private $paymentStatus;
 
+    /**
+     * @param string $type Transaction type, see Model constants for available types
+     *
+     * @since 1.0.0
+     */
     public function __construct($type)
     {
         $this->type = $type;
@@ -183,6 +188,8 @@ class Transaction extends ModelEntity
 
     /**
      * @return int|null
+     *
+     * @since 1.0.0
      */
     public function getId()
     {
@@ -191,6 +198,8 @@ class Transaction extends ModelEntity
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getOrderNumber()
     {
@@ -199,6 +208,8 @@ class Transaction extends ModelEntity
 
     /**
      * @param string|null orderNumber
+     *
+     * @since 1.0.0
      */
     public function setOrderNumber($orderNumber)
     {
@@ -207,6 +218,8 @@ class Transaction extends ModelEntity
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getPaymentUniqueId()
     {
@@ -215,6 +228,8 @@ class Transaction extends ModelEntity
 
     /**
      * @param string|null $paymentUniqueId
+     *
+     * @since 1.0.0
      */
     public function setPaymentUniqueId($paymentUniqueId)
     {
@@ -223,6 +238,8 @@ class Transaction extends ModelEntity
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getParentTransactionId()
     {
@@ -231,6 +248,8 @@ class Transaction extends ModelEntity
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getTransactionId()
     {
@@ -239,6 +258,8 @@ class Transaction extends ModelEntity
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getProviderTransactionId()
     {
@@ -247,6 +268,8 @@ class Transaction extends ModelEntity
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getProviderTransactionReference()
     {
@@ -255,6 +278,8 @@ class Transaction extends ModelEntity
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getTransactionType()
     {
@@ -266,6 +291,8 @@ class Transaction extends ModelEntity
      * (PaymentSDK only provides getPaymentMethod() in SuccessResponse class)
      *
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getPaymentMethod()
     {
@@ -277,6 +304,8 @@ class Transaction extends ModelEntity
 
     /**
      * @param string $paymentMethod
+     *
+     * @since 1.0.0
      */
     private function setPaymentMethod($paymentMethod)
     {
@@ -285,6 +314,8 @@ class Transaction extends ModelEntity
 
     /**
      * @return float|null
+     *
+     * @since 1.0.0
      */
     public function getAmount()
     {
@@ -293,6 +324,8 @@ class Transaction extends ModelEntity
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getCurrency()
     {
@@ -301,6 +334,8 @@ class Transaction extends ModelEntity
 
     /**
      * @return array
+     *
+     * @since 1.0.0
      */
     public function getResponse()
     {
@@ -309,6 +344,8 @@ class Transaction extends ModelEntity
 
     /**
      * @param Response $response
+     *
+     * @since 1.0.0
      */
     public function setResponse(Response $response)
     {
@@ -343,6 +380,8 @@ class Transaction extends ModelEntity
 
     /**
      * @return array|null
+     *
+     * @since 1.0.0
      */
     public function getRequest()
     {
@@ -351,6 +390,8 @@ class Transaction extends ModelEntity
 
     /**
      * @param array $request
+     *
+     * @since 1.0.0
      */
     public function setRequest(array $request)
     {
@@ -375,6 +416,8 @@ class Transaction extends ModelEntity
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getType()
     {
@@ -383,6 +426,8 @@ class Transaction extends ModelEntity
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getRequestId()
     {
@@ -391,6 +436,8 @@ class Transaction extends ModelEntity
 
     /**
      * @param \DateTime
+     *
+     * @since 1.0.0
      */
     public function setCreatedAt(\DateTime $createdAt)
     {
@@ -399,6 +446,8 @@ class Transaction extends ModelEntity
 
     /**
      * @return \DateTime
+     *
+     * @since 1.0.0
      */
     public function getCreatedAt()
     {
@@ -407,6 +456,8 @@ class Transaction extends ModelEntity
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getState()
     {
@@ -415,6 +466,8 @@ class Transaction extends ModelEntity
 
     /**
      * @param string $state
+     *
+     * @since 1.0.0
      */
     public function setState($state)
     {
@@ -423,6 +476,8 @@ class Transaction extends ModelEntity
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getBasketSignature()
     {
@@ -431,6 +486,8 @@ class Transaction extends ModelEntity
 
     /**
      * @param string|null $basketSignature
+     *
+     * @since 1.0.0
      */
     public function setBasketSignature($basketSignature)
     {
@@ -439,6 +496,8 @@ class Transaction extends ModelEntity
 
     /**
      * @return int|null
+     *
+     * @since 1.0.0
      */
     public function getPaymentStatus()
     {
@@ -447,17 +506,29 @@ class Transaction extends ModelEntity
 
     /**
      * @param int $paymentStatusId
+     *
+     * @since 1.0.0
      */
     public function setPaymentStatus($paymentStatusId)
     {
         $this->paymentStatus = $paymentStatusId;
     }
 
+    /**
+     * @return bool
+     *
+     * @since 1.0.0
+     */
     public function isInitial()
     {
         return $this->getType() === self::TYPE_INITIAL_REQUEST || $this->getType() === self::TYPE_INITIAL_RESPONSE;
     }
 
+    /**
+     * @return array
+     *
+     * @since 1.0.0
+     */
     public function toArray()
     {
         return [
