@@ -51,6 +51,7 @@ use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
 use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
 use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
+use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 use WirecardShopwareElasticEngine\Components\Services\PaymentHandler;
 use WirecardShopwareElasticEngine\Components\Services\TransactionManager;
@@ -181,7 +182,11 @@ class PaymentHandlerTest extends TestCase
         $paymentConfig->method('hasFraudPrevention')->willReturn(true);
         $paymentConfig->method('sendDescriptor')->willReturn(true);
 
-        $payment = $this->createMock(PaymentInterface::class);
+        $builder = new \PHPUnit_Framework_MockObject_MockBuilder(
+            $this,
+            [PaymentInterface::class, ProcessPaymentInterface::class]
+        );
+        $payment = $builder->getMock();
         $payment->method('getTransaction')->willReturn($transaction);
         $payment->method('getPaymentConfig')->willReturn($paymentConfig);
         $customAction = $this->createMock(Action::class);
