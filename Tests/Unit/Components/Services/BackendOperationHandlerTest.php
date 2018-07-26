@@ -46,7 +46,6 @@ use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Services\BackendOperationHandler;
-use WirecardShopwareElasticEngine\Components\Services\SessionHandler;
 use WirecardShopwareElasticEngine\Components\Services\TransactionManager;
 use WirecardShopwareElasticEngine\Models\Transaction as TransactionModel;
 
