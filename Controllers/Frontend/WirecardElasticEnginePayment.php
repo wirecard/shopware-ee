@@ -58,6 +58,9 @@ use WirecardShopwareElasticEngine\Exception\UnknownActionException;
 use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
+/**
+ * @since 1.0.0
+ */
 // @codingStandardsIgnoreStart
 class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopware_Controllers_Frontend_Payment implements CSRFWhitelistAware
 {
