@@ -30,10 +30,14 @@
 
 /* eslint-env mocha */
 
-const { expect } = require('chai');
 const { Builder, By, until, Key } = require('selenium-webdriver');
 const { config } = require('../config');
-const { loginWithExampleAccount, waitUntilOverlayIsStale, checkConfirmationPage } = require('../common');
+const {
+    loginWithExampleAccount,
+    checkConfirmationPage,
+    addProductToCartAndGotoCheckout,
+    selectPaymentMethod
+} = require('../common');
 
 describe('Sofort. test', () => {
     const driver = new Builder()
@@ -46,44 +50,30 @@ describe('Sofort. test', () => {
 
     it('should check the sofort payment process', async () => {
         await loginWithExampleAccount(driver);
+        await addProductToCartAndGotoCheckout(driver, '/genusswelten/tees-und-zubeh/tee-zubehoer/24/glas-teekaennchen');
+        await selectPaymentMethod(driver, paymentLabel);
 
-        // Go to a product and buy it
-        await driver.get(`${config.url}/genusswelten/tees-und-zubeh/tee-zubehoer/24/glas-teekaennchen`);
-        await driver.findElement(By.className('buybox--button')).click();
-
-        // Wait for the cart to be shown
-        await driver.wait(until.elementLocated(By.className('button--checkout')));
-
-        // Go to checkout page
-        await driver.findElement(By.className('button--checkout')).click();
-
-        // Go to payment selection page, check if wirecard payments are present and select credit card
-        await driver.findElement(By.className('btn--change-payment')).click();
-        await driver.findElement(By.xpath("//*[contains(text(), '" + paymentLabel + "')]")).click();
-
-        // Go back to checkout page and test if payment method has been selected
-        await waitUntilOverlayIsStale(driver, By.className('js--overlay'));
-        await driver.findElement(By.className('main--actions')).click();
-        const paymentDescription = await driver.findElement(By.className('payment--description')).getText();
-        expect(paymentDescription).to.include(paymentLabel);
-
-        // Check AGB and confirm order
-        await driver.findElement(By.id('sAGB')).click();
+        // Confirm order
+        console.log('click button confirm--form');
         await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
 
         // Wait for Sofort. page and fill out forms
+        console.log('wait for #MultipaysSessionSenderCountryId');
         await driver.wait(until.elementLocated(By.id('MultipaysSessionSenderCountryId')));
         await driver.findElement(By.css('#MultipaysSessionSenderCountryId > option[value=\'AT\']')).click();
         await driver.findElement(By.id('BankCodeSearch')).sendKeys(formFields.bankCode, Key.ENTER);
 
+        console.log('wait for #BackendFormLOGINNAMEUSERID');
         await driver.wait(until.elementLocated(By.id('BackendFormLOGINNAMEUSERID')));
         await driver.findElement(By.id('BackendFormLOGINNAMEUSERID')).sendKeys(formFields.userId);
         await driver.findElement(By.id('BackendFormUSERPIN')).sendKeys(formFields.password, Key.ENTER);
 
+        console.log('wait for #account-1');
         await driver.wait(until.elementLocated(By.id('account-1')));
         await driver.findElement(By.id('account-1')).click();
         await driver.findElement(By.id('WizardForm')).submit();
 
+        console.log('wait for #BackendFormTAN');
         await driver.wait(until.elementLocated(By.id('BackendFormTAN')));
         await driver.findElement(By.id('BackendFormTAN')).sendKeys(formFields.tan, Key.ENTER);
 

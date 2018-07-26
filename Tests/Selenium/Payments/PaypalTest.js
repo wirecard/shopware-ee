@@ -30,14 +30,14 @@
 
 /* eslint-env mocha */
 
-const { expect } = require('chai');
 const { Builder, By, until, Key } = require('selenium-webdriver');
 const { config } = require('../config');
 const {
     loginWithExampleAccount,
-    waitUntilOverlayIsStale,
     waitUntilOverlayIsNotVisible,
-    checkConfirmationPage
+    checkConfirmationPage,
+    addProductToCartAndGotoCheckout,
+    selectPaymentMethod
 } = require('../common');
 
 describe('PayPal test', () => {
@@ -51,35 +51,19 @@ describe('PayPal test', () => {
 
     it('should check the paypal payment process', async () => {
         await loginWithExampleAccount(driver);
+        await addProductToCartAndGotoCheckout(driver, '/genusswelten/tees-und-zubeh/tee-zubehoer/24/glas-teekaennchen');
+        await selectPaymentMethod(driver, paymentLabel);
 
-        // Go to a product and buy it
-        await driver.get(`${config.url}/genusswelten/tees-und-zubeh/tee-zubehoer/24/glas-teekaennchen`);
-        await driver.findElement(By.className('buybox--button')).click();
-
-        // Wait for the cart to be shown
-        await driver.wait(until.elementLocated(By.className('button--checkout')));
-
-        // Go to checkout page
-        await driver.findElement(By.className('button--checkout')).click();
-
-        // Go to payment selection page, check if wirecard payments are present and select paypal
-        await driver.findElement(By.className('btn--change-payment')).click();
-        await driver.findElement(By.xpath("//*[contains(text(), '" + paymentLabel + "')]")).click();
-
-        // Go back to checkout page and test if payment method has been selected
-        await waitUntilOverlayIsStale(driver, By.className('js--overlay'));
-        await driver.findElement(By.className('main--actions')).click();
-        const paymentDescription = await driver.findElement(By.className('payment--description')).getText();
-        expect(paymentDescription).to.include(paymentLabel);
-
-        // Check AGB and confirm order
-        await driver.findElement(By.id('sAGB')).click();
+        // Confirm order
+        console.log('click button confirm--form');
         await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
 
         try {
             // Log in to PayPal
+            console.log('wait for #loginSection');
             await driver.wait(until.elementLocated(By.id('loginSection')), 10000);
             await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
+            console.log('click #loginSection .btn');
             await driver.wait(driver.findElement(By.css('#loginSection .btn')).click());
             await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
         } catch (e) {
@@ -87,19 +71,25 @@ describe('PayPal test', () => {
         }
 
         // Enter PayPal credentials
+        console.log('wait for #btnNext');
         await driver.wait(until.elementLocated(By.id('btnNext')));
+        console.log('wait for #email');
         await driver.wait(until.elementLocated(By.id('email')));
         await driver.findElement(By.id('email')).sendKeys(formFields.email, Key.ENTER);
 
         await waitUntilOverlayIsNotVisible(driver, By.className('spinnerWithLockIcon'));
 
+        console.log('wait for #btnLogin');
         await driver.wait(until.elementLocated(By.id('btnLogin')));
+        console.log('wait for #password');
         await driver.wait(until.elementLocated(By.id('password')));
         await driver.findElement(By.id('password')).sendKeys(formFields.password, Key.ENTER);
 
         await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
 
+        console.log('wait for #confirmButtonTop');
         await driver.wait(until.elementLocated(By.id('confirmButtonTop')));
+        console.log('click #confirmButtonTop');
         await driver.wait(driver.findElement(By.id('confirmButtonTop')).click());
 
         await checkConfirmationPage(driver, paymentLabel);
