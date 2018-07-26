@@ -7,6 +7,7 @@ Ext.define('Shopware.apps.WirecardExtendOrder.view.GeneralInformationWindow', {
     title: '{s name="Title"}{/s}',
     layout: 'anchor',
     bodyPadding: 10,
+    autoScroll: true,
 
     style: {
         background: '#EBEDEF'
