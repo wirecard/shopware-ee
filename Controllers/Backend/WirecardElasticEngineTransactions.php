@@ -45,8 +45,11 @@ use WirecardShopwareElasticEngine\Exception\UnknownActionException;
 use WirecardShopwareElasticEngine\Exception\MissingCredentialsException;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
+/**
+ * @since 1.0.0
+ */
 // @codingStandardsIgnoreStart
-class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Controllers_Backend_Application implements CSRFWhitelistAware
+class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Shopware_Controllers_Backend_Application implements CSRFWhitelistAware
 {
     // @codingStandardsIgnoreEnd
 
@@ -61,7 +64,9 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
     protected $alias = 'transaction';
 
     /**
-     * Check credentials against wirecard server
+     * Check credentials against Wirecard server
+     *
+     * @since 1.0.0
      */
     public function testCredentialsAction()
     {
@@ -102,11 +107,12 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
 
     /**
      * Loads transaction details for order given with orderNumber
+     *
+     * @since 1.0.0
      */
     public function detailsAction()
     {
-        /** @var PaymentFactory $paymentFactory */
-        $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
+        $paymentFactory = $this->getPaymentFactory();
         $payment        = $paymentFactory->create($this->Request()->getParam('payment'));
 
         $orderNumber = $this->Request()->getParam('orderNumber');
@@ -156,6 +162,12 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         ]);
     }
 
+    /**
+     * @return Enlight_View|Enlight_View_Default|void
+     * @throws \WirecardShopwareElasticEngine\Exception\UnknownPaymentException
+     *
+     * @since 1.0.0
+     */
     public function processBackendOperationsAction()
     {
         $operation     = $this->Request()->getParam('operation');
@@ -165,11 +177,11 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
         $currency = $this->Request()->getParam('currency');
 
         if (! $operation) {
-            return $this->handleError('BackendOperationFailed');
+            $this->handleError('BackendOperationFailed');
+            return;
         }
 
-        /** @var PaymentFactory $paymentFactory */
-        $paymentFactory = $this->get('wirecard_elastic_engine.payment_factory');
+        $paymentFactory = $this->getPaymentFactory();
         $payment        = $paymentFactory->create($this->Request()->getParam('payment'));
 
         $shop           = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
@@ -195,13 +207,15 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
             $operation
         );
 
-        return $this->handleAction($action);
+        $this->handleAction($action);
     }
 
     /**
      * @param Action $action
      *
      * @throws Exception
+     *
+     * @since 1.0.0
      */
     protected function handleAction(Action $action)
     {
@@ -210,12 +224,10 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
             foreach ($action->getAssignments() as $key => $value) {
                 $this->View()->assign($key, $value);
             }
-            return;
         }
 
         if ($action instanceof ErrorAction) {
             $this->handleError($action->getMessage());
-            return;
         }
 
         throw new UnknownActionException(get_class($action));
@@ -249,6 +261,8 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
      * @param array $assignments
      *
      * @return Enlight_View|Enlight_View_Default
+     *
+     * @since 1.0.0
      */
     private function handleSuccess(array $assignments)
     {
@@ -262,6 +276,8 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
      *
      * @return Enlight_View|Enlight_View_Default
      * @throws Exception
+     *
+     * @since 1.0.0
      */
     private function handleError($message = '')
     {
@@ -284,9 +300,22 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
     /**
      * @return \Shopware\Components\Logger
      * @throws Exception
+     *
+     * @since 1.0.0
      */
     private function getLogger()
     {
         return $this->get('pluginlogger');
+    }
+
+    /**
+     * @return PaymentFactory
+     * @throws Exception
+     *
+     * @since 1.0.0
+     */
+    private function getPaymentFactory()
+    {
+        return $this->get('wirecard_elastic_engine.payment_factory');
     }
 }
