@@ -48,9 +48,8 @@ exports.loginWithExampleAccount = async function (driver) {
         console.log('login successful');
     } catch (e) {
         console.log('login failed, current url: ' + await driver.getCurrentUrl());
-        console.log('--- HTML ---');
-        console.log(await driver.findElement(By.css('body')).getAttribute('outerHTML'));
-        console.log('--- HTML ---');
+        console.log(`get ${config.url}/account/logout`);
+        await driver.get(`${config.url}/account/logout`);
         driver.manage().deleteAllCookies();
         console.log(`retry: get ${config.url}/account/login`);
         await driver.get(`${config.url}/account/login`);
