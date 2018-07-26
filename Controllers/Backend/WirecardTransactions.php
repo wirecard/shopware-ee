@@ -204,18 +204,27 @@ class Shopware_Controllers_Backend_WirecardTransactions extends Shopware_Control
     public function submitMailAction()
     {
         $senderAddress = $this->Request()->getParam('address');
-        $message = $this->Request()->getParam('message');
-        $replyTo = $this->Request()->getParam('replyTo');
+        $message       = $this->Request()->getParam('message');
+        $replyTo       = $this->Request()->getParam('replyTo');
 
-        $supportMail = $this->get('wirecard_elastic_engine.support_mail');
+        $supportMail = $this->get('wirecard_elastic_engine.support_mailer');
 
-        return $this->View()->assign([
-            'success' => $supportMail->sendSupportMail(
+        try {
+            $supportMail->send(
                 $this->container->getParameterBag(),
                 $senderAddress,
                 $message,
                 $replyTo
-            )
+            );
+        } catch(\Exception $e) {
+            $this->getLogger()->error('Sending support mail failed: ' . $e->getMessage());
+            return $this->View()->assign([
+                'success' => false
+            ]);
+        }
+
+        return $this->View()->assign([
+            'success' => true
         ]);
     }
 

@@ -20,14 +20,12 @@ Ext.define('Shopware.apps.WirecardTransactions.view.MailSupportForm', {
 
     initComponent: function() {
         var me = this;
-
         me.items = me.createItems();
-
         me.callParent(arguments);
     },
 
     createItems: function() {
-        var items = [{
+        return [{
             xtype: 'textfield',
             name: 'address',
             fieldLabel: '{s name="SenderAddress"}{/s}',
@@ -49,9 +47,6 @@ Ext.define('Shopware.apps.WirecardTransactions.view.MailSupportForm', {
             rows: 20,
             allowBlank: false
         }];
-
-        return items;
     }
-
 });
 // {/block}

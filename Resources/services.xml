@@ -47,8 +47,8 @@
                  class="WirecardShopwareElasticEngine\Components\Services\SessionHandler">
             <argument type="service" id="session"/>
         </service>
-        <service id="wirecard_elastic_engine.support_mail"
-                 class="WirecardShopwareElasticEngine\Components\Services\SupportMail">
+        <service id="wirecard_elastic_engine.support_mailer"
+                 class="WirecardShopwareElasticEngine\Components\Services\SupportMailer">
             <argument type="service" id="models"/>
             <argument type="service" id="mail"/>
             <argument type="service" id="shopware_plugininstaller.plugin_manager"/>

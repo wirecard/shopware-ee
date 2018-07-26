@@ -33,7 +33,11 @@ Ext.define('Shopware.apps.WirecardTransactions.controller.Main', {
         me.mainWindow.setLoading(true);
 
         if (!form.isValid()) {
-            Shopware.Notification.createGrowlMessage('{s name="MailSupportTitle" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}', '{s name="FormValidationError" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}', me.mainWindow.title);
+            Shopware.Notification.createGrowlMessage(
+                '{s name="MailSupportTitle" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}',
+                '{s name="FormValidationError" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}',
+                me.mainWindow.title
+            );
             me.mainWindow.setLoading(false);
             return;
         }
@@ -43,14 +47,21 @@ Ext.define('Shopware.apps.WirecardTransactions.controller.Main', {
             params: form.getValues(),
             success: function(response) {
                 var data = Ext.decode(response.responseText);
-                console.log(data);
                 if (data.success) {
-                    Shopware.Notification.createGrowlMessage('{s name="MailSupportTitle" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}', '{s name="SuccessfullySend" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}', me.mainWindow.title);
+                    Shopware.Notification.createGrowlMessage(
+                        '{s name="MailSupportTitle" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}',
+                        '{s name="SuccessfullySend" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}',
+                        me.mainWindow.title
+                    );
                     me.mainWindow.close();
                     return;
                 }
 
-                Shopware.Notification.createGrowlMessage('{s name="MailSupportTitle" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}', '{s name="SendingFailed" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}', me.mainWindow.title);
+                Shopware.Notification.createGrowlMessage(
+                    '{s name="MailSupportTitle" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}',
+                    '{s name="SendingFailed" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}',
+                    me.mainWindow.title
+                );
                 me.mainWindow.setLoading(false);
             }
         });

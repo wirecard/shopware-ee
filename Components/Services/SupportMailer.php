@@ -32,70 +32,95 @@
 namespace WirecardShopwareElasticEngine\Components\Services;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
+use Shopware\Models\Payment\Payment;
+use Shopware\Models\Plugin\Plugin;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
 use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
 
-class SupportMail
+/**
+ * @package WirecardShopwareElasticEngine\Components\Services
+ *
+ * @since   1.0.0
+ */
+class SupportMailer
 {
+    /**
+     * @var EntityManagerInterface
+     */
     private $em;
+
+    /**
+     * @var \Enlight_Components_Mail
+     */
     private $mail;
+
+    /**
+     * @var InstallerService
+     */
     private $installerService;
+
+    /**
+     * @var PaymentFactory
+     */
     private $paymentFactory;
 
-    const SUPPORT_ADDRESS = 'shop-systems-support@wirecard.com';
-
+    /**
+     * @param EntityManagerInterface   $em
+     * @param \Enlight_Components_Mail $mail
+     * @param InstallerService         $installerService
+     * @param PaymentFactory           $paymentFactory
+     *
+     * @since 1.0.0
+     */
     public function __construct(
         EntityManagerInterface $em,
         \Enlight_Components_Mail $mail,
         InstallerService $installerService,
         PaymentFactory $paymentFactory
     ) {
-        $this->em = $em;
-        $this->mail = $mail;
+        $this->em               = $em;
+        $this->mail             = $mail;
         $this->installerService = $installerService;
-        $this->paymentFactory = $paymentFactory;
+        $this->paymentFactory   = $paymentFactory;
     }
 
     /**
      * Sends Email to Wirecard Support
      *
      * @param ParameterBagInterface $parameterBag
-     * @param string $senderAddress
-     * @param string $content
-     * @param string $replyTo
-     * @return bool
+     * @param string                $senderAddress
+     * @param string                $message
+     * @param string                $replyTo
+     * @return \Zend_Mail
+     * @throws \Zend_Mail_Exception
      */
-    public function sendSupportMail(ParameterBagInterface $parameterBag, $senderAddress, $message, $replyTo = null)
+    public function send(ParameterBagInterface $parameterBag, $senderAddress, $message, $replyTo = null)
     {
         $serverInfo = $this->getServerInfo();
-        $shopInfo = $this->getShopInfo($parameterBag);
+        $shopInfo   = $this->getShopInfo($parameterBag);
         $pluginInfo = $this->getPluginInfo();
         $pluginList = $this->getPluginList();
 
         $message .= PHP_EOL . PHP_EOL . PHP_EOL;
-        $message .= '***Server Info:***';
+        $message .= '*** Server Info: ***';
         $message .= $this->arrayToText($serverInfo);
 
-        $message .= '***Server Info:***';
+        $message .= '*** Shop Info: ***';
         $message .= $this->arrayToText($shopInfo);
 
-        $message .= '***Plugin Info:***';
+        $message .= '*** Plugin Info: ***';
         $message .= $this->arrayToText($pluginInfo);
 
-        $message .= '***Plugin List:***';
+        $message .= '*** Plugin List: ***';
         $message .= $this->arrayToText($pluginList);
 
         $this->mail->setFrom($senderAddress);
 
-        if ($replyTo) {
-             $this->mail->setReplyTo($replyTo);
-        } else {
-             $this->mail->setReplyTo($senderAddress);
-        }
+        $this->mail->setReplyTo($replyTo ?: $senderAddress);
 
-        $this->mail->addTo(self::SUPPORT_ADDRESS);
+        $this->mail->addTo($this->getRecipientMail());
         $this->mail->setSubject('Shopware support request');
         $this->mail->setBodyText($message);
 
@@ -103,12 +128,30 @@ class SupportMail
     }
 
     /**
+     * @return string
+     *
+     * @since 1.0.0
+     */
+    private function getRecipientMail()
+    {
+        if (in_array(getenv('SHOPWARE_ENV'), ['dev', 'development', 'testing', 'test'])) {
+//            return 'test@example.com';
+            return 'kh@loremipsum.at';
+        }
+
+        return 'shop-systems-support@wirecard.com';
+    }
+
+    /**
      * Formats array to readable string
      *
      * @param array $array
-     * return string
+     *
+     * @return string
+     *
+     * @since 1.0.0
      */
-    protected function arrayToText(array $array)
+    protected function arrayToText($array)
     {
         $result = PHP_EOL;
         foreach ($array as $key => $val) {
@@ -133,7 +176,7 @@ class SupportMail
     {
         return [
             'os'     => php_uname(),
-            'server' => $_SERVER['SERVER_SOFTWARE'],
+            'server' => isset($_SERVER['SERVER_SOFTWARE']) ? $_SERVER['SERVER_SOFTWARE'] : 'unknown',
             'php'    => phpversion()
         ];
     }
@@ -146,7 +189,7 @@ class SupportMail
     {
         return [
             'name'    => $parameterBag->get('kernel.name'),
-            'version' =>$parameterBag->get('shopware.release.version')
+            'version' => $parameterBag->get('shopware.release.version'),
         ];
     }
 
@@ -155,32 +198,28 @@ class SupportMail
      */
     protected function getPluginInfo()
     {
-        $plugin = $this->installerService->getPluginByName(WirecardShopwareElasticEngine::NAME);
-
-        $payments = $this->paymentFactory->getSupportedPayments();
-
+        $plugin         = $this->installerService->getPluginByName(WirecardShopwareElasticEngine::NAME);
+        $payments       = $this->paymentFactory->getSupportedPayments();
         $paymentConfigs = [];
 
-
         foreach ($payments as $payment) {
-            $paymentModel = $this->em->getRepository(\Shopware\Models\Payment\Payment::class)
-                          ->findOneBy(['name' => $payment->getName()]);
+            $paymentModel = $this->em->getRepository(Payment::class)
+                                     ->findOneBy(['name' => $payment->getName()]);
+
             if (! $paymentModel) {
                 continue;
             }
 
-            $paymentConfig = $payment->getPaymentConfig();
-
             $paymentConfigs[$payment->getName()] = array_merge(
-                [ 'active' => $paymentModel->getActive() ],
-                $paymentConfig->toArray()
+                ['active' => $paymentModel->getActive()],
+                $payment->getPaymentConfig()->toArray()
             );
         }
 
         return [
-            'name'    => WirecardShopwareElasticEngine::NAME,
-            'version' => $plugin->getVersion(),
-            'config'  => $paymentConfigs
+            'name'     => WirecardShopwareElasticEngine::NAME,
+            'version'  => $plugin->getVersion(),
+            'payments' => $paymentConfigs,
         ];
     }
 
@@ -189,13 +228,14 @@ class SupportMail
      */
     protected function getPluginList()
     {
-        $repository = $this->em->getRepository(\Shopware\Models\Plugin\Plugin::class);
-        $builder = $repository->createQueryBuilder('plugin');
-        $builder->andWhere('plugin.capabilityEnable = true');
-        $builder->addOrderBy('plugin.active', 'desc');
-        $builder->addOrderBy('plugin.name');
-
-        $plugins = $builder->getQuery()->execute();
+        /** @var EntityRepository $repository */
+        $repository = $this->em->getRepository(Plugin::class);
+        $plugins    = $repository->createQueryBuilder('plugin')
+                                 ->andWhere('plugin.capabilityEnable = true')
+                                 ->addOrderBy('plugin.active', 'desc')
+                                 ->addOrderBy('plugin.name')
+                                 ->getQuery()
+                                 ->execute();
 
         $rows = [];
 
@@ -203,11 +243,11 @@ class SupportMail
         foreach ($plugins as $plugin) {
             $rows[] = [
                 'name'      => $plugin->getName(),
-                'label'     =>$plugin->getLabel(),
-                'version'   =>$plugin->getVersion(),
-                'author'    =>$plugin->getAuthor(),
-                'active'    =>$plugin->getActive() ? 'Yes' : 'No',
-                'installed' =>$plugin->getInstalled() ? 'Yes' : 'No',
+                'label'     => $plugin->getLabel(),
+                'version'   => $plugin->getVersion(),
+                'author'    => $plugin->getAuthor(),
+                'active'    => $plugin->getActive() ? 'Yes' : 'No',
+                'installed' => $plugin->getInstalled() ? 'Yes' : 'No',
             ];
         }
 

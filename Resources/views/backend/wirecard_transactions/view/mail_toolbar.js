@@ -11,32 +11,26 @@ Ext.define('Shopware.apps.WirecardTransactions.view.MailToolbar', {
 
     initComponent: function() {
         var me = this;
-
         me.items = me.createItems();
         me.registerEvents();
-
         me.callParent(arguments);
     },
 
     registerEvents: function() {
         var me = this;
-
         me.addEvents('submitMail');
     },
 
     createItems: function() {
-        var me = this,
-            items = [];
-
-        items.push('->');
-        items.push(me.createSubmitButton());
-
-        return items;
+        var me = this;
+        return [
+            '->', // aligns the button to the right
+            me.createSubmitButton()
+        ];
     },
 
     createSubmitButton: function() {
         var me = this;
-
         return Ext.create('Shopware.apps.Base.view.element.Button', {
             text: 'Submit',
             cls: 'primary',
@@ -46,7 +40,6 @@ Ext.define('Shopware.apps.WirecardTransactions.view.MailToolbar', {
 
     onSubmitButtonClick: function() {
         var me = this;
-
         me.fireEvent('submitMail');
     }
 });

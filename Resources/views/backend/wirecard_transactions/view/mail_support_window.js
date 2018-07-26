@@ -10,26 +10,19 @@ Ext.define('Shopware.apps.WirecardTransactions.view.MailSupportWindow', {
 
     initComponent: function() {
         var me = this;
-
         me.dockedItems = [me.createToolbar()];
-
-        me.items = [me.createItems()];
-
+        me.items = [me.createForm()];
         me.callParent(arguments);
     },
 
     createToolbar: function() {
         var me = this;
-
         me.toolbar = Ext.create('Shopware.apps.WirecardTransactions.view.MailToolbar');
-
         return me.toolbar;
     },
 
-    createItems: function() {
-        var form = Ext.create('Shopware.apps.WirecardTransactions.view.MailSupportForm');
-
-        return form;
+    createForm: function() {
+        return Ext.create('Shopware.apps.WirecardTransactions.view.MailSupportForm');
     }
 });
 // {/block}
