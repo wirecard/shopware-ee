@@ -38,6 +38,14 @@ use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 
+/**
+ * The `OrderSummary` is passed to the `PaymentHandler` which processes the actual payment, based on the information
+ * stored in the summary (e.g. used payment method, consumer information, etc..).
+ *
+ * @package WirecardShopwareElasticEngine\Components\Data
+ *
+ * @since   1.0.0
+ */
 class OrderSummary
 {
     /**
@@ -71,14 +79,20 @@ class OrderSummary
     protected $deviceFingerprintId;
 
     /**
-     * OrderDetails constructor.
-     *
+     * @var array
+     */
+    protected $additionalPaymentData;
+
+    /**
      * @param string           $paymentUniqueId
      * @param PaymentInterface $payment
      * @param UserMapper       $userMapper
      * @param BasketMapper     $basketMapper
      * @param Amount           $amount
      * @param string           $deviceFingerprintId
+     * @param array            $additionalPaymentData
+     *
+     * @since 1.0.0
      */
     public function __construct(
         $paymentUniqueId,
@@ -86,18 +100,22 @@ class OrderSummary
         UserMapper $userMapper,
         BasketMapper $basketMapper,
         Amount $amount,
-        $deviceFingerprintId
+        $deviceFingerprintId,
+        $additionalPaymentData = []
     ) {
-        $this->paymentUniqueId     = $paymentUniqueId;
-        $this->payment             = $payment;
-        $this->userMapper          = $userMapper;
-        $this->amount              = $amount;
-        $this->basketMapper        = $basketMapper;
-        $this->deviceFingerprintId = $deviceFingerprintId;
+        $this->paymentUniqueId       = $paymentUniqueId;
+        $this->payment               = $payment;
+        $this->userMapper            = $userMapper;
+        $this->amount                = $amount;
+        $this->basketMapper          = $basketMapper;
+        $this->deviceFingerprintId   = $deviceFingerprintId;
+        $this->additionalPaymentData = $additionalPaymentData;
     }
 
     /**
      * @return PaymentInterface
+     *
+     * @since 1.0.0
      */
     public function getPayment()
     {
@@ -106,6 +124,8 @@ class OrderSummary
 
     /**
      * @return UserMapper
+     *
+     * @since 1.0.0
      */
     public function getUserMapper()
     {
@@ -114,6 +134,8 @@ class OrderSummary
 
     /**
      * @return BasketMapper
+     *
+     * @since 1.0.0
      */
     public function getBasketMapper()
     {
@@ -122,6 +144,8 @@ class OrderSummary
 
     /**
      * @return Amount
+     *
+     * @since 1.0.0
      */
     public function getAmount()
     {
@@ -130,6 +154,8 @@ class OrderSummary
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getPaymentUniqueId()
     {
@@ -138,6 +164,8 @@ class OrderSummary
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getDeviceFingerprintId()
     {
@@ -146,6 +174,8 @@ class OrderSummary
 
     /**
      * @return Device
+     *
+     * @since 1.0.0
      */
     public function getWirecardDevice()
     {
@@ -156,7 +186,17 @@ class OrderSummary
 
     /**
      * @return array
+     */
+    public function getAdditionalPaymentData()
+    {
+        return $this->additionalPaymentData;
+    }
+
+    /**
+     * @return array
      * @throws \WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function toArray()
     {

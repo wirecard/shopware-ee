@@ -61,7 +61,8 @@ class OrderSummaryTest extends TestCase
             $user,
             $basket,
             $amount,
-            'device-fingerprint'
+            'device-fingerprint',
+            ['foo' => 'bar']
         );
 
         $this->assertSame(20001, $order->getPaymentUniqueId());
@@ -73,6 +74,7 @@ class OrderSummaryTest extends TestCase
         $device = $order->getWirecardDevice();
         $this->assertInstanceOf(Device::class, $device);
         $this->assertEquals('device-fingerprint', $device->getFingerprint());
+        $this->assertEquals(['foo' => 'bar'], $order->getAdditionalPaymentData());
     }
 
     public function testToArray()
