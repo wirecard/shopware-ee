@@ -38,10 +38,16 @@ use Shopware\Models\Shop\Shop;
 use Shopware_Components_Config;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
-use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Exception\UnknownTransactionTypeException;
 use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
 
+/**
+ * Base class for payment implementations.
+ *
+ * @package WirecardShopwareElasticEngine\Components\Payments
+ *
+ * @since   1.0.0
+ */
 abstract class Payment implements PaymentInterface
 {
     const ACTION = 'WirecardElasticEnginePayment';
@@ -74,11 +80,6 @@ abstract class Payment implements PaymentInterface
     protected $router;
 
     /**
-     * @var array
-     */
-    protected $additionalData;
-
-    /**
      * @var \Enlight_Event_EventManager
      */
     protected $eventManager;
@@ -89,6 +90,8 @@ abstract class Payment implements PaymentInterface
      * @param InstallerService            $installerService
      * @param RouterInterface             $router
      * @param \Enlight_Event_EventManager $eventManager
+     *
+     * @since 1.0.0
      */
     public function __construct(
         EntityManagerInterface $em,
@@ -105,7 +108,7 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getLabel()
     {
@@ -113,7 +116,7 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getName()
     {
@@ -121,7 +124,7 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
-     * @return int
+     * {@inheritdoc}
      */
     public function getPosition()
     {
@@ -129,7 +132,7 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getPaymentOptions()
     {
@@ -144,8 +147,7 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
-     * @return string
-     * @throws UnknownTransactionTypeException
+     * {@inheritdoc}
      */
     public function getTransactionType()
     {
@@ -160,7 +162,7 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag, $selectedCurrency)
     {
@@ -183,7 +185,7 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getBackendTransaction($operation, $paymentMethod)
     {
@@ -191,36 +193,12 @@ abstract class Payment implements PaymentInterface
     }
 
     /**
-     * @inheritdoc
-     */
-    public function getAdditionalFormFields()
-    {
-        return null;
-    }
-
-    /**
-     * @param array $additionalData
-     */
-    public function setAdditionalPaymentData(array $additionalData)
-    {
-        $this->additionalData = $additionalData;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function processReturn(
-        TransactionService $transactionService,
-        \Enlight_Controller_Request_Request $request
-    ) {
-        return null;
-    }
-
-    /**
      * @param string $name
      * @param string $prefix
      *
      * @return string
+     *
+     * @since 1.0.0
      */
     protected function getPluginConfig($name, $prefix = 'wirecardElasticEngine')
     {

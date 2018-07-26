@@ -45,11 +45,23 @@ use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
 use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
 use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
+use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
 
+/**
+ * Responsible for handling the payment. Payments may implement their own way of handling payments by implementing
+ * the `ProcessPaymentInterface` interface.
+ * Ultimately a proper `Action` is returned to the controller.
+ *
+ * @package WirecardShopwareElasticEngine\Components\Services
+ *
+ * @since   1.0.0
+ */
 class PaymentHandler extends Handler
 {
     /**
+     * Executes the payment process.
+     *
      * @param OrderSummary                        $orderSummary
      * @param TransactionService                  $transactionService
      * @param Redirect                            $redirect
@@ -59,6 +71,8 @@ class PaymentHandler extends Handler
      *
      * @return Action
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function execute(
         OrderSummary $orderSummary,
@@ -73,17 +87,19 @@ class PaymentHandler extends Handler
         $payment = $orderSummary->getPayment();
 
         try {
-            $action = $payment->processPayment(
-                $orderSummary,
-                $transactionService,
-                $this->em->getRepository(Shop::class)->getActiveDefault(),
-                $redirect,
-                $request,
-                $shopwareOrder
-            );
+            if ($payment instanceof ProcessPaymentInterface) {
+                $action = $payment->processPayment(
+                    $orderSummary,
+                    $transactionService,
+                    $this->em->getRepository(Shop::class)->getActiveDefault(),
+                    $redirect,
+                    $request,
+                    $shopwareOrder
+                );
 
-            if ($action !== null) {
-                return $action;
+                if ($action) {
+                    return $action;
+                }
             }
 
             $response = $transactionService->process(
@@ -122,12 +138,16 @@ class PaymentHandler extends Handler
     /**
      * Prepares the transaction for being sent to Wirecard by adding specific (e.g. amount) and optional (e.g. fraud
      * prevention data) data to the `Transaction` object of the payment.
+     * Keep in mind that the transaction returned by the payment is ALWAYS the same instance, hence we don't need to
+     * return the transaction here.
      *
      * @param OrderSummary $orderSummary
      * @param Redirect     $redirect
      * @param string       $notificationUrl
      *
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     private function prepareTransaction(OrderSummary $orderSummary, Redirect $redirect, $notificationUrl)
     {
@@ -168,6 +188,8 @@ class PaymentHandler extends Handler
      * @param $orderNumber
      *
      * @return string
+     *
+     * @since 1.0.0
      */
     protected function getDescriptor($orderNumber)
     {

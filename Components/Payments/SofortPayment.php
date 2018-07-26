@@ -42,8 +42,14 @@ use Wirecard\PaymentSdk\Transaction\SofortTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\SofortPaymentConfig;
+use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 
-class SofortPayment extends Payment
+/**
+ * @package WirecardShopwareElasticEngine\Components\Payments
+ *
+ * @since   1.0.0
+ */
+class SofortPayment extends Payment implements ProcessPaymentInterface
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_sofort';
 
@@ -53,7 +59,7 @@ class SofortPayment extends Payment
     private $transactionInstance;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getLabel()
     {
@@ -61,7 +67,7 @@ class SofortPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getName()
     {
@@ -69,7 +75,7 @@ class SofortPayment extends Payment
     }
 
     /**
-     * @return int
+     * {@inheritdoc}
      */
     public function getPosition()
     {
@@ -77,7 +83,7 @@ class SofortPayment extends Payment
     }
 
     /**
-     * @return SofortTransaction
+     * {@inheritdoc}
      */
     public function getTransaction()
     {
@@ -95,6 +101,8 @@ class SofortPayment extends Payment
      * @param string|null $paymentMethod
      *
      * @return SofortTransaction|SepaCreditTransferTransaction
+     *
+     * @since 1.0.0
      */
     public function getBackendTransaction($operation, $paymentMethod)
     {
@@ -108,7 +116,7 @@ class SofortPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag, $selectedCurrency)
     {
@@ -131,7 +139,7 @@ class SofortPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getPaymentConfig()
     {
@@ -155,7 +163,7 @@ class SofortPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function processPayment(
         OrderSummary $orderSummary,
