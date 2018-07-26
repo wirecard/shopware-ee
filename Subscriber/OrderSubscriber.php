@@ -48,6 +48,10 @@ class OrderSubscriber implements SubscriberInterface
 
     public function onOrderShouldSendMail(\Enlight_Event_EventArgs $args)
     {
+        if (getenv('SHOPWARE_ENV') === 'testing') {
+            // Disable confirmation mail in testing environment
+            return false;
+        }
         if (isset($args['variables']['additional']['payment']['action'])
             && $args['variables']['additional']['payment']['action'] === Payment::ACTION
         ) {

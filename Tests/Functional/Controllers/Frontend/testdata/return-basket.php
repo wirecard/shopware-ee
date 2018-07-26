@@ -1,6 +1,7 @@
 <?php
 
 use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
+use WirecardShopwareElasticEngine\Components\Payments\Payment;
 
 return [
     'sBasket'   => [
@@ -30,7 +31,8 @@ return [
                 'email'     => 'test@example.com',
             ],
             'payment' => [
-                'name' => CreditCardPayment::PAYMETHOD_IDENTIFIER,
+                'action' => Payment::ACTION,
+                'name'   => CreditCardPayment::PAYMETHOD_IDENTIFIER,
             ],
         ],
         'billingaddress'  => ['userID' => 1, 'countryID' => 1],

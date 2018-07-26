@@ -1,5 +1,6 @@
 <?php
 
+use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 
 return [
@@ -40,7 +41,8 @@ return [
                 'email'     => 'test@example.com',
             ],
             'payment' => [
-                'name' => PaypalPayment::PAYMETHOD_IDENTIFIER,
+                'action' => Payment::ACTION,
+                'name'   => PaypalPayment::PAYMETHOD_IDENTIFIER,
             ],
         ],
         'billingaddress'  => ['userID' => 1, 'countryID' => 1],
