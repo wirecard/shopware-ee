@@ -39,6 +39,7 @@ describe('default test', () => {
     const driver = new Builder()
         .forBrowser('chrome')
         .build();
+    driver.manage().deleteAllCookies();
 
     const wirecardPaymentLabels = [
         'Wirecard Credit Card',

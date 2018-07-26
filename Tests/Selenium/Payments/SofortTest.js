@@ -39,6 +39,7 @@ describe('Sofort. test', () => {
     const driver = new Builder()
         .forBrowser('chrome')
         .build();
+    driver.manage().deleteAllCookies();
 
     const paymentLabel = config.payments.sofort.label;
     const formFields = config.payments.sofort.fields;

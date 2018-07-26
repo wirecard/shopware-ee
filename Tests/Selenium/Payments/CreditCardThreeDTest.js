@@ -39,6 +39,7 @@ describe('Credit Card 3-D Secure test', () => {
     const driver = new Builder()
         .forBrowser('chrome')
         .build();
+    driver.manage().deleteAllCookies();
 
     const paymentLabel = config.payments.creditCardThreeD.label;
     const formFields = config.payments.creditCardThreeD.fields;
