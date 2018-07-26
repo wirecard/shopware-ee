@@ -10,14 +10,16 @@
             {include file='frontend/_includes/messages.tpl' type='error' content="error"}
         </div>
         {if $threeDSecure}
-            <div class="content content--checkout">
-                <h2>{s name="CreditCard3DSTitle" namespace="frontend/wirecard_elastic_engine/checkout"}{/s}</h2>
+            <div class="content content--checkout confirm--content">
+                <h2>{s name="CreditCard3DSRedirectTitle" namespace="frontend/wirecard_elastic_engine/checkout"}{/s}</h2>
                 <form id="wirecardee-credit-card--redirect-form" method="{$method}" action="{$url}">
                     {foreach from=$formFields item='field' key='key'}
                         <input type="hidden" name="{$key}" value="{$field}"/>
                     {/foreach}
-                    <button class="btn is--primary is--large right" type="submit">
+                    <button class="btn is--primary is--large right is--icon-right" type="submit">
                         {s name="CreditCardSendButtonLabel" namespace="frontend/wirecard_elastic_engine/checkout"}Send{/s}
+                        {* loading spinner icon *}
+                        <i class="js--loading"></i>
                     </button>
                 </form>
                 <script type="text/javascript">
@@ -88,6 +90,7 @@
                     if (!document.getElementById('jsresponse')) {
                         // If not, we will prevent the submission of the form and submit the credit card UI form instead
                         event.preventDefault();
+                        // disable submit button and replace icon with loading spinner
                         $formSubmit.prop('disabled', true);
                         $formSubmitIcon.attr('class', 'js--loading');
                         WirecardPaymentPage.seamlessSubmitForm({
