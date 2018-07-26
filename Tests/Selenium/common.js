@@ -47,8 +47,12 @@ exports.loginWithExampleAccount = async function (driver) {
         await driver.wait(until.elementLocated(By.className('account--welcome')), 5000);
         console.log('login successful');
     } catch (e) {
-        console.log('login failed, retrying...');
-        console.log(`get ${config.url}/account/login`);
+        console.log('login failed, current url: ' + await driver.getCurrentUrl());
+        console.log('--- HTML ---');
+        console.log(await driver.findElement(By.css('body')).getAttribute('outerHTML'));
+        console.log('--- HTML ---');
+        driver.manage().deleteAllCookies();
+        console.log(`retry: get ${config.url}/account/login`);
         await driver.get(`${config.url}/account/login`);
         console.log('wait for [email]');
         await driver.wait(until.elementLocated(By.name('email')), 5000);
