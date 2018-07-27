@@ -31,7 +31,7 @@ env:
     - secure: ${SONAR_TOKEN}
     - COMPOSER_ARGS="--no-interaction"
     - PLUGIN_NAME=WirecardShopwareElasticEngine
-    - SHOPWARE_ENV=development
+#    - SHOPWARE_ENV=testing
     - SHOPWARE_DIRECTORY=${HOME}/shopware
     - WEBSERVER_PORT=8000
     - github_token:
@@ -55,10 +55,10 @@ before_script:
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:cache:clear
   - rm -rf ${SHOPWARE_DIRECTORY}/var/cache
   - cd ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
-  - php -S localhost:${WEBSERVER_PORT} server.php &
+  - SHOPWARE_ENV=development php -S localhost:${WEBSERVER_PORT} server.php &
 
 script:
-  - composer test-coverage
+#  - composer test-coverage
 #  - sonar-scanner
 #  - composer cs-check
 #  - npm run lint
