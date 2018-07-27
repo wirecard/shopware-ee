@@ -55,6 +55,8 @@
             <argument type="service" id="pluginlogger"/>
             <argument type="service" id="config"/>
             <argument type="service" id="wirecard_elastic_engine.transaction_manager"/>
+            <argument type="service" id="mail"/>
+            <argument type="service" id="snippets"/>
         </service>
         <service id="wirecard_elastic_engine.notification_handler"
                  class="WirecardShopwareElasticEngine\Components\Services\NotificationHandler"

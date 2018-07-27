@@ -71,11 +71,23 @@ abstract class Handler
     protected $transactionManager;
 
     /**
-     * @param EntityManagerInterface      $em
-     * @param RouterInterface             $router
-     * @param LoggerInterface             $logger
-     * @param \Shopware_Components_Config $config
-     * @param TransactionManager          $transactionManager
+     * @var \Enlight_Components_Mail
+     */
+    protected $mail;
+
+    /**
+     * @var \Shopware_Components_Snippet_Manager
+     */
+    protected $snippetManager;
+
+    /**
+     * @param EntityManagerInterface               $em
+     * @param RouterInterface                      $router
+     * @param LoggerInterface                      $logger
+     * @param \Shopware_Components_Config          $config
+     * @param TransactionManager                   $transactionManager
+     * @param \Enlight_Components_Mail             $mail
+     * @param \Shopware_Components_Snippet_Manager $snippetManager
      *
      * @since 1.0.0
      */
@@ -84,12 +96,16 @@ abstract class Handler
         RouterInterface $router,
         LoggerInterface $logger,
         \Shopware_Components_Config $config,
-        TransactionManager $transactionManager
+        TransactionManager $transactionManager,
+        \Enlight_Components_Mail $mail,
+        \Shopware_Components_Snippet_Manager $snippetManager
     ) {
         $this->em                 = $em;
         $this->router             = $router;
         $this->logger             = $logger;
         $this->shopwareConfig     = $config;
         $this->transactionManager = $transactionManager;
+        $this->mail               = $mail;
+        $this->snippetManager     = $snippetManager;
     }
 }
