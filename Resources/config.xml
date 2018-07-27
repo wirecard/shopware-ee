@@ -34,8 +34,8 @@
         <!-- General -->
         <element type="button" scope="shop">
             <name>wirecardElasticEngineGeneralInformation</name>
-            <label lang="de">Allgemeine Informationen betreffend des Wirecard Shop Plugins</label>
-            <label lang="en">General Information regarding Wirecard Shop Plugins</label>
+            <label lang="de">Allgemeine Informationen zum Wirecard Shop Plugin</label>
+            <label lang="en">Wirecard Shop Plugin General Information</label>
             <options>
                 <handler>
                     <![CDATA[
@@ -111,12 +111,10 @@ function (button) {
             <label lang="en">[Credit Card] 3-D Secure Merchant Account ID</label>
             <value>508b8896-b37d-4614-845c-26bf8bf2c948</value>
             <description lang="de">
-                Geben Sie Ihren 3D Händler Bezeichner an.
-                Tragen Sie "null" ein, um 3-D Secure zu deaktivieren.
+                Geben Sie Ihren 3D Händler Bezeichner an. Tragen Sie "null" ein, um 3-D Secure zu deaktivieren.
             </description>
             <description lang="en">
-                Unique identifier assigned to your 3-D Secure merchant account.
-                Enter "null" to disable 3-D Secure.
+                Unique identifier assigned to your 3-D Secure merchant account. Enter "null" to disable 3-D Secure.
             </description>
         </element>
         <element type="text" scope="shop">
@@ -124,11 +122,11 @@ function (button) {
             <label lang="de">[Kreditkarte] 3-D Secure Geheimschlüssel</label>
             <label lang="en">[Credit Card] 3-D Secure Secret Key</label>
             <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
-            <description lang="de">Der Geheimschlüssel wird benötigt um die Digitale Signatur für diese 3D Zahlung zu
-                berechnen.
+            <description lang="de">
+                Der Geheimschlüssel wird benötigt um die Digitale Signatur für diese 3D Zahlung zu berechnen.
             </description>
-            <description lang="en">Secret Key is mandatory to calculate the Digital Signature for the 3-D Secure
-                payment.
+            <description lang="en">
+                Secret Key is mandatory to calculate the Digital Signature for the 3-D Secure payment.
             </description>
         </element>
         <element type="select" scope="shop">
@@ -136,10 +134,12 @@ function (button) {
             <label lang="de">[Kreditkarte] Zahlungsaktion</label>
             <label lang="en">[Credit Card] Payment Action</label>
             <value>pay</value>
-            <description lang="de">Wählen Sie zwischen "Purchase" um automatisch eine Buchung durchzuführen oder
+            <description lang="de">
+                Wählen Sie zwischen "Purchase" um automatisch eine Buchung durchzuführen oder
                 "Authorization" um eine manuelle Buchung zu ermöglichen.
             </description>
-            <description lang="en">Select between "Purchase" to capture/invoice your order automatically or
+            <description lang="en">
+                Select between "Purchase" to capture/invoice your order automatically or
                 "Authorization" to capture/invoice manually.
             </description>
             <store>
@@ -280,10 +280,11 @@ function (button) {
             <label lang="de">[PayPal] Geheimschlüssel</label>
             <label lang="en">[PayPal] Secret Key</label>
             <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
-            <description lang="de">Der Geheimschlüssel wird benötigt, um die Digitale Signatur für Zahlungen zu
-                berechnen.
+            <description lang="de">
+                Der Geheimschlüssel wird benötigt, um die Digitale Signatur für Zahlungen zu berechnen.
             </description>
-            <description lang="en">Secret Key is mandatory to calculate the Digital Signature for payments.
+            <description lang="en">
+                Secret Key is mandatory to calculate the Digital Signature for payments.
             </description>
         </element>
         <element type="select" scope="shop">
@@ -291,10 +292,12 @@ function (button) {
             <label lang="de">[PayPal] Zahlungsaktion</label>
             <label lang="en">[PayPal] Payment Action</label>
             <value>pay</value>
-            <description lang="de">Wählen Sie zwischen "Purchase" um automatisch eine Buchung durchzuführen oder
+            <description lang="de">
+                Wählen Sie zwischen "Purchase" um automatisch eine Buchung durchzuführen oder
                 "Authorization" um eine manuelle Buchung zu ermöglichen.
             </description>
-            <description lang="en">Select between "Purchase" to capture/invoice your order automatically or
+            <description lang="en">
+                Select between "Purchase" to capture/invoice your order automatically or
                 "Authorization" to capture/invoice manually.
             </description>
             <store>
@@ -323,10 +326,12 @@ function (button) {
             <label lang="de">[PayPal] Zusätzliche Informationen mitsenden</label>
             <label lang="en">[PayPal] Send additional information</label>
             <value>true</value>
-            <description lang="de">Zusätzliche Informationen werden für Betrugsschutz gesendet. In diesen Daten sind
+            <description lang="de">
+                Zusätzliche Informationen werden für Betrugsschutz gesendet. In diesen Daten sind
                 Rechnungs- / Lieferadresse, Warenkorb und Deskriptor inkludiert.
             </description>
-            <description lang="en">Additional data will be sent for the purpose of fraud protection. This additional
+            <description lang="en">
+                Additional data will be sent for the purpose of fraud protection. This additional
                 data includes billing/shipping address, shopping basket and descriptor.
             </description>
         </element>
@@ -335,11 +340,13 @@ function (button) {
             <label lang="de">[PayPal] Deskriptor</label>
             <label lang="en">[PayPal] Descriptor</label>
             <value>true</value>
-            <description lang="de">Aktivieren Sie den Deskriptor, um bei jeder Transaktion eine Referenz zur jeweiligen
+            <description lang="de">
+                Aktivieren Sie den Deskriptor, um bei jeder Transaktion eine Referenz zur jeweiligen
                 Bestellung mitzuschicken. Diese Referenz wird im Buchungstext angezeigt, der dem Endkunden vom
                 Finanzdienstleister übermittelt wird.
             </description>
-            <description lang="en">Send text which is displayed on the bank statement issued to your consumer by the
+            <description lang="en">
+                Send text which is displayed on the bank statement issued to your consumer by the
                 financial service provider.
             </description>
         </element>
@@ -396,10 +403,11 @@ function (button) {
             <label lang="de">[SEPA-Lastschrift] Geheimschlüssel</label>
             <label lang="en">[SEPA Direct Debit] Secret Key</label>
             <value>ecdf5990-0372-47cd-a55d-037dccfe9d25</value>
-            <description lang="de">Der Geheimschlüssel wird benötigt, um die Digitale Signatur für Zahlungen zu
-                berechnen.
+            <description lang="de">
+                Der Geheimschlüssel wird benötigt, um die Digitale Signatur für Zahlungen zu berechnen.
             </description>
-            <description lang="en">Secret Key is mandatory to calculate the Digital Signature for payments.
+            <description lang="en">
+                Secret Key is mandatory to calculate the Digital Signature for payments.
             </description>
         </element>
         <element type="select" scope="shop">
@@ -407,10 +415,12 @@ function (button) {
             <label lang="de">[SEPA-Lastschrift] Zahlungsaktion</label>
             <label lang="en">[SEPA Direct Debit] Payment Action</label>
             <value>pay</value>
-            <description lang="de">Wählen Sie zwischen "Purchase" um automatisch eine Buchung durchzuführen oder
+            <description lang="de">
+                Wählen Sie zwischen "Purchase" um automatisch eine Buchung durchzuführen oder
                 "Authorization" um eine manuelle Buchung zu ermöglichen.
             </description>
-            <description lang="en">Select between "Purchase" to capture/invoice your order automatically or
+            <description lang="en">
+                Select between "Purchase" to capture/invoice your order automatically or
                 "Authorization" to capture/invoice manually.
             </description>
             <store>
@@ -431,30 +441,34 @@ function (button) {
             <label lang="de">[SEPA-Lastschrift] Zusätzliche Informationen mitsenden</label>
             <label lang="en">[SEPA Direct Debit] Send additional information</label>
             <value>true</value>
-            <description lang="de">Zusätzliche Informationen werden für Betrugsschutz gesendet. In diesen Daten sind
+            <description lang="de">
+                Zusätzliche Informationen werden für Betrugsschutz gesendet. In diesen Daten sind
                 Rechnungs- / Lieferadresse, Warenkorb und Deskriptor inkludiert.
             </description>
-            <description lang="en">Additional data will be sent for the purpose of fraud protection. This additional
+            <description lang="en">
+                Additional data will be sent for the purpose of fraud protection. This additional
                 data includes billing/shipping address, shopping basket and descriptor.
             </description>
         </element>
         <element type="boolean" scope="shop">
             <name>wirecardElasticEngineSepaShowBic</name>
-            <label lang="de">[SEPA-Lastschrift] BIC anzeigen</label>
-            <label lang="en">[SEPA Direct Debit] Show BIC</label>
+            <label lang="de">[SEPA-Lastschrift] BIC aktivieren</label>
+            <label lang="en">[SEPA Direct Debit] BIC enabled</label>
             <value>false</value>
-            <description lang="de">BIC Eingabefeld anzeigen</description>
-            <description lang="en">Show BIC input field on checkout page</description>
+            <description lang="de">Wenn BIC aktivierst ist, wird das BIC Eingabefeld angezeigt.</description>
+            <description lang="en">If BIC is activated, the consumer must enter a BIC in checkout.</description>
         </element>
         <element required="true" type="text" scope="shop">
             <name>wirecardElasticEngineSepaCreditorId</name>
             <label lang="de">[SEPA-Lastschrift] Creditor ID</label>
             <label lang="en">[SEPA Direct Debit] Creditor ID</label>
             <value>DE98ZZZ09999999999</value>
-            <description lang="de">Die Creditor ID wird benötigt, um das SEPA-Lastschrift-Mandat zu erstellen. Die
+            <description lang="de">
+                Die Creditor ID wird benötigt, um das SEPA-Lastschrift-Mandat zu erstellen. Die
                 Creditor ID muss beim zuständigen Bankinstitut angefordert werden.
             </description>
-            <description lang="en">SEPA requires Creditor ID to create SEPA Direct Debit Mandate. To get a Creditor ID
+            <description lang="en">
+                SEPA requires Creditor ID to create SEPA Direct Debit Mandate. To get a Creditor ID
                 apply at the responsible bank institute.
             </description>
         </element>
@@ -463,10 +477,11 @@ function (button) {
             <label lang="de">[SEPA-Lastschrift] Creditor Name</label>
             <label lang="en">[SEPA Direct Debit] Creditor Name</label>
             <value></value>
-            <description lang="de">Für das SEPA-Lastschrift-Mandat wird der Name des Zahlungsempfängers (Creditor)
-                benötigt.
+            <description lang="de">
+                Für das SEPA-Lastschrift-Mandat wird der Name des Zahlungsempfängers (Creditor) benötigt.
             </description>
-            <description lang="en">SEPA requires a Creditor Name for display on the SEPA Direct Debit Mandate page.
+            <description lang="en">
+                SEPA requires a Creditor Name for display on the SEPA Direct Debit Mandate page.
             </description>
         </element>
         <element type="text" scope="shop">
@@ -509,10 +524,11 @@ function (button) {
             <label lang="de">[SEPA Credit Transfer] Geheimschlüssel</label>
             <label lang="en">[SEPA Credit Transfer] Secret Key</label>
             <value>ecdf5990-0372-47cd-a55d-037dccfe9d25</value>
-            <description lang="de">Der Geheimschlüssel wird benötigt, um die Digitale Signatur für Zahlungen zu
-                berechnen.
+            <description lang="de">
+                Der Geheimschlüssel wird benötigt, um die Digitale Signatur für Zahlungen zu berechnen.
             </description>
-            <description lang="en">Secret Key is mandatory to calculate the Digital Signature for payments.
+            <description lang="en">
+                Secret Key is mandatory to calculate the Digital Signature for payments.
             </description>
         </element>
         <element required="true" type="text" scope="shop">
@@ -520,10 +536,12 @@ function (button) {
             <label lang="de">[SEPA Credit Transfer] Creditor ID</label>
             <label lang="en">[SEPA Credit Transfer] Creditor ID</label>
             <value>DE98ZZZ09999999999</value>
-            <description lang="de">Die Creditor ID wird benötigt, um das SEPA-Lastschrift-Mandat zu erstellen. Die
+            <description lang="de">
+                Die Creditor ID wird benötigt, um das SEPA-Lastschrift-Mandat zu erstellen. Die
                 Creditor ID muss beim zuständigen Bankinstitut angefordert werden.
             </description>
-            <description lang="en">SEPA requires Creditor ID to create SEPA Direct Debit Mandate. To get a Creditor ID
+            <description lang="en">
+                SEPA requires Creditor ID to create SEPA Direct Debit Mandate. To get a Creditor ID
                 apply at the responsible bank institute.
             </description>
         </element>
@@ -566,10 +584,11 @@ function (button) {
             <label lang="de">[Sofort.] Geheimschlüssel</label>
             <label lang="en">[Sofort.] Secret Key</label>
             <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
-            <description lang="de">Der Geheimschlüssel wird benötigt, um die Digitale Signatur für Zahlungen zu
-                berechnen.
+            <description lang="de">
+                Der Geheimschlüssel wird benötigt, um die Digitale Signatur für Zahlungen zu berechnen.
             </description>
-            <description lang="en">Secret Key is mandatory to calculate the Digital Signature for payments.
+            <description lang="en">
+                Secret Key is mandatory to calculate the Digital Signature for payments.
             </description>
         </element>
         <element type="boolean" scope="shop">
@@ -577,10 +596,12 @@ function (button) {
             <label lang="de">[Sofort.] Zusätzliche Informationen mitsenden</label>
             <label lang="en">[Sofort.] Send additional information</label>
             <value>true</value>
-            <description lang="de">Zusätzliche Informationen werden für Betrugsschutz gesendet. In diesen Daten sind
+            <description lang="de">
+                Zusätzliche Informationen werden für Betrugsschutz gesendet. In diesen Daten sind
                 Rechnungs- / Lieferadresse, Warenkorb und Deskriptor inkludiert.
             </description>
-            <description lang="en">Additional data will be sent for the purpose of fraud protection. This additional
+            <description lang="en">
+                Additional data will be sent for the purpose of fraud protection. This additional
                 data includes billing/shipping address, shopping basket and descriptor.
             </description>
         </element>
