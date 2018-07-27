@@ -40,7 +40,17 @@ const {
 
 describe('default test', () => {
     const driver = new Builder()
-        .forBrowser('chrome')
+        .usingServer('http://hub-cloud.browserstack.com/wd/hub')
+        .withCapabilities({
+            'browserName': 'Chrome',
+            'browser_version': '62.0',
+            'os': 'Windows',
+            'os_version': '10',
+            'resolution': '1920x1080',
+            'browserstack.user': process.env.TEST_BS_USER,
+            'browserstack.key': process.env.TEST_BS_KEY,
+            'browserstack.local': 'true'
+        })
         .build();
     driver.manage().deleteAllCookies();
 
