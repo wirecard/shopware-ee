@@ -46,6 +46,8 @@ use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
  */
 class SupportMailer
 {
+    const SUPPORT_MAIL = 'shop-systems-support@wirecard.com';
+
     /**
      * @var EntityManagerInterface
      */
@@ -135,11 +137,10 @@ class SupportMailer
     private function getRecipientMail()
     {
         if (in_array(getenv('SHOPWARE_ENV'), ['dev', 'development', 'testing', 'test'])) {
-//            return 'test@example.com';
-            return 'kh@loremipsum.at';
+            return 'test@example.com';
         }
 
-        return 'shop-systems-support@wirecard.com';
+        return self::SUPPORT_MAIL;
     }
 
     /**
