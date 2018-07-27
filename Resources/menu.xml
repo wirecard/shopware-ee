@@ -60,10 +60,10 @@
                     </onclick>
                 </entry>
                 <entry>
-                    <name>WirecardEmailSupport</name>
+                    <name>WirecardElasticEngineEmailSupport</name>
                     <label lang="en">Mail support</label>
                     <label lang="de">E-Mail Support</label>
-                    <controller>WirecardTransactions</controller>
+                    <controller>WirecardElasticEngineTransactions</controller>
                     <action>mailSupport</action>
                     <class>sprite-wirecard</class>
                 </entry>
