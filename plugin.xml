@@ -33,9 +33,9 @@
     <label>Wirecard</label>
 
     <version>0.5.0</version>
-    <compatibility minVersion="5.3.0" />
+    <compatibility minVersion="5.4.0" />
 
-    <author>Wirecard</author>
-    <link>https://www.wirecard.at/</link>
+    <author>Wirecard AG</author>
+    <link>https://www.wirecard.com/</link>
     <license>GPL-3.0</license>
 </plugin>
