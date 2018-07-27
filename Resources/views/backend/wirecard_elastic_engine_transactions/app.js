@@ -40,7 +40,10 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions', {
     ],
     views: [
         'Window',
-        'Grid'
+        'Grid',
+        'MailSupportWindow',
+        'MailToolbar',
+        'MailSupportForm'
     ],
     models: [
         'Transaction'
