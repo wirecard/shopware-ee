@@ -123,10 +123,7 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
 
         $transactions = $this->getModelManager()
                              ->getRepository(Transaction::class)
-                             ->findBy([
-                                 'orderNumber' => $orderNumber,
-                             ]);
-
+                             ->findBy(['orderNumber' => $orderNumber]);
         if (! $transactions) {
             return $this->handleError('No transactions found');
         }
@@ -142,6 +139,7 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
             'transactions' => [],
         ];
 
+        $transactions = $this->addTransactionsByPaymentUniqueId($transactions);
         foreach ($transactions as $transaction) {
             /** @var Transaction $transaction */
             $paymentTransaction = $payment->getBackendTransaction(
@@ -160,6 +158,39 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
         return $this->handleSuccess([
             'data' => $result,
         ]);
+    }
+
+    /**
+     * Add transactions via paymentUniqueId that have no orderNumber yet.
+     *
+     * @param Transaction[] $transactions
+     *
+     * @return array|Transaction[]
+     * @throws Exception
+     *
+     * @since 1.0.0
+     */
+    private function addTransactionsByPaymentUniqueId($transactions)
+    {
+        foreach ($transactions as $transaction) {
+            $paymentUniqueId = $transaction->getPaymentUniqueId();
+            if (! $paymentUniqueId) {
+                continue;
+            }
+            $addTransactions = $this->getModelManager()
+                                    ->getRepository(Transaction::class)
+                                    ->findBy(['orderNumber' => null, 'paymentUniqueId' => $paymentUniqueId]);
+            foreach ($addTransactions as $addTransaction) {
+                $addTransaction->setOrderNumber($transaction->getOrderNumber());
+                $this->getModelManager()->flush($addTransaction);
+                $transactions[] = $addTransaction;
+            }
+            break;
+        }
+        usort($transactions, function (Transaction $a, Transaction $b) {
+            return $a->getId() - $b->getId();
+        });
+        return $transactions;
     }
 
     /**
