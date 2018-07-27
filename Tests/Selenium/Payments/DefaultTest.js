@@ -49,7 +49,8 @@ describe('default test', () => {
             'resolution': '1920x1080',
             'browserstack.user': process.env.TEST_BS_USER,
             'browserstack.key': process.env.TEST_BS_KEY,
-            'browserstack.local': 'true'
+            'browserstack.local': 'true',
+            'browserstack.localIdentifier': `foobar_${Math.round(Math.random() * 100)}_${Date.now()}`
         })
         .build();
     driver.manage().deleteAllCookies();
