@@ -28,57 +28,49 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-// {block name="backend/wirecard_elastic_engine_extend_order/view/general_information_window"}
-// {namespace name="backend/wirecard_elastic_engine/general_information"}
-Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.GeneralInformationWindow', {
-    extend: 'Enlight.app.Window',
-    alias: 'widget.wirecardee-extend-order-general-information-window',
-    height: 600,
-    title: '{s name="Title"}{/s}',
-    layout: 'anchor',
-    bodyPadding: 10,
-    autoScroll: true,
+// {block name="backend/wireacard_transactions/view/mail_toolbar"}
+Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.MailToolbar', {
+    extend: 'Ext.toolbar.Toolbar',
+    alias: 'widget.wirecardee-transactions-mail-toolbar',
 
-    style: {
-        background: '#EBEDEF'
-    },
+    ui: 'shopware-ui',
 
-    snippets: {
-        GeneralInformation: '{"{s name="Content"}{/s}"|escape|replace:"\n":"<br>"}'
-    },
+    padding: '10 0 5',
+    width: '100%',
+    dock: 'bottom',
 
-    initComponent: function () {
+    initComponent: function() {
         var me = this;
-
         me.items = me.createItems();
-
+        me.registerEvents();
         me.callParent(arguments);
     },
 
-    /**
-     * Returns an array containing the general information template.
-     * @returns { *[] }
-     */
-    createItems: function () {
+    registerEvents: function() {
         var me = this;
-
-        return [{
-            xtype: 'container',
-            renderTpl: me.createGeneralInformationTemplate(),
-            renderData: me.snippets
-        }];
+        me.addEvents('submitMail');
     },
 
-    /**
-     * Creates the general information template.
-     * @returns { Ext.XTemplate }
-     */
-    createGeneralInformationTemplate: function () {
-        return Ext.create('Ext.XTemplate',
-            '{literal}<tpl for=".">',
-            '<p>{GeneralInformation}</p>',
-            '</tpl>{/literal}'
-        );
+    createItems: function() {
+        var me = this;
+        return [
+            '->', // aligns the button to the right
+            me.createSubmitButton()
+        ];
+    },
+
+    createSubmitButton: function() {
+        var me = this;
+        return Ext.create('Shopware.apps.Base.view.element.Button', {
+            text: 'Submit',
+            cls: 'primary',
+            handler: Ext.bind(me.onSubmitButtonClick, me)
+        });
+    },
+
+    onSubmitButtonClick: function() {
+        var me = this;
+        me.fireEvent('submitMail');
     }
 });
 // {/block}

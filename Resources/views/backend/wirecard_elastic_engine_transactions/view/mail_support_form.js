@@ -28,57 +28,59 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-// {block name="backend/wirecard_elastic_engine_extend_order/view/general_information_window"}
-// {namespace name="backend/wirecard_elastic_engine/general_information"}
-Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.GeneralInformationWindow', {
-    extend: 'Enlight.app.Window',
-    alias: 'widget.wirecardee-extend-order-general-information-window',
-    height: 600,
-    title: '{s name="Title"}{/s}',
-    layout: 'anchor',
+// {namespace name="backend/wirecard_elastic_engine/support_mail"}
+// {block name="backend/wireacard_transactions/view/mail_support_form"}
+Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.MailSupportForm', {
+    extend: 'Ext.form.Panel',
+    alias: 'widget.wirecardee-transactions-mail-support-form',
+    title: '{s name="FormTitle"}{/s}',
+
+    anchor: '100%',
+    border: false,
     bodyPadding: 10,
-    autoScroll: true,
 
     style: {
         background: '#EBEDEF'
     },
 
-    snippets: {
-        GeneralInformation: '{"{s name="Content"}{/s}"|escape|replace:"\n":"<br>"}'
+    fieldDefaults: {
+        anchor: '100%',
+        labelWidth: 180
     },
 
-    initComponent: function () {
+    initComponent: function() {
         var me = this;
-
         me.items = me.createItems();
-
         me.callParent(arguments);
     },
 
     /**
-     * Returns an array containing the general information template.
+     * Returns fields for the support mail form.
      * @returns { *[] }
      */
-    createItems: function () {
-        var me = this;
-
+    createItems: function() {
         return [{
-            xtype: 'container',
-            renderTpl: me.createGeneralInformationTemplate(),
-            renderData: me.snippets
+            xtype: 'textfield',
+            name: 'address',
+            fieldLabel: '{s name="SenderAddress"}{/s}',
+            helpText: '{s name="SenderAddressDescription"}{/s}',
+            vtype: 'email',
+            allowBlank: false
+        }, {
+            xtype: 'textfield',
+            name: 'replyTo',
+            fieldLabel: '{s name="ReplyTo"}{/s}',
+            helpText: '{s name="ReplyToDescription"}{/s}',
+            vtype: 'email'
+        }, {
+            xtype: 'textarea',
+            name: 'message',
+            fieldLabel: '{s name="Message"}{/s}',
+            helpText: '{s name="MessageDescription"}{/s}',
+            height: 400,
+            rows: 20,
+            allowBlank: false
         }];
-    },
-
-    /**
-     * Creates the general information template.
-     * @returns { Ext.XTemplate }
-     */
-    createGeneralInformationTemplate: function () {
-        return Ext.create('Ext.XTemplate',
-            '{literal}<tpl for=".">',
-            '<p>{GeneralInformation}</p>',
-            '</tpl>{/literal}'
-        );
     }
 });
 // {/block}

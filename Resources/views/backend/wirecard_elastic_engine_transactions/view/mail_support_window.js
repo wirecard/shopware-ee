@@ -28,57 +28,39 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-// {block name="backend/wirecard_elastic_engine_extend_order/view/general_information_window"}
-// {namespace name="backend/wirecard_elastic_engine/general_information"}
-Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.GeneralInformationWindow', {
+// {namespace name="backend/wirecard_elastic_engine/support_mail"}
+// {block name="backend/wireacard_transactions/view/mail_support_window"}
+Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.MailSupportWindow', {
     extend: 'Enlight.app.Window',
-    alias: 'widget.wirecardee-extend-order-general-information-window',
-    height: 600,
-    title: '{s name="Title"}{/s}',
+    alias: 'widget.wirecardee-mail-support-window',
     layout: 'anchor',
-    bodyPadding: 10,
-    autoScroll: true,
+    title: '{s name="MailSupportTitle"}{/s}',
 
-    style: {
-        background: '#EBEDEF'
-    },
+    toolbar: null,
 
-    snippets: {
-        GeneralInformation: '{"{s name="Content"}{/s}"|escape|replace:"\n":"<br>"}'
-    },
-
-    initComponent: function () {
+    initComponent: function() {
         var me = this;
-
-        me.items = me.createItems();
-
+        me.dockedItems = [me.createToolbar()];
+        me.items = [me.createForm()];
         me.callParent(arguments);
     },
 
     /**
-     * Returns an array containing the general information template.
-     * @returns { *[] }
+     * Creates the toolbar for the mail support window.
+     * @returns { null|* }
      */
-    createItems: function () {
+    createToolbar: function() {
         var me = this;
-
-        return [{
-            xtype: 'container',
-            renderTpl: me.createGeneralInformationTemplate(),
-            renderData: me.snippets
-        }];
+        me.toolbar = Ext.create('Shopware.apps.WirecardElasticEngineTransactions.view.MailToolbar');
+        return me.toolbar;
     },
 
     /**
-     * Creates the general information template.
-     * @returns { Ext.XTemplate }
+     * Creates the form for the mail support window.
+     * @returns { Shopware.apps.WirecardElasticEngineTransactions.view.MailSupportForm }
      */
-    createGeneralInformationTemplate: function () {
-        return Ext.create('Ext.XTemplate',
-            '{literal}<tpl for=".">',
-            '<p>{GeneralInformation}</p>',
-            '</tpl>{/literal}'
-        );
+    createForm: function() {
+        return Ext.create('Shopware.apps.WirecardElasticEngineTransactions.view.MailSupportForm');
     }
 });
 // {/block}

@@ -40,7 +40,10 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions', {
     ],
     views: [
         'Window',
-        'Grid'
+        'Grid',
+        'MailSupportWindow',
+        'MailToolbar',
+        'MailSupportForm'
     ],
     models: [
         'Transaction'
@@ -48,6 +51,11 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions', {
     stores: [
         'Transactions'
     ],
+
+    /**
+     * Called after the component is initialized.
+     * @returns { * }
+     */
     launch: function () {
         return this.getController('Main').mainWindow;
     }
