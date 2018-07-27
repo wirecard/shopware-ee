@@ -50,7 +50,7 @@ describe('default test', () => {
             'browserstack.user': process.env.TEST_BS_USER,
             'browserstack.key': process.env.TEST_BS_KEY,
             'browserstack.local': 'true',
-            'browserstack.localIdentifier': `foobar_${Math.round(Math.random() * 100)}_${Date.now()}`
+            'browserstack.localIdentifier': process.env.BROWSERSTACK_LOCAL_IDENTIFIER
         })
         .build();
     driver.manage().deleteAllCookies();
