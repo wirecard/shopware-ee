@@ -203,17 +203,41 @@ class NotificationHandler extends Handler
             $currency = $notification->getRequestedAmount()->getCurrency();
             $transactionType = $notification->getTransactionType();
 
-            $message = 'Order Number: '      . $orderNumber . PHP_EOL;
-            $message .= 'Payment ID: '       . $paymentId . PHP_EOL;
-            $message .= 'Transaction ID: '   . $transactionId . PHP_EOL;
-            $message .= 'Transaction Type: ' . $transactionType . PHP_EOL;
-            $message .= 'Amount: ' . $amount . ' ' . $currency . PHP_EOL;
+            $subject = $this->snippetManager
+                            ->getNamespace('backend/wirecard_elastic_engine/common')
+                            ->get('PaymentNotificationMailSubject', 'Payment notification recieved');
+
+            $orderNumberLabel = $this->snippetManager
+                                     ->getNamespace('backend/wirecard_elastic_engine/transactions_window')
+                                     ->get('OrderNumber', 'Bestellnummer');
+
+            $paymentNumberLabel = $this->snippetManager
+                                       ->getNamespace('backend/wirecard_elastic_engine/transactions_window')
+                                       ->get('PaymentUniqueId', 'Payment Number');
+
+            $transactionIdLabel = $this->snippetManager
+                                       ->getNamespace('backend/wirecard_elastic_engine/transactions_window')
+                                       ->get('TransactionId', 'TransactionID');
+
+            $transactionTypeLabel = $this->snippetManager
+                                         ->getNamespace('backend/wirecard_elastic_engine/transactions_window')
+                                         ->get('TransactionType', 'Action');
+
+            $amountLabel = $this->snippetManager
+                                ->getNamespace('backend/wirecard_elastic_engine/transactions_window')
+                                ->get('Amount', 'Amount');
+
+            $message = $orderNumberLabel      . ': ' . $orderNumber              . PHP_EOL;
+            $message .= $paymentNumberLabel   . ': ' . $paymentId                . PHP_EOL;
+            $message .= $transactionIdLabel   . ': ' . $transactionId            . PHP_EOL;
+            $message .= $transactionTypeLabel . ': ' . $transactionType          . PHP_EOL;
+            $message .= $amountLabel          . ': ' . $amount . ' ' . $currency . PHP_EOL;
 
             $message .= PHP_EOL . PHP_EOL;
             $message .= print_r($notification->getData(), true);
 
             $this->mail->addTo($notifyMail);
-            $this->mail->setSubject('Payment Notification recieved');
+            $this->mail->setSubject($subject);
             $this->mail->setBodyText($message);
             $this->mail->send();
         }
