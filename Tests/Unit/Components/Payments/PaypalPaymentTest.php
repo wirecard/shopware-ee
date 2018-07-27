@@ -67,13 +67,13 @@ class PaypalPaymentTest extends PaymentTestCase
 
     public function testGetPaymentOptions()
     {
-        $this->assertEquals('Wirecard PayPal', $this->payment->getLabel());
+        $this->assertEquals('WirecardPayPal', $this->payment->getLabel());
         $this->assertEquals('wirecard_elastic_engine_paypal', $this->payment->getName());
         $this->assertEquals(1, $this->payment->getPosition());
         $this->assertPaymentOptions(
             $this->payment->getPaymentOptions(),
             'wirecard_elastic_engine_paypal',
-            'Wirecard PayPal',
+            'WirecardPayPal',
             1
         );
     }

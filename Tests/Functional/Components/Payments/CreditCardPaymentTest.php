@@ -86,11 +86,11 @@ class CreditCardPaymentTest extends TestCase
 
     public function testGetPaymentOptions()
     {
-        $this->assertEquals('Wirecard Credit Card', $this->payment->getLabel());
+        $this->assertEquals('WirecardCreditCard', $this->payment->getLabel());
         $this->assertEquals('wirecard_elastic_engine_credit_card', $this->payment->getName());
         $this->assertEquals([
             'name'                  => 'wirecard_elastic_engine_credit_card',
-            'description'           => 'Wirecard Credit Card',
+            'description'           => 'WirecardCreditCard',
             'action'                => 'WirecardElasticEnginePayment',
             'active'                => 0,
             'position'              => 0,

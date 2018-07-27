@@ -66,7 +66,7 @@ class SepaPayment extends Payment implements ProcessPaymentInterface, Additional
      */
     public function getLabel()
     {
-        return 'Wirecard SEPA Direct Debit';
+        return 'WirecardSEPADirectDebit';
     }
 
     /**

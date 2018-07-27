@@ -47,16 +47,35 @@ use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
 use WirecardShopwareElasticEngine\Models\Transaction;
 use Doctrine\ORM\Tools\SchemaTool;
 
+/**
+ * @package WirecardShopwareElasticEngine
+ *
+ * @since   1.0.0
+ */
 class WirecardShopwareElasticEngine extends Plugin
 {
     const NAME = 'WirecardShopwareElasticEngine';
 
+    /**
+     * @param InstallContext $context
+     *
+     * @throws Exception\UnknownPaymentException
+     *
+     * @since 1.0.0
+     */
     public function install(InstallContext $context)
     {
         $this->registerPayments($context->getPlugin());
         $this->updateDatabase();
     }
 
+    /**
+     * @param UninstallContext $context
+     *
+     * @throws \Doctrine\ORM\OptimisticLockException
+     *
+     * @since 1.0.0
+     */
     public function uninstall(UninstallContext $context)
     {
         parent::uninstall($context);
@@ -64,6 +83,13 @@ class WirecardShopwareElasticEngine extends Plugin
         $this->deactivatePayments($context->getPlugin());
     }
 
+    /**
+     * @param UpdateContext $context
+     *
+     * @throws Exception\UnknownPaymentException
+     *
+     * @since 1.0.0
+     */
     public function update(UpdateContext $context)
     {
         parent::update($context);
@@ -72,12 +98,24 @@ class WirecardShopwareElasticEngine extends Plugin
         $this->updateDatabase();
     }
 
+    /**
+     * @param ActivateContext $context
+     *
+     * @since 1.0.0
+     */
     public function activate(ActivateContext $context)
     {
         parent::activate($context);
         $context->scheduleClearCache(ActivateContext::CACHE_LIST_ALL);
     }
 
+    /**
+     * @param DeactivateContext $context
+     *
+     * @throws \Doctrine\ORM\OptimisticLockException
+     *
+     * @since 1.0.0
+     */
     public function deactivate(DeactivateContext $context)
     {
         parent::deactivate($context);
@@ -85,6 +123,11 @@ class WirecardShopwareElasticEngine extends Plugin
         $context->scheduleClearCache(DeactivateContext::CACHE_LIST_ALL);
     }
 
+    /**
+     * Update database to latest plugin database schema.
+     *
+     * @since 1.0.0
+     */
     protected function updateDatabase()
     {
         $entityManager = $this->container->get('models');
@@ -98,15 +141,33 @@ class WirecardShopwareElasticEngine extends Plugin
         );
     }
 
+    /**
+     * Create or update wirecard payments. Existing payment option will be overwritten (on install).
+     *
+     * @param PluginModel $plugin
+     *
+     * @throws Exception\UnknownPaymentException
+     *
+     * @since 1.0.0
+     */
     protected function registerPayments(PluginModel $plugin)
     {
         $installer = $this->container->get('shopware.plugin_payment_installer');
 
         foreach ($this->getSupportedPayments() as $payment) {
-            $installer->createOrUpdate($plugin->getName(), $payment->getPaymentOptions());
+            $installer->createOrUpdate($plugin->getName(), $this->translateOptions($payment->getPaymentOptions()));
         }
     }
 
+    /**
+     * Create new wirecard payments. Existing payments remain unchanged (on update).
+     *
+     * @param PluginModel $plugin
+     *
+     * @throws Exception\UnknownPaymentException
+     *
+     * @since 1.0.0
+     */
     protected function updatePayments(PluginModel $plugin)
     {
         $installer = $this->container->get('shopware.plugin_payment_installer');
@@ -120,10 +181,19 @@ class WirecardShopwareElasticEngine extends Plugin
             if (isset($payments[$payment->getName()])) {
                 continue;
             }
-            $installer->createOrUpdate($plugin->getName(), $payment->getPaymentOptions());
+            $installer->createOrUpdate($plugin->getName(), $this->translateOptions($payment->getPaymentOptions()));
         }
     }
 
+    /**
+     * Deactivate wirecard payments (on uninstall and plugin deactivation).
+     *
+     * @param PluginModel $plugin
+     *
+     * @throws \Doctrine\ORM\OptimisticLockException
+     *
+     * @since 1.0.0
+     */
     private function deactivatePayments(PluginModel $plugin)
     {
         foreach ($plugin->getPayments() as $payment) {
@@ -135,8 +205,35 @@ class WirecardShopwareElasticEngine extends Plugin
     }
 
     /**
+     * Translate wirecard payment options.
+     *
+     * @param $options
+     *
+     * @return mixed
+     *
+     * @since 1.0.0
+     */
+    private function translateOptions($options)
+    {
+        $snippetManager = $this->container->get('snippets');
+        $snippet        = $snippetManager->getNamespace('frontend/wirecard_elastic_engine/payments');
+
+        foreach (['description', 'additionalDescription'] as $translationField) {
+            if (isset($options[$translationField])) {
+                $options[$translationField] = $snippet->get($options[$translationField], $options[$translationField]);
+                $this->container->get('pluginlogger')->notice($translationField . ' ' . $options[$translationField]);
+            }
+        }
+        return $options;
+    }
+
+    /**
+     * Return wirecard payment instances.
+     *
      * @return Components\Payments\PaymentInterface[]
      * @throws Exception\UnknownPaymentException
+     *
+     * @since 1.0.0
      */
     public function getSupportedPayments()
     {

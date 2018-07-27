@@ -56,9 +56,9 @@ describe('default test', () => {
     driver.manage().deleteAllCookies();
 
     const wirecardPaymentLabels = [
-        'Wirecard Credit Card',
+        'Wirecard Kreditkarte',
         'Wirecard PayPal',
-        'Wirecard SEPA Direct Debit',
+        'Wirecard SEPA-Lastschrift',
         'Wirecard Sofort.'
     ];
 

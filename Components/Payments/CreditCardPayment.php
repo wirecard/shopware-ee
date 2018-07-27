@@ -65,7 +65,7 @@ class CreditCardPayment extends Payment implements ProcessReturnInterface, Proce
      */
     public function getLabel()
     {
-        return 'Wirecard Credit Card';
+        return 'WirecardCreditCard';
     }
 
     /**

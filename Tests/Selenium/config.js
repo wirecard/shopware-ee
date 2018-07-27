@@ -43,7 +43,7 @@ exports.config = {
             }
         },
         creditCard: {
-            label: 'Wirecard Credit Card',
+            label: 'Wirecard Kreditkarte',
             fields: {
                 last_name: 'Lastname',
                 account_number: '4012000300001003',
@@ -51,7 +51,7 @@ exports.config = {
             }
         },
         creditCardThreeD: {
-            label: 'Wirecard Credit Card',
+            label: 'Wirecard Kreditkarte',
             fields: {
                 last_name: 'Lastname',
                 account_number: '4012000300001003',
@@ -60,7 +60,7 @@ exports.config = {
             password: 'wirecard'
         },
         sepa: {
-            label: 'Wirecard SEPA Direct Debit',
+            label: 'Wirecard SEPA-Lastschrift',
             fields: {
                 'wirecardee-sepa--first-name': 'Firstname',
                 'wirecardee-sepa--last-name': 'Lastname',
