@@ -327,7 +327,8 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                         infoPanel.add({
                             xtype: 'container',
                             renderTpl: me.createInfoPanelTemplate(),
-                            renderData: transaction
+                            renderData: transaction,
+                            margin: '0 0 10px'
                         });
                     }
                     if (transaction.type === 'initial-response' && transaction.paymentMethod === 'sepadirectdebit') {
