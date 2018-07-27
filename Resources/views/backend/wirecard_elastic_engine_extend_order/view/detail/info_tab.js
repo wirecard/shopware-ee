@@ -50,20 +50,18 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
             currency: '{s name="Currency" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}'
         },
         operations: {
-            title: '{s name="BackendOperation"}{/s}',
             successTitle: '{s name="BackendOperationSuccessTitle"}{/s}',
             successMessage: '{s name="BackendOperationSuccessMessage"}{/s}',
             errorTitle: '{s name="BackendOperationErrorTitle"}{/s}',
             cancelConfirmation: '{s name="BackendOperationCancelConfirmation"}{/s}'
         },
         amountDialog: {
-            title: '{s name="AmountDialogTitle"}{/s}',
-            fieldLabel: '{s name="AmountDialogFieldLabel"}{/s}',
+            fieldLabel: '{s name="Amount" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
             submit: '{s name="AmountDialogSubmit"}{/s}',
-            close: '{s name="AmountDialogClose"}{/s}'
+            close: '{s name="detail/cancel" namespace="backend/order/main"}{/s}'
         },
         buttons: {
-            openTransaction: '{s name="OpenTransactionButtonText"}{/s}',
+            openTransaction: '{s name="OpenTransactionTooltip" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
             payCapture: '{s name="PayCaptureButtonText"}{/s}',
             refund: '{s name="RefundButtonText"}{/s}',
             creditRefund: '{s name="CreditRefundButtonText"}{/s}',
@@ -169,7 +167,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                         iconCls: 'sprite-cheque--plus',
                         tooltip: me.snippets.buttons.payCapture,
                         handler: function (view, row, col, item, opts, record) {
-                            me.showAmountDialog(record.data, 'pay');
+                            me.showAmountDialog(me.snippets.buttons.payCapture, record.data, 'pay');
                         },
                         getClass: function (value, meta, record) {
                             var transaction = record.data;
@@ -181,7 +179,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                         iconCls: 'sprite-arrow-circle-315',
                         tooltip: me.snippets.buttons.refund,
                         handler: function (view, row, col, item, opts, record) {
-                            me.showAmountDialog(record.data, 'refund');
+                            me.showAmountDialog(me.snippets.buttons.refund, record.data, 'refund');
                         },
                         getClass: function (value, meta, record) {
                             var transaction = record.data;
@@ -193,7 +191,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                         iconCls: 'sprite-arrow-circle-315',
                         tooltip: me.snippets.buttons.creditRefund,
                         handler: function (view, row, col, item, opts, record) {
-                            me.showAmountDialog(record.data, 'credit');
+                            me.showAmountDialog(me.snippets.buttons.creditRefund, record.data, 'credit');
                         },
                         getClass: function (value, meta, record) {
                             var transaction = record.data;
@@ -247,13 +245,14 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
 
     /**
      * Shows a dialog to enter an amount. Mainly shown for specific backend operations like capture or refund.
+     * @param title
      * @param transaction
      * @param operation
      */
-    showAmountDialog: function (transaction, operation) {
+    showAmountDialog: function (title, transaction, operation) {
         var me = this;
         var win = Ext.create('Ext.window.Window', {
-            title: me.snippets.amountDialog.title,
+            title: title,
             id: 'wirecardee-transaction-amount-window',
             layout: 'fit',
             width: 300,

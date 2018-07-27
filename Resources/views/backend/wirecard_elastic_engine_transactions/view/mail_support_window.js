@@ -34,7 +34,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.MailSupportWind
     extend: 'Enlight.app.Window',
     alias: 'widget.wirecardee-mail-support-window',
     layout: 'anchor',
-    title: '{s name="MailSupportTitle"}{/s}',
+    title: '{s name="Title"}{/s}',
 
     toolbar: null,
 

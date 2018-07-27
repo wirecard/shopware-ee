@@ -33,7 +33,6 @@
 Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.MailSupportForm', {
     extend: 'Ext.form.Panel',
     alias: 'widget.wirecardee-transactions-mail-support-form',
-    title: '{s name="FormTitle"}{/s}',
 
     anchor: '100%',
     border: false,
@@ -63,20 +62,17 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.MailSupportForm
             xtype: 'textfield',
             name: 'address',
             fieldLabel: '{s name="SenderAddress"}{/s}',
-            helpText: '{s name="SenderAddressDescription"}{/s}',
             vtype: 'email',
             allowBlank: false
         }, {
             xtype: 'textfield',
             name: 'replyTo',
             fieldLabel: '{s name="ReplyTo"}{/s}',
-            helpText: '{s name="ReplyToDescription"}{/s}',
             vtype: 'email'
         }, {
             xtype: 'textarea',
             name: 'message',
             fieldLabel: '{s name="Message"}{/s}',
-            helpText: '{s name="MessageDescription"}{/s}',
             height: 400,
             rows: 20,
             allowBlank: false

@@ -70,7 +70,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.controller.Main', {
 
         if (!form.isValid()) {
             Shopware.Notification.createGrowlMessage(
-                '{s name="MailSupportTitle" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}',
+                '{s name="Title" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}',
                 '{s name="FormValidationError" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}',
                 me.mainWindow.title
             );
@@ -85,7 +85,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.controller.Main', {
                 var data = Ext.decode(response.responseText);
                 if (data.success) {
                     Shopware.Notification.createGrowlMessage(
-                        '{s name="MailSupportTitle" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}',
+                        '{s name="Title" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}',
                         '{s name="SuccessfullySend" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}',
                         me.mainWindow.title
                     );
@@ -94,7 +94,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.controller.Main', {
                 }
 
                 Shopware.Notification.createGrowlMessage(
-                    '{s name="MailSupportTitle" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}',
+                    '{s name="Title" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}',
                     '{s name="SendingFailed" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}',
                     me.mainWindow.title
                 );

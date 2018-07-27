@@ -28,6 +28,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
+// {namespace name="backend/wirecard_elastic_engine/support_mail"}
 // {block name="backend/wireacard_transactions/view/mail_toolbar"}
 Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.MailToolbar', {
     extend: 'Ext.toolbar.Toolbar',
@@ -62,7 +63,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.MailToolbar', {
     createSubmitButton: function() {
         var me = this;
         return Ext.create('Shopware.apps.Base.view.element.Button', {
-            text: 'Submit',
+            text: '{s name="Submit"}{/s}',
             cls: 'primary',
             handler: Ext.bind(me.onSubmitButtonClick, me)
         });
