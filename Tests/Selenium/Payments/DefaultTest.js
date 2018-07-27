@@ -30,60 +30,26 @@
 
 /* eslint-env mocha */
 
-const { Builder, By } = require('selenium-webdriver');
-const {
-    loginWithExampleAccount,
-    waitUntilOverlayIsStale,
-    checkConfirmationPage,
-    addProductToCartAndGotoCheckout
-} = require('../common');
+const {expect} = require('chai');
+const {Builder, By, until} = require('selenium-webdriver');
 
 describe('default test', () => {
     const driver = new Builder()
-        .usingServer('http://hub-cloud.browserstack.com/wd/hub')
-        .withCapabilities({
-            'browserName': 'Chrome',
-            'browser_version': '62.0',
-            'os': 'Windows',
-            'os_version': '10',
-            'resolution': '1920x1080',
-            'browserstack.user': process.env.TEST_BS_USER,
-            'browserstack.key': process.env.TEST_BS_KEY,
-            'browserstack.local': 'true',
-            'browserstack.localIdentifier': process.env.BROWSERSTACK_LOCAL_IDENTIFIER
-        })
+        .forBrowser('chrome')
         .build();
-    driver.manage().deleteAllCookies();
 
-    const wirecardPaymentLabels = [
-        'Wirecard Credit Card',
-        'Wirecard PayPal',
-        'Wirecard SEPA Direct Debit',
-        'Wirecard Sofort.'
-    ];
+    it('should check if frontend login works', async () => {
+        await driver.get(`http://localhost:8000/account`);
 
-    it('should check the default checkout', async () => {
-        await loginWithExampleAccount(driver);
-        await addProductToCartAndGotoCheckout(driver, '/genusswelten/tees-und-zubeh/tee-zubehoer/24/glas-teekaennchen');
+        await driver.wait(until.elementLocated(By.name('email')));
+        await driver.findElement(By.name('email')).sendKeys('test@example.com');
+        await driver.findElement(By.name('password')).sendKeys('shopware');
+        await driver.findElement(By.className('register--login-btn')).click();
 
-        // Go to payment selection page select "prepayment"
-        await driver.findElement(By.className('btn--change-payment')).click();
-        // Check if all wirecard payments are present
-        wirecardPaymentLabels.forEach(async paymentLabel => {
-            await driver.findElement(By.xpath("//*[contains(text(), '" + paymentLabel + "')]"));
-        });
-        await driver.findElement(By.xpath("//*[contains(text(), 'Vorkasse')]")).click();
+        await driver.wait(until.elementLocated(By.className('account--welcome')));
 
-        // Go back to checkout page and test if payment method has been selected
-        await waitUntilOverlayIsStale(driver, By.className('js--overlay'));
-        await driver.findElement(By.className('main--actions')).click();
-
-        // Check AGB and confirm order
-        await driver.findElement(By.id('sAGB')).click();
-        console.log('click button confirm--form');
-        await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
-
-        await checkConfirmationPage(driver, 'Vorkasse');
+        const title = await driver.getTitle();
+        expect(title).to.include('Kundenkonto');
     });
 
     after(async () => driver.quit());
