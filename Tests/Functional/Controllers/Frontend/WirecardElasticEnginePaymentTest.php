@@ -104,7 +104,7 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
         $paymentUniqueId = '1532501234exxxf';
         $requestId       = '249XXXXXXXXXxxxXXXXXXXXXxxxXXXXXXXXXxxxXXXXXXXXXXXXXXXXxxxXXXc87';
 
-        $this->prepareInitialTransaction($paymentUniqueId, $requestId, $initialRequest);
+        $this->prepareInitialTransaction($paymentUniqueId, $requestId, $basketSignature, $initialRequest);
 
         // delete order from a previous test
         Shopware()->Db()->delete('s_order', "temporaryID='$paymentUniqueId' AND status!=-1");
@@ -148,10 +148,11 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
     {
         $initialRequest  = json_decode(file_get_contents(__DIR__ . '/testdata/initial-request.json'), true);
         $notifyPayload   = file_get_contents(__DIR__ . '/testdata/notify-payload.xml');
+        $basketSignature = '3691c683586000115ef63cb81ada7e7ade4d5b9d0242b020d01e88ff559ffc9a';
         $paymentUniqueId = '1532501234exxxf';
         $requestId       = '249XXXXXXXXXxxxXXXXXXXXXxxxXXXXXXXXXxxxXXXXXXXXXXXXXXXXxxxXXXc87';
 
-        $this->prepareInitialTransaction($paymentUniqueId, $requestId, $initialRequest);
+        $this->prepareInitialTransaction($paymentUniqueId, $requestId, $basketSignature, $initialRequest);
 
         $this->Request()->setMethod('GET');
         $this->Request()->setHeader('User-Agent', self::USER_AGENT);
@@ -165,7 +166,7 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
         $this->assertEmpty($response->getBody());
     }
 
-    private function prepareInitialTransaction($paymentUniqueId, $requestId, $initialRequest)
+    private function prepareInitialTransaction($paymentUniqueId, $requestId, $basketSignature, $initialRequest)
     {
         // prepare initial transaction
         $em = Shopware()->Container()->get('models');
@@ -175,6 +176,7 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
         if (! $transaction) {
             $transaction = new Transaction(Transaction::TYPE_INITIAL_REQUEST);
             $transaction->setPaymentUniqueId($paymentUniqueId);
+            $transaction->setBasketSignature($basketSignature);
             $transaction->setRequest($initialRequest);
             $em->persist($transaction);
             $em->flush();
