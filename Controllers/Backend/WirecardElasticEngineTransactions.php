@@ -228,15 +228,15 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
                 $message,
                 $replyTo
             );
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->getLogger()->error('Sending support mail failed: ' . $e->getMessage());
             return $this->View()->assign([
-                'success' => false
+                'success' => false,
             ]);
         }
 
         return $this->View()->assign([
-            'success' => true
+            'success' => true,
         ]);
     }
 

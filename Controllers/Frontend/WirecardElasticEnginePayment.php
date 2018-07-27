@@ -198,7 +198,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $this->getLogger()->debug('Frontend::returnAction: enter');
 
         /** @var ReturnHandler $returnHandler */
-        $returnHandler      = $this->get('wirecard_elastic_engine.return_handler');
+        $returnHandler = $this->get('wirecard_elastic_engine.return_handler');
         /** @var TransactionManager $transactionManager */
         $transactionManager = $this->get('wirecard_elastic_engine.transaction_manager');
         $request            = $this->Request();
@@ -308,6 +308,11 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function notifyAction()
     {
+        // Disable template rendering for incoming notifications
+        /** @var Enlight_Controller_Plugins_ViewRenderer_Bootstrap $viewRenderer */
+        $viewRenderer = $this->get('front')->Plugins()->get('ViewRenderer');
+        $viewRenderer->setNoRender();
+
         /** @var PaymentFactory $paymentFactory */
         /** @var NotificationHandler $notificationHandler */
         $paymentFactory      = $this->get('wirecard_elastic_engine.payment_factory');
@@ -321,7 +326,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $this->container->getParameterBag(),
                 $this->getCurrencyShortName()
             ));
-            $notification   = $backendService->handleNotification(file_get_contents('php://input'));
+            $notification   = $backendService->handleNotification($request->getRawBody());
 
             $notificationHandler->handleResponse(
                 $this->getModules()->Order(),
@@ -331,7 +336,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         } catch (\Exception $e) {
             $this->logException('Notification handling failed', $e);
         }
-        exit();
     }
 
     /**
