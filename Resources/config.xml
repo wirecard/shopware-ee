@@ -60,6 +60,17 @@ function (button) {
                 </handler>
             </options>
         </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineNotifyMail</name>
+            <label lang="de">Bezahlbestätigungs E-Mail</label>
+            <label lang="en">Payment Notification Mail</label>
+            <value></value>
+            <description lang="de">Erhalten Sie eine E-Mail nach Erhalt einer Bezahlbestätigung.</description>
+            <description lang="en">Recieve a mail upon receipt of payment notification.</description>
+            <options>
+                <vtype>email</vtype>
+            </options>
+        </element>
         <!-- General End -->
         <!-- Credit Card -->
         <element type="text" scope="shop">
