@@ -30,15 +30,18 @@
 
 Ext.define('Shopware.apps.WirecardElasticEngineTransactions.store.Transactions', {
     extend: 'Shopware.store.Listing',
-
-    configure: function () {
-        return {
-            controller: 'WirecardElasticEngineTransactions'
-        };
-    },
     sorters: [{
         property: 'id',
         direction: 'DESC'
     }],
-    model: 'Shopware.apps.WirecardElasticEngineTransactions.model.Transaction'
+    model: 'Shopware.apps.WirecardElasticEngineTransactions.model.Transaction',
+
+    /**
+     * @returns { { controller: string } }
+     */
+    configure: function () {
+        return {
+            controller: 'WirecardElasticEngineTransactions'
+        };
+    }
 });

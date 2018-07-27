@@ -72,6 +72,10 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.TransactionDetai
         me.callParent(arguments);
     },
 
+    /**
+     * Returns an array containing the transaction list template.
+     * @returns { *[] }
+     */
     createItems: function () {
         var me = this;
 
@@ -82,6 +86,10 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.TransactionDetai
         }];
     },
 
+    /**
+     * Creates the transaction list template.
+     * @returns { Ext.XTemplate}
+     */
     createListTemplate: function () {
         var me = this;
 

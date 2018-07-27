@@ -54,6 +54,10 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.MailSupportForm
         me.callParent(arguments);
     },
 
+    /**
+     * Returns fields for the support mail form.
+     * @returns { *[] }
+     */
     createItems: function() {
         return [{
             xtype: 'textfield',

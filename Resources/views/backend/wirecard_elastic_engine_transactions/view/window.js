@@ -34,6 +34,10 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.Window', {
     height: 550,
     title: '{s name="ListWindowTitle" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
 
+    /**
+     * Configures the transaction window.
+     * @returns { { listingGrid: string, listingStore: string } }
+     */
     configure: function () {
         return {
             listingGrid: 'Shopware.apps.WirecardElasticEngineTransactions.view.Grid',

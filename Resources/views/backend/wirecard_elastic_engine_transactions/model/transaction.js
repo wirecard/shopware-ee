@@ -30,12 +30,6 @@
 
 Ext.define('Shopware.apps.WirecardElasticEngineTransactions.model.Transaction', {
     extend: 'Shopware.data.Model',
-
-    configure: function () {
-        return {
-            controller: 'WirecardElasticEngineTransactions'
-        };
-    },
     fields: [
         { name: 'id', type: 'int' },
         { name: 'orderId', type: 'int' },
@@ -55,5 +49,14 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.model.Transaction', 
         { name: 'request', type: 'object' },
         { name: 'requestId', type: 'string' },
         { name: 'createdAt', type: 'string' }
-    ]
+    ],
+
+    /**
+     * @returns { { controller: string } }
+     */
+    configure: function () {
+        return {
+            controller: 'WirecardElasticEngineTransactions'
+        };
+    }
 });

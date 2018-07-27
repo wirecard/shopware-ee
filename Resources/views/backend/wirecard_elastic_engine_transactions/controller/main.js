@@ -47,6 +47,9 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.controller.Main', {
         me.createComponentControl();
     },
 
+    /**
+     * Creates the toolbar for the mail support window.
+     */
     createComponentControl: function() {
         var me = this;
 
@@ -57,6 +60,9 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.controller.Main', {
         });
     },
 
+    /**
+     * Sends the support mail.
+     */
     onSubmitMail: function() {
         var me = this,
             form = me.getMailSupportForm().getForm();

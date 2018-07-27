@@ -56,6 +56,9 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.Grid', {
         OrderCanceled: '{s name="OrderCanceled"}{/s}'
     },
 
+    /**
+     * @returns { { columns: *|{orderNumber, paymentUniqueId, type, transactionId, parentTransactionId, providerTransactionId, transactionType, paymentMethod, amount, currency}, rowEditing: boolean, deleteButton: boolean, deleteColumn: boolean, editButton: boolean, editColumn: boolean, addButton: boolean } }
+     */
     configure: function () {
         var me = this;
 

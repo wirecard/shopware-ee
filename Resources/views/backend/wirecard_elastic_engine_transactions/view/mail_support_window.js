@@ -45,12 +45,20 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.MailSupportWind
         me.callParent(arguments);
     },
 
+    /**
+     * Creates the toolbar for the mail support window.
+     * @returns { null|* }
+     */
     createToolbar: function() {
         var me = this;
         me.toolbar = Ext.create('Shopware.apps.WirecardElasticEngineTransactions.view.MailToolbar');
         return me.toolbar;
     },
 
+    /**
+     * Creates the form for the mail support window.
+     * @returns { Shopware.apps.WirecardElasticEngineTransactions.view.MailSupportForm }
+     */
     createForm: function() {
         return Ext.create('Shopware.apps.WirecardElasticEngineTransactions.view.MailSupportForm');
     }
