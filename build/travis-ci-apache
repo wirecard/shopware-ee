@@ -1,7 +1,7 @@
 <VirtualHost *:80>
-  DocumentRoot %HOME%/shopware
+  DocumentRoot %DOCUMENT_ROOT%
 
-  <Directory "%HOME%/shopware/">
+  <Directory "%DOCUMENT_ROOT%/">
     Options FollowSymLinks MultiViews ExecCGI
     AllowOverride All
     Require all granted
