@@ -19,8 +19,8 @@ addons:
 
 php:
   - 7.1
-#  - 7.0
-#  - 5.6
+  - 7.0
+  - 5.6
 
 services:
   - mysql
@@ -30,7 +30,6 @@ env:
     - secure: ${SONAR_TOKEN}
     - COMPOSER_ARGS="--no-interaction"
     - PLUGIN_NAME=WirecardShopwareElasticEngine
-#    - SHOPWARE_ENV=testing
     - SHOPWARE_DIRECTORY=${HOME}/shopware
     - github_token:
         secure: "gH+IJRS0uQe2G/gg4nL0UgQxh4Tog16vQIBzWgQiFUjmQM/jMvUtw6kW4ixcusOPGR4rqKuLFCd8gbDg/I848VNDb7a+xg+wGm7KvognnbcxbnB0TcxNcPTGZUWXbSqGi3z8YhAaaa1LfrROM3qS4LeU3Bz+B7ZpdbA7xqzkmBRPgEdsv7OLmCwow2e6jreeGcCAqM34q84JavZkWcoHCQbLoknwyNCzilMKUN8fe+Ih46o1O0iuVOv9lAWIOLlAJJNcrX+kamv4RhrtDQwyVWsnDB2OO2Me4Lr4Bkqy9pN+diszgX8OzhOnkFl+ZXYTIUI5NxK3kAkd4lKOO3QgHIoveSmeoaS/mrC5kflNs6vN399Jm8X4gSmxUhkl01hEAfEqL+BiW2o22/Pq8WeMVVaQy3ONUwlSGGBkk/IkckbG/LzpJv5Jjztfi8Xfl9JF1jO/0BABsqodx/pEbDzIKKb3S/U/EHmCXV8zqmD67E/PIii3Y9kxeVaDNdWT5u4O69Pt9sR7csA8OL8YS8th/d825v4BTPswIFxn1vXB1sTKJZGwyO+fu53CE7qcZEMc/+NJnfLZBhIbV9SE1zVRsDPX1AiruPd/sXjYy01AR4SYdCO+RrdyVWoIE65hV/MOGgvu327jI13ZIpFE2PwE1fPj6JqTtrW5YugLCOQUGd0="
@@ -70,17 +69,17 @@ before_script:
   - cd ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
 
 script:
-#  - composer test-coverage
-#  - sonar-scanner
-#  - composer cs-check
-#  - npm run lint
+  - composer test-coverage
+  - sonar-scanner
+  - composer cs-check
+  - npm run lint
   - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
   - npm run test:default
-  #- npm run test:creditcard
-  #- npm run test:creditcard3ds
-  #- npm run test:sepa
-  #- npm run test:sofort
-  #- npm run test:paypal
+  - npm run test:paypal
+#- npm run test:creditcard
+#- npm run test:creditcard3ds
+#- npm run test:sepa
+#- npm run test:sofort
 
 after_script:
 #  - travis_retry composer upload-coverage
