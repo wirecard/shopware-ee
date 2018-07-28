@@ -19,8 +19,8 @@ addons:
 
 php:
   - 7.1
-  - 7.0
-  - 5.6
+#  - 7.0
+#  - 5.6
 
 services:
   - mysql
@@ -69,7 +69,7 @@ before_script:
   - cd ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
 
 script:
-  - composer test-coverage
+#  - composer test-coverage
   - sonar-scanner
   - composer cs-check
   - npm run lint
