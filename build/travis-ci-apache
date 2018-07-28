@@ -1,6 +1,8 @@
 <VirtualHost *:80>
   DocumentRoot %DOCUMENT_ROOT%
 
+  SetEnv SHOPWARE_ENV testing
+
   <Directory "%DOCUMENT_ROOT%/">
     Options FollowSymLinks MultiViews ExecCGI
     AllowOverride All
