@@ -17,11 +17,10 @@ addons:
     access_key:
       secure: "gbQxLw3xmkieBuvsQNIzMArfSZke0sjmp9R4ROMFBEom0WJRri2iPzAV5q943L9Ohr39QtyX2lOcgiBCS0Ye0TBXRq8FwvVPeuXuyv5bzJogsXW3NzlJcWvmFInGLlfOZ5duNvTOrKiqSIjo+3kK/14o5C5UcEr6VRCkP0ljw6LHmQf8D7WH+wBxiei+Vi5EAU885mL9hUfzbqBLhDBxX3y40OTCBbPu+V/+1iPyHc7RLX/4Sv6XT2shEtGV1XhBx8HxJa2mzB92xSwkV5OuRrzvJwnt5JNzEqpxUeF0TcEblPwIKnYEoeZoutZfBXkuB+i7WcsX9PCqRFVbJDqzgvV/QEuLh4UX91kUuTVZ+RnTpIzWYXGpWJYn+dbs8PFgXGTjlj+xG4gpfSPZcHNgSKJxZp/XlTWlVKUGC7p5FORHjhbgAyIIqw+Ks6hrT2tvbua9OSBZ+zaN+UBPmcgJHaJE++FTuzbbVDRzR6KTRWqys/3lgo5ePpycFv0CUc5KJAN2Yh4bWxqTORAXyyUJoQ1sc0VNQlfSq8/N1mhecLBWS23NiAFoRYz+GTpyq39uzLuMUGTEo4U821079j+3FnKt7GefWxm/qx2XR5R+aTK5SLFMH+XiJaDz3bIij1w9Rh7ebIO7C8HLACG7/0iWQsq/fGhSlQgZl0wyG2SEv0Y="
 
-
 php:
   - 7.1
-  - 7.0
-  - 5.6
+#  - 7.0
+#  - 5.6
 
 services:
   - mysql
@@ -55,7 +54,7 @@ before_script:
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:cache:clear
   - rm -rf ${SHOPWARE_DIRECTORY}/var/cache
   - cd ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
-  - SHOPWARE_ENV=development php -S localhost:${WEBSERVER_PORT} server.php &
+  - SHOPWARE_ENV=testing php -S localhost:${WEBSERVER_PORT} server.php &
 
 script:
 #  - composer test-coverage
