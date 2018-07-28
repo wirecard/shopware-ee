@@ -29,7 +29,7 @@
  */
 
 exports.config = {
-    url: 'http://localhost:8000',
+    url: 'http://localhost',
     exampleAccount: {
         email: 'test@example.com',
         password: 'shopware'
