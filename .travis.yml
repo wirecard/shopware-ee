@@ -85,4 +85,6 @@ after_script:
 #  - travis_retry composer upload-coverage
 
 after_failure:
+  - sudo cat /var/log/apache2/error.log
+  - cat ${SHOPWARE_DIRECTORY}/composer.lock
   - cat ${SHOPWARE_DIRECTORY}/var/log/*.log
