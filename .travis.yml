@@ -72,9 +72,9 @@ script:
   - composer cs-check
   - npm run lint
   - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
-  - npm run test:default
   - composer test-coverage
   - sonar-scanner
+  - npm run test:default
   - npm run test:paypal
 #- npm run test:creditcard
 #- npm run test:creditcard3ds
