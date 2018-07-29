@@ -156,6 +156,8 @@ class SepaPaymentConfig extends PaymentConfig
     }
 
     /**
+     * Set SEPA Credit Transfer transaction merchant account ID
+     *
      * @param string
      *
      * @since 1.0.0
@@ -166,6 +168,8 @@ class SepaPaymentConfig extends PaymentConfig
     }
 
     /**
+     * Get SEPA Credit Transfer transaction merchant account ID
+     *
      * @return string
      *
      * @since 1.0.0
@@ -176,6 +180,8 @@ class SepaPaymentConfig extends PaymentConfig
     }
 
     /**
+     * Set SEPA Credit Transfer transaction secret
+     *
      * @param string
      *
      * @since 1.0.0
@@ -186,6 +192,8 @@ class SepaPaymentConfig extends PaymentConfig
     }
 
     /**
+     * Get SEPA Credit Transfer transaction secret
+     *
      * @return string
      *
      * @since 1.0.0
@@ -196,6 +204,8 @@ class SepaPaymentConfig extends PaymentConfig
     }
 
     /**
+     * set SEPA Credit Transfer creditor id
+     *
      * @param string
      *
      * @since 1.0.0
@@ -206,6 +216,8 @@ class SepaPaymentConfig extends PaymentConfig
     }
 
     /**
+     * Get SEPA Credit Transfer creditor id
+     *
      * @return string
      *
      * @since 1.0.0
@@ -223,12 +235,12 @@ class SepaPaymentConfig extends PaymentConfig
         return array_merge(
             parent::toArray(),
             [
-                'showBic'                  => $this->showBic(),
-                'creditorId'               => $this->getCreditorId(),
-                'creditorName'             => $this->getCreditorName(),
-                'creditorAddress'          => $this->getCreditorAddress(),
-                'backendTransactionMaid'   => $this->getBackendTransactionMAID(),
-                'backendCreditorId'        => $this->getBackendCreditorId()
+                'showBic'                => $this->showBic(),
+                'creditorId'             => $this->getCreditorId(),
+                'creditorName'           => $this->getCreditorName(),
+                'creditorAddress'        => $this->getCreditorAddress(),
+                'backendTransactionMaid' => $this->getBackendTransactionMAID(),
+                'backendCreditorId'      => $this->getBackendCreditorId(),
             ]
         );
     }

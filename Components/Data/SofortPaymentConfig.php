@@ -56,6 +56,8 @@ class SofortPaymentConfig extends PaymentConfig
     protected $backendCreditorId;
 
     /**
+     * Set SEPA Credit Transfer transaction merchant account ID
+     *
      * @param string
      *
      * @since 1.0.0
@@ -66,6 +68,8 @@ class SofortPaymentConfig extends PaymentConfig
     }
 
     /**
+     * Get SEPA Credit Transfer transaction merchant account ID
+     *
      * @return string
      *
      * @since 1.0.0
@@ -76,6 +80,8 @@ class SofortPaymentConfig extends PaymentConfig
     }
 
     /**
+     * Set SEPA Credit Transfer transaction secret
+     *
      * @param string
      *
      * @since 1.0.0
@@ -86,6 +92,8 @@ class SofortPaymentConfig extends PaymentConfig
     }
 
     /**
+     * Get SEPA Credit Transfer transaction secret
+     *
      * @return string
      *
      * @since 1.0.0
@@ -96,6 +104,8 @@ class SofortPaymentConfig extends PaymentConfig
     }
 
     /**
+     * Set SEPA Credit Transfer creditor id
+     *
      * @param string
      *
      * @since 1.0.0
@@ -106,6 +116,8 @@ class SofortPaymentConfig extends PaymentConfig
     }
 
     /**
+     * Get SEPA Credit Transfer creditor id
+     *
      * @return string
      *
      * @since 1.0.0
