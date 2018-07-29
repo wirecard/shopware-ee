@@ -163,7 +163,6 @@ class SepaPayment extends Payment implements ProcessPaymentInterface, Additional
         $paymentConfig->setCreditorId($this->getPluginConfig('SepaCreditorId'));
         $paymentConfig->setCreditorName($this->getPluginConfig('SepaCreditorName'));
         $paymentConfig->setCreditorAddress($this->getPluginConfig('SepaCreditorAddress'));
-        $paymentConfig->setMandateText($this->getPluginConfig('SepaMandateText'));
         $paymentConfig->setBackendTransactionMAID($this->getPluginConfig('SepaBackendMerchantId'));
         $paymentConfig->setBackendTransactionSecret($this->getPluginConfig('SepaBackendSecret'));
         $paymentConfig->setBackendCreditorId($this->getPluginConfig('SepaBackendCreditorId'));

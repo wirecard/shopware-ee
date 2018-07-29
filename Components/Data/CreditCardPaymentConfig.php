@@ -67,13 +67,11 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @var string
-     *
-     * @since 1.0.0
      */
     protected $sslMaxLimitCurrency;
 
     /**
-     * @return string
+     * @return string If "null", ThreeD credentials are disabled
      *
      * @since 1.0.0
      */
@@ -93,7 +91,7 @@ class CreditCardPaymentConfig extends PaymentConfig
     }
 
     /**
-     * @return string|float
+     * @return string|float If "null", ThreeDMinLimit is disabled
      *
      * @since 1.0.0
      */
@@ -113,7 +111,7 @@ class CreditCardPaymentConfig extends PaymentConfig
     }
 
     /**
-     * @return string
+     * @return string If "null", the shop default currency will be used
      *
      * @since 1.0.0
      */
@@ -153,7 +151,7 @@ class CreditCardPaymentConfig extends PaymentConfig
     }
 
     /**
-     * @return string|float
+     * @return string|float If "null", SslMaxLimit is disabled
      *
      * @since 1.0.0
      */
@@ -173,7 +171,7 @@ class CreditCardPaymentConfig extends PaymentConfig
     }
 
     /**
-     * @return string
+     * @return string If "null", the shop default currency will be used
      *
      * @since 1.0.0
      */

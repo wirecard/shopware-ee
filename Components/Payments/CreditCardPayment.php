@@ -106,14 +106,14 @@ class CreditCardPayment extends Payment implements ProcessReturnInterface, Proce
         $paymentConfig     = $this->getPaymentConfig();
         $creditCardConfig  = new CreditCardConfig();
 
-        if ($paymentConfig->getTransactionMAID() && $paymentConfig->getTransactionMAID() !== 'null') {
+        if ($paymentConfig->getTransactionMAID() && strtolower($paymentConfig->getTransactionMAID()) !== 'null') {
             $creditCardConfig->setSSLCredentials(
                 $paymentConfig->getTransactionMAID(),
                 $paymentConfig->getTransactionSecret()
             );
         }
 
-        if ($paymentConfig->getThreeDMAID() && $paymentConfig->getThreeDMAID() !== 'null') {
+        if ($paymentConfig->getThreeDMAID() && strtolower($paymentConfig->getThreeDMAID()) !== 'null') {
             $creditCardConfig->setThreeDCredentials(
                 $paymentConfig->getThreeDMAID(),
                 $paymentConfig->getThreeDSecret()
