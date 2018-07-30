@@ -38,7 +38,8 @@ const {
     addProductToCartAndGotoCheckout,
     selectPaymentMethod,
     getDriver,
-    asyncForEach
+    asyncForEach,
+    waitForAlert
 } = require('../common');
 
 describe('Credit Card 3-D Secure test', () => {
@@ -80,6 +81,8 @@ describe('Credit Card 3-D Secure test', () => {
         console.log('wait for #password');
         await driver.wait(until.elementLocated(By.id('password')), 20000);
         await driver.findElement(By.id('password')).sendKeys(config.payments.creditCardThreeD.password, Key.ENTER);
+
+        await waitForAlert(driver, 10000);
 
         await checkConfirmationPage(driver, paymentLabel);
     });

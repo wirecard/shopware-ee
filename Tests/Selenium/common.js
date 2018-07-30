@@ -133,6 +133,18 @@ exports.waitUntilOverlayIsStale = async function (driver, locator) {
     }
 };
 
+exports.waitForAlert = async function (driver, timeout) {
+    try {
+        console.log('wait for alert');
+        const alert = await driver.wait(until.alertIsPresent(), timeout);
+        console.log('accept alert');
+        await alert.accept();
+        await driver.switchTo().defaultContent();
+    } catch (e) {
+        console.log('no alert popup');
+    }
+}
+
 exports.asyncForEach = async function (arr, cb) {
     for (let i = 0; i < arr.length; i++) {
         await cb(arr[i], i, arr);

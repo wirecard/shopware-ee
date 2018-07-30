@@ -37,6 +37,7 @@ const {
     checkConfirmationPage,
     addProductToCartAndGotoCheckout,
     selectPaymentMethod,
+    waitForAlert,
     getDriver
 } = require('../common');
 
@@ -69,11 +70,13 @@ describe('Sofort. test', () => {
         console.log('wait for #account-1');
         await driver.wait(until.elementLocated(By.id('account-1')), 20000);
         await driver.findElement(By.id('account-1')).click();
-        await driver.findElement(By.id('WizardForm')).submit();
+        await driver.findElement(By.css('button.primary')).click();
 
         console.log('wait for #BackendFormTAN');
         await driver.wait(until.elementLocated(By.id('BackendFormTAN')), 20000);
         await driver.findElement(By.id('BackendFormTAN')).sendKeys(formFields.tan, Key.ENTER);
+
+        await waitForAlert(driver, 10000);
 
         await checkConfirmationPage(driver, paymentLabel);
     });
