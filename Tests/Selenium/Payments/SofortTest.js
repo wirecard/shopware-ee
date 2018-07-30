@@ -30,20 +30,18 @@
 
 /* eslint-env mocha */
 
-const { Builder, By, until, Key } = require('selenium-webdriver');
+const { By, until, Key } = require('selenium-webdriver');
 const { config } = require('../config');
 const {
     loginWithExampleAccount,
     checkConfirmationPage,
     addProductToCartAndGotoCheckout,
-    selectPaymentMethod
+    selectPaymentMethod,
+    getDriver
 } = require('../common');
 
 describe('Sofort. test', () => {
-    const driver = new Builder()
-        .forBrowser('chrome')
-        .build();
-    driver.manage().deleteAllCookies();
+    const driver = getDriver();
 
     const paymentLabel = config.payments.sofort.label;
     const formFields = config.payments.sofort.fields;
@@ -59,22 +57,22 @@ describe('Sofort. test', () => {
 
         // Wait for Sofort. page and fill out forms
         console.log('wait for #MultipaysSessionSenderCountryId');
-        await driver.wait(until.elementLocated(By.id('MultipaysSessionSenderCountryId')));
+        await driver.wait(until.elementLocated(By.id('MultipaysSessionSenderCountryId')), 20000);
         await driver.findElement(By.css('#MultipaysSessionSenderCountryId > option[value=\'AT\']')).click();
         await driver.findElement(By.id('BankCodeSearch')).sendKeys(formFields.bankCode, Key.ENTER);
 
         console.log('wait for #BackendFormLOGINNAMEUSERID');
-        await driver.wait(until.elementLocated(By.id('BackendFormLOGINNAMEUSERID')));
+        await driver.wait(until.elementLocated(By.id('BackendFormLOGINNAMEUSERID')), 20000);
         await driver.findElement(By.id('BackendFormLOGINNAMEUSERID')).sendKeys(formFields.userId);
         await driver.findElement(By.id('BackendFormUSERPIN')).sendKeys(formFields.password, Key.ENTER);
 
         console.log('wait for #account-1');
-        await driver.wait(until.elementLocated(By.id('account-1')));
+        await driver.wait(until.elementLocated(By.id('account-1')), 20000);
         await driver.findElement(By.id('account-1')).click();
         await driver.findElement(By.id('WizardForm')).submit();
 
         console.log('wait for #BackendFormTAN');
-        await driver.wait(until.elementLocated(By.id('BackendFormTAN')));
+        await driver.wait(until.elementLocated(By.id('BackendFormTAN')), 20000);
         await driver.findElement(By.id('BackendFormTAN')).sendKeys(formFields.tan, Key.ENTER);
 
         await checkConfirmationPage(driver, paymentLabel);

@@ -30,13 +30,8 @@
 
 const { Builder } = require('selenium-webdriver');
 const { browsers, tests } = require('./config');
+const { asyncForEach } = require('./common');
 const Mocha = require('mocha');
-
-async function asyncForEach(arr, cb) {
-    for (let i = 0; i < arr.length; i++) {
-        await cb(arr[i], i, arr);
-    }
-}
 
 const run = async () => {
     await asyncForEach(browsers, async browser => {
@@ -47,22 +42,36 @@ const run = async () => {
             'browserstack.localIdentifier': process.env.BROWSERSTACK_LOCAL_IDENTIFIER
         }, browser);
 
-        // Driver used by the Selenium tests.
-        global.driver = new Builder()
-            .usingServer('http://hub-cloud.browserstack.com/wd/hub')
-            .withCapabilities(bsConfig)
-            .build();
+        await asyncForEach(tests, async testCase => {
+            // Driver used by the Selenium tests.
+            global.driver = await new Builder()
+                .usingServer('http://hub-cloud.browserstack.com/wd/hub')
+                .withCapabilities(bsConfig)
+                .build();
 
-        await asyncForEach(tests, file => {
             const mocha = new Mocha({
-                timeout: 120000
+                timeout: testCase.timeout
             });
 
             return new Promise((resolve, reject) => {
-                mocha.addFile(`./Tests/Selenium/${file}.js`);
+                // `require` (used by Mocha#addFile) caches files by default, making it impossible to run tests
+                // multiple times. To fix this we clear the cache on every test.
+                mocha.suite.on('require', function (global, file) {
+                    delete require.cache[file];
+                });
+
+                console.log(`Running ${testCase.file} against ${browser.browserName}`);
+
+                mocha.addFile(`./Tests/Selenium/${testCase.file}.js`);
+
                 mocha.run()
-                    .on('pass', () => resolve())
-                    .on('fail', test => reject(`Selenium test (${test.title}) failed.`))
+                    .on('fail', test => {
+                        reject(new Error(`Selenium test (${test.title}) failed.`));
+                        process.exit(1);
+                    })
+                    .on('end', () => {
+                        resolve();
+                    })
                 ;
             });
         });
@@ -70,21 +79,3 @@ const run = async () => {
 };
 
 run();
-
-// browsers.forEach(async (browser) => {
-//
-//     tests.forEach(async (file) => {
-//         mocha.addFile(`./Tests/Selenium/${file}.js`);
-//
-//         await mocha.run()
-//             // .on('test', test => console.log(test))
-//             // .on('test end', test => console.log(test))
-//             // .on('pass', test => console.log(test))
-//             .on('fail', test => {
-//                 console.log(test);
-//                 process.exit(1);
-//             })
-//             // .on('end', test => console.log(test))
-//         ;
-//     });
-// });

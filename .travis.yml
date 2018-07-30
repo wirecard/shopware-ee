@@ -72,17 +72,12 @@ script:
   - composer cs-check
   - npm run lint
   - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
-  - npm run test:default
-  - npm run test:paypal
+  - npm run test:runner
   - composer test-coverage
   - sonar-scanner
-#- npm run test:creditcard
-#- npm run test:creditcard3ds
-#- npm run test:sepa
-#- npm run test:sofort
 
 after_script:
-#  - travis_retry composer upload-coverage
+  - travis_retry composer upload-coverage
 
 after_failure:
   - sudo cat /var/log/apache2/error.log

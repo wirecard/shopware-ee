@@ -30,20 +30,19 @@
 
 /* eslint-env mocha */
 
-const { Builder, By, until } = require('selenium-webdriver');
+const { By, until } = require('selenium-webdriver');
 const { config } = require('../config');
 const {
     loginWithExampleAccount,
     checkConfirmationPage,
     addProductToCartAndGotoCheckout,
-    selectPaymentMethod
+    selectPaymentMethod,
+    getDriver,
+    asyncForEach
 } = require('../common');
 
 describe('Credit Card test', () => {
-    const driver = new Builder()
-        .forBrowser('chrome')
-        .build();
-    driver.manage().deleteAllCookies();
+    const driver = getDriver();
 
     const paymentLabel = config.payments.creditCard.label;
     const formFields = config.payments.creditCard.fields;
@@ -59,12 +58,13 @@ describe('Credit Card test', () => {
 
         // Fill out credit card iframe
         console.log('wait for .wirecard-seamless-frame');
-        await driver.wait(until.elementLocated(By.className('wirecard-seamless-frame')));
+        await driver.wait(until.elementLocated(By.className('wirecard-seamless-frame')), 20000);
         console.log('wait for switch to iframe .wirecard-seamless-frame');
         await driver.wait(until.ableToSwitchToFrame(By.className('wirecard-seamless-frame')));
         console.log('wait for #account_number');
-        await driver.wait(until.elementLocated(By.id('account_number')));
-        Object.keys(formFields).forEach(async field => {
+        await driver.wait(until.elementLocated(By.id('account_number')), 20000);
+        await asyncForEach(Object.keys(formFields), async field => {
+            console.log(`setting ${field} to ${formFields[field]}`);
             await driver.findElement(By.id(field)).sendKeys(formFields[field]);
         });
         await driver.findElement(By.css('#expiration_month_list > option[value=\'01\']')).click();
@@ -72,7 +72,7 @@ describe('Credit Card test', () => {
 
         // Switch back from iframe and click Send button
         console.log('switch back from iframe to default content');
-        driver.switchTo().defaultContent();
+        await driver.switchTo().defaultContent();
         console.log('wait for #wirecardee-credit-card--form-submit');
         await driver.wait(until.elementLocated(By.id('wirecardee-credit-card--form-submit')));
         console.log('click #wirecardee-credit-card--form-submit');

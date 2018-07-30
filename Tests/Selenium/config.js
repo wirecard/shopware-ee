@@ -85,25 +85,47 @@ exports.config = {
  */
 exports.browsers = [
     {
-        browserName: 'Chrome',
-        browser_version: '62.0',
-        os: 'Windows',
-        os_version: '10'
-    },
-    {
         browserName: 'Firefox',
         browser_version: '62.0 beta',
         os: 'Windows',
         os_version: '7',
         resolution: '1920x1080'
+    },
+    {
+        browserName: 'Chrome',
+        browser_version: '62.0',
+        os: 'Windows',
+        os_version: '10',
+        resolution: '1920x1080'
     }
 ];
 
 /**
- * List of test files (without `.js` extension!) to be executed. All tests must be located in `./Tests/Selenium`.
- * @type {string[]}
+ * List of tests to be executed. All tests must be located in `./Tests/Selenium`.
  */
 exports.tests = [
-    'Payments/DefaultTest'
-    // 'Payments/PaypalTest'
+    {
+        file: 'Payments/DefaultTest',
+        timeout: 120000
+    },
+    {
+        file: 'Payments/PaypalTest',
+        timeout: 180000
+    },
+    {
+        file: 'Payments/CreditCardTest',
+        timeout: 60000
+    },
+    {
+        file: 'Payments/CreditCardThreeDTest',
+        timeout: 60000
+    },
+    {
+        file: 'Payments/SepaTest',
+        timeout: 60000
+    },
+    {
+        file: 'Payments/SofortTest',
+        timeout: 60000
+    }
 ];
