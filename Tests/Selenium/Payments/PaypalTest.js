@@ -91,6 +91,16 @@ describe('PayPal test', () => {
         console.log('click #confirmButtonTop');
         await driver.wait(driver.findElement(By.id('confirmButtonTop')).click(), 10000);
 
+        try {
+            console.log('wait for alert');
+            const alert = await driver.wait(until.alertIsPresent(), 25000);
+            console.log('accept alert');
+            await alert.accept();
+            await driver.switchTo().defaultContent();
+        } catch (e) {
+            console.log('no alert popup');
+        }
+
         await checkConfirmationPage(driver, paymentLabel);
     });
 
