@@ -67,30 +67,24 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.TransactionDetai
     initComponent: function () {
         var me = this;
 
-        me.items = me.createItems();
+        me.items = [];
+        if (me.record.data.statusMessage) {
+            me.items.push(Shopware.Notification.createBlockMessage(me.record.data.statusMessage, 'notice'));
+        }
+        me.items.push({
+            xtype: 'container',
+            renderTpl: me.createDetailsTemplate(),
+            renderData: me.record.data
+        });
 
         me.callParent(arguments);
-    },
-
-    /**
-     * Returns an array containing the transaction list template.
-     * @returns { *[] }
-     */
-    createItems: function () {
-        var me = this;
-
-        return [{
-            xtype: 'container',
-            renderTpl: me.createListTemplate(),
-            renderData: me.record.data
-        }];
     },
 
     /**
      * Creates the transaction list template.
      * @returns { Ext.XTemplate}
      */
-    createListTemplate: function () {
+    createDetailsTemplate: function () {
         var me = this;
 
         return Ext.create('Ext.XTemplate',

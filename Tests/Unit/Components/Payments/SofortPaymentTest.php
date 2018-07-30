@@ -131,6 +131,10 @@ class SofortPaymentTest extends PaymentTestCase
 
         $shop       = $this->createMock(Shop::class);
         $parameters = $this->createMock(ParameterBagInterface::class);
+        $parameters->method('get')->willReturnMap([
+            ['kernel.name', 'Shopware'],
+            ['shopware.release.version', '__SW_VERSION__'],
+        ]);
 
         $config = $this->payment->getTransactionConfig($shop, $parameters, 'EUR');
 
@@ -150,6 +154,14 @@ class SofortPaymentTest extends PaymentTestCase
         $this->assertEquals('CT-MAID', $sofortCreditTransferConfig->getMerchantAccountId());
         $this->assertEquals('CT-Secret', $sofortCreditTransferConfig->getSecret());
         $this->assertEquals(SepaCreditTransferTransaction::NAME, $sofortCreditTransferConfig->getPaymentMethodName());
+        $this->assertEquals([
+            'headers' => [
+                'shop-system-name'    => 'Shopware',
+                'shop-system-version' => '__SW_VERSION__',
+                'plugin-name'         => 'WirecardShopwareElasticEngine',
+                'plugin-version'      => '__PLUGIN_VERSION__',
+            ],
+        ], $config->getShopHeader());
     }
 
     public function testGetTransactionTypePurchase()

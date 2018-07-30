@@ -39,11 +39,12 @@ use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\Container;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
-use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
+use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
+use Wirecard\PaymentSdk\Transaction\SofortTransaction;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
-use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
+use WirecardShopwareElasticEngine\Components\Payments\SofortPayment;
 
-class CreditCardPaymentTest extends TestCase
+class SofortPaymentTest extends TestCase
 {
     /** @var Container */
     private $container;
@@ -63,7 +64,7 @@ class CreditCardPaymentTest extends TestCase
     /** @var \Enlight_Event_EventManager $config */
     private $eventManager;
 
-    /** @var CreditCardPayment */
+    /** @var SofortPayment */
     protected $payment;
 
     public function setUp()
@@ -75,7 +76,7 @@ class CreditCardPaymentTest extends TestCase
         $this->router       = $this->container->get('router');
         $this->eventManager = $this->container->get('events');
 
-        $this->payment = new CreditCardPayment(
+        $this->payment = new SofortPayment(
             $this->em,
             $this->config,
             $this->installer,
@@ -86,21 +87,21 @@ class CreditCardPaymentTest extends TestCase
 
     public function testGetPaymentOptions()
     {
-        $this->assertEquals('WirecardCreditCard', $this->payment->getLabel());
-        $this->assertEquals('wirecard_elastic_engine_credit_card', $this->payment->getName());
+        $this->assertEquals('WirecardSofort', $this->payment->getLabel());
+        $this->assertEquals('wirecard_elastic_engine_sofort', $this->payment->getName());
         $this->assertEquals([
-            'name'                  => 'wirecard_elastic_engine_credit_card',
-            'description'           => 'WirecardCreditCard',
+            'name'                  => 'wirecard_elastic_engine_sofort',
+            'description'           => 'WirecardSofort',
             'action'                => 'WirecardElasticEnginePayment',
             'active'                => 0,
-            'position'              => 0,
+            'position'              => 9,
             'additionalDescription' => '',
         ], $this->payment->getPaymentOptions());
     }
 
     public function testGetTransaction()
     {
-        $this->assertInstanceOf(CreditCardTransaction::class, $this->payment->getTransaction());
+        $this->assertInstanceOf(SofortTransaction::class, $this->payment->getTransaction());
     }
 
     public function testGetPaymentConfig()
@@ -109,17 +110,14 @@ class CreditCardPaymentTest extends TestCase
 
         $this->assertInstanceOf(PaymentConfig::class, $config);
         $this->assertEquals('https://api-test.wirecard.com', $config->getBaseUrl());
-        $this->assertEquals('70000-APITEST-AP', $config->getHttpUser());
-        $this->assertEquals('qD2wzQ_hrc!8', $config->getHttpPassword());
-        $this->assertEquals('53f2895a-e4de-4e82-a813-0d87a10e55e6', $config->getTransactionMAID());
+        $this->assertEquals('16390-testing', $config->getHttpUser());
+        $this->assertEquals('3!3013=D3fD8X7', $config->getHttpPassword());
+        $this->assertEquals('6c0e7efd-ee58-40f7-9bbd-5e7337a052cd', $config->getTransactionMAID());
         $this->assertEquals('dbc5a498-9a66-43b9-bf1d-a618dd399684', $config->getTransactionSecret());
+        $this->assertEquals('59a01668-693b-49f0-8a1f-f3c1ba025d45', $config->getBackendTransactionMAID());
+        $this->assertEquals('ecdf5990-0372-47cd-a55d-037dccfe9d25', $config->getBackendTransactionSecret());
+        $this->assertEquals('DE98ZZZ09999999999', $config->getBackendCreditorId());
         $this->assertEquals('pay', $config->getTransactionOperation());
-        $this->assertEquals('dbc5a498-9a66-43b9-bf1d-a618dd399684', $config->getThreeDSecret());
-        $this->assertEquals(300, $config->getSslMaxLimit());
-        $this->assertEmpty($config->getSslMaxLimitCurrency());
-        $this->assertEquals(100, $config->getThreeDMinLimit());
-        $this->assertEmpty($config->getThreeDMinLimitCurrency());
-        $this->assertEquals('508b8896-b37d-4614-845c-26bf8bf2c948', $config->getThreeDMAID());
     }
 
     public function testGetTransactionConfig()
@@ -130,20 +128,23 @@ class CreditCardPaymentTest extends TestCase
 
         $this->assertInstanceOf(Config::class, $config);
         $this->assertEquals('https://api-test.wirecard.com', $config->getBaseUrl());
-        $this->assertEquals('70000-APITEST-AP', $config->getHttpUser());
-        $this->assertEquals('qD2wzQ_hrc!8', $config->getHttpPassword());
-        $this->assertInstanceOf(PaymentMethodConfig::class, $config->get(CreditCardTransaction::NAME));
+        $this->assertEquals('16390-testing', $config->getHttpUser());
+        $this->assertEquals('3!3013=D3fD8X7', $config->getHttpPassword());
+        $this->assertInstanceOf(PaymentMethodConfig::class, $config->get(SofortTransaction::NAME));
         $this->assertEquals(
-            '53f2895a-e4de-4e82-a813-0d87a10e55e6',
-            $config->get(CreditCardTransaction::NAME)->getMerchantAccountId()
-        );
+            '6c0e7efd-ee58-40f7-9bbd-5e7337a052cd',
+            $config->get(SofortTransaction::NAME)->getMerchantAccountId());
         $this->assertEquals(
             'dbc5a498-9a66-43b9-bf1d-a618dd399684',
-            $config->get(CreditCardTransaction::NAME)->getSecret()
+            $config->get(SofortTransaction::NAME)->getSecret()
         );
+        $this->assertInstanceOf(PaymentMethodConfig::class, $config->get(SepaCreditTransferTransaction::NAME));
         $this->assertEquals(
-            '508b8896-b37d-4614-845c-26bf8bf2c948',
-            $config->get(CreditCardTransaction::NAME)->getThreeDMerchantAccountId()
+            '59a01668-693b-49f0-8a1f-f3c1ba025d45',
+            $config->get(SepaCreditTransferTransaction::NAME)->getMerchantAccountId());
+        $this->assertEquals(
+            'ecdf5990-0372-47cd-a55d-037dccfe9d25',
+            $config->get(SepaCreditTransferTransaction::NAME)->getSecret()
         );
         $this->assertEquals([
             'headers' => [

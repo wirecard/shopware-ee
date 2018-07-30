@@ -284,7 +284,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     }
                 }
 
-                $action = $returnHandler->handleSuccess($response, $initialTransaction);
+                $action = $returnHandler->handleSuccess($response, $initialTransaction, $orderStatusComment);
             } else {
                 $action = $returnHandler->handleResponse($response);
             }
