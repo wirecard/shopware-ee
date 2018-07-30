@@ -68,6 +68,7 @@ class TransactionTest extends ModelTestCase
         $this->assertGetterAndSetter('paymentStatus', Status::PAYMENT_STATE_COMPLETELY_PAID);
         $this->assertGetterAndSetter('state', Transaction::STATE_CLOSED, Transaction::STATE_OPEN);
         $this->assertGetterAndSetter('createdAt', new \DateTime(), $this->model->getCreatedAt());
+        $this->assertGetterAndSetter('statusMessage', 'error');
 
         $this->assertEquals([
             'id'                           => null,
@@ -87,6 +88,7 @@ class TransactionTest extends ModelTestCase
             'state'                        => Transaction::STATE_CLOSED,
             'response'                     => null,
             'request'                      => null,
+            'statusMessage'                => 'error',
         ], $this->model->toArray());
     }
 
@@ -109,6 +111,7 @@ class TransactionTest extends ModelTestCase
         $this->assertInstanceOf(\DateTime::class, $transaction->getCreatedAt());
         $this->assertNull($transaction->getResponse());
         $this->assertTrue($transaction->isInitial());
+        $this->assertNull($transaction->getStatusMessage());
     }
 
     public function testWithResponse()
@@ -149,6 +152,7 @@ class TransactionTest extends ModelTestCase
             'state'                        => Transaction::STATE_OPEN,
             'response'                     => [],
             'request'                      => null,
+            'statusMessage'                => null,
         ], $transaction->toArray());
     }
 
@@ -204,6 +208,7 @@ class TransactionTest extends ModelTestCase
                 'request-id'     => 'req-id',
             ],
             'request'                      => null,
+            'statusMessage'                => null,
         ], $transaction->toArray());
     }
 
@@ -247,6 +252,7 @@ class TransactionTest extends ModelTestCase
             'state'                        => Transaction::STATE_OPEN,
             'response'                     => [],
             'request'                      => null,
+            'statusMessage'                => null,
         ], $transaction->toArray());
     }
 
@@ -289,6 +295,7 @@ class TransactionTest extends ModelTestCase
             'state'                        => Transaction::STATE_OPEN,
             'response'                     => [],
             'request'                      => null,
+            'statusMessage'                => null,
         ], $transaction->toArray());
     }
 
@@ -328,6 +335,7 @@ class TransactionTest extends ModelTestCase
             'state'                        => Transaction::STATE_OPEN,
             'response'                     => null,
             'request'                      => $request,
+            'statusMessage'                => null,
         ], $transaction->toArray());
     }
 }

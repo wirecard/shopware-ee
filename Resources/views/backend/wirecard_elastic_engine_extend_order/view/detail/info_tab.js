@@ -127,7 +127,8 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 'backendOperations',
                 'isFinal',
                 'state',
-                'type'
+                'type',
+                'statusMessage'
             ],
             data: []
         });
@@ -156,12 +157,17 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                     xtype: 'actioncolumn',
                     width: 150,
                     items: [{
-                        iconCls: 'sprite-magnifier-medium',
                         tooltip: me.snippets.buttons.openTransaction,
-
                         handler: function (view, rowIndex, colIndex, item, opts, record) {
-                            var detailsWindow = Ext.create('Shopware.apps.WirecardElasticEngineExtendOrder.view.TransactionDetailsWindow', { record: record });
-                            detailsWindow.show();
+                            Ext.create('Shopware.apps.WirecardElasticEngineExtendOrder.view.TransactionDetailsWindow', { record: record }).show();
+                        },
+                        getClass: function (value, meta, record) {
+                            var transaction = record.data;
+                            if (!transaction.statusMessage) {
+                                return 'sprite-magnifier-medium';
+                            } else {
+                                return 'sprite-exclamation';
+                            }
                         }
                     }, {
                         iconCls: 'sprite-cheque--plus',

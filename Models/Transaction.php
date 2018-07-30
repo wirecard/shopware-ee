@@ -185,6 +185,12 @@ class Transaction extends ModelEntity
     private $paymentStatus;
 
     /**
+     * @var string
+     * @ORM\Column(name="status_message", type="text", nullable=true)
+     */
+    private $statusMessage;
+
+    /**
      * @param string $type Transaction type, see Model constants for available types
      *
      * @since 1.0.0
@@ -525,6 +531,26 @@ class Transaction extends ModelEntity
     }
 
     /**
+     * @return string|null
+     *
+     * @since 1.0.0
+     */
+    public function getStatusMessage()
+    {
+        return $this->statusMessage;
+    }
+
+    /**
+     * @param string|null $statusMessage
+     *
+     * @since 1.0.0
+     */
+    public function setStatusMessage($statusMessage)
+    {
+        $this->statusMessage = $statusMessage;
+    }
+
+    /**
      * @return bool
      *
      * @since 1.0.0
@@ -559,6 +585,7 @@ class Transaction extends ModelEntity
             'response'                     => $this->getResponse(),
             'request'                      => $this->getRequest(),
             'state'                        => $this->getState(),
+            'statusMessage'                => $this->getStatusMessage(),
         ];
     }
 }

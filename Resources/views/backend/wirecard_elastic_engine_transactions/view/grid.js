@@ -133,11 +133,17 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.Grid', {
             items = me.callParent(arguments);
 
         items.push({
-            iconCls: 'sprite-magnifier-medium',
             tooltip: me.snippets.OpenTransactionTooltip,
             handler: function (view, rowIndex, colIndex, item, opts, record) {
-                var detailsWindow = Ext.create('Shopware.apps.WirecardElasticEngineExtendOrder.view.TransactionDetailsWindow', { record: record });
-                detailsWindow.show();
+                Ext.create('Shopware.apps.WirecardElasticEngineExtendOrder.view.TransactionDetailsWindow', { record: record }).show();
+            },
+            getClass: function (value, meta, record) {
+                var transaction = record.data;
+                if (!transaction.statusMessage) {
+                    return 'sprite-magnifier-medium';
+                } else {
+                    return 'sprite-exclamation';
+                }
             }
         });
 

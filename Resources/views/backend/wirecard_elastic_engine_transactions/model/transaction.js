@@ -48,7 +48,8 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.model.Transaction', 
         { name: 'response', type: 'object' },
         { name: 'request', type: 'object' },
         { name: 'requestId', type: 'string' },
-        { name: 'createdAt', type: 'string' }
+        { name: 'createdAt', type: 'string' },
+        { name: 'statusMessage', type: 'string' }
     ],
 
     /**

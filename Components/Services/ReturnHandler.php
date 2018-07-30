@@ -71,7 +71,6 @@ class ReturnHandler extends Handler
     ) {
         if ($payment instanceof ProcessReturnInterface) {
             $response = $payment->processReturn($transactionService, $request);
-
             if ($response) {
                 return $response;
             }
@@ -120,14 +119,15 @@ class ReturnHandler extends Handler
     /**
      * @param SuccessResponse $response
      * @param Transaction     $initialTransaction
+     * @param string          $statusMessage
      *
      * @return Action
      *
      * @since 1.0.0
      */
-    public function handleSuccess(SuccessResponse $response, Transaction $initialTransaction)
+    public function handleSuccess(SuccessResponse $response, Transaction $initialTransaction, $statusMessage = null)
     {
-        $this->transactionManager->createReturn($initialTransaction, $response);
+        $this->transactionManager->createReturn($initialTransaction, $response, $statusMessage);
 
         // `sUniqueID` should match the order temporaryId/paymentUniqueId to show proper information after redirect.
         return new RedirectAction($this->router->assemble([
