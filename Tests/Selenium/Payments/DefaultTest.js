@@ -30,7 +30,7 @@
 
 /* eslint-env mocha */
 
-const { Builder, By } = require('selenium-webdriver');
+const { By } = require('selenium-webdriver');
 const {
     loginWithExampleAccount,
     waitUntilOverlayIsStale,
@@ -39,21 +39,7 @@ const {
 } = require('../common');
 
 describe('default test', () => {
-    const driver = new Builder()
-        .usingServer('http://hub-cloud.browserstack.com/wd/hub')
-        .withCapabilities({
-            'browserName': 'Chrome',
-            'browser_version': '62.0',
-            'os': 'Windows',
-            'os_version': '10',
-            'resolution': '1920x1080',
-            'browserstack.user': process.env.TEST_BS_USER,
-            'browserstack.key': process.env.TEST_BS_KEY,
-            'browserstack.local': 'true',
-            'browserstack.localIdentifier': process.env.BROWSERSTACK_LOCAL_IDENTIFIER
-        })
-        .build();
-    driver.manage().deleteAllCookies();
+    const driver = global.driver;
 
     const wirecardPaymentLabels = [
         'Wirecard Kreditkarte',

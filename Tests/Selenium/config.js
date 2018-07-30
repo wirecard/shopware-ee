@@ -78,3 +78,32 @@ exports.config = {
         }
     }
 };
+
+/**
+ * List of browsers to test against.
+ * See https://www.browserstack.com/automate/capabilities
+ */
+exports.browsers = [
+    {
+        browserName: 'Chrome',
+        browser_version: '62.0',
+        os: 'Windows',
+        os_version: '10'
+    },
+    {
+        browserName: 'Firefox',
+        browser_version: '62.0 beta',
+        os: 'Windows',
+        os_version: '7',
+        resolution: '1920x1080'
+    }
+];
+
+/**
+ * List of test files (without `.js` extension!) to be executed. All tests must be located in `./Tests/Selenium`.
+ * @type {string[]}
+ */
+exports.tests = [
+    'Payments/DefaultTest'
+    // 'Payments/PaypalTest'
+];
