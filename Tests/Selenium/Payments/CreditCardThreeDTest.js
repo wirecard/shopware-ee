@@ -82,7 +82,7 @@ describe('Credit Card 3-D Secure test', () => {
         await driver.wait(until.elementLocated(By.id('password')), 20000);
         await driver.findElement(By.id('password')).sendKeys(config.payments.creditCardThreeD.password, Key.ENTER);
 
-        await waitForAlert(driver, 10000);
+        await waitForAlert(driver, 20000);
 
         await checkConfirmationPage(driver, paymentLabel);
     });
