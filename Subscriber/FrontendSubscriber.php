@@ -175,7 +175,8 @@ class FrontendSubscriber implements SubscriberInterface
      */
     private function assignPaymentStatus(\Enlight_View_Default $view)
     {
-        if (strpos($view->getAssign('sPayment'), 'wirecard_elastic_engine') === false) {
+        $payment = $view->getAssign('sPayment');
+        if (isset($payment['name']) && strpos($payment['name'], 'wirecard_elastic_engine') === false) {
             return;
         }
         $sOrderNumber = $view->getAssign('sOrderNumber');
