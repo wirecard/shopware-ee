@@ -126,6 +126,10 @@ class SepaPaymentTest extends PaymentTestCase
 
         $shop       = $this->createMock(Shop::class);
         $parameters = $this->createMock(ParameterBagInterface::class);
+        $parameters->method('get')->willReturnMap([
+            ['kernel.name', 'Shopware'],
+            ['shopware.release.version', '__SW_VERSION__'],
+        ]);
 
         $config = $this->payment->getTransactionConfig($shop, $parameters, 'EUR');
 
@@ -145,6 +149,14 @@ class SepaPaymentTest extends PaymentTestCase
         $this->assertEquals('CT-MAID', $sepaCreditTransferConfig->getMerchantAccountId());
         $this->assertEquals('CT-Secret', $sepaCreditTransferConfig->getSecret());
         $this->assertEquals(SepaCreditTransferTransaction::NAME, $sepaCreditTransferConfig->getPaymentMethodName());
+        $this->assertEquals([
+            'headers' => [
+                'shop-system-name'    => 'Shopware',
+                'shop-system-version' => '__SW_VERSION__',
+                'plugin-name'         => 'WirecardShopwareElasticEngine',
+                'plugin-version'      => '__PLUGIN_VERSION__',
+            ],
+        ], $config->getShopHeader());
     }
 
     public function testGetTransactionTypeException()

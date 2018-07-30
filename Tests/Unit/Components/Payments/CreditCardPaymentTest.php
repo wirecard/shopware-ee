@@ -106,6 +106,10 @@ class CreditCardPaymentTest extends PaymentTestCase
 
         $shop       = $this->createMock(Shop::class);
         $parameters = $this->createMock(ParameterBagInterface::class);
+        $parameters->method('get')->willReturnMap([
+            ['kernel.name', 'Shopware'],
+            ['shopware.release.version', '__SW_VERSION__'],
+        ]);
 
         $this->em->method('getRepository')->willReturn($this->createMock(EntityRepository::class));
 
@@ -121,6 +125,14 @@ class CreditCardPaymentTest extends PaymentTestCase
         $this->assertEquals('CCMAID', $paymentMethodConfig->getMerchantAccountId());
         $this->assertEquals('CCSecret', $paymentMethodConfig->getSecret());
         $this->assertEquals(CreditCardTransaction::NAME, $paymentMethodConfig->getPaymentMethodName());
+        $this->assertEquals([
+            'headers' => [
+                'shop-system-name'    => 'Shopware',
+                'shop-system-version' => '__SW_VERSION__',
+                'plugin-name'         => 'WirecardShopwareElasticEngine',
+                'plugin-version'      => '__PLUGIN_VERSION__',
+            ],
+        ], $config->getShopHeader());
     }
 
     public function testGetTransactionTypeException()

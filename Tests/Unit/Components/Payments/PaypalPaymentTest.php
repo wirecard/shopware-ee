@@ -102,6 +102,10 @@ class PaypalPaymentTest extends PaymentTestCase
 
         $shop       = $this->createMock(Shop::class);
         $parameters = $this->createMock(ParameterBagInterface::class);
+        $parameters->method('get')->willReturnMap([
+            ['kernel.name', 'Shopware'],
+            ['shopware.release.version', '__SW_VERSION__'],
+        ]);
 
         $config = $this->payment->getTransactionConfig($shop, $parameters, 'EUR');
 
@@ -115,6 +119,14 @@ class PaypalPaymentTest extends PaymentTestCase
         $this->assertEquals('MAID', $paymentMethodConfig->getMerchantAccountId());
         $this->assertEquals('Secret', $paymentMethodConfig->getSecret());
         $this->assertEquals(PayPalTransaction::NAME, $paymentMethodConfig->getPaymentMethodName());
+        $this->assertEquals([
+            'headers' => [
+                'shop-system-name'    => 'Shopware',
+                'shop-system-version' => '__SW_VERSION__',
+                'plugin-name'         => 'WirecardShopwareElasticEngine',
+                'plugin-version'      => '__PLUGIN_VERSION__',
+            ],
+        ], $config->getShopHeader());
     }
 
     public function testGetTransactionTypeException()

@@ -145,6 +145,14 @@ class CreditCardPaymentTest extends TestCase
             '508b8896-b37d-4614-845c-26bf8bf2c948',
             $config->get(CreditCardTransaction::NAME)->getThreeDMerchantAccountId()
         );
+        $this->assertEquals([
+            'headers' => [
+                'shop-system-name'    => 'Shopware',
+                'shop-system-version' => '___VERSION___',
+                'plugin-name'         => 'WirecardShopwareElasticEngine',
+                'plugin-version'      => '0.5.0',
+            ],
+        ], $config->getShopHeader());
     }
 
     public function testGetTransactionType()
