@@ -57,6 +57,7 @@ use WirecardShopwareElasticEngine\Exception\CouldNotSaveOrderException;
 use WirecardShopwareElasticEngine\Exception\UnknownActionException;
 use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
 use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
 
 /**
  * @since 1.0.0
@@ -250,7 +251,14 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     $response->getTransactionId(),
                     $initialTransaction->getPaymentUniqueId(),
                     $paymentStatus,
-                    false
+                    // Mails should be send if either the final state is already returned by the return action or
+                    // if the state is open and the merchant wants to to send pending mails.
+                    NotificationHandler::shouldSendMail($paymentStatus)
+                    || ($paymentStatus === Status::PAYMENT_STATE_OPEN
+                        && $this->container->get('config')->getByNamespace(
+                            WirecardShopwareElasticEngine::NAME,
+                            'wirecardElasticEnginePendingMail'
+                        ))
                 );
                 if (! $orderNumber) {
                     throw new CouldNotSaveOrderException(
@@ -279,7 +287,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                             $response->getTransactionId(),
                             $initialTransaction->getPaymentUniqueId(),
                             $initialTransaction->getPaymentStatus(),
-                            false
+                            NotificationHandler::shouldSendMail($initialTransaction->getPaymentStatus())
                         );
                     }
                 }

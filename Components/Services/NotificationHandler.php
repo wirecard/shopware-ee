@@ -149,8 +149,25 @@ class NotificationHandler extends Handler
      */
     private function savePaymentStatus(\sOrder $shopwareOrder, Order $order, $paymentStatusId)
     {
-        $shopwareOrder->setPaymentStatus($order->getId(), $paymentStatusId, false);
-        return;
+        $shopwareOrder->setPaymentStatus(
+            $order->getId(),
+            $paymentStatusId,
+            self::shouldSendMail($paymentStatusId)
+        );
+    }
+
+    /**
+     * @param $paymentStatusId
+     * @return bool
+     *
+     * @since 1.0.0
+     */
+    public static function shouldSendMail($paymentStatusId)
+    {
+        return in_array($paymentStatusId, [
+            Status::PAYMENT_STATE_COMPLETELY_PAID,
+            Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED
+        ]);
     }
 
     /**
