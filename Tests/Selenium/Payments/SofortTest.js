@@ -76,7 +76,7 @@ describe('Sofort. test', () => {
         await driver.wait(until.elementLocated(By.id('BackendFormTAN')), 20000);
         await driver.findElement(By.id('BackendFormTAN')).sendKeys(formFields.tan, Key.ENTER);
 
-        await waitForAlert(driver, 10000);
+        await waitForAlert(driver, 20000);
 
         await checkConfirmationPage(driver, paymentLabel);
     });

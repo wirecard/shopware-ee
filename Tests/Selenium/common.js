@@ -30,7 +30,6 @@
 
 const { expect } = require('chai');
 const { Builder, By, until } = require('selenium-webdriver');
-const { Options } = require('selenium-webdriver/firefox');
 const { config } = require('./config');
 
 exports.loginWithExampleAccount = async function (driver) {
@@ -143,7 +142,7 @@ exports.waitForAlert = async function (driver, timeout) {
     } catch (e) {
         console.log('no alert popup');
     }
-}
+};
 
 exports.asyncForEach = async function (arr, cb) {
     for (let i = 0; i < arr.length; i++) {

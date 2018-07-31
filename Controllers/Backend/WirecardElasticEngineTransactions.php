@@ -285,10 +285,12 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
             foreach ($action->getAssignments() as $key => $value) {
                 $this->View()->assign($key, $value);
             }
+            return;
         }
 
         if ($action instanceof ErrorAction) {
             $this->handleError($action->getMessage());
+            return;
         }
 
         throw new UnknownActionException(get_class($action));
