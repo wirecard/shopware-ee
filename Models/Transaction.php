@@ -581,7 +581,7 @@ class Transaction extends ModelEntity
             'type'                         => $this->getType(),
             'amount'                       => $this->getAmount(),
             'currency'                     => $this->getCurrency(),
-            'createdAt'                    => $this->getCreatedAt(),
+            'createdAt'                    => $this->getCreatedAt()->format(\DateTime::W3C),
             'response'                     => $this->getResponse(),
             'request'                      => $this->getRequest(),
             'state'                        => $this->getState(),

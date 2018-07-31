@@ -307,6 +307,11 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
             $order = $this->getManager()->getRepository(Order::class)
                           ->findOneBy(['number' => $current['orderNumber']]);
 
+            $createdAt = $result['data'][$key]['createdAt'];
+            if ($createdAt instanceof \DateTime) {
+                $result['data'][$key]['createdAt'] = $createdAt->format(\DateTime::W3C);
+            }
+
             /** @var Shopware\Models\Payment\Payment $payment */
             $payment = $order ? $order->getPayment() : null;
             /** @var Shopware\Models\Order\Status $status */

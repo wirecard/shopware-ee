@@ -142,7 +142,17 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 enableTextSelection: true
             },
             columns: [
-                { header: me.snippets.transactionsTable.createdAt, dataIndex: 'createdAt', flex: 1 },
+                {
+                    header: me.snippets.transactionsTable.createdAt,
+                    dataIndex: 'createdAt',
+                    flex: 1,
+                    renderer: function (value) {
+                        if (value === Ext.undefined) {
+                            return value;
+                        }
+                        return Ext.util.Format.date(value) + ' ' + Ext.util.Format.date(value, 'H:i:s');
+                    }
+                },
                 { header: me.snippets.transactionsTable.type, dataIndex: 'type', flex: 1 },
                 { header: me.snippets.transactionsTable.transactionId, dataIndex: 'transactionId', flex: 1 },
                 { header: me.snippets.transactionsTable.transactionType, dataIndex: 'transactionType', flex: 1 },
@@ -317,8 +327,8 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
         this.detailsStore.load({
             callback: function (records) {
                 var data = Array.isArray(records) && records.length === 1 ? records[0].getData() : false;
-                window.DATA = data;
 
+                infoPanel.removeAll();
                 if (!data || !data.transactions || !data.transactions.length) {
                     infoPanel.add({
                         xtype: 'container',
