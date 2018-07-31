@@ -66,6 +66,11 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
             refund: '{s name="RefundButtonText"}{/s}',
             creditRefund: '{s name="CreditRefundButtonText"}{/s}',
             cancelRefund: '{s name="CancelRefundButtonText"}{/s}'
+        },
+        bankData: {
+            title: '{s name="BankDataTitle"}{/s}',
+            iban: '{s name="IBAN"}{/s}',
+            bic: '{s name="BIC"}{/s}'
         }
     },
 
@@ -335,6 +340,24 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                             renderData: transaction,
                             margin: '0 0 10px'
                         });
+
+                        if (me.record.getPayment().first().get('name') === 'wirecard_elastic_engine_poi') {
+                            var poi = {
+                                'bankName': transaction.response['merchant-bank-account.0.bank-name'],
+                                'bic':      transaction.response['merchant-bank-account.0.bic'],
+                                'iban':     transaction.response['merchant-bank-account.0.iban'],
+                                'address':  transaction.response['merchant-bank-account.0.branch-address'],
+                                'city':     transaction.response['merchant-bank-account.0.branch-city'],
+                                'state':    transaction.response['merchant-bank-account.0.branch-state']
+                            }
+                            console.log(poi);
+                            infoPanel.add({
+                                xtype: 'container',
+                                renderTpl: me.createBankDataTemplate(),
+                                renderData: poi,
+                                margin: '0 0 10px'
+                            });
+                        }
                     }
                     if (transaction.type === 'initial-response' && transaction.paymentMethod === 'sepadirectdebit') {
                         infoPanel.add({
@@ -419,6 +442,31 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
             '<div class="wirecardee-info-panel">',
             '<p><label class="x-form-item-label">' + me.snippets.paymentUniqueId + ':</label> {paymentUniqueId}</p>',
             '</div>',
+            '</tpl>{/literal}'
+        );
+    },
+
+    /**
+     * Bank data for payment on invoice
+     * @return { Ext.XTemplate }
+     */
+    createBankDataTemplate: function() {
+        var me = this;
+        return new Ext.XTemplate(
+            '{literal}<tpl for=".">',
+            '<p><label class="x-form-item-label">' + me.snippets.bankData.title + ':</label></p>',
+            '<tpl if="bankName">',
+            '<p>{bankName}</p>',
+            '</tpl>',
+            '<p>' + me.snippets.bankData.iban + ': {iban}</p>',
+            '<tpl if="bic">',
+            '<p>' + me.snippets.bankData.bic + ': {bic}</p>',
+            '</tpl>',
+            '<tpl if="address">',
+            '<p> {address} <br>',
+            '{city} {state}',
+            '</p>',
+            '</tpl>',
             '</tpl>{/literal}'
         );
     }
