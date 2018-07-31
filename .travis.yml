@@ -9,8 +9,8 @@ cache:
 
 addons:
   browserstack:
-    username: ${BROWSER_STACK_USER}
-    access_key: ${BROWSER_STACK_KEY}
+    username: ${BROWSERSTACK_USER}
+    access_key: ${BROWSERSTACK_KEY}
 
 php:
   - 7.1
