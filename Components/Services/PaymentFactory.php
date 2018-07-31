@@ -40,6 +40,7 @@ use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInAdvancePayment;
+use WirecardShopwareElasticEngine\Components\Payments\PaymentOnInvoicePayment;
 use WirecardShopwareElasticEngine\Components\Payments\SepaPayment;
 use WirecardShopwareElasticEngine\Components\Payments\SofortPayment;
 use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
@@ -161,6 +162,7 @@ class PaymentFactory
             CreditCardPayment::PAYMETHOD_IDENTIFIER       => CreditCardPayment::class,
             IdealPayment::PAYMETHOD_IDENTIFIER            => IdealPayment::class,
             PaymentInAdvancePayment::PAYMETHOD_IDENTIFIER => PaymentInAdvancePayment::class,
+            PaymentOnInvoicePayment::PAYMETHOD_IDENTIFIER => PaymentOnInvoicePayment::class,
             SepaPayment::PAYMETHOD_IDENTIFIER             => SepaPayment::class,
             SofortPayment::PAYMETHOD_IDENTIFIER           => SofortPayment::class
         ];
