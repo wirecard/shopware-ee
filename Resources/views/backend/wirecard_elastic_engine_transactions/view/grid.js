@@ -216,7 +216,6 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.Grid', {
         if (value === Ext.undefined) {
             return value;
         }
-
-        return Ext.util.Format.date(value, 'm.d.Y H:i');
+        return Ext.util.Format.date(value) + ' ' + Ext.util.Format.date(value, 'H:i');
     }
 });
