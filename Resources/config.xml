@@ -62,11 +62,17 @@ function (button) {
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineNotifyMail</name>
-            <label lang="de">Bezahlbestätigungs E-Mail</label>
-            <label lang="en">Payment Notification Mail</label>
+            <label lang="de">Zahlungsbenachrichtigung per E-Mail</label>
+            <label lang="en">Payment notification by e-mail</label>
             <value></value>
-            <description lang="de">Erhalten Sie eine E-Mail nach Erhalt einer Bezahlbestätigung.</description>
-            <description lang="en">Recieve a mail upon receipt of payment notification.</description>
+            <description lang="de">
+                Tragen Sie Ihre E-Mail-Adresse ein, um eine Zahlungsbenachrichtigung für jede eingehende
+                Zahlungsbestätigung per E-Mail zu erhalten.
+            </description>
+            <description lang="en">
+                Enter your e-mail address to receive a payment notification for each incoming payment confirmation
+                via e-mail.
+            </description>
             <options>
                 <vtype>email</vtype>
             </options>

@@ -140,7 +140,8 @@ class NotificationHandler extends Handler
         }
 
         if ($notification->getTransactionType() === Transaction::TYPE_AUTHORIZATION
-            || $notification->getTransactionType() === Transaction::TYPE_PURCHASE) {
+            || $notification->getTransactionType() === Transaction::TYPE_PURCHASE
+        ) {
             $this->sendPaymentNotificationMail($notification, $initialTransaction);
         }
 
@@ -185,61 +186,50 @@ class NotificationHandler extends Handler
     }
 
     /**
-     * @param Response $notification
+     * @param SuccessResponse  $notification
      * @param TransactionModel $initialTransaction
      */
-    private function sendPaymentNotificationMail(Response $notification, TransactionModel $initialTransaction)
+    private function sendPaymentNotificationMail(SuccessResponse $notification, TransactionModel $initialTransaction)
     {
-        $notifyMail = $this->shopwareConfig->getByNamespace(
+        $notifyMailAddress = $this->shopwareConfig->getByNamespace(
             WirecardShopwareElasticEngine::NAME,
             'wirecardElasticEngineNotifyMail'
         );
-
-        if ($notifyMail) {
-            $orderNumber = $initialTransaction->getOrderNumber() ?: '-';
-            $transactionId = $notification->getTransactionId();
-            $paymentId = $initialTransaction->getPaymentUniqueId();
-            $amount = $notification->getRequestedAmount()->getValue();
-            $currency = $notification->getRequestedAmount()->getCurrency();
-            $transactionType = $notification->getTransactionType();
-
-            $subject = $this->snippetManager
-                            ->getNamespace('backend/wirecard_elastic_engine/common')
-                            ->get('PaymentNotificationMailSubject', 'Payment notification recieved');
-
-            $orderNumberLabel = $this->snippetManager
-                                     ->getNamespace('backend/wirecard_elastic_engine/transactions_window')
-                                     ->get('OrderNumber', 'Bestellnummer');
-
-            $paymentNumberLabel = $this->snippetManager
-                                       ->getNamespace('backend/wirecard_elastic_engine/transactions_window')
-                                       ->get('PaymentUniqueId', 'Payment Number');
-
-            $transactionIdLabel = $this->snippetManager
-                                       ->getNamespace('backend/wirecard_elastic_engine/transactions_window')
-                                       ->get('TransactionId', 'TransactionID');
-
-            $transactionTypeLabel = $this->snippetManager
-                                         ->getNamespace('backend/wirecard_elastic_engine/transactions_window')
-                                         ->get('TransactionType', 'Action');
-
-            $amountLabel = $this->snippetManager
-                                ->getNamespace('backend/wirecard_elastic_engine/transactions_window')
-                                ->get('Amount', 'Amount');
-
-            $message = $orderNumberLabel      . ': ' . $orderNumber              . PHP_EOL;
-            $message .= $paymentNumberLabel   . ': ' . $paymentId                . PHP_EOL;
-            $message .= $transactionIdLabel   . ': ' . $transactionId            . PHP_EOL;
-            $message .= $transactionTypeLabel . ': ' . $transactionType          . PHP_EOL;
-            $message .= $amountLabel          . ': ' . $amount . ' ' . $currency . PHP_EOL;
-
-            $message .= PHP_EOL . PHP_EOL;
-            $message .= print_r($notification->getData(), true);
-
-            $this->mail->addTo($notifyMail);
-            $this->mail->setSubject($subject);
-            $this->mail->setBodyText($message);
-            $this->mail->send();
+        if (! $notifyMailAddress) {
+            return;
         }
+
+        $orderNumber     = $initialTransaction->getOrderNumber() ?: '-';
+        $paymentId       = $initialTransaction->getPaymentUniqueId();
+        $transactionId   = $notification->getTransactionId();
+        $transactionType = $notification->getTransactionType();
+        $amount          = $notification->getRequestedAmount()->getValue();
+        $currency        = $notification->getRequestedAmount()->getCurrency();
+
+        $snippets = $this->snippetManager->getNamespace('backend/wirecard_elastic_engine/common');
+
+        $subject = $snippets->get('PaymentNotificationMailSubject', 'Payment notification recieved');
+
+        $snippets = $this->snippetManager->getNamespace('backend/wirecard_elastic_engine/transactions_window');
+
+        $orderNumberLabel     = $snippets->get('OrderNumber', 'Order Number');
+        $paymentNumberLabel   = $snippets->get('PaymentUniqueId', 'Payment Number');
+        $transactionIdLabel   = $snippets->get('TransactionId', 'Transaction ID');
+        $transactionTypeLabel = $snippets->get('TransactionType', 'Action');
+        $amountLabel          = $snippets->get('Amount', 'Amount');
+
+        $message = $orderNumberLabel . ': ' . $orderNumber . PHP_EOL;
+        $message .= $paymentNumberLabel . ': ' . $paymentId . PHP_EOL;
+        $message .= $transactionIdLabel . ': ' . $transactionId . PHP_EOL;
+        $message .= $transactionTypeLabel . ': ' . $transactionType . PHP_EOL;
+        $message .= $amountLabel . ': ' . $amount . ' ' . $currency . PHP_EOL;
+
+        $message .= PHP_EOL . PHP_EOL;
+        $message .= print_r($notification->getData(), true);
+
+        $this->mail->addTo($notifyMailAddress);
+        $this->mail->setSubject($subject);
+        $this->mail->setBodyText($message);
+        $this->mail->send();
     }
 }
