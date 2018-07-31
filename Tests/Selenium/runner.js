@@ -36,8 +36,8 @@ const Mocha = require('mocha');
 const run = async () => {
     await asyncForEach(browsers, async browser => {
         const bsConfig = Object.assign({
-            'browserstack.user': process.env.TEST_BS_USER,
-            'browserstack.key': process.env.TEST_BS_KEY,
+            'browserstack.user': process.env.BROWSERSTACK_USER,
+            'browserstack.key': process.env.BROWSERSTACK_KEY,
             'browserstack.local': 'true',
             'browserstack.localIdentifier': process.env.BROWSERSTACK_LOCAL_IDENTIFIER
         }, browser);
@@ -60,7 +60,7 @@ const run = async () => {
                     delete require.cache[file];
                 });
 
-                console.log(`Running ${testCase.file} against ${browser.browserName}`);
+                console.log(`Running ${testCase.file} against ${browser.browserName} (v${browser.browser_version}) on ${browser.os} (${browser.os_version})`);
 
                 mocha.addFile(`./Tests/Selenium/${testCase.file}.js`);
 
