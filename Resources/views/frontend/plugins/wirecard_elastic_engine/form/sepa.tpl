@@ -28,7 +28,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  *}
 
-{namespace name="frontend/wirecard_elastic_engine/sepa"}
+{namespace name="frontend/wirecard_elastic_engine/sepa-direct-debit"}
 {block name="wirecard_elastic_engine_sepa_form"}
     {block name="wirecard_confirm_mandate_field"}
         <input type="hidden" id="wirecardee-sepa--confirm-mandate"

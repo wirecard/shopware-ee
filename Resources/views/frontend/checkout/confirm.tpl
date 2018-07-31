@@ -35,7 +35,7 @@
     {if $wirecardElasticEngineViewAssignments and $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_sepa'}
         <div class="panel has--border wirecardee--additional-form-fields">
             <div class="panel--title primary is--underline">
-                {s name="SepaPaymentFormHeader" namespace="frontend/wirecard_elastic_engine/sepa"}{/s}
+                {s name="SepaPaymentFormHeader" namespace="frontend/wirecard_elastic_engine/sepa-direct-debit"}{/s}
             </div>
             <div class="panel--body is--wide">
                 {include file="frontend/plugins/wirecard_elastic_engine/form/sepa.tpl"}
@@ -83,7 +83,7 @@
                     if ($('#wirecardee-sepa--confirm-mandate').val() !== 'confirmed') {
                         event.preventDefault();
                         modalWindow = $.modal.open(getMandateText(), {
-                            title: "{s name="SepaMandateTitle" namespace="frontend/wirecard_elastic_engine/sepa"}{/s}",
+                            title: "{s name="SepaMandateTitle" namespace="frontend/wirecard_elastic_engine/sepa-direct-debit"}{/s}",
                             closeOnOverlay: false,
                             showCloseButton: false
                         });
