@@ -17,9 +17,9 @@
   },
   "type": "shopware-plugin",
   "scripts": {
-    "upload-coverage": "codacycoverage clover build/coverage/xml",
+    "upload-coverage": "codacycoverage clover build/coverage.xml",
     "cs-check": "phpcs --standard=phpcs.xml --ignore=*/vendor/*,*/Tests/*,*/node_modules/*,*/Resources/* -s",
     "cs-fix": "phpcbf --standard=phpcs.xml",
-    "test-coverage": "phpunit --colors=always --coverage-clover build/coverage/xml"
+    "test-coverage": "phpunit --colors=always --coverage-clover build/coverage.xml"
   }
 }
