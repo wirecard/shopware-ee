@@ -317,8 +317,8 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
         this.detailsStore.load({
             callback: function (records) {
                 var data = Array.isArray(records) && records.length === 1 ? records[0].getData() : false;
-                window.DATA = data;
 
+                infoPanel.removeAll();
                 if (!data || !data.transactions || !data.transactions.length) {
                     infoPanel.add({
                         xtype: 'container',
