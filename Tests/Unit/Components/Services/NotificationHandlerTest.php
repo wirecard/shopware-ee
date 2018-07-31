@@ -152,4 +152,12 @@ class NotificationHandlerTest extends TestCase
         );
         $this->assertSame($transactionEntity, $notifyTransaction);
     }
+
+    public function testShouldSendMail()
+    {
+        $this->assertFalse(NotificationHandler::shouldSendStatusMail(null));
+        $this->assertFalse(NotificationHandler::shouldSendStatusMail(Status::PAYMENT_STATE_OPEN));
+        $this->assertTrue(NotificationHandler::shouldSendStatusMail(Status::PAYMENT_STATE_COMPLETELY_PAID));
+        $this->assertTrue(NotificationHandler::shouldSendStatusMail(Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED));
+    }
 }

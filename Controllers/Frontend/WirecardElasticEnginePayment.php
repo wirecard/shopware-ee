@@ -200,10 +200,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         /** @var ReturnHandler $returnHandler */
         $returnHandler = $this->get('wirecard_elastic_engine.return_handler');
-        /** @var TransactionManager $transactionManager */
-        $transactionManager = $this->get('wirecard_elastic_engine.transaction_manager');
-        $request            = $this->Request();
-        $payment            = $this->getPaymentFactory()->create($request->getParam(self::ROUTER_METHOD));
+        $request       = $this->Request();
+        $payment       = $this->getPaymentFactory()->create($request->getParam(self::ROUTER_METHOD));
 
         //$this->getLogger()->debug('Frontend::returnAction: request: ' . json_encode($request->getParams()));
 
@@ -219,80 +217,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             );
 
             if ($response instanceof SuccessResponse) {
-                $this->getSessionManager()->destroyDeviceFingerprintId();
-
-                $this->getLogger()->debug('Frontend::returnAction: Incoming success return');
-
-                $orderStatus        = Status::ORDER_STATE_OPEN;
-                $orderStatusComment = null;
-
-                $initialTransaction = $transactionManager->getInitialTransaction($response);
-                $this->getLogger()->debug("Frontend::returnAction: got initial transaction " .
-                                          "{$initialTransaction->getId()}, load basket");
-                $orderBasket = $this->loadBasketFromSignature($initialTransaction->getBasketSignature());
-                try {
-                    $this->verifyBasketSignature($initialTransaction->getBasketSignature(), $orderBasket);
-                } catch (\RuntimeException $exception) {
-                    $orderStatusComment = 'Basket verification failed: ' . $exception->getMessage();
-                    $this->getLogger()->warning($orderStatusComment);
-                    $orderStatus = Status::ORDER_STATE_CLARIFICATION_REQUIRED;
-                }
-
-                // check if payment status has already been set by notification (see NotificationHandler)
-                $paymentStatus = Status::PAYMENT_STATE_OPEN;
-                $this->getLogger()->debug('Frontend::returnAction: initial transaction payment status: '
-                                          . $initialTransaction->getPaymentStatus());
-                if ($initialTransaction->getPaymentStatus()) {
-                    $paymentStatus = $initialTransaction->getPaymentStatus();
-                }
-
-                $this->getLogger()->debug('Frontend::returnAction: save order');
-                $orderNumber = $this->saveOrder(
-                    $response->getTransactionId(),
-                    $initialTransaction->getPaymentUniqueId(),
-                    $paymentStatus,
-                    // Mails should be send if either the final state is already returned by the return action or
-                    // if the state is open and the merchant wants to to send pending mails.
-                    NotificationHandler::shouldSendMail($paymentStatus)
-                    || ($paymentStatus === Status::PAYMENT_STATE_OPEN
-                        && $this->container->get('config')->getByNamespace(
-                            WirecardShopwareElasticEngine::NAME,
-                            'wirecardElasticEnginePendingMail'
-                        ))
-                );
-                if (! $orderNumber) {
-                    throw new CouldNotSaveOrderException(
-                        $response->getTransactionId(),
-                        $initialTransaction->getPaymentUniqueId(),
-                        $paymentStatus
-                    );
-                }
-                $initialTransaction->setOrderNumber($orderNumber);
-                $this->getModelManager()->flush($initialTransaction);
-                $this->getLogger()->debug('Frontend::returnAction: flushed initial transaction with orderNumber '
-                                          . $orderNumber);
-
-                if ($orderStatus !== Status::ORDER_STATE_OPEN) {
-                    $this->setOrderStatus($orderNumber, $orderStatus, $orderStatusComment);
-                }
-
-                // check again if payment status has been set by notification and try to update payment status
-                if (! $initialTransaction->getPaymentStatus()) {
-                    $this->getModelManager()->refresh($initialTransaction);
-                    $this->getLogger()->debug('Frontend::returnAction: refreshed initial transaction, payment status: '
-                                              . $initialTransaction->getPaymentStatus());
-                    if ($initialTransaction->getPaymentStatus()) {
-                        $this->getLogger()->debug('Frontend::returnAction: save order payment status');
-                        $this->savePaymentStatus(
-                            $response->getTransactionId(),
-                            $initialTransaction->getPaymentUniqueId(),
-                            $initialTransaction->getPaymentStatus(),
-                            NotificationHandler::shouldSendMail($initialTransaction->getPaymentStatus())
-                        );
-                    }
-                }
-
-                $action = $returnHandler->handleSuccess($response, $initialTransaction, $orderStatusComment);
+                $action = $this->createOrder($returnHandler, $response);
             } else {
                 $action = $returnHandler->handleResponse($response);
             }
@@ -303,6 +228,107 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         $this->getLogger()->debug('Frontend::returnAction: finished');
         return $this->handleAction($action);
+    }
+
+    /**
+     * @param ReturnHandler   $returnHandler
+     * @param SuccessResponse $response
+     *
+     * @return Action
+     * @throws CouldNotSaveOrderException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException
+     */
+    private function createOrder(ReturnHandler $returnHandler, SuccessResponse $response)
+    {
+        /** @var TransactionManager $transactionManager */
+        $transactionManager = $this->get('wirecard_elastic_engine.transaction_manager');
+
+        $this->getSessionManager()->destroyDeviceFingerprintId();
+
+        $this->getLogger()->debug('Frontend::returnAction: Incoming success return');
+
+        $orderStatus        = Status::ORDER_STATE_OPEN;
+        $orderStatusComment = null;
+
+        $initialTransaction = $transactionManager->getInitialTransaction($response);
+        $this->getLogger()->debug("Frontend::returnAction: got initial transaction " .
+                                  "{$initialTransaction->getId()}, load basket");
+        $orderBasket = $this->loadBasketFromSignature($initialTransaction->getBasketSignature());
+        try {
+            $this->verifyBasketSignature($initialTransaction->getBasketSignature(), $orderBasket);
+        } catch (\RuntimeException $exception) {
+            $orderStatusComment = 'Basket verification failed: ' . $exception->getMessage();
+            $this->getLogger()->warning($orderStatusComment);
+            $orderStatus = Status::ORDER_STATE_CLARIFICATION_REQUIRED;
+        }
+
+        // check if payment status has already been set by notification (see NotificationHandler)
+        $paymentStatus = Status::PAYMENT_STATE_OPEN;
+        $this->getLogger()->debug('Frontend::returnAction: initial transaction payment status: '
+                                  . $initialTransaction->getPaymentStatus());
+        if ($initialTransaction->getPaymentStatus()) {
+            $paymentStatus = $initialTransaction->getPaymentStatus();
+        }
+
+        $this->getLogger()->debug('Frontend::returnAction: save order');
+        $orderNumber = $this->saveOrder(
+            $response->getTransactionId(),
+            $initialTransaction->getPaymentUniqueId(),
+            $paymentStatus,
+            $this->shouldSendStatusMailOnSaveOrder($paymentStatus)
+        );
+        if (! $orderNumber) {
+            throw new CouldNotSaveOrderException(
+                $response->getTransactionId(),
+                $initialTransaction->getPaymentUniqueId(),
+                $paymentStatus
+            );
+        }
+        $initialTransaction->setOrderNumber($orderNumber);
+        $this->getModelManager()->flush($initialTransaction);
+        $this->getLogger()->debug('Frontend::returnAction: flushed initial transaction with orderNumber '
+                                  . $orderNumber);
+
+        if ($orderStatus !== Status::ORDER_STATE_OPEN) {
+            $this->setOrderStatus($orderNumber, $orderStatus, $orderStatusComment);
+        }
+
+        // check again if payment status has been set by notification and try to update payment status
+        if (! $initialTransaction->getPaymentStatus()) {
+            $this->getModelManager()->refresh($initialTransaction);
+            $this->getLogger()->debug('Frontend::returnAction: refreshed initial transaction, payment status: '
+                                      . $initialTransaction->getPaymentStatus());
+            if ($initialTransaction->getPaymentStatus()) {
+                $this->getLogger()->debug('Frontend::returnAction: save order payment status');
+                $this->savePaymentStatus(
+                    $response->getTransactionId(),
+                    $initialTransaction->getPaymentUniqueId(),
+                    $initialTransaction->getPaymentStatus(),
+                    NotificationHandler::shouldSendStatusMail($initialTransaction->getPaymentStatus())
+                );
+            }
+        }
+
+        return $returnHandler->handleSuccess($response, $initialTransaction, $orderStatusComment);
+    }
+
+    /**
+     * Mails should be send if either the final state is already returned by the return action or
+     * if the state is open and the merchant wants to to send pending mails.
+     *
+     * @param int $paymentStatus
+     *
+     * @return bool
+     */
+    private function shouldSendStatusMailOnSaveOrder($paymentStatus)
+    {
+        $sendPendingMails = $this->container->get('config')->getByNamespace(
+            WirecardShopwareElasticEngine::NAME,
+            'wirecardElasticEnginePendingMail'
+        );
+        return NotificationHandler::shouldSendStatusMail($paymentStatus)
+               || ($paymentStatus === Status::PAYMENT_STATE_OPEN && $sendPendingMails);
     }
 
     /**
