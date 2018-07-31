@@ -56,6 +56,11 @@ class IdealPayment extends Payment implements ProcessPaymentInterface, Additiona
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_ideal';
 
     /**
+     * @var IdealTransaction
+     */
+    private $transactionInstance;
+
+    /**
      * {@inheritdoc}
      */
     public function getLabel()
