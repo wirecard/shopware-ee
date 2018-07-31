@@ -58,7 +58,7 @@ class NotificationHandler extends Handler
      * @param Response       $notification
      * @param BackendService $backendService
      *
-     * @return bool
+     * @return Transaction|null
      * @throws \WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException
      *
      * @since 1.0.0
@@ -68,21 +68,19 @@ class NotificationHandler extends Handler
         if ($notification instanceof SuccessResponse) {
             $initialTransaction = $this->handleSuccess($shopwareOrder, $notification, $backendService);
 
-            $this->transactionManager->createNotify($initialTransaction, $notification, $backendService);
-
-            return true;
+            return $this->transactionManager->createNotify($initialTransaction, $notification, $backendService);
         }
 
         if ($notification instanceof FailureResponse) {
             $this->logger->error("Failure response", $notification->getData());
-            return false;
+            return null;
         }
 
         $this->logger->error("Unexpected notification response", [
             'class'    => get_class($notification),
             'response' => $notification->getData(),
         ]);
-        return false;
+        return null;
     }
 
     /**

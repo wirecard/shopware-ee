@@ -123,12 +123,12 @@ class NotificationHandlerTest extends TestCase
         $response = $this->createMock(Response::class);
         $response->expects($this->atLeastOnce())->method('getData')->willReturn([]);
 
-        $success = $this->handler->handleResponse(
+        $transaction = $this->handler->handleResponse(
             $this->shopwareOrder,
             $response,
             $this->backendService
         );
-        $this->assertFalse($success);
+        $this->assertNull($transaction);
     }
 
     public function testExecuteSuccessResponse()
@@ -145,11 +145,11 @@ class NotificationHandlerTest extends TestCase
         $this->transactionManager->expects($this->atLeastOnce())->method('createNotify')
                                  ->willReturn($transactionEntity);
 
-        $success = $this->handler->handleResponse(
+        $notifyTransaction = $this->handler->handleResponse(
             $this->shopwareOrder,
             $response,
             $this->backendService
         );
-        $this->assertTrue($success);
+        $this->assertSame($transactionEntity, $notifyTransaction);
     }
 }

@@ -328,11 +328,15 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             ));
             $notification   = $backendService->handleNotification($request->getRawBody());
 
-            $notificationHandler->handleResponse(
+            $notifyTransaction = $notificationHandler->handleResponse(
                 $this->getModules()->Order(),
                 $notification,
                 $backendService
             );
+            if ($notifyTransaction) {
+                $notificationMail = $this->get('wirecard_elastic_engine.mail.merchant_notification');
+                $notificationMail->send($notification, $notifyTransaction);
+            }
         } catch (\Exception $e) {
             $this->logException('Notification handling failed', $e);
         }
