@@ -77,6 +77,21 @@ function (button) {
                 <vtype>email</vtype>
             </options>
         </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEnginePendingMail</name>
+            <label lang="de">Mail für Pendingstatus versenden</label>
+            <label lang="en">Send Pendingstate mails</label>
+            <value>false</value>
+            <description lang="de">
+                Falls "Ja" gesetzt ist, werden Mails zu noch nicht bestätigten Zahlungen verschickt.
+            </description>
+            <description lang="en">
+                Selecting "Yes", mails will be sent for pending orders
+            </description>
+            <options>
+                <vtype>email</vtype>
+            </options>
+        </element>
         <!-- General End -->
         <!-- Credit Card -->
         <element type="text" scope="shop">
