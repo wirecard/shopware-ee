@@ -62,8 +62,8 @@ function (button) {
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineNotifyMail</name>
-            <label lang="de">Zahlungsbenachrichtigung per E-Mail</label>
-            <label lang="en">Payment notification by e-mail</label>
+            <label lang="de">E-Mail für Zahlungsbenachrichtigungen</label>
+            <label lang="en">E-mail for payment notifications</label>
             <value></value>
             <description lang="de">
                 Tragen Sie Ihre E-Mail-Adresse ein, um eine Zahlungsbenachrichtigung für jede eingehende
@@ -79,14 +79,15 @@ function (button) {
         </element>
         <element type="boolean" scope="shop">
             <name>wirecardElasticEnginePendingMail</name>
-            <label lang="de">Mail für Pendingstatus versenden</label>
-            <label lang="en">Send Pendingstate mails</label>
+            <label lang="de">Sende Mails bei ausstehendem Zahlungsstatus</label>
+            <label lang="en">Send pending status mails</label>
             <value>false</value>
             <description lang="de">
-                Falls "Ja" gesetzt ist, werden Mails zu noch nicht bestätigten Zahlungen verschickt.
+                Wenn diese Option aktiviert ist, erhalten Kunden eine E-Mail mit der Information,
+                dass die Zahlung noch nicht abgeschlossen ist.
             </description>
             <description lang="en">
-                Selecting "Yes", mails will be sent for pending orders
+                If enabled, consumers get an e-mail containing the information that the payment is not yet finalized.
             </description>
             <options>
                 <vtype>email</vtype>
