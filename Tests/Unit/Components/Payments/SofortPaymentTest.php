@@ -35,10 +35,14 @@ use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
+use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\Transaction\SofortTransaction;
+use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
+use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\SofortPayment;
 use WirecardShopwareElasticEngine\Tests\Unit\PaymentTestCase;
 use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
@@ -181,5 +185,30 @@ class SofortPaymentTest extends PaymentTestCase
 
         $payment = new SofortPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
         $this->assertEquals('purchase', $payment->getTransactionType());
+    }
+
+    public function testProcessPayment()
+    {
+        $this->assertInstanceOf(ProcessPaymentInterface::class, $this->payment);
+
+        $orderSummary = $this->createMock(OrderSummary::class);
+        $orderSummary->method('getPaymentUniqueId')->willReturn('1532501234exxxf');
+        $transactionService = $this->createMock(TransactionService::class);
+        $shop               = $this->createMock(Shop::class);
+        $redirect           = $this->createMock(Redirect::class);
+        $request            = $this->createMock(\Enlight_Controller_Request_Request::class);
+        $order              = $this->createMock(\sOrder::class);
+
+        $this->assertNull($this->payment->processPayment(
+            $orderSummary,
+            $transactionService,
+            $shop,
+            $redirect,
+            $request,
+            $order
+        ));
+        $transaction = $this->payment->getTransaction();
+        $transaction->setOperation(Operation::PAY);
+        $this->assertEquals('1532501234exxxf', $transaction->getOrderNumber());
     }
 }

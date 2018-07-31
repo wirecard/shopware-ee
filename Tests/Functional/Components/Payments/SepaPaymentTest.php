@@ -42,6 +42,7 @@ use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\Transaction\SepaDirectDebitTransaction;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
+use WirecardShopwareElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardShopwareElasticEngine\Components\Payments\SepaPayment;
 
 class SepaPaymentTest extends TestCase
@@ -162,5 +163,17 @@ class SepaPaymentTest extends TestCase
     public function testGetTransactionType()
     {
         $this->assertEquals('purchase', $this->payment->getTransactionType());
+    }
+
+    public function testGetAdditionalViewAssignments()
+    {
+        $this->assertInstanceOf(AdditionalViewAssignmentsInterface::class, $this->payment);
+        $this->assertEquals([
+            'method'          => 'wirecard_elastic_engine_sepa',
+            'showBic'         => false,
+            'creditorId'      => 'DE98ZZZ09999999999',
+            'creditorName'    => '',
+            'creditorAddress' => '',
+        ], $this->payment->getAdditionalViewAssignments());
     }
 }

@@ -32,12 +32,20 @@
 namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Payments;
 
 use Doctrine\ORM\EntityRepository;
+use Shopware\Models\Shop\Locale;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
+use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
+use Wirecard\PaymentSdk\Transaction\Operation;
+use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
+use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
+use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
+use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 use WirecardShopwareElasticEngine\Exception\UnknownTransactionTypeException;
@@ -58,6 +66,7 @@ class CreditCardPaymentTest extends PaymentTestCase
             [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineCreditCardSecret', null, 'CCSecret'],
             [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineCreditCardSslMaxLimit', null, '300'],
             [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineCreditCardThreeDMinLimit', null, '100'],
+            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineCreditCardTransactionType', null, 'pay'],
         ]);
 
         $this->payment = new CreditCardPayment(
@@ -137,8 +146,7 @@ class CreditCardPaymentTest extends PaymentTestCase
 
     public function testGetTransactionTypeException()
     {
-        $this->expectException(UnknownTransactionTypeException::class);
-        $this->assertEquals('', $this->payment->getTransactionType());
+        $this->assertEquals('purchase', $this->payment->getTransactionType());
     }
 
     public function testGetTransactionType()
@@ -157,5 +165,40 @@ class CreditCardPaymentTest extends PaymentTestCase
         ]);
         $payment = new PaypalPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
         $this->assertEquals('authorization', $payment->getTransactionType());
+    }
+
+    public function testProcessPayment()
+    {
+        $requestData = file_get_contents(__DIR__ . '/testdata/creditcard-requestdata.json');
+
+        $this->assertInstanceOf(ProcessPaymentInterface::class, $this->payment);
+
+        $orderSummary = $this->createMock(OrderSummary::class);
+        $orderSummary->method('getPayment')->willReturn($this->payment);
+        $orderSummary->method('getPaymentUniqueId')->willReturn('1532501234exxxf');
+        $orderSummary->method('getBasketMapper')->willReturn($this->createMock(BasketMapper::class));
+        $transactionService = $this->createMock(TransactionService::class);
+        $transactionService->method('getCreditCardUiWithData')->willReturn($requestData);
+        $shop = $this->createMock(Shop::class);
+        $shop->method('getLocale')->willReturn(new Locale());
+        $redirect = $this->createMock(Redirect::class);
+        $request  = $this->createMock(\Enlight_Controller_Request_Request::class);
+        $order    = $this->createMock(\sOrder::class);
+
+        $action = $this->payment->processPayment(
+            $orderSummary,
+            $transactionService,
+            $shop,
+            $redirect,
+            $request,
+            $order
+        );
+        $this->assertInstanceOf(ViewAction::class, $action);
+        $this->assertEquals('credit_card.tpl', $action->getTemplate());
+        $this->assertEquals([
+            'wirecardUrl'         => null,
+            'wirecardRequestData' => $requestData,
+            'url'                 => null,
+        ], $action->getAssignments());
     }
 }

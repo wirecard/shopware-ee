@@ -205,8 +205,9 @@ class SepaPayment extends Payment implements ProcessPaymentInterface, Additional
             || $additionalPaymentData['sepaConfirmMandate'] !== 'confirmed'
             || ! isset($additionalPaymentData['sepaIban'])
             || ! isset($additionalPaymentData['sepaFirstName'])
-            || ! isset($additionalPaymentData['sepaLastName'])) {
-            throw new InsufficientDataException('Insufficient Data for SEPA Transaction');
+            || ! isset($additionalPaymentData['sepaLastName'])
+        ) {
+            throw new InsufficientDataException('Insufficient Data for SEPA Direct Debit Transaction');
         }
 
         $transaction = $this->getTransaction();
@@ -224,6 +225,8 @@ class SepaPayment extends Payment implements ProcessPaymentInterface, Additional
 
         $mandate = new Mandate($this->generateMandateId($orderSummary));
         $transaction->setMandate($mandate);
+
+        return null;
     }
 
     /**

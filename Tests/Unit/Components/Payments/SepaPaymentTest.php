@@ -35,11 +35,17 @@ use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
+use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\Transaction\SepaDirectDebitTransaction;
+use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
+use WirecardShopwareElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
+use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\SepaPayment;
+use WirecardShopwareElasticEngine\Exception\InsufficientDataException;
 use WirecardShopwareElasticEngine\Exception\UnknownTransactionTypeException;
 use WirecardShopwareElasticEngine\Tests\Unit\PaymentTestCase;
 use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
@@ -181,5 +187,83 @@ class SepaPaymentTest extends PaymentTestCase
         ]);
         $payment = new SepaPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
         $this->assertEquals('authorization', $payment->getTransactionType());
+    }
+
+    public function testProcessPayment()
+    {
+        $this->assertInstanceOf(ProcessPaymentInterface::class, $this->payment);
+
+        $orderSummary = $this->createMock(OrderSummary::class);
+        $orderSummary->method('getAdditionalPaymentData')->willReturn([
+            'sepaConfirmMandate' => 'confirmed',
+            'sepaIban'           => 'I-B-A-N',
+            'sepaFirstName'      => 'Firstname',
+            'sepaLastName'       => 'Lastname',
+        ]);
+        $orderSummary->method('getPaymentUniqueId')->willReturn('1532501234exxxf');
+        $transactionService = $this->createMock(TransactionService::class);
+        $shop               = $this->createMock(Shop::class);
+        $redirect           = $this->createMock(Redirect::class);
+        $request            = $this->createMock(\Enlight_Controller_Request_Request::class);
+        $order              = $this->createMock(\sOrder::class);
+
+        $this->assertNull($this->payment->processPayment(
+            $orderSummary,
+            $transactionService,
+            $shop,
+            $redirect,
+            $request,
+            $order
+        ));
+        $transaction = $this->payment->getTransaction();
+        $transaction->setOperation(Operation::PAY);
+        $this->assertArraySubset([
+            'account-holder'   => [
+                'last-name'  => 'Lastname',
+                'first-name' => 'Firstname',
+            ],
+            'transaction-type' => 'debit',
+            'bank-account'     => [
+                'iban' => 'I-B-A-N',
+            ],
+            'mandate'          => [
+                'mandate-id'  => '-exxxf-1532501234',
+                'signed-date' => date('Y-m-d'),
+            ],
+        ], $transaction->mappedProperties());
+    }
+
+    public function testProcessPaymentInsufficientDataException()
+    {
+        $this->assertInstanceOf(ProcessPaymentInterface::class, $this->payment);
+
+        $orderSummary       = $this->createMock(OrderSummary::class);
+        $transactionService = $this->createMock(TransactionService::class);
+        $shop               = $this->createMock(Shop::class);
+        $redirect           = $this->createMock(Redirect::class);
+        $request            = $this->createMock(\Enlight_Controller_Request_Request::class);
+        $order              = $this->createMock(\sOrder::class);
+
+        $this->expectException(InsufficientDataException::class);
+        $this->payment->processPayment(
+            $orderSummary,
+            $transactionService,
+            $shop,
+            $redirect,
+            $request,
+            $order
+        );
+    }
+
+    public function testGetAdditionalViewAssignments()
+    {
+        $this->assertInstanceOf(AdditionalViewAssignmentsInterface::class, $this->payment);
+        $this->assertEquals([
+            'method'          => 'wirecard_elastic_engine_sepa',
+            'showBic'         => false,
+            'creditorId'      => null,
+            'creditorName'    => null,
+            'creditorAddress' => null,
+        ], $this->payment->getAdditionalViewAssignments());
     }
 }

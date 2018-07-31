@@ -265,11 +265,11 @@ class CreditCardPayment extends Payment implements ProcessReturnInterface, Proce
             $shop->getLocale()->getLocale()
         );
 
-        $transaction = new Transaction(Transaction::TYPE_INITIAL_REQUEST);
-        $transaction->setPaymentUniqueId($orderSummary->getPaymentUniqueId());
-        $transaction->setBasketSignature($orderSummary->getBasketMapper()->getSignature());
-        $transaction->setRequest(json_decode($requestData, true));
-        $this->em->persist($transaction);
+        $transactionModel = new Transaction(Transaction::TYPE_INITIAL_REQUEST);
+        $transactionModel->setPaymentUniqueId($orderSummary->getPaymentUniqueId());
+        $transactionModel->setBasketSignature($orderSummary->getBasketMapper()->getSignature());
+        $transactionModel->setRequest(json_decode($requestData, true));
+        $this->em->persist($transactionModel);
         $this->em->flush();
 
         return new ViewAction('credit_card.tpl', [
