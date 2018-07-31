@@ -37,9 +37,7 @@ use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
-use Wirecard\PaymentSdk\Transaction\Transaction;
-use WirecardShopwareElasticEngine\Models\Transaction as TransactionModel;
-use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
+use WirecardShopwareElasticEngine\Models\Transaction;
 
 /**
  * Handles notification responses. Notification responses are server-to-server, meaning you must NEVER access session
@@ -60,7 +58,7 @@ class NotificationHandler extends Handler
      * @param Response       $notification
      * @param BackendService $backendService
      *
-     * @return bool
+     * @return Transaction|null
      * @throws \WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException
      *
      * @since 1.0.0
@@ -70,21 +68,19 @@ class NotificationHandler extends Handler
         if ($notification instanceof SuccessResponse) {
             $initialTransaction = $this->handleSuccess($shopwareOrder, $notification, $backendService);
 
-            $this->transactionManager->createNotify($initialTransaction, $notification, $backendService);
-
-            return true;
+            return $this->transactionManager->createNotify($initialTransaction, $notification, $backendService);
         }
 
         if ($notification instanceof FailureResponse) {
             $this->logger->error("Failure response", $notification->getData());
-            return false;
+            return null;
         }
 
         $this->logger->error("Unexpected notification response", [
             'class'    => get_class($notification),
             'response' => $notification->getData(),
         ]);
-        return false;
+        return null;
     }
 
     /**
@@ -92,7 +88,7 @@ class NotificationHandler extends Handler
      * @param SuccessResponse $notification
      * @param BackendService  $backendService
      *
-     * @return TransactionModel
+     * @return Transaction
      * @throws \WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException
      */
     protected function handleSuccess(
@@ -142,12 +138,6 @@ class NotificationHandler extends Handler
             $this->savePaymentStatus($shopwareOrder, $order, $paymentStatusId);
         }
 
-        if ($notification->getTransactionType() === Transaction::TYPE_AUTHORIZATION
-            || $notification->getTransactionType() === Transaction::TYPE_PURCHASE
-        ) {
-            $this->sendPaymentNotificationMail($notification, $initialTransaction);
-        }
-
         $this->logger->debug('NotificationHandler::handleSuccess: finished');
         return $initialTransaction;
     }
@@ -186,53 +176,5 @@ class NotificationHandler extends Handler
             default:
                 return Status::PAYMENT_STATE_OPEN;
         }
-    }
-
-    /**
-     * @param SuccessResponse  $notification
-     * @param TransactionModel $initialTransaction
-     */
-    private function sendPaymentNotificationMail(SuccessResponse $notification, TransactionModel $initialTransaction)
-    {
-        $notifyMailAddress = $this->shopwareConfig->getByNamespace(
-            WirecardShopwareElasticEngine::NAME,
-            'wirecardElasticEngineNotifyMail'
-        );
-        if (! $notifyMailAddress) {
-            return;
-        }
-
-        $orderNumber     = $initialTransaction->getOrderNumber() ?: '-';
-        $paymentId       = $initialTransaction->getPaymentUniqueId();
-        $transactionId   = $notification->getTransactionId();
-        $transactionType = $notification->getTransactionType();
-        $amount          = $notification->getRequestedAmount()->getValue();
-        $currency        = $notification->getRequestedAmount()->getCurrency();
-
-        $snippets = $this->snippetManager->getNamespace('backend/wirecard_elastic_engine/common');
-
-        $subject = $snippets->get('PaymentNotificationMailSubject', 'Payment notification recieved');
-
-        $snippets = $this->snippetManager->getNamespace('backend/wirecard_elastic_engine/transactions_window');
-
-        $orderNumberLabel     = $snippets->get('OrderNumber', 'Order Number');
-        $paymentNumberLabel   = $snippets->get('PaymentUniqueId', 'Payment Number');
-        $transactionIdLabel   = $snippets->get('TransactionId', 'Transaction ID');
-        $transactionTypeLabel = $snippets->get('TransactionType', 'Action');
-        $amountLabel          = $snippets->get('Amount', 'Amount');
-
-        $message = $orderNumberLabel . ': ' . $orderNumber . PHP_EOL;
-        $message .= $paymentNumberLabel . ': ' . $paymentId . PHP_EOL;
-        $message .= $transactionIdLabel . ': ' . $transactionId . PHP_EOL;
-        $message .= $transactionTypeLabel . ': ' . $transactionType . PHP_EOL;
-        $message .= $amountLabel . ': ' . $amount . ' ' . $currency . PHP_EOL;
-
-        $message .= PHP_EOL . PHP_EOL;
-        $message .= print_r($notification->getData(), true);
-
-        $this->mail->addTo($notifyMailAddress);
-        $this->mail->setSubject($subject);
-        $this->mail->setBodyText($message);
-        $this->mail->send();
     }
 }
