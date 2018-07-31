@@ -33,12 +33,14 @@ namespace WirecardShopwareElasticEngine\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManagerInterface;
 use Shopware\Components\Theme\LessDefinition;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 use WirecardShopwareElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
 use WirecardShopwareElasticEngine\Components\Services\SessionManager;
+use WirecardShopwareElasticEngine\Models\Transaction;
 
 /**
  * @package WirecardShopwareElasticEngine\Subscriber
@@ -47,6 +49,11 @@ use WirecardShopwareElasticEngine\Components\Services\SessionManager;
  */
 class FrontendSubscriber implements SubscriberInterface
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    private $em;
+
     /**
      * @var string
      */
@@ -72,11 +79,13 @@ class FrontendSubscriber implements SubscriberInterface
     public function __construct(
         $pluginDirectory,
         \Enlight_Template_Manager $templateManager,
-        PaymentFactory $paymentFactory
+        PaymentFactory $paymentFactory,
+        EntityManagerInterface $em
     ) {
         $this->pluginDirectory = $pluginDirectory;
         $this->templateManager = $templateManager;
         $this->paymentFactory  = $paymentFactory;
+        $this->em              = $em;
     }
 
     /**
@@ -146,6 +155,7 @@ class FrontendSubscriber implements SubscriberInterface
         // Display payment status on finish page.
         if ($request->getActionName() === 'finish') {
             $this->assignPaymentStatus($view);
+            $this->assignAdditionalPaymentInformations($view);
         }
 
         if ($request->getActionName() === 'confirm') {
@@ -204,6 +214,38 @@ class FrontendSubscriber implements SubscriberInterface
         $view->assign('wirecardElasticEnginePaymentStatus', $paymentStatus);
     }
 
+    /**
+     * @param \Enlight_View_Default $view
+     *
+     * @since 1.0.0
+     */
+    private function assignAdditionalPaymentInformations(\Enlight_View_Default $view)
+    {
+        $payment = $view->getAssign('sPayment');
+        if (isset($payment['name']) && $payment['name'] !== 'wirecard_elastic_engine_pia') {
+            return;
+        }
+        $sOrderNumber = $view->getAssign('sOrderNumber');
+        if (! $sOrderNumber) {
+            return;
+        }
+
+        $transaction = $this->em->getRepository(Transaction::class)->findOneBy(['orderNumber' => $sOrderNumber, 'type' => 'initial-response']);
+
+        $response = $transaction->getResponse();
+        $bankData = [
+            'bankName'  => $response['merchant-bank-account.0.bank-name'],
+            'bic'       => $response['merchant-bank-account.0.bic'],
+            'iban'      => $response['merchant-bank-account.0.iban'],
+            'address'   => $response['merchant-bank-account.0.branch-address'],
+            'city'      => $response['merchant-bank-account.0.branch-city'],
+            'state'     => $response['merchant-bank-account.0.branch-state'],
+            'reference' => $response['provider-transaction-reference-id']
+        ];
+
+        $view->assign('wirecardElasticEngineBankData', $bankData);
+    }
+    
     /**
      * @param \Enlight_View_Default $view
      *

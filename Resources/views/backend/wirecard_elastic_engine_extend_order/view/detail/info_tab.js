@@ -350,7 +350,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                                 'city':     transaction.response['merchant-bank-account.0.branch-city'],
                                 'state':    transaction.response['merchant-bank-account.0.branch-state']
                             }
-                            console.log(poi);
+
                             infoPanel.add({
                                 xtype: 'container',
                                 renderTpl: me.createBankDataTemplate(),
