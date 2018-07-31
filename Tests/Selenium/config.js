@@ -114,18 +114,18 @@ exports.tests = [
     },
     {
         file: 'Payments/CreditCardTest',
-        timeout: 60000
+        timeout: 120000
     },
     {
         file: 'Payments/CreditCardThreeDTest',
-        timeout: 60000
+        timeout: 120000
     },
     {
         file: 'Payments/SepaTest',
-        timeout: 60000
+        timeout: 120000
     },
     {
         file: 'Payments/SofortTest',
-        timeout: 60000
+        timeout: 120000
     }
 ];
