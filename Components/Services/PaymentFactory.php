@@ -35,6 +35,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Components\Routing\RouterInterface;
 use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
+use WirecardShopwareElasticEngine\Components\Payments\IdealPayment;
 use WirecardShopwareElasticEngine\Components\Payments\Payment;
 use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
@@ -157,6 +158,7 @@ class PaymentFactory
         return [
             PaypalPayment::PAYMETHOD_IDENTIFIER     => PaypalPayment::class,
             CreditCardPayment::PAYMETHOD_IDENTIFIER => CreditCardPayment::class,
+            IdealPayment::PAYMETHOD_IDENTIFIER      => IdealPayment::class,
             SepaPayment::PAYMETHOD_IDENTIFIER       => SepaPayment::class,
             SofortPayment::PAYMETHOD_IDENTIFIER     => SofortPayment::class
         ];
