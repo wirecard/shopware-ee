@@ -242,7 +242,9 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
     }
 
     /**
-     * Submit support mail to wirecard
+     * Send support mail to wirecard
+     *
+     * @since 1.0.0
      */
     public function submitMailAction()
     {
@@ -250,9 +252,8 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
         $message       = $this->Request()->getParam('message');
         $replyTo       = $this->Request()->getParam('replyTo');
 
-        $supportMail = $this->get('wirecard_elastic_engine.support_mailer');
-
         try {
+            $supportMail = $this->get('wirecard_elastic_engine.mail.support');
             $supportMail->send(
                 $this->container->getParameterBag(),
                 $senderAddress,
