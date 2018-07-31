@@ -66,6 +66,13 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
             refund: '{s name="RefundButtonText"}{/s}',
             creditRefund: '{s name="CreditRefundButtonText"}{/s}',
             cancelRefund: '{s name="CancelRefundButtonText"}{/s}'
+        },
+        sepaMandate: {
+            title: '{s name="SepaMandateTitle" namespace="frontend/wirecard_elastic_engine/sepa_direct_debit"}{/s}',
+            creditorId: '{s name="CreditorID" namespace="frontend/wirecard_elastic_engine/sepa_direct_debit"}{/s}',
+            dueDate: '{s name="DueDate" namespace="frontend/wirecard_elastic_engine/sepa_direct_debit"}{/s}',
+            id: '{s name="MandateId" namespace="frontend/wirecard_elastic_engine/sepa_direct_debit"}{/s}',
+            signatureDate: '{s name="SignatureDate" namespace="frontend/wirecard_elastic_engine/sepa_direct_debit"}{/s}'
         }
     },
 
@@ -88,7 +95,6 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
      */
     createInfoContainer: function () {
         var me = this;
-
         return Ext.create('Ext.panel.Panel', {
             title: me.snippets.infoTitle,
             alias: 'wirecardee-info-panel',
@@ -314,7 +320,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
     },
 
     /**
-     * Loads the store.
+     * Loads the details store, creates info panels and loads the transactions store.
      */
     loadStore: function () {
         var me = this,
@@ -329,6 +335,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 var data = Array.isArray(records) && records.length === 1 ? records[0].getData() : false;
 
                 infoPanel.removeAll();
+
                 if (!data || !data.transactions || !data.transactions.length) {
                     infoPanel.add({
                         xtype: 'container',
@@ -339,34 +346,10 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
 
                 data.transactions.forEach(function (transaction) {
                     if (transaction.type === 'initial-response' || transaction.type === 'initial-request') {
-                        infoPanel.add({
-                            xtype: 'container',
-                            renderTpl: me.createInfoPanelTemplate(),
-                            renderData: transaction,
-                            margin: '0 0 10px'
-                        });
+                        infoPanel.add(me.getInfoPanelItem(transaction));
                     }
                     if (transaction.type === 'initial-response' && transaction.paymentMethod === 'sepadirectdebit') {
-                        infoPanel.add({
-                            xtype: 'container',
-                            renderTpl: Ext.create('Ext.XTemplate',
-                                '{literal}<tpl for=".">',
-                                '<div class="wirecardee-info-panel-sepa">',
-                                '<h3>SEPA Direct Debit Mandate Data</h3>',
-                                '<p><label class="x-form-item-label">Creditor Id:</label> {creditorId}</p>',
-                                '<p><label class="x-form-item-label">Due Date:</label> {dueDate}</p>',
-                                '<p><label class="x-form-item-label">Mandate Id:</label> {mandateId}</p>',
-                                '<p><label class="x-form-item-label">Mandate Signature Date:</label> {mandateSignedDate}</p>',
-                                '</div>',
-                                '</tpl>{/literal}'
-                            ),
-                            renderData: {
-                                creditorId: transaction.response['creditor-id'],
-                                dueDate: transaction.response['due-date'],
-                                mandateId: transaction.response['mandate.0.mandate-id'],
-                                mandateSignedDate: transaction.response['mandate.0.signed-date']
-                            }
-                        });
+                        infoPanel.add(me.getInfoPanelSepaMandateInfoItem(transaction));
                     }
                 });
 
@@ -377,6 +360,46 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 }
             }
         });
+    },
+
+    getInfoPanelItem: function (transaction) {
+        var me = this;
+        return {
+            xtype: 'container',
+            renderTpl: new Ext.XTemplate(
+                '{literal}<tpl for=".">',
+                '<div class="wirecardee-info-panel">',
+                '<p><label class="x-form-item-label">' + me.snippets.paymentUniqueId + ':</label> {paymentUniqueId}</p>',
+                '</div>',
+                '</tpl>{/literal}'
+            ),
+            renderData: transaction,
+            margin: '0 0 10px'
+        };
+    },
+
+    getInfoPanelSepaMandateInfoItem: function (transaction) {
+        var me = this;
+        return {
+            xtype: 'container',
+            renderTpl: Ext.create('Ext.XTemplate',
+                '{literal}<tpl for=".">',
+                '<div class="wirecardee-info-panel-sepa">',
+                '<h3>' + me.snippets.sepaMandate.title + '</h3>',
+                '<p><label class="x-form-item-label">' + me.snippets.sepaMandate.creditorId + ':</label> {creditorId}</p>',
+                '<p><label class="x-form-item-label">' + me.snippets.sepaMandate.dueDate + ':</label> {dueDate}</p>',
+                '<p><label class="x-form-item-label">' + me.snippets.sepaMandate.id + ':</label> {mandateId}</p>',
+                '<p><label class="x-form-item-label">' + me.snippets.sepaMandate.signatureDate + ':</label> {mandateSignedDate}</p>',
+                '</div>',
+                '</tpl>{/literal}'
+            ),
+            renderData: {
+                creditorId: transaction.response['creditor-id'],
+                dueDate: transaction.response['due-date'],
+                mandateId: transaction.response['mandate.0.mandate-id'],
+                mandateSignedDate: transaction.response['mandate.0.signed-date']
+            }
+        };
     },
 
     /**
@@ -416,21 +439,6 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 }
             }
         });
-    },
-
-    /**
-     * Default content for the info panel.
-     * @returns { Ext.XTemplate }
-     */
-    createInfoPanelTemplate: function () {
-        var me = this;
-        return new Ext.XTemplate(
-            '{literal}<tpl for=".">',
-            '<div class="wirecardee-info-panel">',
-            '<p><label class="x-form-item-label">' + me.snippets.paymentUniqueId + ':</label> {paymentUniqueId}</p>',
-            '</div>',
-            '</tpl>{/literal}'
-        );
     }
 });
 // {/block}

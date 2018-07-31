@@ -50,7 +50,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.controller.Main', {
     /**
      * Creates the toolbar for the mail support window.
      */
-    createComponentControl: function() {
+    createComponentControl: function () {
         var me = this;
 
         me.control({
@@ -63,9 +63,10 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.controller.Main', {
     /**
      * Sends the support mail.
      */
-    onSubmitMail: function() {
+    onSubmitMail: function () {
         var me = this,
             form = me.getMailSupportForm().getForm();
+
         me.mainWindow.setLoading(true);
 
         if (!form.isValid()) {
@@ -81,7 +82,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.controller.Main', {
         Ext.Ajax.request({
             url: '{url action=submitMail}',
             params: form.getValues(),
-            success: function(response) {
+            success: function (response) {
                 var data = Ext.decode(response.responseText);
                 if (data.success) {
                     Shopware.Notification.createGrowlMessage(

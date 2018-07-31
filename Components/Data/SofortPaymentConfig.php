@@ -127,7 +127,6 @@ class SofortPaymentConfig extends PaymentConfig
         return $this->backendCreditorId;
     }
 
-
     /**
      * {@inheritdoc}
      */
