@@ -46,7 +46,10 @@ const run = async () => {
             // Driver used by the Selenium tests.
             global.driver = await new Builder()
                 .usingServer('http://hub-cloud.browserstack.com/wd/hub')
-                .withCapabilities(bsConfig)
+                .withCapabilities(Object.assign({
+                    name: testCase.file,
+                    build: process.env.TRAVIS ? `${process.env.TRAVIS_PHP_VERSION}-${process.env.TRAVIS_COMMIT} (Job: ${process.env.TRAVIS_JOB_NUMBER})` : 'local'
+                }, bsConfig))
                 .build();
 
             const mocha = new Mocha({
