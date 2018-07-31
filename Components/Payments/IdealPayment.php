@@ -157,7 +157,7 @@ class IdealPayment extends Payment implements ProcessPaymentInterface, Additiona
         $paymentConfig->setBackendTransactionSecret($this->getPluginConfig('SepaBackendSecret'));
         $paymentConfig->setBackendCreditorId($this->getPluginConfig('SepaBackendCreditorId'));
 
-        //        $paymentConfig->setFraudPrevention($this->getPluginConfig('SofortFraudPrevention'));
+        $paymentConfig->setFraudPrevention($this->getPluginConfig('IdealFraudPrevention'));
 
         return $paymentConfig;
     }
