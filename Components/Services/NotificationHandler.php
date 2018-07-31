@@ -90,6 +90,8 @@ class NotificationHandler extends Handler
      *
      * @return Transaction
      * @throws \WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException
+     *
+     * @since 1.0.0
      */
     protected function handleSuccess(
         \sOrder $shopwareOrder,
@@ -146,6 +148,8 @@ class NotificationHandler extends Handler
      * @param \sOrder $shopwareOrder
      * @param Order   $order
      * @param int     $paymentStatusId
+     *
+     * @since 1.0.0
      */
     private function savePaymentStatus(\sOrder $shopwareOrder, Order $order, $paymentStatusId)
     {
@@ -158,6 +162,8 @@ class NotificationHandler extends Handler
      * @param Response       $notification
      *
      * @return int
+     *
+     * @since 1.0.0
      */
     private function getPaymentStatusId($backendService, $notification)
     {

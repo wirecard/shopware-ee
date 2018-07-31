@@ -42,6 +42,8 @@ class UnknownTransactionTypeException extends \Exception
 {
     /**
      * @param string $operation
+     *
+     * @since 1.0.0
      */
     public function __construct($operation)
     {

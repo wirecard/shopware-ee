@@ -64,21 +64,13 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.GeneralInformati
 
         return [{
             xtype: 'container',
-            renderTpl: me.createGeneralInformationTemplate(),
+            renderTpl: Ext.create('Ext.XTemplate',
+                '{literal}<tpl for=".">',
+                '<p>{GeneralInformation}</p>',
+                '</tpl>{/literal}'
+            ),
             renderData: me.snippets
         }];
-    },
-
-    /**
-     * Creates the general information template.
-     * @returns { Ext.XTemplate }
-     */
-    createGeneralInformationTemplate: function () {
-        return Ext.create('Ext.XTemplate',
-            '{literal}<tpl for=".">',
-            '<p>{GeneralInformation}</p>',
-            '</tpl>{/literal}'
-        );
     }
 });
 // {/block}
