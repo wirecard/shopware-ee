@@ -48,7 +48,8 @@ const run = async () => {
                 .usingServer('http://hub-cloud.browserstack.com/wd/hub')
                 .withCapabilities(Object.assign({
                     name: testCase.file,
-                    build: process.env.TRAVIS ? `${process.env.TRAVIS_PHP_VERSION}-${process.env.TRAVIS_COMMIT} (Job: ${process.env.TRAVIS_JOB_NUMBER})` : 'local'
+                    build: process.env.TRAVIS ? `${process.env.TRAVIS_JOB_NUMBER} ${process.env.TRAVIS_PHP_VERSION}` : 'local',
+                    project: 'Shopware:WirecardElasticEngine'
                 }, bsConfig))
                 .build();
 
