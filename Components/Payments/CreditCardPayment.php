@@ -65,7 +65,7 @@ class CreditCardPayment extends Payment implements ProcessReturnInterface, Proce
      */
     public function getLabel()
     {
-        return 'Wirecard Credit Card';
+        return 'WirecardCreditCard';
     }
 
     /**
@@ -106,14 +106,14 @@ class CreditCardPayment extends Payment implements ProcessReturnInterface, Proce
         $paymentConfig     = $this->getPaymentConfig();
         $creditCardConfig  = new CreditCardConfig();
 
-        if ($paymentConfig->getTransactionMAID() && $paymentConfig->getTransactionMAID() !== 'null') {
+        if ($paymentConfig->getTransactionMAID() && strtolower($paymentConfig->getTransactionMAID()) !== 'null') {
             $creditCardConfig->setSSLCredentials(
                 $paymentConfig->getTransactionMAID(),
                 $paymentConfig->getTransactionSecret()
             );
         }
 
-        if ($paymentConfig->getThreeDMAID() && $paymentConfig->getThreeDMAID() !== 'null') {
+        if ($paymentConfig->getThreeDMAID() && strtolower($paymentConfig->getThreeDMAID()) !== 'null') {
             $creditCardConfig->setThreeDCredentials(
                 $paymentConfig->getThreeDMAID(),
                 $paymentConfig->getThreeDSecret()
@@ -265,11 +265,11 @@ class CreditCardPayment extends Payment implements ProcessReturnInterface, Proce
             $shop->getLocale()->getLocale()
         );
 
-        $transaction = new Transaction(Transaction::TYPE_INITIAL_REQUEST);
-        $transaction->setPaymentUniqueId($orderSummary->getPaymentUniqueId());
-        $transaction->setBasketSignature($orderSummary->getBasketMapper()->getSignature());
-        $transaction->setRequest(json_decode($requestData, true));
-        $this->em->persist($transaction);
+        $transactionModel = new Transaction(Transaction::TYPE_INITIAL_REQUEST);
+        $transactionModel->setPaymentUniqueId($orderSummary->getPaymentUniqueId());
+        $transactionModel->setBasketSignature($orderSummary->getBasketMapper()->getSignature());
+        $transactionModel->setRequest(json_decode($requestData, true));
+        $this->em->persist($transactionModel);
         $this->em->flush();
 
         return new ViewAction('credit_card.tpl', [

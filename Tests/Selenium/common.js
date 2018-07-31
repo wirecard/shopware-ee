@@ -29,10 +29,12 @@
  */
 
 const { expect } = require('chai');
-const { By, until } = require('selenium-webdriver');
+const { Builder, By, until } = require('selenium-webdriver');
 const { config } = require('./config');
 
 exports.loginWithExampleAccount = async function (driver) {
+    await driver.manage().deleteAllCookies();
+
     console.log(`get ${config.url}/account`);
     await driver.get(`${config.url}/account`);
     console.log('wait for [email]');
@@ -104,7 +106,7 @@ exports.selectPaymentMethod = async function (driver, paymentLabel) {
 
 exports.checkConfirmationPage = async function (driver, paymentLabel) {
     console.log('wait for .teaser--btn-print');
-    await driver.wait(until.elementLocated(By.className('teaser--btn-print')));
+    await driver.wait(until.elementLocated(By.className('teaser--btn-print')), 30000);
     console.log('expect content .panel--title');
     const panelTitle = await driver.findElement(By.className('panel--title')).getText();
     expect(panelTitle).to.include('Vielen Dank');
@@ -128,4 +130,32 @@ exports.waitUntilOverlayIsStale = async function (driver, locator) {
         console.log('wait for staleness');
         await driver.wait(until.stalenessOf(overlay[0]));
     }
+};
+
+exports.waitForAlert = async function (driver, timeout) {
+    try {
+        console.log('wait for alert');
+        const alert = await driver.wait(until.alertIsPresent(), timeout);
+        console.log('accept alert');
+        await alert.accept();
+        await driver.switchTo().defaultContent();
+    } catch (e) {
+        console.log('no alert popup');
+    }
+};
+
+exports.asyncForEach = async function (arr, cb) {
+    for (let i = 0; i < arr.length; i++) {
+        await cb(arr[i], i, arr);
+    }
+};
+
+exports.getDriver = () => {
+    if (global.driver) {
+        return global.driver;
+    }
+
+    return new Builder()
+        .forBrowser('firefox')
+        .build();
 };

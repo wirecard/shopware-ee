@@ -35,6 +35,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Plugin\Plugin;
+use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
 
 abstract class PaymentTestCase extends \PHPUnit_Framework_TestCase
 {
@@ -63,6 +64,8 @@ abstract class PaymentTestCase extends \PHPUnit_Framework_TestCase
         $this->eventManager = $this->createMock(\Enlight_Event_EventManager::class);
 
         $plugin = $this->createMock(Plugin::class);
+        $plugin->method('getName')->willReturn(WirecardShopwareElasticEngine::NAME);
+        $plugin->method('getVersion')->willReturn('__PLUGIN_VERSION__');
         $this->installer->method('getPluginByName')->willReturn($plugin);
     }
 

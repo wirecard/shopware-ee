@@ -66,7 +66,7 @@ class SepaPayment extends Payment implements ProcessPaymentInterface, Additional
      */
     public function getLabel()
     {
-        return 'Wirecard SEPA Direct Debit';
+        return 'WirecardSEPADirectDebit';
     }
 
     /**
@@ -163,7 +163,6 @@ class SepaPayment extends Payment implements ProcessPaymentInterface, Additional
         $paymentConfig->setCreditorId($this->getPluginConfig('SepaCreditorId'));
         $paymentConfig->setCreditorName($this->getPluginConfig('SepaCreditorName'));
         $paymentConfig->setCreditorAddress($this->getPluginConfig('SepaCreditorAddress'));
-        $paymentConfig->setMandateText($this->getPluginConfig('SepaMandateText'));
         $paymentConfig->setBackendTransactionMAID($this->getPluginConfig('SepaBackendMerchantId'));
         $paymentConfig->setBackendTransactionSecret($this->getPluginConfig('SepaBackendSecret'));
         $paymentConfig->setBackendCreditorId($this->getPluginConfig('SepaBackendCreditorId'));
@@ -206,8 +205,9 @@ class SepaPayment extends Payment implements ProcessPaymentInterface, Additional
             || $additionalPaymentData['sepaConfirmMandate'] !== 'confirmed'
             || ! isset($additionalPaymentData['sepaIban'])
             || ! isset($additionalPaymentData['sepaFirstName'])
-            || ! isset($additionalPaymentData['sepaLastName'])) {
-            throw new InsufficientDataException('Insufficient Data for SEPA Transaction');
+            || ! isset($additionalPaymentData['sepaLastName'])
+        ) {
+            throw new InsufficientDataException('Insufficient Data for SEPA Direct Debit Transaction');
         }
 
         $transaction = $this->getTransaction();
@@ -225,6 +225,8 @@ class SepaPayment extends Payment implements ProcessPaymentInterface, Additional
 
         $mandate = new Mandate($this->generateMandateId($orderSummary));
         $transaction->setMandate($mandate);
+
+        return null;
     }
 
     /**

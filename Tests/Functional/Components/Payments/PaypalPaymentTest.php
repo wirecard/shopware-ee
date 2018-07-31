@@ -86,11 +86,11 @@ class PaypalPaymentTest extends TestCase
 
     public function testGetPaymentOptions()
     {
-        $this->assertEquals('Wirecard PayPal', $this->payment->getLabel());
+        $this->assertEquals('WirecardPayPal', $this->payment->getLabel());
         $this->assertEquals('wirecard_elastic_engine_paypal', $this->payment->getName());
         $this->assertEquals([
             'name'                  => 'wirecard_elastic_engine_paypal',
-            'description'           => 'Wirecard PayPal',
+            'description'           => 'WirecardPayPal',
             'action'                => 'WirecardElasticEnginePayment',
             'active'                => 0,
             'position'              => 1,
@@ -134,6 +134,14 @@ class PaypalPaymentTest extends TestCase
             'dbc5a498-9a66-43b9-bf1d-a618dd399684',
             $config->get(PayPalTransaction::NAME)->getSecret()
         );
+        $this->assertEquals([
+            'headers' => [
+                'shop-system-name'    => 'Shopware',
+                'shop-system-version' => '___VERSION___',
+                'plugin-name'         => 'WirecardShopwareElasticEngine',
+                'plugin-version'      => '0.5.0',
+            ],
+        ], $config->getShopHeader());
     }
 
     public function testGetTransactionType()

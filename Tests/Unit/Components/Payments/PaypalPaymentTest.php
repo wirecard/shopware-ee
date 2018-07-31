@@ -35,8 +35,14 @@ use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
+use Wirecard\PaymentSdk\Entity\Amount;
+use Wirecard\PaymentSdk\Entity\Redirect;
+use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
+use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
+use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
 use WirecardShopwareElasticEngine\Exception\UnknownTransactionTypeException;
 use WirecardShopwareElasticEngine\Tests\Unit\PaymentTestCase;
@@ -67,13 +73,13 @@ class PaypalPaymentTest extends PaymentTestCase
 
     public function testGetPaymentOptions()
     {
-        $this->assertEquals('Wirecard PayPal', $this->payment->getLabel());
+        $this->assertEquals('WirecardPayPal', $this->payment->getLabel());
         $this->assertEquals('wirecard_elastic_engine_paypal', $this->payment->getName());
         $this->assertEquals(1, $this->payment->getPosition());
         $this->assertPaymentOptions(
             $this->payment->getPaymentOptions(),
             'wirecard_elastic_engine_paypal',
-            'Wirecard PayPal',
+            'WirecardPayPal',
             1
         );
     }
@@ -102,6 +108,10 @@ class PaypalPaymentTest extends PaymentTestCase
 
         $shop       = $this->createMock(Shop::class);
         $parameters = $this->createMock(ParameterBagInterface::class);
+        $parameters->method('get')->willReturnMap([
+            ['kernel.name', 'Shopware'],
+            ['shopware.release.version', '__SW_VERSION__'],
+        ]);
 
         $config = $this->payment->getTransactionConfig($shop, $parameters, 'EUR');
 
@@ -115,6 +125,14 @@ class PaypalPaymentTest extends PaymentTestCase
         $this->assertEquals('MAID', $paymentMethodConfig->getMerchantAccountId());
         $this->assertEquals('Secret', $paymentMethodConfig->getSecret());
         $this->assertEquals(PayPalTransaction::NAME, $paymentMethodConfig->getPaymentMethodName());
+        $this->assertEquals([
+            'headers' => [
+                'shop-system-name'    => 'Shopware',
+                'shop-system-version' => '__SW_VERSION__',
+                'plugin-name'         => 'WirecardShopwareElasticEngine',
+                'plugin-version'      => '__PLUGIN_VERSION__',
+            ],
+        ], $config->getShopHeader());
     }
 
     public function testGetTransactionTypeException()
@@ -139,5 +157,34 @@ class PaypalPaymentTest extends PaymentTestCase
         ]);
         $payment = new PaypalPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
         $this->assertEquals('authorization', $payment->getTransactionType());
+    }
+
+    public function testProcessPayment()
+    {
+        $this->assertInstanceOf(ProcessPaymentInterface::class, $this->payment);
+
+        $orderSummary = $this->createMock(OrderSummary::class);
+        $orderSummary->method('getPaymentUniqueId')->willReturn('1532501234exxxf');
+        $orderSummary->method('getAmount')->willReturn(new Amount(50, 'EUR'));
+        $transactionService = $this->createMock(TransactionService::class);
+        $shop               = $this->createMock(Shop::class);
+        $redirect           = $this->createMock(Redirect::class);
+        $request            = $this->createMock(\Enlight_Controller_Request_Request::class);
+        $order              = $this->createMock(\sOrder::class);
+
+        $this->assertNull($this->payment->processPayment(
+            $orderSummary,
+            $transactionService,
+            $shop,
+            $redirect,
+            $request,
+            $order
+        ));
+        $transaction = $this->payment->getTransaction();
+        $transaction->setOperation(Operation::PAY);
+        $this->assertArraySubset([
+            'transaction-type' => 'debit',
+            'order-detail'     => '1532501234exxxf - 50.00 EUR',
+        ], $transaction->mappedProperties());
     }
 }

@@ -107,12 +107,13 @@ class TransactionManager
     /**
      * @param Transaction $initialTransaction
      * @param Response    $response
+     * @param string      $statusMessage
      *
      * @return Transaction|null
      *
      * @since 1.0.0
      */
-    public function createReturn(Transaction $initialTransaction, Response $response)
+    public function createReturn(Transaction $initialTransaction, Response $response, $statusMessage = null)
     {
         $transactions = $this->em->getRepository(Transaction::class)
                                  ->findBy(['paymentUniqueId' => $initialTransaction->getPaymentUniqueId()]);
@@ -126,6 +127,7 @@ class TransactionManager
         $transaction->setPaymentUniqueId($initialTransaction->getPaymentUniqueId());
         $transaction->setOrderNumber($initialTransaction->getOrderNumber());
         $transaction->setResponse($response);
+        $transaction->setStatusMessage($statusMessage);
 
         return $this->persist($transaction);
     }
@@ -212,6 +214,7 @@ class TransactionManager
 
     /**
      * @param Transaction $transaction
+     *
      * @return Transaction
      *
      * @since 1.0.0

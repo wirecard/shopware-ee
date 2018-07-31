@@ -56,6 +56,9 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.Grid', {
         OrderCanceled: '{s name="OrderCanceled"}{/s}'
     },
 
+    /**
+     * @returns { { columns: *|{ orderNumber, paymentUniqueId, type, transactionId, parentTransactionId, providerTransactionId, transactionType, paymentMethod, amount, currency }, rowEditing: boolean, deleteButton: boolean, deleteColumn: boolean, editButton: boolean, editColumn: boolean, addButton: boolean } }
+     */
     configure: function () {
         var me = this;
 
@@ -130,11 +133,17 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.Grid', {
             items = me.callParent(arguments);
 
         items.push({
-            iconCls: 'sprite-magnifier-medium',
             tooltip: me.snippets.OpenTransactionTooltip,
             handler: function (view, rowIndex, colIndex, item, opts, record) {
-                var detailsWindow = Ext.create('Shopware.apps.WirecardElasticEngineExtendOrder.view.TransactionDetailsWindow', { record: record });
-                detailsWindow.show();
+                Ext.create('Shopware.apps.WirecardElasticEngineExtendOrder.view.TransactionDetailsWindow', { record: record }).show();
+            },
+            getClass: function (value, meta, record) {
+                var transaction = record.data;
+                if (!transaction.statusMessage) {
+                    return 'sprite-magnifier-medium';
+                } else {
+                    return 'sprite-exclamation';
+                }
             }
         });
 
@@ -207,7 +216,6 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.Grid', {
         if (value === Ext.undefined) {
             return value;
         }
-
-        return Ext.util.Format.date(value, 'm.d.Y H:i');
+        return Ext.util.Format.date(value) + ' ' + Ext.util.Format.date(value, 'H:i');
     }
 });

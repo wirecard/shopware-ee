@@ -29,7 +29,7 @@
  */
 
 exports.config = {
-    url: 'http://localhost:8000',
+    url: 'http://localhost',
     exampleAccount: {
         email: 'test@example.com',
         password: 'shopware'
@@ -43,7 +43,7 @@ exports.config = {
             }
         },
         creditCard: {
-            label: 'Wirecard Credit Card',
+            label: 'Wirecard Kreditkarte',
             fields: {
                 last_name: 'Lastname',
                 account_number: '4012000300001003',
@@ -51,7 +51,7 @@ exports.config = {
             }
         },
         creditCardThreeD: {
-            label: 'Wirecard Credit Card',
+            label: 'Wirecard Kreditkarte',
             fields: {
                 last_name: 'Lastname',
                 account_number: '4012000300001003',
@@ -60,7 +60,7 @@ exports.config = {
             password: 'wirecard'
         },
         sepa: {
-            label: 'Wirecard SEPA Direct Debit',
+            label: 'Wirecard SEPA-Lastschrift',
             fields: {
                 'wirecardee-sepa--first-name': 'Firstname',
                 'wirecardee-sepa--last-name': 'Lastname',
@@ -78,3 +78,54 @@ exports.config = {
         }
     }
 };
+
+/**
+ * List of browsers to test against.
+ * See https://www.browserstack.com/automate/capabilities
+ */
+exports.browsers = [
+    {
+        browserName: 'Firefox',
+        browser_version: '62.0 beta',
+        os: 'Windows',
+        os_version: '7',
+        resolution: '1920x1080'
+    },
+    {
+        browserName: 'Chrome',
+        browser_version: '62.0',
+        os: 'Windows',
+        os_version: '10',
+        resolution: '1920x1080'
+    }
+];
+
+/**
+ * List of tests to be executed. All tests must be located in `./Tests/Selenium`.
+ */
+exports.tests = [
+    {
+        file: 'Payments/DefaultTest',
+        timeout: 120000
+    },
+    {
+        file: 'Payments/PaypalTest',
+        timeout: 180000
+    },
+    {
+        file: 'Payments/CreditCardTest',
+        timeout: 60000
+    },
+    {
+        file: 'Payments/CreditCardThreeDTest',
+        timeout: 60000
+    },
+    {
+        file: 'Payments/SepaTest',
+        timeout: 60000
+    },
+    {
+        file: 'Payments/SofortTest',
+        timeout: 60000
+    }
+];

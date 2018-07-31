@@ -122,6 +122,9 @@ class NotificationHandler extends Handler
             $this->logger->debug('NotificationHandler::handleSuccess: order found, save payment status '
                                  . $paymentStatusId);
             $this->savePaymentStatus($shopwareOrder, $order, $paymentStatusId);
+            if (! $initialTransaction->getOrderNumber() && $order->getNumber()) {
+                $initialTransaction->setOrderNumber($order->getNumber());
+            }
             return $initialTransaction;
         }
         $this->logger->debug('NotificationHandler::handleSuccess: no order');

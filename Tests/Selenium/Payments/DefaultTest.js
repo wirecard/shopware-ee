@@ -30,24 +30,23 @@
 
 /* eslint-env mocha */
 
-const { Builder, By } = require('selenium-webdriver');
+const { By } = require('selenium-webdriver');
 const {
     loginWithExampleAccount,
     waitUntilOverlayIsStale,
     checkConfirmationPage,
-    addProductToCartAndGotoCheckout
+    addProductToCartAndGotoCheckout,
+    asyncForEach,
+    getDriver
 } = require('../common');
 
 describe('default test', () => {
-    const driver = new Builder()
-        .forBrowser('chrome')
-        .build();
-    driver.manage().deleteAllCookies();
+    const driver = getDriver();
 
     const wirecardPaymentLabels = [
-        'Wirecard Credit Card',
+        'Wirecard Kreditkarte',
         'Wirecard PayPal',
-        'Wirecard SEPA Direct Debit',
+        'Wirecard SEPA-Lastschrift',
         'Wirecard Sofort.'
     ];
 
@@ -58,7 +57,7 @@ describe('default test', () => {
         // Go to payment selection page select "prepayment"
         await driver.findElement(By.className('btn--change-payment')).click();
         // Check if all wirecard payments are present
-        wirecardPaymentLabels.forEach(async paymentLabel => {
+        await asyncForEach(wirecardPaymentLabels, async paymentLabel => {
             await driver.findElement(By.xpath("//*[contains(text(), '" + paymentLabel + "')]"));
         });
         await driver.findElement(By.xpath("//*[contains(text(), 'Vorkasse')]")).click();

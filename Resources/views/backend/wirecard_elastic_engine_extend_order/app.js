@@ -28,6 +28,9 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
+// Don't get confused by the lines being commented out; this is intended Shopware behaviour!
+// See https://developers.shopware.com/developers-guide/backend-extension/#add-custom-extjs-controller
+
 // {block name="backend/order/application"}
 //     {$smarty.block.parent}
 //     {include file="backend/wirecard_elastic_engine_extend_order/view/detail/info_tab.js"}

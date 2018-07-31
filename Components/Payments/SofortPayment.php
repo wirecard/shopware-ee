@@ -63,7 +63,7 @@ class SofortPayment extends Payment implements ProcessPaymentInterface
      */
     public function getLabel()
     {
-        return 'Wirecard Sofort.';
+        return 'WirecardSofort';
     }
 
     /**

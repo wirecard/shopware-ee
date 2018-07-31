@@ -30,20 +30,19 @@
 
 /* eslint-env mocha */
 
-const { Builder, By, until } = require('selenium-webdriver');
+const { By, until } = require('selenium-webdriver');
 const { config } = require('../config');
 const {
     loginWithExampleAccount,
     checkConfirmationPage,
     addProductToCartAndGotoCheckout,
-    selectPaymentMethod
+    selectPaymentMethod,
+    getDriver,
+    asyncForEach
 } = require('../common');
 
 describe('SEPA Direct Debit test', () => {
-    const driver = new Builder()
-        .forBrowser('chrome')
-        .build();
-    driver.manage().deleteAllCookies();
+    const driver = getDriver();
 
     const paymentLabel = config.payments.sepa.label;
     const formFields = config.payments.sepa.fields;
@@ -54,7 +53,7 @@ describe('SEPA Direct Debit test', () => {
         await selectPaymentMethod(driver, paymentLabel);
 
         // Fill sepa fields
-        Object.keys(formFields).forEach(async field => {
+        await asyncForEach(Object.keys(formFields), async field => {
             await driver.findElement(By.id(field)).sendKeys(formFields[field]);
         });
 
@@ -64,7 +63,7 @@ describe('SEPA Direct Debit test', () => {
 
         // Confirm sepa mandate in modal dialog
         console.log('wait for .wirecardee--sepa-mandate');
-        await driver.wait(until.elementLocated(By.className('wirecardee--sepa-mandate')));
+        await driver.wait(until.elementLocated(By.className('wirecardee--sepa-mandate')), 10000);
         console.log('click .wirecardee-sepa--confirm-check');
         await driver.findElement(By.id('wirecardee-sepa--confirm-check')).click();
         console.log('click .wirecardee-sepa--confirm-button');

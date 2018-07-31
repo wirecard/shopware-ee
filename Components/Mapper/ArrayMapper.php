@@ -72,28 +72,6 @@ abstract class ArrayMapper
     }
 
     /**
-     * Returns if an array key exists in an (multidimensional) array.
-     *
-     * @param string|array $keys Single key or a key chain for multidimensional arrays
-     *
-     * @return bool
-     *
-     * @since 1.0.0
-     */
-    protected function has($keys)
-    {
-        $keys  = (array)$keys;
-        $value = $this->arrayEntity;
-        foreach ($keys as $key) {
-            if (! is_array($value) || ! array_key_exists($key, $value)) {
-                return false;
-            }
-            $value = $value[$key];
-        }
-        return true;
-    }
-
-    /**
      * Returns a key from an (multidimensional) array. If the key doesn't exist the fallback value is returned.
      *
      * @param string|array $keys Single key or a key chain for multidimensional arrays

@@ -33,23 +33,23 @@
     <entries>
         <entry>
             <name>Wirecard</name>
-            <label lang="en">Wirecard</label>
             <label lang="de">Wirecard</label>
+            <label lang="en">Wirecard</label>
             <class>sprite--wirecard</class>
             <parent identifiedBy="controller">Payments</parent>
             <children>
                 <entry>
                     <name>WirecardElasticEngineTransactions</name>
-                    <label lang="en">Transactions</label>
                     <label lang="de">Transaktionen</label>
+                    <label lang="en">Transactions</label>
                     <controller>WirecardElasticEngineTransactions</controller>
                     <action>index</action>
                     <class>sprite-wirecard</class>
                 </entry>
                 <entry>
                     <name>WirecardElasticEngineLiveChat</name>
-                    <label lang="en">LiveChat</label>
-                    <label lang="de">LiveChat</label>
+                    <label lang="de">LiveChat mit Support</label>
+                    <label lang="en">LiveChat with support</label>
                     <controller>WirecardElasticEngineTransactions</controller>
                     <action>livechat</action>
                     <class>sprite-wirecard</class>
@@ -58,6 +58,14 @@
                             wirecardeeChatOpen();
                         ]]>
                     </onclick>
+                </entry>
+                <entry>
+                    <name>WirecardElasticEngineEmailSupport</name>
+                    <label lang="de">E-Mail Support</label>
+                    <label lang="en">Mail support</label>
+                    <controller>WirecardElasticEngineTransactions</controller>
+                    <action>mailSupport</action>
+                    <class>sprite-wirecard</class>
                 </entry>
             </children>
         </entry>

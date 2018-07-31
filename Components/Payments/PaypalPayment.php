@@ -60,7 +60,7 @@ class PaypalPayment extends Payment implements ProcessPaymentInterface
      */
     public function getLabel()
     {
-        return 'Wirecard PayPal';
+        return 'WirecardPayPal';
     }
 
     /**

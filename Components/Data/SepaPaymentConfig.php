@@ -63,11 +63,6 @@ class SepaPaymentConfig extends PaymentConfig
     /**
      * @var string
      */
-    protected $mandateText;
-
-    /**
-     * @var string
-     */
     protected $backendTransactionMaid;
 
     /**
@@ -81,7 +76,9 @@ class SepaPaymentConfig extends PaymentConfig
     protected $backendCreditorId;
 
     /**
-     * @param bool
+     * @param bool $showBic
+     *
+     * @since 1.0.0
      */
     public function setShowBic($showBic)
     {
@@ -89,7 +86,9 @@ class SepaPaymentConfig extends PaymentConfig
     }
 
     /**
-     * @return bool
+     * @return bool if true, the BIC form field on checkout page will be displayed
+     *
+     * @since 1.0.0
      */
     public function showBic()
     {
@@ -98,6 +97,8 @@ class SepaPaymentConfig extends PaymentConfig
 
     /**
      * @param string
+     *
+     * @since 1.0.0
      */
     public function setCreditorId($creditorId)
     {
@@ -106,6 +107,8 @@ class SepaPaymentConfig extends PaymentConfig
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getCreditorId()
     {
@@ -114,6 +117,8 @@ class SepaPaymentConfig extends PaymentConfig
 
     /**
      * @param string
+     *
+     * @since 1.0.0
      */
     public function setCreditorName($creditorName)
     {
@@ -122,6 +127,8 @@ class SepaPaymentConfig extends PaymentConfig
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getCreditorName()
     {
@@ -130,6 +137,8 @@ class SepaPaymentConfig extends PaymentConfig
 
     /**
      * @param string
+     *
+     * @since 1.0.0
      */
     public function setCreditorAddress($creditorAddress)
     {
@@ -138,6 +147,8 @@ class SepaPaymentConfig extends PaymentConfig
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getCreditorAddress()
     {
@@ -145,23 +156,11 @@ class SepaPaymentConfig extends PaymentConfig
     }
 
     /**
+     * Set SEPA Credit Transfer transaction merchant account ID
+     *
      * @param string
-     */
-    public function setMandateText($mandateText)
-    {
-        $this->mandateText = $mandateText;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMandateText()
-    {
-        return $this->mandateText;
-    }
-
-    /**
-     * @param string
+     *
+     * @since 1.0.0
      */
     public function setBackendTransactionMAID($backendTransactionMaid)
     {
@@ -169,7 +168,11 @@ class SepaPaymentConfig extends PaymentConfig
     }
 
     /**
+     * Get SEPA Credit Transfer transaction merchant account ID
+     *
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getBackendTransactionMAID()
     {
@@ -177,7 +180,11 @@ class SepaPaymentConfig extends PaymentConfig
     }
 
     /**
+     * Set SEPA Credit Transfer transaction secret
+     *
      * @param string
+     *
+     * @since 1.0.0
      */
     public function setBackendTransactionSecret($backendTransactionSecret)
     {
@@ -185,7 +192,11 @@ class SepaPaymentConfig extends PaymentConfig
     }
 
     /**
+     * Get SEPA Credit Transfer transaction secret
+     *
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getBackendTransactionSecret()
     {
@@ -193,7 +204,11 @@ class SepaPaymentConfig extends PaymentConfig
     }
 
     /**
+     * set SEPA Credit Transfer creditor id
+     *
      * @param string
+     *
+     * @since 1.0.0
      */
     public function setBackendCreditorId($backendCreditorId)
     {
@@ -201,13 +216,16 @@ class SepaPaymentConfig extends PaymentConfig
     }
 
     /**
+     * Get SEPA Credit Transfer creditor id
+     *
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getBackendCreditorId()
     {
         return $this->backendCreditorId;
     }
-
 
     /**
      * {@inheritdoc}
@@ -217,13 +235,12 @@ class SepaPaymentConfig extends PaymentConfig
         return array_merge(
             parent::toArray(),
             [
-                'showBic'                  => $this->showBic(),
-                'creditorId'               => $this->getCreditorId(),
-                'creditorName'             => $this->getCreditorName(),
-                'creditorAddress'          => $this->getCreditorAddress(),
-                'mandateText'              => $this->getMandateText(),
-                'backendTransactionMaid'   => $this->getBackendTransactionMAID(),
-                'backendCreditorId'        => $this->getBackendCreditorId()
+                'showBic'                => $this->showBic(),
+                'creditorId'             => $this->getCreditorId(),
+                'creditorName'           => $this->getCreditorName(),
+                'creditorAddress'        => $this->getCreditorAddress(),
+                'backendTransactionMaid' => $this->getBackendTransactionMAID(),
+                'backendCreditorId'      => $this->getBackendCreditorId(),
             ]
         );
     }

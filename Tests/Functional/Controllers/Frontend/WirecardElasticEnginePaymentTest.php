@@ -31,6 +31,7 @@
 
 namespace WirecardShopwareElasticEngine\Tests\Functional\Controllers\Frontend;
 
+use Doctrine\ORM\EntityRepository;
 use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardShopwareElasticEngine\Models\Transaction;
 
@@ -101,19 +102,9 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
         $basketData      = require __DIR__ . '/testdata/return-basket.php';
         $basketSignature = '3691c683586000115ef63cb81ada7e7ade4d5b9d0242b020d01e88ff559ffc9a';
         $paymentUniqueId = '1532501234exxxf';
+        $requestId       = '249XXXXXXXXXxxxXXXXXXXXXxxxXXXXXXXXXxxxXXXXXXXXXXXXXXXXxxxXXXc87';
 
-        // prepare initial transaction
-        $em          = Shopware()->Container()->get('models');
-        $transaction = $em->getRepository(Transaction::class)
-                          ->findOneBy(['requestId' => '249XXXXXXXXXxxxXXXXXXXXXxxxXXXXXXXXXxxxXXXXXXXXXXXXXXXXxxxXXXc87']);
-        if (! $transaction) {
-            $transaction = new Transaction(Transaction::TYPE_INITIAL_REQUEST);
-            $transaction->setPaymentUniqueId($paymentUniqueId);
-            $transaction->setBasketSignature($basketSignature);
-            $transaction->setRequest($initialRequest);
-            $em->persist($transaction);
-            $em->flush();
-        }
+        $this->prepareInitialTransaction($paymentUniqueId, $requestId, $basketSignature, $initialRequest);
 
         // delete order from a previous test
         Shopware()->Db()->delete('s_order', "temporaryID='$paymentUniqueId' AND status!=-1");
@@ -151,5 +142,45 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
         $this->assertEquals('Location', $locationHeader['name']);
         $this->assertContains('checkout/shippingPayment/wirecard_elastic_engine_error_code/1',
             $locationHeader['value']);
+    }
+
+    public function testNotifyAction()
+    {
+        $initialRequest  = json_decode(file_get_contents(__DIR__ . '/testdata/initial-request.json'), true);
+        $notifyPayload   = file_get_contents(__DIR__ . '/testdata/notify-payload.xml');
+        $basketSignature = '3691c683586000115ef63cb81ada7e7ade4d5b9d0242b020d01e88ff559ffc9a';
+        $paymentUniqueId = '1532501234exxxf';
+        $requestId       = '249XXXXXXXXXxxxXXXXXXXXXxxxXXXXXXXXXxxxXXXXXXXXXXXXXXXXxxxXXXc87';
+
+        $this->prepareInitialTransaction($paymentUniqueId, $requestId, $basketSignature, $initialRequest);
+
+        $this->Request()->setMethod('GET');
+        $this->Request()->setHeader('User-Agent', self::USER_AGENT);
+        $this->Request()->setRawBody($notifyPayload);
+
+        $response = $this->dispatch('/WirecardElasticEnginePayment/notify/method/'
+                                    . CreditCardPayment::PAYMETHOD_IDENTIFIER);
+
+        $this->assertFalse($response->isRedirect());
+        $this->assertEquals(200, $response->getHttpResponseCode());
+        $this->assertEmpty($response->getBody());
+    }
+
+    private function prepareInitialTransaction($paymentUniqueId, $requestId, $basketSignature, $initialRequest)
+    {
+        // prepare initial transaction
+        $em = Shopware()->Container()->get('models');
+        /** @var EntityRepository $repo */
+        $repo        = $em->getRepository(Transaction::class);
+        $transaction = $repo->findOneBy(['requestId' => $requestId]);
+        if (! $transaction) {
+            $transaction = new Transaction(Transaction::TYPE_INITIAL_REQUEST);
+            $transaction->setPaymentUniqueId($paymentUniqueId);
+            $transaction->setBasketSignature($basketSignature);
+            $transaction->setRequest($initialRequest);
+            $em->persist($transaction);
+            $em->flush();
+        }
+        return $transaction;
     }
 }

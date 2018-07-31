@@ -86,11 +86,11 @@ class CreditCardPaymentTest extends TestCase
 
     public function testGetPaymentOptions()
     {
-        $this->assertEquals('Wirecard Credit Card', $this->payment->getLabel());
+        $this->assertEquals('WirecardCreditCard', $this->payment->getLabel());
         $this->assertEquals('wirecard_elastic_engine_credit_card', $this->payment->getName());
         $this->assertEquals([
             'name'                  => 'wirecard_elastic_engine_credit_card',
-            'description'           => 'Wirecard Credit Card',
+            'description'           => 'WirecardCreditCard',
             'action'                => 'WirecardElasticEnginePayment',
             'active'                => 0,
             'position'              => 0,
@@ -145,6 +145,14 @@ class CreditCardPaymentTest extends TestCase
             '508b8896-b37d-4614-845c-26bf8bf2c948',
             $config->get(CreditCardTransaction::NAME)->getThreeDMerchantAccountId()
         );
+        $this->assertEquals([
+            'headers' => [
+                'shop-system-name'    => 'Shopware',
+                'shop-system-version' => '___VERSION___',
+                'plugin-name'         => 'WirecardShopwareElasticEngine',
+                'plugin-version'      => '0.5.0',
+            ],
+        ], $config->getShopHeader());
     }
 
     public function testGetTransactionType()

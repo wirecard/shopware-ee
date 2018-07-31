@@ -55,6 +55,10 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.GeneralInformati
         me.callParent(arguments);
     },
 
+    /**
+     * Returns an array containing the general information template.
+     * @returns { *[] }
+     */
     createItems: function () {
         var me = this;
 
@@ -65,6 +69,10 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.GeneralInformati
         }];
     },
 
+    /**
+     * Creates the general information template.
+     * @returns { Ext.XTemplate }
+     */
     createGeneralInformationTemplate: function () {
         return Ext.create('Ext.XTemplate',
             '{literal}<tpl for=".">',
