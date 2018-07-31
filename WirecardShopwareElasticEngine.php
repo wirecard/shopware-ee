@@ -42,6 +42,7 @@ use Shopware\Components\Plugin\Context\DeactivateContext;
 use Shopware\Components\Plugin\Context\InstallContext;
 use Shopware\Components\Plugin\Context\UninstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
+use Shopware\Models\Payment\Payment;
 use Shopware\Models\Plugin\Plugin as PluginModel;
 use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
 use WirecardShopwareElasticEngine\Models\Transaction;
@@ -154,8 +155,12 @@ class WirecardShopwareElasticEngine extends Plugin
     {
         $installer = $this->container->get('shopware.plugin_payment_installer');
 
+        $payments = [];
         foreach ($this->getSupportedPayments() as $payment) {
-            $installer->createOrUpdate($plugin->getName(), $this->translateOptions($payment->getPaymentOptions()));
+            $payments[] = $installer->createOrUpdate($plugin->getName(), $payment->getPaymentOptions());
+        }
+        if (! empty($payments)) {
+            $this->translatePayments($payments);
         }
     }
 
@@ -177,11 +182,15 @@ class WirecardShopwareElasticEngine extends Plugin
             $payments[$payment->getName()] = $payment;
         }
 
+        $payments = [];
         foreach ($this->getSupportedPayments() as $payment) {
             if (isset($payments[$payment->getName()])) {
                 continue;
             }
-            $installer->createOrUpdate($plugin->getName(), $this->translateOptions($payment->getPaymentOptions()));
+            $payments[] = $installer->createOrUpdate($plugin->getName(), $payment->getPaymentOptions());
+        }
+        if (! empty($payments)) {
+            $this->translatePayments($payments);
         }
     }
 
@@ -205,29 +214,6 @@ class WirecardShopwareElasticEngine extends Plugin
     }
 
     /**
-     * Translate wirecard payment options.
-     *
-     * @param $options
-     *
-     * @return mixed
-     *
-     * @since 1.0.0
-     */
-    private function translateOptions($options)
-    {
-        $snippetManager = $this->container->get('snippets');
-        $snippet        = $snippetManager->getNamespace('frontend/wirecard_elastic_engine/payments');
-
-        foreach (['description', 'additionalDescription'] as $translationField) {
-            if (isset($options[$translationField])) {
-                $options[$translationField] = $snippet->get($options[$translationField], $options[$translationField]);
-                $this->container->get('pluginlogger')->notice($translationField . ' ' . $options[$translationField]);
-            }
-        }
-        return $options;
-    }
-
-    /**
      * Return wirecard payment instances.
      *
      * @return Components\Payments\PaymentInterface[]
@@ -245,5 +231,64 @@ class WirecardShopwareElasticEngine extends Plugin
             $this->container->get('events')
         );
         return $paymentFactory->getSupportedPayments();
+    }
+
+    /**
+     * Translate payment descriptions
+     *
+     * @param Payment[] $payments
+     *
+     * @throws \Exception
+     */
+    private function translatePayments($payments)
+    {
+        $iniFile  = dirname(__FILE__) . '/Resources/snippets/frontend/wirecard_elastic_engine/payments.ini';
+        $snippets = parse_ini_file($iniFile, true);
+        $db       = Shopware()->Db();
+
+        try {
+            $shops = $db->select()
+                        ->from('s_core_shops', ['id', 'default'])
+                        ->joinInner('s_core_locales', '`s_core_shops`.`locale_id`=`s_core_locales`.`id`', 'locale')
+                        ->query()->fetchAll();
+
+            foreach ($shops as $shop) {
+                $locale = $shop['locale'];
+                foreach ($payments as $payment) {
+                    if (! isset($snippets[$locale][$payment->getDescription()])) {
+                        continue;
+                    }
+                    $this->updatePaymentTranslation(
+                        $shop['id'],
+                        $payment->getId(),
+                        $snippets[$locale][$payment->getDescription()],
+                        $shop['default']
+                    );
+                }
+            }
+        } catch (\Exception $exception) {
+            throw new \Exception('Payment translation failed: ' . $exception->getMessage());
+        }
+    }
+
+    /**
+     * Update translation of payment description
+     *
+     * @param int    $shopId
+     * @param int    $paymentId
+     * @param string $description
+     * @param int    $defaultShop
+     *
+     * @throws \Zend_Db_Adapter_Exception
+     */
+    private function updatePaymentTranslation($shopId, $paymentId, $description, $defaultShop)
+    {
+        if ($defaultShop) {
+            Shopware()->Db()->update('s_core_paymentmeans', ['description' => $description], 'id=' . $paymentId);
+            return;
+        }
+
+        $translationObject = new \Shopware_Components_Translation();
+        $translationObject->write($shopId, 'config_payment', $paymentId, ['description' => $description], true);
     }
 }
