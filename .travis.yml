@@ -4,13 +4,10 @@ language: php
 
 cache:
   directories:
-    - $HOME/.sonar/cache
     - $HOME/.composer/cache/files
     - node_modules
 
 addons:
-  sonarcloud:
-    organization: "wirecard"
   browserstack:
     username:
       secure: "vBaR5gsVuNjMgDn06glSMHfVhN7zhh7hePPgRUgMD2E2et1MLCyqBGPO21oUPUjWrVImSXYayypue0dsFi+OZOdolgP2HOFfogmRs7OFfcSAfq9WYR9i6iDv9NcLCH6zk76a2ckQToBQJjwpj25Bxhbnu7wXgGsKCYrXqfcz7AWO/GduWEdRWbLxMrT8qfvMNFT+W9TPVywb6ZWkMeLWOOkNS9JoMXrXCRw77i4AQeFnaIfmC/PX460iTnpxHecGIW/oHtKACOf898P50bYxtvt7Rf98rsOnq4FFS5rkUxL0KFoI1PFBnf/AgZKBEhC2MzblcJZ2gaiuHIcKGKVgUZ75LJjeYEKPZ4I28naJH5U8MhTqyyehAJtXJEUzSBq9gQGKx8HuAvKpiCR/jWCM4E0VsNkRbUuFxyPlvicbSvk4mPcljSpJPaIfQqzyIvVoKBg+lWNH45DqQd/FxmkREGWASQoI61715+9qvpnlvIBGJ0jX6BIQ87cmwjNZnfhP22txRLREOT/y+WdjV5ZGDQNvhAH7aseQNMSLWQXAntj8zyFnHomy4rS4/THJVwdMV7UWtV3m+fms4CzdhgTLBC4ps6Q2w2jI50ZBdj42bFDjCuJyg13USo3xbpYsZvrrxuNIkjCCDWNJEOzVL2dNlQAoxCtauVC1wvmCGALjB9c="
@@ -27,7 +24,6 @@ services:
 
 env:
   global:
-    - secure: ${SONAR_TOKEN}
     - COMPOSER_ARGS="--no-interaction"
     - PLUGIN_NAME=WirecardShopwareElasticEngine
     - SHOPWARE_DIRECTORY=${HOME}/shopware
@@ -74,7 +70,6 @@ script:
   - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
   - npm run test:runner
   - composer test-coverage
-  - sonar-scanner
 
 after_script:
   - travis_retry composer upload-coverage
