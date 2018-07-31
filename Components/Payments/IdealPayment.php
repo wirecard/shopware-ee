@@ -42,7 +42,7 @@ use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\Transaction\IdealTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
-use WirecardShopwareElasticEngine\Components\Data\SofortPaymentConfig;
+use WirecardShopwareElasticEngine\Components\Data\IdealPaymentConfig;
 use WirecardShopwareElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 
@@ -137,13 +137,13 @@ class IdealPayment extends Payment implements ProcessPaymentInterface, Additiona
     }
 
     /**
-     * @return SofortPaymentConfig
+     * @return IdealPaymentConfig
      *
      * @since 1.0.0
      */
     public function getPaymentConfig()
     {
-        $paymentConfig = new SofortPaymentConfig(
+        $paymentConfig = new IdealPaymentConfig(
             $this->getPluginConfig('IdealServer'),
             $this->getPluginConfig('IdealHttpUser'),
             $this->getPluginConfig('IdealHttpPassword')
