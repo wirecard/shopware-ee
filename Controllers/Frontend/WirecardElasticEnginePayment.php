@@ -274,6 +274,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         }
         $initialTransaction->setOrderNumber($orderNumber);
         $this->getModelManager()->flush($initialTransaction);
+
         $this->sendStatusMailOnSaveOrder($orderNumber, $paymentStatus);
 
         if ($orderStatus !== Status::ORDER_STATE_OPEN) {
@@ -312,7 +313,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             WirecardElasticEngine::NAME,
             'wirecardElasticEnginePendingMail'
         );
-        if ($paymentStatus !== Status::PAYMENT_STATE_OPEN && $sendPendingMails) {
+        if ($paymentStatus !== Status::PAYMENT_STATE_OPEN || ! $sendPendingMails) {
             return;
         }
 
