@@ -139,11 +139,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.Grid', {
             },
             getClass: function (value, meta, record) {
                 var transaction = record.data;
-                if (!transaction.statusMessage) {
-                    return 'sprite-magnifier-medium';
-                } else {
-                    return 'sprite-exclamation';
-                }
+                return transaction.statusMessage ? 'sprite-exclamation' : 'sprite-magnifier-medium';
             }
         });
 

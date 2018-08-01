@@ -153,10 +153,8 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                     dataIndex: 'createdAt',
                     flex: 1,
                     renderer: function (value) {
-                        if (value === Ext.undefined) {
-                            return value;
-                        }
-                        return Ext.util.Format.date(value) + ' ' + Ext.util.Format.date(value, 'H:i:s');
+                        return (value === Ext.undefined) ? value
+                            : (Ext.util.Format.date(value) + ' ' + Ext.util.Format.date(value, 'H:i:s'));
                     }
                 },
                 { header: me.snippets.transactionsTable.type, dataIndex: 'type', flex: 1 },
@@ -178,12 +176,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                             Ext.create('Shopware.apps.WirecardElasticEngineExtendOrder.view.TransactionDetailsWindow', { record: record }).show();
                         },
                         getClass: function (value, meta, record) {
-                            var transaction = record.data;
-                            if (!transaction.statusMessage) {
-                                return 'sprite-magnifier-medium';
-                            } else {
-                                return 'sprite-exclamation';
-                            }
+                            return record.data.statusMessage ? 'sprite-exclamation' : 'sprite-magnifier-medium';
                         }
                     }, {
                         iconCls: 'sprite-cheque--plus',
