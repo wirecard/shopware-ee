@@ -196,14 +196,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function returnAction()
     {
-        $this->getLogger()->debug('Frontend::returnAction: enter');
-
         /** @var ReturnHandler $returnHandler */
         $returnHandler = $this->get('wirecard_elastic_engine.return_handler');
         $request       = $this->Request();
         $payment       = $this->getPaymentFactory()->create($request->getParam(self::ROUTER_METHOD));
-
-        //$this->getLogger()->debug('Frontend::returnAction: request: ' . json_encode($request->getParams()));
 
         try {
             $response = $returnHandler->handleRequest(
@@ -216,17 +212,14 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $request
             );
 
-            if ($response instanceof SuccessResponse) {
-                $action = $this->createOrder($returnHandler, $response);
-            } else {
-                $action = $returnHandler->handleResponse($response);
-            }
+            $action = $response instanceof SuccessResponse
+                ? $this->createOrder($returnHandler, $response)
+                : $returnHandler->handleResponse($response);
         } catch (\Exception $e) {
             $this->logException('Return processing failed', $e);
             $action = new ErrorAction(ErrorAction::PROCESSING_FAILED, 'Return processing failed');
         }
 
-        $this->getLogger()->debug('Frontend::returnAction: finished');
         return $this->handleAction($action);
     }
 
@@ -246,15 +239,11 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         $this->getSessionManager()->destroyDeviceFingerprintId();
 
-        $this->getLogger()->debug('Frontend::returnAction: Incoming success return');
-
         $orderStatus        = Status::ORDER_STATE_OPEN;
         $orderStatusComment = null;
 
         $initialTransaction = $transactionManager->getInitialTransaction($response);
-        $this->getLogger()->debug("Frontend::returnAction: got initial transaction " .
-                                  "{$initialTransaction->getId()}, load basket");
-        $orderBasket = $this->loadBasketFromSignature($initialTransaction->getBasketSignature());
+        $orderBasket        = $this->loadBasketFromSignature($initialTransaction->getBasketSignature());
         try {
             $this->verifyBasketSignature($initialTransaction->getBasketSignature(), $orderBasket);
         } catch (\RuntimeException $exception) {
@@ -265,19 +254,17 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         // check if payment status has already been set by notification (see NotificationHandler)
         $paymentStatus = Status::PAYMENT_STATE_OPEN;
-        $this->getLogger()->debug('Frontend::returnAction: initial transaction payment status: '
-                                  . $initialTransaction->getPaymentStatus());
         if ($initialTransaction->getPaymentStatus()) {
             $paymentStatus = $initialTransaction->getPaymentStatus();
         }
 
-        $this->getLogger()->debug('Frontend::returnAction: save order');
         $orderNumber = $this->saveOrder(
             $response->getTransactionId(),
             $initialTransaction->getPaymentUniqueId(),
             $paymentStatus,
             $this->shouldSendStatusMailOnSaveOrder($paymentStatus)
         );
+        $this->getLogger()->debug("Saved order $orderNumber with payment status $paymentStatus");
         if (! $orderNumber) {
             throw new CouldNotSaveOrderException(
                 $response->getTransactionId(),
@@ -287,8 +274,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         }
         $initialTransaction->setOrderNumber($orderNumber);
         $this->getModelManager()->flush($initialTransaction);
-        $this->getLogger()->debug('Frontend::returnAction: flushed initial transaction with orderNumber '
-                                  . $orderNumber);
 
         if ($orderStatus !== Status::ORDER_STATE_OPEN) {
             $this->setOrderStatus($orderNumber, $orderStatus, $orderStatusComment);
@@ -297,10 +282,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         // check again if payment status has been set by notification and try to update payment status
         if (! $initialTransaction->getPaymentStatus()) {
             $this->getModelManager()->refresh($initialTransaction);
-            $this->getLogger()->debug('Frontend::returnAction: refreshed initial transaction, payment status: '
-                                      . $initialTransaction->getPaymentStatus());
             if ($initialTransaction->getPaymentStatus()) {
-                $this->getLogger()->debug('Frontend::returnAction: save order payment status');
+                $this->getLogger()->debug('Payment status has changed to ' . $initialTransaction->getPaymentStatus());
                 $this->savePaymentStatus(
                     $response->getTransactionId(),
                     $initialTransaction->getPaymentUniqueId(),
