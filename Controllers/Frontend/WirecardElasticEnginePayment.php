@@ -262,7 +262,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $response->getTransactionId(),
             $initialTransaction->getPaymentUniqueId(),
             $paymentStatus,
-            $this->shouldSendStatusMailOnSaveOrder($paymentStatus)
+            NotificationHandler::shouldSendStatusMail($paymentStatus)
         );
         $this->getLogger()->debug("Saved order $orderNumber with payment status $paymentStatus");
         if (! $orderNumber) {
@@ -274,6 +274,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         }
         $initialTransaction->setOrderNumber($orderNumber);
         $this->getModelManager()->flush($initialTransaction);
+        $this->sendStatusMailOnSaveOrder($orderNumber, $paymentStatus);
 
         if ($orderStatus !== Status::ORDER_STATE_OPEN) {
             $this->setOrderStatus($orderNumber, $orderStatus, $orderStatusComment);
@@ -300,18 +301,29 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * Mails should be send if either the final state is already returned by the return action or
      * if the state is open and the merchant wants to to send pending mails.
      *
+     * @param     $orderNumber
      * @param int $paymentStatus
      *
-     * @return bool
+     * @throws Exception
      */
-    private function shouldSendStatusMailOnSaveOrder($paymentStatus)
+    private function sendStatusMailOnSaveOrder($orderNumber, $paymentStatus)
     {
         $sendPendingMails = $this->container->get('config')->getByNamespace(
             WirecardElasticEngine::NAME,
             'wirecardElasticEnginePendingMail'
         );
-        return NotificationHandler::shouldSendStatusMail($paymentStatus)
-               || ($paymentStatus === Status::PAYMENT_STATE_OPEN && $sendPendingMails);
+        if ($paymentStatus !== Status::PAYMENT_STATE_OPEN && $sendPendingMails) {
+            return;
+        }
+
+        $order = $this->getModelManager()->getRepository(Order::class)->findOneBy(['number' => $orderNumber]);
+        if ($order) {
+            $shopwareOrder = Shopware()->Modules()->Order();
+            $mail          = $shopwareOrder->createStatusMail($order->getId(), $paymentStatus);
+            if ($mail) {
+                $shopwareOrder->sendStatusMail($mail);
+            }
+        }
     }
 
     /**
