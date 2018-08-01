@@ -398,6 +398,106 @@ function (button) {
             </options>
         </element>
         <!-- PayPal End -->
+        <!-- Masterpass -->
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineMasterpassServer</name>
+            <label lang="de">[Masterpass] Base URL</label>
+            <label lang="en">[Masterpass] Base URL</label>
+            <value>https://api-test.wirecard.com</value>
+            <description lang="de">Wirecard Base URL (z.B. https://api.wirecard.com)</description>
+            <description lang="en">Wirecard Base URL (e.g. https://api.wirecard.com)</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineMasterpassHttpUser</name>
+            <label lang="de">[Masterpass] HTTP Benutzer</label>
+            <label lang="en">[Masterpass] HTTP User</label>
+            <value>70000-APITEST-AP</value>
+            <description lang="de">Wirecard HTTP Benutzer laut Vertrag mit Wirecard.</description>
+            <description lang="en">HTTP User as provided in your Wirecard contract.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineMasterpassHttpPassword</name>
+            <label lang="de">[Masterpass] HTTP Passwort</label>
+            <label lang="en">[Masterpass] HTTP Password</label>
+            <value>qD2wzQ_hrc!8</value>
+            <description lang="de">Wirecard HTTP Passwort laut Vertrag mit Wirecard.</description>
+            <description lang="en">HTTP Password as provided in your Wirecard contract.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineMasterpassMerchantId</name>
+            <label lang="de">[Masterpass] Händler-Konto-ID</label>
+            <label lang="en">[Masterpass] Merchant Account ID</label>
+            <value>8bc8ed6d-81a8-43be-bd7b-75b008f89fa6</value>
+            <description lang="de">Eindeutige Händler-Konto-ID laut Vertrag mit Wirecard.</description>
+            <description lang="en">Unique identifier assigned to your merchant account.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineMasterpassSecret</name>
+            <label lang="de">[Masterpass] Geheimschlüssel</label>
+            <label lang="en">[Masterpass] Secret Key</label>
+            <value>2d96596b-9d10-4c98-ac47-4d56e22fd878</value>
+            <description lang="de">
+                Der Geheimschlüssel wird benötigt, um die Digitale Signatur für Zahlungen zu berechnen.
+            </description>
+            <description lang="en">
+                Secret Key is mandatory to calculate the Digital Signature for payments.
+            </description>
+        </element>
+        <element type="select" scope="shop">
+            <name>wirecardElasticEngineMasterpassTransactionType</name>
+            <label lang="de">[Masterpass] Zahlungsaktion</label>
+            <label lang="en">[Masterpass] Payment Action</label>
+            <value>pay</value>
+            <description lang="de">
+                Wählen Sie zwischen "Purchase" um automatisch eine Buchung durchzuführen oder
+                "Authorization" um eine manuelle Buchung zu ermöglichen.
+            </description>
+            <description lang="en">
+                Select between "Purchase" to capture/invoice your order automatically or
+                "Authorization" to capture/invoice manually.
+            </description>
+            <store>
+                <option>
+                    <value>reserve</value>
+                    <label lang="de">Authorization</label>
+                    <label lang="en">Authorization</label>
+                </option>
+                <option>
+                    <value>pay</value>
+                    <label lang="de">Purchase</label>
+                    <label lang="en">Purchase</label>
+                </option>
+            </store>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineMasterpassFraudPrevention</name>
+            <label lang="de">[Masterpass] Zusätzliche Informationen mitsenden</label>
+            <label lang="en">[Masterpass] Send additional information</label>
+            <value>true</value>
+            <description lang="de">
+                Zusätzliche Informationen werden für Betrugsschutz gesendet. In diesen Daten sind
+                Rechnungs- / Lieferadresse, Warenkorb und Deskriptor inkludiert.
+            </description>
+            <description lang="en">
+                Additional data will be sent for the purpose of fraud protection. This additional
+                data includes billing/shipping address, shopping basket and descriptor.
+            </description>
+        </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEngineMasterpassTestApi</name>
+            <label lang="de">[Masterpass] Konfiguration testen</label>
+            <label lang="en">[Masterpass] Test configuration</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    wirecardeeTestPaymentCredentials(button, 'Masterpass', 'Wirecard Masterpass Test');
+}
+                    ]]>
+                </handler>
+            </options>
+        </element>
+        <!-- Masterpass End -->
         <!-- SEPA Direct Debit -->
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaServer</name>
