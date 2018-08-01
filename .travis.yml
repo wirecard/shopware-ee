@@ -67,7 +67,7 @@ script:
   - composer cs-check
   - npm run lint
   - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
-  - npm run test:runner
+#  - npm run test:runner
   - composer test-coverage
 
 after_script:
