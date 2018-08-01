@@ -653,5 +653,90 @@ function (button) {
             </options>
         </element>
         <!-- Sofort. End -->
+        <!-- UnionPay -->
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineUnionpayServer</name>
+            <label lang="de">[UnionPay International] Base URL</label>
+            <label lang="en">[UnionPay International] Base URL</label>
+            <value>https://api-test.wirecard.com</value>
+            <description lang="de">Wirecard Base URL (z.B. https://api.wirecard.com)</description>
+            <description lang="en">Wirecard Base URL (e.g. https://api.wirecard.com)</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineUnionpayHttpUser</name>
+            <label lang="de">[UnionPay International] HTTP Benutzer</label>
+            <label lang="en">[UnionPay International] HTTP User</label>
+            <value>70000-APITEST-AP</value>
+            <description lang="de">Wirecard HTTP Benutzer laut Vertrag mit Wirecard.</description>
+            <description lang="en">HTTP User as provided in your Wirecard contract.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineUnionpayHttpPassword</name>
+            <label lang="de">[UnionPay International] HTTP Passwort</label>
+            <label lang="en">[UnionPay International] HTTP Password</label>
+            <value>qD2wzQ_hrc!8</value>
+            <description lang="de">Wirecard HTTP Passwort laut Vertrag mit Wirecard.</description>
+            <description lang="en">HTTP Password as provided in your Wirecard contract.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineUnionpayMerchantId</name>
+            <label lang="de">[UnionPay International] Händler-Konto-ID</label>
+            <label lang="en">[UnionPay International] Merchant Account ID</label>
+            <value>53f2895a-e4de-4e82-a813-0d87a10e55e6</value>
+            <description lang="de">Eindeutige Händler-Konto-ID laut Vertrag mit Wirecard.</description>
+            <description lang="en">Unique identifier assigned to your merchant account.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineUnionpaySecret</name>
+            <label lang="de">[UnionPay International] Geheimschlüssel</label>
+            <label lang="en">[UnionPay International] Secret Key</label>
+            <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
+            <description lang="de">Der Geheimschlüssel wird benötigt, um die Digitale Signatur für Zahlungen zu
+                berechnen.
+            </description>
+            <description lang="en">Secret Key is mandatory to calculate the Digital Signature for payments.
+            </description>
+        </element>
+        <element type="select" scope="shop">
+            <name>wirecardElasticEngineUnionpayTransactionType</name>
+            <label lang="de">[UnionPay International] Zahlungsaktion</label>
+            <label lang="en">[UnionPay International] Payment Action</label>
+            <value>pay</value>
+            <description lang="de">
+                Wählen Sie zwischen "Purchase" um automatisch eine Buchung durchzuführen oder
+                "Authorization" um eine manuelle Buchung zu ermöglichen.
+            </description>
+            <description lang="en">
+                Select between "Purchase" to capture/invoice your order automatically or
+                "Authorization" to capture/invoice manually.
+            </description>
+            <store>
+                <option>
+                    <value>reserve</value>
+                    <label lang="de">Authorization</label>
+                    <label lang="en">Authorization</label>
+                </option>
+                <option>
+                    <value>pay</value>
+                    <label lang="de">Purchase</label>
+                    <label lang="en">Purchase</label>
+                </option>
+            </store>
+        </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEngineUnionpayTestApi</name>
+            <label lang="de">[UnionPay International] Konfiguration testen</label>
+            <label lang="en">[UnionPay International] Test configuration</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    wirecardeeTestPaymentCredentials(button, 'Unionpay', 'Wirecard UnionPay International Test');
+}
+                    ]]>
+                </handler>
+            </options>
+        </element>
+        <!-- UnionPay End -->
     </elements>
 </config>
