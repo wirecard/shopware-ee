@@ -38,6 +38,7 @@ use WirecardElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardElasticEngine\Components\Payments\Payment;
 use WirecardElasticEngine\Components\Payments\PaymentInterface;
 use WirecardElasticEngine\Components\Payments\PaypalPayment;
+use WirecardElasticEngine\Components\Payments\MasterpassPayment;
 use WirecardElasticEngine\Components\Payments\SepaPayment;
 use WirecardElasticEngine\Components\Payments\SofortPayment;
 use WirecardElasticEngine\Exception\UnknownPaymentException;
@@ -157,6 +158,7 @@ class PaymentFactory
         return [
             PaypalPayment::PAYMETHOD_IDENTIFIER     => PaypalPayment::class,
             CreditCardPayment::PAYMETHOD_IDENTIFIER => CreditCardPayment::class,
+            MasterpassPayment::PAYMETHOD_IDENTIFIER => MasterpassPayment::class,
             SepaPayment::PAYMETHOD_IDENTIFIER       => SepaPayment::class,
             SofortPayment::PAYMETHOD_IDENTIFIER     => SofortPayment::class,
         ];
