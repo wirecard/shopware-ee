@@ -32,22 +32,15 @@
 
 {block name='frontend_checkout_confirm_information_wrapper'}
     {$smarty.block.parent}
-<<<<<<< HEAD
     {if $wirecardElasticEngineViewAssignments}
         {if $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_sepa'}
             <div class="panel has--border wirecardee--additional-form-fields">
                 <div class="panel--title primary is--underline">
-                    {s name="SepaPaymentFormHeader" namespace="frontend/wirecard_elastic_engine/sepa"}{/s}
+                    {s name="SepaPaymentFormHeader" namespace="frontend/wirecard_elastic_engine/sepa_direct_debit"}{/s}
                 </div>
                 <div class="panel--body is--wide">
                     {include file="frontend/plugins/wirecard_elastic_engine/form/sepa.tpl"}
                 </div>
-=======
-    {if $wirecardElasticEngineViewAssignments and $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_sepa'}
-        <div class="panel has--border wirecardee--additional-form-fields">
-            <div class="panel--title primary is--underline">
-                {s name="SepaPaymentFormHeader" namespace="frontend/wirecard_elastic_engine/sepa_direct_debit"}{/s}
->>>>>>> dev
             </div>
         {elseif $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_ideal'}
             <div class="panel has--border wirecardee--additional-form-fields">
