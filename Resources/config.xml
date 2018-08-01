@@ -723,6 +723,20 @@ function (button) {
                 </option>
             </store>
         </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineUnionpayInternationalFraudPrevention</name>
+            <label lang="de">[UnionPay International] Zusätzliche Informationen mitsenden</label>
+            <label lang="en">[UnionPay International] Send additional information</label>
+            <value>true</value>
+            <description lang="de">
+                Zusätzliche Informationen werden für Betrugsschutz gesendet. In diesen Daten sind
+                Rechnungs- / Lieferadresse, Warenkorb und Deskriptor inkludiert.
+            </description>
+            <description lang="en">
+                Additional data will be sent for the purpose of fraud protection. This additional
+                data includes billing/shipping address, shopping basket and descriptor.
+            </description>
+        </element>
         <element type="button" scope="shop">
             <name>wirecardElasticEngineUnionpayInternationalTestApi</name>
             <label lang="de">[UnionPay International] Konfiguration testen</label>
