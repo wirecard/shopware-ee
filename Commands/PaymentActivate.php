@@ -29,21 +29,21 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Commands;
+namespace WirecardElasticEngine\Commands;
 
 use Shopware\Commands\ShopwareCommand;
 use Shopware\Models\Plugin\Plugin;
 use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
+use WirecardElasticEngine\WirecardElasticEngine;
 
 /**
  * Enables all Wirecard payments methods.
  * For testing purposes all Wirecard related payments requires to be activated, hence this command is usually only
  * called in testing environments.
  *
- * @package WirecardShopwareElasticEngine\Commands
+ * @package WirecardElasticEngine\Commands
  * @since   1.0.0
  */
 class PaymentActivate extends ShopwareCommand
@@ -66,9 +66,9 @@ class PaymentActivate extends ShopwareCommand
         $em = $this->container->get('models');
 
         /** @var Plugin $plugin */
-        $plugin = $em->getRepository(Plugin::class)->findOneBy(['name' => WirecardShopwareElasticEngine::NAME]);
+        $plugin = $em->getRepository(Plugin::class)->findOneBy(['name' => WirecardElasticEngine::NAME]);
         if (! $plugin) {
-            throw new RuntimeException("Plugin '" . WirecardShopwareElasticEngine::NAME . "' not found");
+            throw new RuntimeException("Plugin '" . WirecardElasticEngine::NAME . "' not found");
         }
 
         foreach ($plugin->getPayments() as $payment) {

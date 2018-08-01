@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Subscriber;
+namespace WirecardElasticEngine\Tests\Unit\Subscriber;
 
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
@@ -38,14 +38,14 @@ use Shopware\Components\Plugin;
 use Shopware\Components\Routing\RouterInterface;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
-use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
+use WirecardElasticEngine\Components\Payments\PaymentInterface;
+use WirecardElasticEngine\WirecardElasticEngine;
 
-class WirecardShopwareElasticEngineTest extends TestCase
+class WirecardElasticEngineTest extends TestCase
 {
     public function testPlugin()
     {
-        $plugin = new WirecardShopwareElasticEngine(true);
+        $plugin = new WirecardElasticEngine(true);
         $this->assertInstanceOf(Plugin::class, $plugin);
         $this->assertTrue($plugin->isActive());
     }
@@ -68,7 +68,7 @@ class WirecardShopwareElasticEngineTest extends TestCase
         $container = $this->createMock(ContainerInterface::class);
         $container->method('get')->willReturnMap($map);
 
-        $plugin = new WirecardShopwareElasticEngine(true);
+        $plugin = new WirecardElasticEngine(true);
         $plugin->setContainer($container);
         $this->assertInstanceOf(Plugin::class, $plugin);
         $payments = $plugin->getSupportedPayments();

@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Functional;
+namespace WirecardElasticEngine\Tests\Functional;
 
 use Shopware\Components\Test\Plugin\TestCase;
 use Wirecard\PaymentSdk\Config\Config;
@@ -42,7 +42,7 @@ class ApiCredentialsTest extends TestCase
     const HTTP_PASSWORD = 'qD2wzQ_hrc!8';
 
     protected static $ensureLoadedPlugins = [
-        'WirecardShopwareElasticEngine',
+        'WirecardElasticEngine',
     ];
 
     public function testCredentials()

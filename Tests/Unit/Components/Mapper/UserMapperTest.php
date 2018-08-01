@@ -29,13 +29,13 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Mapper;
+namespace WirecardElasticEngine\Tests\Unit\Components\Mapper;
 
 use PHPUnit\Framework\TestCase;
 use Wirecard\PaymentSdk\Entity\AccountHolder;
 use Wirecard\PaymentSdk\Entity\Address;
-use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
-use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
+use WirecardElasticEngine\Components\Mapper\UserMapper;
+use WirecardElasticEngine\Exception\ArrayKeyNotFoundException;
 
 class UserMapperTest extends TestCase
 {

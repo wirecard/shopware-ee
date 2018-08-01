@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Services;
+namespace WirecardElasticEngine\Tests\Unit\Components\Services;
 
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
@@ -43,9 +43,9 @@ use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Transaction\Transaction;
-use WirecardShopwareElasticEngine\Components\Services\NotificationHandler;
-use WirecardShopwareElasticEngine\Components\Services\TransactionManager;
-use WirecardShopwareElasticEngine\Models\Transaction as TransactionModel;
+use WirecardElasticEngine\Components\Services\NotificationHandler;
+use WirecardElasticEngine\Components\Services\TransactionManager;
+use WirecardElasticEngine\Models\Transaction as TransactionModel;
 
 class NotificationHandlerTest extends TestCase
 {

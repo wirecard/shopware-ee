@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Mail;
+namespace WirecardElasticEngine\Tests\Unit\Components\Mail;
 
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManagerInterface;
@@ -40,8 +40,8 @@ use PHPUnit\Framework\TestCase;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Models\Plugin\Plugin;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use WirecardShopwareElasticEngine\Components\Mail\SupportMail;
-use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
+use WirecardElasticEngine\Components\Mail\SupportMail;
+use WirecardElasticEngine\Components\Services\PaymentFactory;
 
 class SupportMailTest extends TestCase
 {

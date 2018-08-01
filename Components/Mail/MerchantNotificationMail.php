@@ -29,15 +29,15 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Mail;
+namespace WirecardElasticEngine\Components\Mail;
 
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Transaction\Transaction;
-use WirecardShopwareElasticEngine\Models\Transaction as TransactionModel;
-use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
+use WirecardElasticEngine\Models\Transaction as TransactionModel;
+use WirecardElasticEngine\WirecardElasticEngine;
 
 /**
- * @package WirecardShopwareElasticEngine\Components\Mail
+ * @package WirecardElasticEngine\Components\Mail
  *
  * @since   1.0.0
  */
@@ -95,7 +95,7 @@ class MerchantNotificationMail
         }
 
         $notifyMailAddress = $this->shopwareConfig->getByNamespace(
-            WirecardShopwareElasticEngine::NAME,
+            WirecardElasticEngine::NAME,
             'wirecardElasticEngineNotifyMail'
         );
         if (! $notifyMailAddress) {

@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Payments;
+namespace WirecardElasticEngine\Tests\Unit\Components\Payments;
 
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -40,15 +40,15 @@ use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\Transaction\SepaDirectDebitTransaction;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
-use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
-use WirecardShopwareElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
-use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
-use WirecardShopwareElasticEngine\Components\Payments\SepaPayment;
-use WirecardShopwareElasticEngine\Exception\InsufficientDataException;
-use WirecardShopwareElasticEngine\Exception\UnknownTransactionTypeException;
-use WirecardShopwareElasticEngine\Tests\Unit\PaymentTestCase;
-use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
+use WirecardElasticEngine\Components\Data\OrderSummary;
+use WirecardElasticEngine\Components\Data\PaymentConfig;
+use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
+use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Components\Payments\SepaPayment;
+use WirecardElasticEngine\Exception\InsufficientDataException;
+use WirecardElasticEngine\Exception\UnknownTransactionTypeException;
+use WirecardElasticEngine\Tests\Unit\PaymentTestCase;
+use WirecardElasticEngine\WirecardElasticEngine;
 
 class SepaPaymentTest extends PaymentTestCase
 {
@@ -60,10 +60,10 @@ class SepaPaymentTest extends PaymentTestCase
         parent::setUp();
 
         $this->config->method('getByNamespace')->willReturnMap([
-            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineSepaMerchantId', null, 'DD-MAID'],
-            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineSepaSecret', null, 'DD-Secret'],
-            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineSepaBackendMerchantId', null, 'CT-MAID'],
-            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineSepaBackendSecret', null, 'CT-Secret'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineSepaMerchantId', null, 'DD-MAID'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineSepaSecret', null, 'DD-Secret'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineSepaBackendMerchantId', null, 'CT-MAID'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineSepaBackendSecret', null, 'CT-Secret'],
         ]);
 
         $this->payment = new SepaPayment(
@@ -159,7 +159,7 @@ class SepaPaymentTest extends PaymentTestCase
             'headers' => [
                 'shop-system-name'    => 'Shopware',
                 'shop-system-version' => '__SW_VERSION__',
-                'plugin-name'         => 'WirecardShopwareElasticEngine',
+                'plugin-name'         => 'WirecardElasticEngine',
                 'plugin-version'      => '__PLUGIN_VERSION__',
             ],
         ], $config->getShopHeader());
@@ -176,14 +176,14 @@ class SepaPaymentTest extends PaymentTestCase
         /** @var \Shopware_Components_Config|\PHPUnit_Framework_MockObject_MockObject $config */
         $config = $this->createMock(\Shopware_Components_Config::class);
         $config->method('getByNamespace')->willReturnMap([
-            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineSepaTransactionType', null, 'pay'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineSepaTransactionType', null, 'pay'],
         ]);
         $payment = new SepaPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
         $this->assertEquals('purchase', $payment->getTransactionType());
 
         $config = $this->createMock(\Shopware_Components_Config::class);
         $config->method('getByNamespace')->willReturnMap([
-            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineSepaTransactionType', null, 'reserve'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineSepaTransactionType', null, 'reserve'],
         ]);
         $payment = new SepaPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
         $this->assertEquals('authorization', $payment->getTransactionType());

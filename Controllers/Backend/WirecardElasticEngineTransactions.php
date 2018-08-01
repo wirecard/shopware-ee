@@ -36,14 +36,14 @@ use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Actions\Action;
-use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
-use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
-use WirecardShopwareElasticEngine\Components\Services\BackendOperationHandler;
-use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
-use WirecardShopwareElasticEngine\Exception\UnknownActionException;
-use WirecardShopwareElasticEngine\Exception\MissingCredentialsException;
-use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardElasticEngine\Components\Actions\Action;
+use WirecardElasticEngine\Components\Actions\ErrorAction;
+use WirecardElasticEngine\Components\Actions\ViewAction;
+use WirecardElasticEngine\Components\Services\BackendOperationHandler;
+use WirecardElasticEngine\Components\Services\PaymentFactory;
+use WirecardElasticEngine\Exception\UnknownActionException;
+use WirecardElasticEngine\Exception\MissingCredentialsException;
+use WirecardElasticEngine\Models\Transaction;
 
 /**
  * @since 1.0.0
@@ -195,7 +195,7 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
 
     /**
      * @return Enlight_View|Enlight_View_Default|void
-     * @throws \WirecardShopwareElasticEngine\Exception\UnknownPaymentException
+     * @throws \WirecardElasticEngine\Exception\UnknownPaymentException
      *
      * @since 1.0.0
      */

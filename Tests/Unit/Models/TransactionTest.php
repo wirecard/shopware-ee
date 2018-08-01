@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Models;
+namespace WirecardElasticEngine\Tests\Unit\Models;
 
 use Shopware\Models\Order\Status;
 use Wirecard\PaymentSdk\Entity\Amount;
@@ -39,9 +39,9 @@ use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Payments\Payment;
-use WirecardShopwareElasticEngine\Models\Transaction;
-use WirecardShopwareElasticEngine\Tests\Unit\ModelTestCase;
+use WirecardElasticEngine\Components\Payments\Payment;
+use WirecardElasticEngine\Models\Transaction;
+use WirecardElasticEngine\Tests\Unit\ModelTestCase;
 
 class TransactionTest extends ModelTestCase
 {

@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Mail;
+namespace WirecardElasticEngine\Components\Mail;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
@@ -37,11 +37,11 @@ use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Models\Payment\Payment;
 use Shopware\Models\Plugin\Plugin;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
-use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
+use WirecardElasticEngine\Components\Services\PaymentFactory;
+use WirecardElasticEngine\WirecardElasticEngine;
 
 /**
- * @package WirecardShopwareElasticEngine\Components\Mail
+ * @package WirecardElasticEngine\Components\Mail
  *
  * @since   1.0.0
  */
@@ -99,7 +99,7 @@ class SupportMail
      *
      * @return \Zend_Mail
      * @throws \Zend_Mail_Exception
-     * @throws \WirecardShopwareElasticEngine\Exception\UnknownPaymentException
+     * @throws \WirecardElasticEngine\Exception\UnknownPaymentException
      *
      * @since 1.0.0
      */
@@ -203,13 +203,13 @@ class SupportMail
     /**
      * @return array
      *
-     * @throws \WirecardShopwareElasticEngine\Exception\UnknownPaymentException
+     * @throws \WirecardElasticEngine\Exception\UnknownPaymentException
      *
      * @since 1.0.0
      */
     protected function getPluginInfo()
     {
-        $plugin         = $this->installerService->getPluginByName(WirecardShopwareElasticEngine::NAME);
+        $plugin         = $this->installerService->getPluginByName(WirecardElasticEngine::NAME);
         $payments       = $this->paymentFactory->getSupportedPayments();
         $paymentConfigs = [];
 
@@ -228,7 +228,7 @@ class SupportMail
         }
 
         return [
-            'name'     => WirecardShopwareElasticEngine::NAME,
+            'name'     => WirecardElasticEngine::NAME,
             'version'  => $plugin->getVersion(),
             'payments' => $paymentConfigs,
         ];

@@ -29,14 +29,14 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Exception;
+namespace WirecardElasticEngine\Exception;
 
 /**
  * Thrown during the return action whenever an order could not be saved.
  *
  * @see     \Shopware_Controllers_Frontend_WirecardElasticEnginePayment::returnAction()
  *
- * @package WirecardShopwareElasticEngine\Exception
+ * @package WirecardElasticEngine\Exception
  *
  * @since   1.0.0
  */

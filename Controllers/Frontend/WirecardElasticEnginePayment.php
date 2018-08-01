@@ -38,26 +38,26 @@ use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Actions\Action;
-use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
-use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
-use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
-use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
-use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
-use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
-use WirecardShopwareElasticEngine\Components\Services\NotificationHandler;
-use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
-use WirecardShopwareElasticEngine\Components\Services\PaymentHandler;
-use WirecardShopwareElasticEngine\Components\Services\ReturnHandler;
-use WirecardShopwareElasticEngine\Components\Services\SessionManager;
-use WirecardShopwareElasticEngine\Components\Services\TransactionManager;
-use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
-use WirecardShopwareElasticEngine\Exception\BasketException;
-use WirecardShopwareElasticEngine\Exception\CouldNotSaveOrderException;
-use WirecardShopwareElasticEngine\Exception\UnknownActionException;
-use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
-use WirecardShopwareElasticEngine\Models\Transaction;
-use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
+use WirecardElasticEngine\Components\Actions\Action;
+use WirecardElasticEngine\Components\Actions\ErrorAction;
+use WirecardElasticEngine\Components\Actions\RedirectAction;
+use WirecardElasticEngine\Components\Actions\ViewAction;
+use WirecardElasticEngine\Components\Data\OrderSummary;
+use WirecardElasticEngine\Components\Mapper\BasketMapper;
+use WirecardElasticEngine\Components\Mapper\UserMapper;
+use WirecardElasticEngine\Components\Services\NotificationHandler;
+use WirecardElasticEngine\Components\Services\PaymentFactory;
+use WirecardElasticEngine\Components\Services\PaymentHandler;
+use WirecardElasticEngine\Components\Services\ReturnHandler;
+use WirecardElasticEngine\Components\Services\SessionManager;
+use WirecardElasticEngine\Components\Services\TransactionManager;
+use WirecardElasticEngine\Exception\ArrayKeyNotFoundException;
+use WirecardElasticEngine\Exception\BasketException;
+use WirecardElasticEngine\Exception\CouldNotSaveOrderException;
+use WirecardElasticEngine\Exception\UnknownActionException;
+use WirecardElasticEngine\Exception\UnknownPaymentException;
+use WirecardElasticEngine\Models\Transaction;
+use WirecardElasticEngine\WirecardElasticEngine;
 
 /**
  * @since 1.0.0
@@ -237,7 +237,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * @return Action
      * @throws CouldNotSaveOrderException
      * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException
+     * @throws \WirecardElasticEngine\Exception\InitialTransactionNotFoundException
      */
     private function createOrder(ReturnHandler $returnHandler, SuccessResponse $response)
     {
@@ -324,7 +324,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     private function shouldSendStatusMailOnSaveOrder($paymentStatus)
     {
         $sendPendingMails = $this->container->get('config')->getByNamespace(
-            WirecardShopwareElasticEngine::NAME,
+            WirecardElasticEngine::NAME,
             'wirecardElasticEnginePendingMail'
         );
         return NotificationHandler::shouldSendStatusMail($paymentStatus)

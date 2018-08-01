@@ -29,16 +29,16 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Mapper;
+namespace WirecardElasticEngine\Components\Mapper;
 
 use Wirecard\PaymentSdk\Entity\AccountHolder;
 use Wirecard\PaymentSdk\Entity\Address;
-use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
+use WirecardElasticEngine\Exception\ArrayKeyNotFoundException;
 
 /**
  * Represents a Shopware user as object.
  *
- * @package WirecardShopwareElasticEngine\Components\Mapper
+ * @package WirecardElasticEngine\Components\Mapper
  *
  * @since   1.0.0
  */

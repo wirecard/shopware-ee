@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Payments;
+namespace WirecardElasticEngine\Tests\Unit\Components\Payments;
 
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -40,12 +40,12 @@ use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\Transaction\SofortTransaction;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
-use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
-use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
-use WirecardShopwareElasticEngine\Components\Payments\SofortPayment;
-use WirecardShopwareElasticEngine\Tests\Unit\PaymentTestCase;
-use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
+use WirecardElasticEngine\Components\Data\OrderSummary;
+use WirecardElasticEngine\Components\Data\PaymentConfig;
+use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Components\Payments\SofortPayment;
+use WirecardElasticEngine\Tests\Unit\PaymentTestCase;
+use WirecardElasticEngine\WirecardElasticEngine;
 
 class SofortPaymentTest extends PaymentTestCase
 {
@@ -57,10 +57,10 @@ class SofortPaymentTest extends PaymentTestCase
         parent::setUp();
 
         $this->config->method('getByNamespace')->willReturnMap([
-            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineSofortMerchantId', null, 'MAID'],
-            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineSofortSecret', null, 'Secret'],
-            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineSepaBackendMerchantId', null, 'CT-MAID'],
-            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineSepaBackendSecret', null, 'CT-Secret'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineSofortMerchantId', null, 'MAID'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineSofortSecret', null, 'Secret'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineSepaBackendMerchantId', null, 'CT-MAID'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineSepaBackendSecret', null, 'CT-Secret'],
         ]);
 
         $this->payment = new SofortPayment(
@@ -162,7 +162,7 @@ class SofortPaymentTest extends PaymentTestCase
             'headers' => [
                 'shop-system-name'    => 'Shopware',
                 'shop-system-version' => '__SW_VERSION__',
-                'plugin-name'         => 'WirecardShopwareElasticEngine',
+                'plugin-name'         => 'WirecardElasticEngine',
                 'plugin-version'      => '__PLUGIN_VERSION__',
             ],
         ], $config->getShopHeader());
@@ -178,7 +178,7 @@ class SofortPaymentTest extends PaymentTestCase
         /** @var \Shopware_Components_Config|\PHPUnit_Framework_MockObject_MockObject $config */
         $config = $this->createMock(\Shopware_Components_Config::class);
         $config->method('getByNamespace')->willReturnMap([
-            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEngineSofortTransactionType', null, 'pay'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineSofortTransactionType', null, 'pay'],
         ]);
         $payment = new SofortPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
         $this->assertEquals('purchase', $payment->getTransactionType());

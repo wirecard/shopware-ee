@@ -29,12 +29,12 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Subscriber;
+namespace WirecardElasticEngine\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
 
 /**
- * @package WirecardShopwareElasticEngine\Subscriber
+ * @package WirecardElasticEngine\Subscriber
  *
  * @since 1.0.0
  */

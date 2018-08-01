@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Services;
+namespace WirecardElasticEngine\Components\Services;
 
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
@@ -37,7 +37,7 @@ use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
-use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardElasticEngine\Models\Transaction;
 
 /**
  * Handles notification responses. Notification responses are server-to-server, meaning you must NEVER access session
@@ -45,7 +45,7 @@ use WirecardShopwareElasticEngine\Models\Transaction;
  * Additionally notifications are the "source of truth", hence they are responsible for setting - respectively
  * updating - the payment status.
  *
- * @package WirecardShopwareElasticEngine\Components\Services
+ * @package WirecardElasticEngine\Components\Services
  *
  * @since   1.0.0
  */
@@ -59,7 +59,7 @@ class NotificationHandler extends Handler
      * @param BackendService $backendService
      *
      * @return Transaction|null
-     * @throws \WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException
+     * @throws \WirecardElasticEngine\Exception\InitialTransactionNotFoundException
      *
      * @since 1.0.0
      */
@@ -89,7 +89,7 @@ class NotificationHandler extends Handler
      * @param BackendService  $backendService
      *
      * @return Transaction
-     * @throws \WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException
+     * @throws \WirecardElasticEngine\Exception\InitialTransactionNotFoundException
      *
      * @since 1.0.0
      */

@@ -29,15 +29,15 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Mapper;
+namespace WirecardElasticEngine\Tests\Unit\Components\Mapper;
 
 use PHPUnit\Framework\TestCase;
 use Wirecard\PaymentSdk\Entity\Basket;
 use Wirecard\PaymentSdk\Transaction\Transaction;
-use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
-use WirecardShopwareElasticEngine\Exception\InvalidBasketException;
-use WirecardShopwareElasticEngine\Exception\NotAvailableBasketException;
-use WirecardShopwareElasticEngine\Exception\OutOfStockBasketException;
+use WirecardElasticEngine\Components\Mapper\BasketMapper;
+use WirecardElasticEngine\Exception\InvalidBasketException;
+use WirecardElasticEngine\Exception\NotAvailableBasketException;
+use WirecardElasticEngine\Exception\OutOfStockBasketException;
 
 class BasketMapperTest extends TestCase
 {

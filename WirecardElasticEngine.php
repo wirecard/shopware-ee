@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine;
+namespace WirecardElasticEngine;
 
 // PSR1.Files.SideEffects is disabled for this file, see `phpcs.xml`
 if (file_exists(__DIR__ . '/vendor/autoload.php')) {
@@ -44,18 +44,18 @@ use Shopware\Components\Plugin\Context\UninstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
 use Shopware\Models\Payment\Payment;
 use Shopware\Models\Plugin\Plugin as PluginModel;
-use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
-use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardElasticEngine\Components\Services\PaymentFactory;
+use WirecardElasticEngine\Models\Transaction;
 use Doctrine\ORM\Tools\SchemaTool;
 
 /**
- * @package WirecardShopwareElasticEngine
+ * @package WirecardElasticEngine
  *
  * @since   1.0.0
  */
-class WirecardShopwareElasticEngine extends Plugin
+class WirecardElasticEngine extends Plugin
 {
-    const NAME = 'WirecardShopwareElasticEngine';
+    const NAME = 'WirecardElasticEngine';
 
     /**
      * @param InstallContext $context

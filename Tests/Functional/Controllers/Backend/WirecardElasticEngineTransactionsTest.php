@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Functional\Controllers\Backend;
+namespace WirecardElasticEngine\Tests\Functional\Controllers\Backend;
 
 use Wirecard\PaymentSdk\Transaction\Operation;
 

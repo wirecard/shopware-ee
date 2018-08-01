@@ -29,17 +29,17 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Mapper;
+namespace WirecardElasticEngine\Components\Mapper;
 
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Item;
-use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
-use WirecardShopwareElasticEngine\Exception\InvalidBasketItemException;
+use WirecardElasticEngine\Exception\ArrayKeyNotFoundException;
+use WirecardElasticEngine\Exception\InvalidBasketItemException;
 
 /**
  * Represents a single item from the Shopware basket as object.
  *
- * @package WirecardShopwareElasticEngine\Components\Mapper
+ * @package WirecardElasticEngine\Components\Mapper
  *
  * @since   1.0.0
  */

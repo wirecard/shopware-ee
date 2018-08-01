@@ -34,7 +34,7 @@
     <services>
         <!-- Factories -->
         <service id="wirecard_elastic_engine.payment_factory"
-                 class="WirecardShopwareElasticEngine\Components\Services\PaymentFactory">
+                 class="WirecardElasticEngine\Components\Services\PaymentFactory">
             <argument type="service" id="models"/>
             <argument type="service" id="config"/>
             <argument type="service" id="shopware_plugininstaller.plugin_manager"/>
@@ -42,13 +42,13 @@
             <argument type="service" id="events"/>
         </service>
         <service id="wirecard_elastic_engine.transaction_manager"
-                 class="WirecardShopwareElasticEngine\Components\Services\TransactionManager">
+                 class="WirecardElasticEngine\Components\Services\TransactionManager">
             <argument type="service" id="models"/>
         </service>
 
         <!-- Handler -->
         <service id="wirecard_elastic_engine.handler"
-                 class="WirecardShopwareElasticEngine\Components\Services\Handler"
+                 class="WirecardElasticEngine\Components\Services\Handler"
                  abstract="true">
             <argument type="service" id="models"/>
             <argument type="service" id="router"/>
@@ -57,36 +57,36 @@
             <argument type="service" id="wirecard_elastic_engine.transaction_manager"/>
         </service>
         <service id="wirecard_elastic_engine.notification_handler"
-                 class="WirecardShopwareElasticEngine\Components\Services\NotificationHandler"
+                 class="WirecardElasticEngine\Components\Services\NotificationHandler"
                  parent="wirecard_elastic_engine.handler">
         </service>
         <service id="wirecard_elastic_engine.return_handler"
-                 class="WirecardShopwareElasticEngine\Components\Services\ReturnHandler"
+                 class="WirecardElasticEngine\Components\Services\ReturnHandler"
                  parent="wirecard_elastic_engine.handler">
         </service>
         <service id="wirecard_elastic_engine.payment_handler"
-                 class="WirecardShopwareElasticEngine\Components\Services\PaymentHandler"
+                 class="WirecardElasticEngine\Components\Services\PaymentHandler"
                  parent="wirecard_elastic_engine.handler">
         </service>
         <service id="wirecard_elastic_engine.backend_operation_handler"
-                 class="WirecardShopwareElasticEngine\Components\Services\BackendOperationHandler"
+                 class="WirecardElasticEngine\Components\Services\BackendOperationHandler"
                  parent="wirecard_elastic_engine.handler">
         </service>
         <service id="wirecard_elastic_engine.session_manager"
-                 class="WirecardShopwareElasticEngine\Components\Services\SessionManager">
+                 class="WirecardElasticEngine\Components\Services\SessionManager">
             <argument type="service" id="session"/>
         </service>
 
         <!-- Mails -->
         <service id="wirecard_elastic_engine.mail.support"
-                 class="WirecardShopwareElasticEngine\Components\Mail\SupportMail">
+                 class="WirecardElasticEngine\Components\Mail\SupportMail">
             <argument type="service" id="mail"/>
             <argument type="service" id="models"/>
             <argument type="service" id="shopware_plugininstaller.plugin_manager"/>
             <argument type="service" id="wirecard_elastic_engine.payment_factory"/>
         </service>
         <service id="wirecard_elastic_engine.mail.merchant_notification"
-                 class="WirecardShopwareElasticEngine\Components\Mail\MerchantNotificationMail">
+                 class="WirecardElasticEngine\Components\Mail\MerchantNotificationMail">
             <argument type="service" id="mail"/>
             <argument type="service" id="config"/>
             <argument type="service" id="snippets"/>
@@ -94,25 +94,25 @@
 
         <!-- Subscriber -->
         <service id="wirecard_elastic_engine.subscriber.frontend"
-                 class="WirecardShopwareElasticEngine\Subscriber\FrontendSubscriber">
-            <argument>%wirecard_shopware_elastic_engine.plugin_dir%</argument>
+                 class="WirecardElasticEngine\Subscriber\FrontendSubscriber">
+            <argument>%wirecard_elastic_engine.plugin_dir%</argument>
             <argument type="service" id="template"/>
             <argument type="service" id="wirecard_elastic_engine.payment_factory"/>
             <tag name="shopware.event_subscriber"/>
         </service>
         <service id="wirecard_elastic_engine.subscriber.backend"
-                 class="WirecardShopwareElasticEngine\Subscriber\BackendSubscriber">
-            <argument>%wirecard_shopware_elastic_engine.plugin_dir%</argument>
+                 class="WirecardElasticEngine\Subscriber\BackendSubscriber">
+            <argument>%wirecard_elastic_engine.plugin_dir%</argument>
             <tag name="shopware.event_subscriber"/>
         </service>
         <service id="wirecard_elastic_engine.subscriber.order_send_mail"
-                 class="WirecardShopwareElasticEngine\Subscriber\OrderSubscriber">
+                 class="WirecardElasticEngine\Subscriber\OrderSubscriber">
             <tag name="shopware.event_subscriber"/>
         </service>
 
         <!-- Commands -->
         <service id="wirecard_elastic_engine.commands.payment_activate"
-                 class="WirecardShopwareElasticEngine\Commands\PaymentActivate">
+                 class="WirecardElasticEngine\Commands\PaymentActivate">
             <tag name="console.command"/>
         </service>
     </services>
