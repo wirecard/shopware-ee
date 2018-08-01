@@ -53,7 +53,7 @@ before_script:
 
   # install shopware
   - git clone https://github.com/shopware/shopware.git ${SHOPWARE_DIRECTORY} --branch 5.4
-  - ant -f ${SHOPWARE_DIRECTORY}/build/build.xml -Dapp.host=localhost -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-unit
+  - ant -f ${SHOPWARE_DIRECTORY}/build/build.xml -Dapp.host=localhost:8000 -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-unit
   - cp ${TRAVIS_BUILD_DIR}/build/travis-shopware-config.php ${SHOPWARE_DIRECTORY}/config.php
   - mv ${TRAVIS_BUILD_DIR} ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:plugin:refresh
