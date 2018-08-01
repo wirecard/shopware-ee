@@ -34,15 +34,20 @@ namespace WirecardShopwareElasticEngine\Components\Payments;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
+use Wirecard\PaymentSdk\Entity\AccountHolder;
+use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\PoiPiaTransaction;
+use Wirecard\PaymentSdk\TransactionService;
+use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
 use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
+use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 
 /**
  * @package WirecardShopwareElasticEngine\Components\Payments
  *
  * @since   1.0.0
  */
-class PaymentInAdvancePayment extends Payment
+class PaymentInAdvancePayment extends Payment implements ProcessPaymentInterface
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_pia';
 
@@ -117,8 +122,27 @@ class PaymentInAdvancePayment extends Payment
         $paymentConfig->setTransactionMAID($this->getPluginConfig('PoiPiaMerchantId'));
         $paymentConfig->setTransactionSecret($this->getPluginConfig('PoiPiaSecret'));
         $paymentConfig->setTransactionOperation(parent::TRANSACTION_OPERATION_RESERVE);
-        $paymentConfig->setFraudPrevention(true);
+        $paymentConfig->setFraudPrevention($this->getPluginConfig('PoiPiaFraudPrevention'));
 
         return $paymentConfig;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function processPayment(
+        OrderSummary $orderSummary,
+        TransactionService $transactionService,
+        Shop $shop,
+        Redirect $redirect,
+        \Enlight_Controller_Request_Request $request,
+        \sOrder $shopwareOrder
+    ) {
+        if (! $this->getPaymentConfig()->hasFraudPrevention()) {
+            $accountHolder = new AccountHolder();
+            $accountHolder->setLastName($orderSummary->getUserMapper()->getLastName());
+            $accountHolder->setFirstName($orderSummary->getUserMapper()->getFirstName());
+            $this->transactionInstance->setAccountHolder($accountHolder);
+        }
     }
 }
