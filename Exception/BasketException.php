@@ -29,12 +29,12 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Exception;
+namespace WirecardElasticEngine\Exception;
 
 /**
  * Parent exception class for basket exceptions.
  *
- * @package WirecardShopwareElasticEngine\Exception
+ * @package WirecardElasticEngine\Exception
  *
  * @since   1.0.0
  */

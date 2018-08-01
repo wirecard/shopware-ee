@@ -29,10 +29,10 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Services;
+namespace WirecardElasticEngine\Components\Services;
 
 /**
- * @package WirecardShopwareElasticEngine\Components\Services
+ * @package WirecardElasticEngine\Components\Services
  *
  * @since   1.0.0
  */

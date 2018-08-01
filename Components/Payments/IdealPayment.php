@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Payments;
+namespace WirecardElasticEngine\Components\Payments;
 
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -41,10 +41,10 @@ use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\Transaction\IdealTransaction;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
-use WirecardShopwareElasticEngine\Components\Data\IdealPaymentConfig;
-use WirecardShopwareElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
-use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Components\Data\OrderSummary;
+use WirecardElasticEngine\Components\Data\IdealPaymentConfig;
+use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
+use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 
 /**
  * @package WirecardShopwareElasticEngine\Components\Payments

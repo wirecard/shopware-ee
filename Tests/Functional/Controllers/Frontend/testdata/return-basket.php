@@ -29,8 +29,8 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
-use WirecardShopwareElasticEngine\Components\Payments\Payment;
+use WirecardElasticEngine\Components\Payments\CreditCardPayment;
+use WirecardElasticEngine\Components\Payments\Payment;
 
 return [
     'sBasket'   => [

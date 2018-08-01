@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Payments;
+namespace WirecardElasticEngine\Components\Payments;
 
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -41,14 +41,14 @@ use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\Transaction\SepaDirectDebitTransaction;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
-use WirecardShopwareElasticEngine\Components\Data\SepaPaymentConfig;
-use WirecardShopwareElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
-use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
-use WirecardShopwareElasticEngine\Exception\InsufficientDataException;
+use WirecardElasticEngine\Components\Data\OrderSummary;
+use WirecardElasticEngine\Components\Data\SepaPaymentConfig;
+use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
+use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Exception\InsufficientDataException;
 
 /**
- * @package WirecardShopwareElasticEngine\Components\Payments
+ * @package WirecardElasticEngine\Components\Payments
  *
  * @since   1.0.0
  */
@@ -205,8 +205,9 @@ class SepaPayment extends Payment implements ProcessPaymentInterface, Additional
             || $additionalPaymentData['sepaConfirmMandate'] !== 'confirmed'
             || ! isset($additionalPaymentData['sepaIban'])
             || ! isset($additionalPaymentData['sepaFirstName'])
-            || ! isset($additionalPaymentData['sepaLastName'])) {
-            throw new InsufficientDataException('Insufficient Data for SEPA Transaction');
+            || ! isset($additionalPaymentData['sepaLastName'])
+        ) {
+            throw new InsufficientDataException('Insufficient Data for SEPA Direct Debit Transaction');
         }
 
         $transaction = $this->getTransaction();
@@ -224,6 +225,8 @@ class SepaPayment extends Payment implements ProcessPaymentInterface, Additional
 
         $mandate = new Mandate($this->generateMandateId($orderSummary));
         $transaction->setMandate($mandate);
+
+        return null;
     }
 
     /**

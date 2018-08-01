@@ -29,17 +29,17 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Payments\Contracts;
+namespace WirecardElasticEngine\Components\Payments\Contracts;
 
 use Shopware\Models\Shop\Shop;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Actions\Action;
-use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
-use WirecardShopwareElasticEngine\Components\Services\PaymentHandler;
+use WirecardElasticEngine\Components\Actions\Action;
+use WirecardElasticEngine\Components\Data\OrderSummary;
+use WirecardElasticEngine\Components\Services\PaymentHandler;
 
 /**
- * @package WirecardShopwareElasticEngine\Components\Payments\Interfaces
+ * @package WirecardElasticEngine\Components\Payments\Interfaces
  *
  * @since   1.0.0
  */

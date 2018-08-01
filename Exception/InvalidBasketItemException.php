@@ -29,16 +29,16 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Exception;
+namespace WirecardElasticEngine\Exception;
 
-use WirecardShopwareElasticEngine\Components\Mapper\BasketItemMapper;
+use WirecardElasticEngine\Components\Mapper\BasketItemMapper;
 
 /**
  * Thrown by the `BasketItemMapper` if item validation fails.
  *
  * @see     BasketItemMapper::validateItem()
  *
- * @package WirecardShopwareElasticEngine\Exception
+ * @package WirecardElasticEngine\Exception
  *
  * @since   1.0.0
  */

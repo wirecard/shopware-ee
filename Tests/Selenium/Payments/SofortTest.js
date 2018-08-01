@@ -60,7 +60,11 @@ describe('Sofort. test', () => {
         console.log('wait for #MultipaysSessionSenderCountryId');
         await driver.wait(until.elementLocated(By.id('MultipaysSessionSenderCountryId')), 20000);
         await driver.findElement(By.css('#MultipaysSessionSenderCountryId > option[value=\'AT\']')).click();
-        await driver.findElement(By.id('BankCodeSearch')).sendKeys(formFields.bankCode, Key.ENTER);
+        await driver.findElement(By.id('BankCodeSearch')).sendKeys(formFields.bankCode);
+
+        console.log('wait for .js-bank-searcher-result-list');
+        await driver.wait(until.elementLocated(By.className('js-bank-searcher-result-list')), 5000);
+        await driver.findElement(By.css('button.primary')).click();
 
         console.log('wait for #BackendFormLOGINNAMEUSERID');
         await driver.wait(until.elementLocated(By.id('BackendFormLOGINNAMEUSERID')), 20000);

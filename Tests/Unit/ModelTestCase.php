@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit;
+namespace WirecardElasticEngine\Tests\Unit;
 
 abstract class ModelTestCase extends \PHPUnit_Framework_TestCase
 {

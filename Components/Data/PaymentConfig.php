@@ -29,12 +29,12 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Data;
+namespace WirecardElasticEngine\Components\Data;
 
 /**
  * Basic payment configuration class, which stores general data like http user, api url, merchant account id (maid), ...
  *
- * @package WirecardShopwareElasticEngine\Components\Data
+ * @package WirecardElasticEngine\Components\Data
  *
  * @since   1.0.0
  */

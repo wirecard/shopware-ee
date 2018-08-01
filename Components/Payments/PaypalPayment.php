@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Payments;
+namespace WirecardElasticEngine\Components\Payments;
 
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -37,12 +37,12 @@ use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
-use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
-use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Components\Data\OrderSummary;
+use WirecardElasticEngine\Components\Data\PaymentConfig;
+use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 
 /**
- * @package WirecardShopwareElasticEngine\Components\Payments
+ * @package WirecardElasticEngine\Components\Payments
  *
  * @since   1.0.0
  */

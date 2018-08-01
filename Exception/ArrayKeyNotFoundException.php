@@ -29,12 +29,12 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Exception;
+namespace WirecardElasticEngine\Exception;
 
 /**
  * Thrown by the `Mapper` class when a required array key is not existent.
  *
- * @package WirecardShopwareElasticEngine\Exception
+ * @package WirecardElasticEngine\Exception
  *
  * @since   1.0.0
  */

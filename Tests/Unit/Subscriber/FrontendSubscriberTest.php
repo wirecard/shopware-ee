@@ -29,11 +29,11 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Subscriber;
+namespace WirecardElasticEngine\Tests\Unit\Subscriber;
 
 use PHPUnit\Framework\TestCase;
-use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
-use WirecardShopwareElasticEngine\Subscriber\FrontendSubscriber;
+use WirecardElasticEngine\Components\Services\PaymentFactory;
+use WirecardElasticEngine\Subscriber\FrontendSubscriber;
 
 class FrontendSubscriberTest extends TestCase
 {

@@ -35,6 +35,7 @@
         <p class="wirecardee--payment-message">
             {if $wirecardElasticEnginePaymentStatus == 'pending'}
                 {s name='PaymentStatusPendingMessage' namespace='frontend/wirecard_elastic_engine/checkout'}{/s}
+                {s name='PaymentStatusPendingMail' namespace='frontend/wirecard_elastic_engine/checkout'}{/s}
             {elseif $wirecardElasticEnginePaymentStatus == 'success'}
                 {s name='PaymentStatusSuccessMessage' namespace='frontend/wirecard_elastic_engine/checkout'}{/s}
             {elseif $wirecardElasticEnginePaymentStatus == 'canceled'}

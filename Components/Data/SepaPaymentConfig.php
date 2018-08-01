@@ -29,12 +29,12 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Data;
+namespace WirecardElasticEngine\Components\Data;
 
 /**
  * SEPA specific payment configuration.
  *
- * @package WirecardShopwareElasticEngine\Components\Data
+ * @package WirecardElasticEngine\Components\Data
  *
  * @since   1.0.0
  */

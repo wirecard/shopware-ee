@@ -29,14 +29,14 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Exception;
+namespace WirecardElasticEngine\Exception;
 
 /**
  * Thrown by the backend controller if testing credentials fails.
  *
  * @see     \Shopware_Controllers_Backend_WirecardElasticEngineTransactions::testCredentialsAction()
  *
- * @package WirecardShopwareElasticEngine\Exception
+ * @package WirecardElasticEngine\Exception
  *
  * @since   1.0.0
  */

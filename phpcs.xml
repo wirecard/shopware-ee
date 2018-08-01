@@ -10,6 +10,6 @@
     <exclude-pattern>./test/*</exclude-pattern>
 
     <rule ref="PSR1.Files.SideEffects">
-        <exclude-pattern>WirecardShopwareElasticEngine.php</exclude-pattern>
+        <exclude-pattern>WirecardElasticEngine.php</exclude-pattern>
     </rule>
 </ruleset>

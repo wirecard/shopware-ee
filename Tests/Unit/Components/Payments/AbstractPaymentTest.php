@@ -29,11 +29,11 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Payments;
+namespace WirecardElasticEngine\Tests\Unit\Components\Payments;
 
-use WirecardShopwareElasticEngine\Components\Payments\Payment;
-use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
-use WirecardShopwareElasticEngine\Tests\Unit\PaymentTestCase;
+use WirecardElasticEngine\Components\Payments\Payment;
+use WirecardElasticEngine\Components\Payments\PaymentInterface;
+use WirecardElasticEngine\Tests\Unit\PaymentTestCase;
 
 class AbstractPaymentTest extends PaymentTestCase
 {
