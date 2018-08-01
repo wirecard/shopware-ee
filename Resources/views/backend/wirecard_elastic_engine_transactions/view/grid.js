@@ -176,9 +176,6 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.Grid', {
      */
     orderNumberRenderer: function (value, style, row) {
         var me = this;
-        if (value === Ext.undefined) {
-            return value;
-        }
         if (!row.data.orderId) {
             return me.snippets.NoOrderNumber;
         }

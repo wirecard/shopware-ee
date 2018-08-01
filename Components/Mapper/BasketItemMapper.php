@@ -243,7 +243,7 @@ class BasketItemMapper extends ArrayMapper
             $item[self::QUANTITY],
             $item[self::PRICE]
         )) {
-            throw new InvalidBasketItemException($this);
+            throw new InvalidBasketItemException();
         }
     }
 }

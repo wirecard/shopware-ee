@@ -260,7 +260,7 @@ class BasketMapper extends ArrayMapper
         $basket = $this->getShopwareBasket();
 
         if (! isset($basket[self::CONTENT])) {
-            throw new InvalidBasketException($this);
+            throw new InvalidBasketException();
         }
 
         foreach ($basket[self::CONTENT] as $item) {
@@ -273,10 +273,10 @@ class BasketMapper extends ArrayMapper
             }
 
             if (! $article[self::ARTICLE_IS_AVAILABLE]) {
-                throw new NotAvailableBasketException($article, $basketItem, $this);
+                throw new NotAvailableBasketException($basketItem);
             }
             if ($article[self::ARTICLE_LAST_STOCK] && $basketItem->getQuantity() > $article[self::ARTICLE_IN_STOCK]) {
-                throw new OutOfStockBasketException($article, $basketItem, $this);
+                throw new OutOfStockBasketException($basketItem);
             }
         }
     }

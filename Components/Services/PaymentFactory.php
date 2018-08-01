@@ -138,7 +138,7 @@ class PaymentFactory
     {
         $payments = [];
 
-        foreach ($this->getMappedPayments() as $identifier => $className) {
+        foreach (array_keys($this->getMappedPayments()) as $identifier) {
             $payments[] = $this->create($identifier);
         }
 
@@ -158,7 +158,7 @@ class PaymentFactory
             PaypalPayment::PAYMETHOD_IDENTIFIER     => PaypalPayment::class,
             CreditCardPayment::PAYMETHOD_IDENTIFIER => CreditCardPayment::class,
             SepaPayment::PAYMETHOD_IDENTIFIER       => SepaPayment::class,
-            SofortPayment::PAYMETHOD_IDENTIFIER     => SofortPayment::class
+            SofortPayment::PAYMETHOD_IDENTIFIER     => SofortPayment::class,
         ];
     }
 }
