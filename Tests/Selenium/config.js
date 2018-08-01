@@ -243,33 +243,39 @@ exports.browsers = [
     },
     // MOBILE: ANDROID
     {
+        browserName: CHROME.name,
         os: ANDROID_7_DEVICE.name,
         os_version: ANDROID_7_DEVICE.version,
         real_mobile: 'true'
     },
     {
+        browserName: CHROME.name,
         os: ANDROID_8_DEVICE.name,
         os_version: ANDROID_8_DEVICE.version,
         real_mobile: 'true'
     },
     {
-        os: ANDROID_8_DEVICE.name,
+        browserName: CHROME.name,
+        device: ANDROID_8_DEVICE.name,
         os_version: ANDROID_8_DEVICE.version,
         real_mobile: 'true',
         deviceOrientation: 'landscape'
     },
     // MOBILE: iOS
     {
+        browserName: SAFARI.name,
         os: IOS_10_DEVICE.name,
         os_version: IOS_10_DEVICE.version,
         real_mobile: 'true'
     },
     {
+        browserName: SAFARI.name,
         os: IOS_11_DEVICE.name,
         os_version: IOS_11_DEVICE.version,
         real_mobile: 'true'
     },
     {
+        browserName: SAFARI.name,
         os: IOS_11_DEVICE.name,
         os_version: IOS_11_DEVICE.version,
         real_mobile: 'true',

@@ -32,7 +32,6 @@
 namespace WirecardElasticEngine\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
-use WirecardElasticEngine\Components\Payments\Payment;
 
 /**
  * @package WirecardElasticEngine\Subscriber
