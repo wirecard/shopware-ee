@@ -1,4 +1,6 @@
-<VirtualHost *:80>
+Listen 8000
+
+<VirtualHost *:8000>
   DocumentRoot %DOCUMENT_ROOT%
 
   SetEnv SHOPWARE_ENV testing

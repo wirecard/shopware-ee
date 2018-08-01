@@ -139,7 +139,7 @@ class PaymentFactory
     {
         $payments = [];
 
-        foreach ($this->getMappedPayments() as $identifier => $className) {
+        foreach (array_keys($this->getMappedPayments()) as $identifier) {
             $payments[] = $this->create($identifier);
         }
 
