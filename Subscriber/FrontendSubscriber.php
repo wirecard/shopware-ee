@@ -194,7 +194,7 @@ class FrontendSubscriber implements SubscriberInterface
             return;
         }
         /** @var Order $order */
-        $order = Shopware()->Models()->getRepository(Order::class)->findOneBy(['number' => $sOrderNumber]);
+        $order = $this->em->getRepository(Order::class)->findOneBy(['number' => $sOrderNumber]);
         if (! $order) {
             return;
         }
@@ -230,7 +230,10 @@ class FrontendSubscriber implements SubscriberInterface
             return;
         }
 
-        $transaction = $this->em->getRepository(Transaction::class)->findOneBy(['orderNumber' => $sOrderNumber, 'type' => 'initial-response']);
+        $transaction = $this->em->getRepository(Transaction::class)->findOneBy([
+            'orderNumber' => $sOrderNumber,
+            'type' => 'initial-response'
+        ]);
 
         $response = $transaction->getResponse();
         $bankData = [
