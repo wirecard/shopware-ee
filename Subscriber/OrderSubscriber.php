@@ -63,12 +63,6 @@ class OrderSubscriber implements SubscriberInterface
             // Disable confirmation mail in testing environment
             return false;
         }
-        if (isset($args['variables']['additional']['payment']['action'])
-            && $args['variables']['additional']['payment']['action'] === Payment::ACTION
-        ) {
-            // We just disable the confirmation mail on WirecardElasticEnginePayment for now
-            return false;
-        }
 
         // Return null to allow other subscribers to handle this event (see EventManager::notifyUntil)
         return null;
