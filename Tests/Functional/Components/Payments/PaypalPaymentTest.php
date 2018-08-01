@@ -93,7 +93,7 @@ class PaypalPaymentTest extends TestCase
             'description'           => 'WirecardPayPal',
             'action'                => 'WirecardElasticEnginePayment',
             'active'                => 0,
-            'position'              => 1,
+            'position'              => 5,
             'additionalDescription' => '',
         ], $this->payment->getPaymentOptions());
     }
