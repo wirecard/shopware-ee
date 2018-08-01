@@ -194,6 +194,6 @@ class PaymentHandler extends Handler
     protected function getDescriptor($orderNumber)
     {
         $shopName = substr($this->shopwareConfig->get('shopName'), 0, 9);
-        return substr("${shopName} ${orderNumber}", 0, 20);
+        return substr($shopName . ' ' . $orderNumber, 0, 20);
     }
 }

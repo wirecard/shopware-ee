@@ -48,15 +48,13 @@ class NotAvailableBasketException extends BasketException
     /**
      * NotAvailableBasketException constructor.
      *
-     * @param array            $article
      * @param BasketItemMapper $item
-     * @param BasketMapper     $basket
      *
      * @throws ArrayKeyNotFoundException
      *
      * @since 1.0.0
      */
-    public function __construct(array $article, BasketItemMapper $item, BasketMapper $basket)
+    public function __construct(BasketItemMapper $item)
     {
         parent::__construct("Article '{$item->getArticleName()}' {$item->getArticleNumber()} is not available");
     }

@@ -45,11 +45,9 @@ use WirecardElasticEngine\Components\Mapper\BasketMapper;
 class InvalidBasketException extends BasketException
 {
     /**
-     * @param BasketMapper $basket
-     *
      * @since 1.0.0
      */
-    public function __construct(BasketMapper $basket)
+    public function __construct()
     {
         parent::__construct("Invalid basket");
     }
