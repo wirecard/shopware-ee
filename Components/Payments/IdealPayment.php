@@ -47,7 +47,7 @@ use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignment
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 
 /**
- * @package WirecardShopwareElasticEngine\Components\Payments
+ * @package WirecardElasticEngine\Components\Payments
  *
  * @since   1.0.0
  */
