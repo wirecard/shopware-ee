@@ -32,7 +32,7 @@
   "orderItems2.taxRate": 19,
   "field_name_1": "paysdk_payment-unique-id",
   "field_value_1": "1532501234exxxf",
-  "notification_transaction_url": "http://swwcpayment.localhost/WirecardElasticEnginePayment/notify/method/wirecard_elastic_engine_credit_card",
+  "notification_transaction_url": "http://localhost/WirecardElasticEnginePayment/notify/method/wirecard_elastic_engine_credit_card",
   "notifications_format": "application/xml",
   "order_number": "1532501234exxxf",
   "ip_address": "::1",

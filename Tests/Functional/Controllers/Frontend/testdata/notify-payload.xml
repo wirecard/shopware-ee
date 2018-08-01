@@ -41,7 +41,7 @@
     <descriptor></descriptor>
     <notifications format="application/xml">
         <notification
-                url="http://localhost:8000/WirecardElasticEnginePayment/notify/method/wirecard_elastic_engine_credit_card"/>
+                url="http://localhost/WirecardElasticEnginePayment/notify/method/wirecard_elastic_engine_credit_card"/>
     </notifications>
     <custom-fields>
         <custom-field field-name="paysdk_payment-unique-id" field-value="1532501234exxxf"/>
