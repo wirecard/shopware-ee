@@ -155,6 +155,8 @@ class NotificationHandler extends Handler
     }
 
     /**
+     * Status mails should be sent if the payment is finalized.
+     *
      * @param int $paymentStatusId
      *
      * @return bool

@@ -19,7 +19,7 @@
   "locale": "de_DE",
   "masked_account_number": "401200******1003",
   "merchant_account_id": "53f2895a-e4de-4e82-a813-0d87a10e55e6",
-  "notification_url_1": "http:\/\/localhost:8000\/WirecardElasticEnginePayment\/notify\/method\/wirecard_elastic_engine_credit_card",
+  "notification_url_1": "http:\/\/localhost\/WirecardElasticEnginePayment\/notify\/method\/wirecard_elastic_engine_credit_card",
   "order_number": "1532501234exxxf",
   "parent_transaction_amount": "45.940000",
   "parent_transaction_amount_currency": "EUR",

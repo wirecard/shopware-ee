@@ -302,10 +302,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * Mails should be send if either the final state is already returned by the return action or
      * if the state is open and the merchant wants to to send pending mails.
      *
-     * @param     $orderNumber
+     * @param int $orderNumber
      * @param int $paymentStatus
      *
      * @throws Exception
+     *
+     * @since 1.0.0
      */
     private function sendStatusMailOnSaveOrder($orderNumber, $paymentStatus)
     {
@@ -318,12 +320,13 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         }
 
         $order = $this->getModelManager()->getRepository(Order::class)->findOneBy(['number' => $orderNumber]);
-        if ($order) {
-            $shopwareOrder = Shopware()->Modules()->Order();
-            $mail          = $shopwareOrder->createStatusMail($order->getId(), $paymentStatus);
-            if ($mail) {
-                $shopwareOrder->sendStatusMail($mail);
-            }
+        if (! $order) {
+            return;
+        }
+        $shopwareOrder = $this->getModules()->Order();
+        $mail          = $shopwareOrder->createStatusMail($order->getId(), $paymentStatus);
+        if ($mail) {
+            $shopwareOrder->sendStatusMail($mail);
         }
     }
 
