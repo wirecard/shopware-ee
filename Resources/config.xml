@@ -498,6 +498,20 @@ function (button) {
                 </handler>
             </options>
         </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEnginePoiPiaFraudPrevention</name>
+            <label lang="de">[Kauf auf Rechnung / Vorauskasse] Zusätzliche Informationen mitsenden</label>
+            <label lang="en">[Payment on Invoice / Payment in Advance] Send additional information</label>
+            <value>true</value>
+            <description lang="de">
+                Zusätzliche Informationen werden für Betrugsschutz gesendet. In diesen Daten sind
+                Rechnungs- / Lieferadresse, Warenkorb und Deskriptor inkludiert.
+            </description>
+            <description lang="en">
+                Additional data will be sent for the purpose of fraud protection. This additional
+                data includes billing/shipping address, shopping basket and descriptor.
+            </description>
+        </element>
         <!-- Poi / Pia End -->
         <!-- SEPA Direct Debit -->
         <element type="text" scope="shop">
