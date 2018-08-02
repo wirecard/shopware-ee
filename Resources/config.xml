@@ -317,20 +317,6 @@ function (button) {
                 Secret Key is mandatory to calculate the Digital Signature for payments.
             </description>
         </element>
-        <element type="button" scope="shop">
-            <name>wirecardElasticEngineIdealTestApi</name>
-            <label lang="de">[iDEAL] Konfiguration testen</label>
-            <label lang="en">[iDEAL] Test configuration</label>
-            <options>
-                <handler>
-                    <![CDATA[
-function (button) {
-    wirecardeeTestPaymentCredentials(button, 'Ideal', 'Wirecard iDEAL Test');
-}
-                    ]]>
-                </handler>
-            </options>
-        </element>
         <element type="boolean" scope="shop">
             <name>wirecardElasticEngineIdealFraudPrevention</name>
             <label lang="de">[iDEAL] Zusätzliche Informationen mitsenden</label>
@@ -344,6 +330,20 @@ function (button) {
                 Additional data will be sent for the purpose of fraud protection. This additional
                 data includes billing/shipping address, shopping basket and descriptor.
             </description>
+        </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEngineIdealTestApi</name>
+            <label lang="de">[iDEAL] Konfiguration testen</label>
+            <label lang="en">[iDEAL] Test configuration</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    wirecardeeTestPaymentCredentials(button, 'Ideal', 'Wirecard iDEAL Test');
+}
+                    ]]>
+                </handler>
+            </options>
         </element>
         <!-- iDEAL End -->
         <!-- PayPal -->
