@@ -2,7 +2,7 @@
   "name": "@wirecard/shopware-ee",
   "version": "0.1.0",
   "scripts": {
-    "lint": "node_modules/.bin/eslint -c .eslintrc.js **/*.js **/*.js --ignore-path .eslintignore",
+    "lint": "node_modules/.bin/eslint -c .eslintrc.json **/*.js **/*.js --ignore-path .eslintignore",
     "test": "node_modules/.bin/mocha Tests/Selenium/**/*Test.js --timeout 150000",
     "test:default": "node_modules/.bin/mocha Tests/Selenium/Payments/DefaultTest.js --timeout 120000",
     "test:creditcard": "node_modules/.bin/mocha Tests/Selenium/Payments/CreditCardTest.js --timeout 60000",

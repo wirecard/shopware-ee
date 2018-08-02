@@ -32,6 +32,10 @@
     {$smarty.block.parent}
     <style type="text/css">
         #lz_overlay_wm { display: none !important; }
+
+        .sprite--wirecard {
+            background-image: url('../custom/plugins/WirecardElasticEngine/plugin.png');
+        }
     </style>
 {/block}
 
