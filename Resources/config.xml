@@ -272,6 +272,118 @@ function (button) {
             </options>
         </element>
         <!-- Credit Card End -->
+        <!-- Ratepay Invoice -->
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceServer</name>
+            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Base URL</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Base URL</label>
+            <value>https://api-test.wirecard.com</value>
+            <description lang="de">Wirecard Base URL (z.B. https://api.wirecard.com)</description>
+            <description lang="en">Wirecard Base URL (e.g. https://api.wirecard.com)</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceHttpUser</name>
+            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] HTTP Benutzer</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] HTTP User</label>
+            <value>70000-APITEST-AP</value>
+            <description lang="de">Wirecard HTTP Benutzer laut Vertrag mit Wirecard.</description>
+            <description lang="en">HTTP User as provided in your Wirecard contract.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceHttpPassword</name>
+            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] HTTP Passwort</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] HTTP Password</label>
+            <value>qD2wzQ_hrc!8</value>
+            <description lang="de">Wirecard HTTP Passwort laut Vertrag mit Wirecard.</description>
+            <description lang="en">HTTP Password as provided in your Wirecard contract.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceMerchantId</name>
+            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Händler-Konto-ID</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Merchant Account ID</label>
+            <value>fa02d1d4-f518-4e22-b42b-2abab5867a84</value>
+            <description lang="de">Eindeutige Händler-Konto-ID laut Vertrag mit Wirecard.</description>
+            <description lang="en">Unique identifier assigned to your merchant account.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceSecret</name>
+            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Geheimschlüssel</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Secret Key</label>
+            <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
+            <description lang="de">Der Geheimschlüssel wird benötigt, um die Digitale Signatur für Zahlungen zu
+                berechnen.
+            </description>
+            <description lang="en">Secret Key is mandatory to calculate the Digital Signature for payments.
+            </description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceMinAmount</name>
+            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Minimaler Betrag</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Minimum Amount</label>
+            <value>20</value>
+            <description lang="de">
+                Garantierter Kauf auf Rechnung wird nur angezeigt, wenn der Bestellbetrag höher ist als der hier
+                definierte Wert (in Standardwährung).
+            </description>
+            <description lang="en">
+                Payment method Guaranteed Invoice will only be displayed if the ordered
+                amount is bigger than this defined amount. Amount in default shop currency
+            </description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceMaxAmount</name>
+            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay]</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Maximum Amount</label>
+            <value>3500</value>
+            <description lang="de">
+                Garantierter Kauf auf Rechnung wird nur angezeigt, wenn der Bestellbetrag
+                niedriger ist als der hier definierte Wert (in Standardwährung).
+            </description>
+            <description lang="en">
+                Payment method Guaranteed Invoice will only be displayed if the ordered amount
+                is smaller than this defined amount. Amount in default shop currency
+            </description>
+        </element>
+        <element type="combo" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceCurrency</name>
+            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Erlaubte Währungen</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Allowed currencies</label>
+            <value>Euro</value>
+            <description lang="de">
+                Garantierter Kauf auf Rechnung wird nur angezeigt, wenn eine der
+                ausgewählten Währungen genutzt wird.
+            </description>
+            <description lang="en">
+                Payment method Guaranteed Invoice will only be displayed if the active
+                currency equals one of these chosen currencies.
+            </description>
+            <store>Shopware.apps.Base.store.Currency</store>
+            <options>
+                <multiSelect>true</multiSelect>
+            </options>
+        </element>
+        <element type="combo" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceShippingCountry</name>
+            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Erlaubte Lieferländer</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Allowed shipping countries</label>
+            <value>2</value>
+            <description lang="de">
+                Garantierter Kauf auf Rechnung wird dem Endkunden beim Checkout nur
+                angezeigt, wenn die Lieferadresse einem der hier gewählten Länder entspricht.
+                Voreingestelle Auswahl: Österreich
+                und Deutschland.
+            </description>
+            <description lang="en">
+                Payment method Guaranteed Invoice will only be displayed if consumers
+                shipping country equals one of these chosen countries.
+                Predefined the following countries are allowed: AT, DE.
+            </description>
+            <store>Shopware.apps.Base.store.Country</store>
+            <options>
+                <multiSelect>true</multiSelect>
+            </options>
+        </element>
+        <!-- Ratepay Invoice End -->
         <!-- PayPal -->
         <element type="text" scope="shop">
             <name>wirecardElasticEnginePaypalServer</name>
