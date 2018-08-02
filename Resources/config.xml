@@ -89,9 +89,6 @@ function (button) {
             <description lang="en">
                 If enabled, consumers get an e-mail containing the information that the payment is not yet finalized.
             </description>
-            <options>
-                <vtype>email</vtype>
-            </options>
         </element>
         <!-- General End -->
         <!-- Credit Card -->
