@@ -29,11 +29,11 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Subscriber;
+namespace WirecardElasticEngine\Tests\Unit\Subscriber;
 
 use PHPUnit\Framework\TestCase;
-use WirecardShopwareElasticEngine\Components\Payments\Payment;
-use WirecardShopwareElasticEngine\Subscriber\OrderSubscriber;
+use WirecardElasticEngine\Components\Payments\Payment;
+use WirecardElasticEngine\Subscriber\OrderSubscriber;
 
 class OrderSubscriberTest extends TestCase
 {
@@ -46,17 +46,21 @@ class OrderSubscriberTest extends TestCase
 
     public function testOnOrderShouldSendMail()
     {
-        // switch environment to skip "testing" env case
-        $env = getenv('SHOPWARE_ENV');
-        putenv("SHOPWARE_ENV=dev");
-
         $subscriber = new OrderSubscriber();
+
+        $env = getenv('SHOPWARE_ENV');
+        if ($env === 'testing') {
+            $this->assertFalse($subscriber->onOrderShouldSendMail(new \Enlight_Controller_ActionEventArgs()));
+        }
+
+        // switch environment to skip "testing" env case
+        putenv("SHOPWARE_ENV=dev");
 
         $this->assertNull($subscriber->onOrderShouldSendMail(new \Enlight_Controller_ActionEventArgs()));
 
         $args = new \Enlight_Controller_ActionEventArgs();
         $args->set('variables', ['additional' => ['payment' => ['action' => Payment::ACTION]]]);
-        $this->assertFalse($subscriber->onOrderShouldSendMail($args));
+        $this->assertNull($subscriber->onOrderShouldSendMail($args));
 
         // restore previous environment
         putenv("SHOPWARE_ENV=" . $env);

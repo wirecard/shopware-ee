@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Models;
+namespace WirecardElasticEngine\Tests\Unit\Models;
 
 use Shopware\Models\Order\Status;
 use Wirecard\PaymentSdk\Entity\Amount;
@@ -39,9 +39,9 @@ use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Payments\Payment;
-use WirecardShopwareElasticEngine\Models\Transaction;
-use WirecardShopwareElasticEngine\Tests\Unit\ModelTestCase;
+use WirecardElasticEngine\Components\Payments\Payment;
+use WirecardElasticEngine\Models\Transaction;
+use WirecardElasticEngine\Tests\Unit\ModelTestCase;
 
 class TransactionTest extends ModelTestCase
 {
@@ -84,7 +84,7 @@ class TransactionTest extends ModelTestCase
             'type'                         => Transaction::TYPE_INITIAL_RESPONSE,
             'amount'                       => null,
             'currency'                     => null,
-            'createdAt'                    => $this->model->getCreatedAt(),
+            'createdAt'                    => $this->model->getCreatedAt()->format(\DateTime::W3C),
             'state'                        => Transaction::STATE_CLOSED,
             'response'                     => null,
             'request'                      => null,
@@ -108,7 +108,7 @@ class TransactionTest extends ModelTestCase
         $this->assertNull($transaction->getCurrency());
         $this->assertEquals(Transaction::TYPE_INITIAL_RESPONSE, $transaction->getType());
         $this->assertEquals(Transaction::STATE_OPEN, $transaction->getState());
-        $this->assertInstanceOf(\DateTime::class, $transaction->getCreatedAt());
+        $this->assertNotNull($transaction->getCreatedAt());
         $this->assertNull($transaction->getResponse());
         $this->assertTrue($transaction->isInitial());
         $this->assertNull($transaction->getStatusMessage());
@@ -148,7 +148,7 @@ class TransactionTest extends ModelTestCase
             'type'                         => Transaction::TYPE_INITIAL_RESPONSE,
             'amount'                       => null,
             'currency'                     => null,
-            'createdAt'                    => $transaction->getCreatedAt(),
+            'createdAt'                    => $transaction->getCreatedAt()->format(\DateTime::W3C),
             'state'                        => Transaction::STATE_OPEN,
             'response'                     => [],
             'request'                      => null,
@@ -201,7 +201,7 @@ class TransactionTest extends ModelTestCase
             'type'                         => Transaction::TYPE_RETURN,
             'amount'                       => 1.23,
             'currency'                     => 'USD',
-            'createdAt'                    => $transaction->getCreatedAt(),
+            'createdAt'                    => $transaction->getCreatedAt()->format(\DateTime::W3C),
             'state'                        => Transaction::STATE_OPEN,
             'response'                     => [
                 'transaction-id' => 'trans-id',
@@ -248,7 +248,7 @@ class TransactionTest extends ModelTestCase
             'type'                         => Transaction::TYPE_RETURN,
             'amount'                       => null,
             'currency'                     => null,
-            'createdAt'                    => $transaction->getCreatedAt(),
+            'createdAt'                    => $transaction->getCreatedAt()->format(\DateTime::W3C),
             'state'                        => Transaction::STATE_OPEN,
             'response'                     => [],
             'request'                      => null,
@@ -291,7 +291,7 @@ class TransactionTest extends ModelTestCase
             'type'                         => Transaction::TYPE_RETURN,
             'amount'                       => null,
             'currency'                     => null,
-            'createdAt'                    => $transaction->getCreatedAt(),
+            'createdAt'                    => $transaction->getCreatedAt()->format(\DateTime::W3C),
             'state'                        => Transaction::STATE_OPEN,
             'response'                     => [],
             'request'                      => null,
@@ -331,7 +331,7 @@ class TransactionTest extends ModelTestCase
             'type'                         => Transaction::TYPE_INITIAL_REQUEST,
             'amount'                       => 10.12,
             'currency'                     => 'USD',
-            'createdAt'                    => $transaction->getCreatedAt(),
+            'createdAt'                    => $transaction->getCreatedAt()->format(\DateTime::W3C),
             'state'                        => Transaction::STATE_OPEN,
             'response'                     => null,
             'request'                      => $request,

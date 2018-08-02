@@ -36,14 +36,14 @@ use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Actions\Action;
-use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
-use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
-use WirecardShopwareElasticEngine\Components\Services\BackendOperationHandler;
-use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
-use WirecardShopwareElasticEngine\Exception\UnknownActionException;
-use WirecardShopwareElasticEngine\Exception\MissingCredentialsException;
-use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardElasticEngine\Components\Actions\Action;
+use WirecardElasticEngine\Components\Actions\ErrorAction;
+use WirecardElasticEngine\Components\Actions\ViewAction;
+use WirecardElasticEngine\Components\Services\BackendOperationHandler;
+use WirecardElasticEngine\Components\Services\PaymentFactory;
+use WirecardElasticEngine\Exception\UnknownActionException;
+use WirecardElasticEngine\Exception\MissingCredentialsException;
+use WirecardElasticEngine\Models\Transaction;
 
 /**
  * @since 1.0.0
@@ -195,7 +195,7 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
 
     /**
      * @return Enlight_View|Enlight_View_Default|void
-     * @throws \WirecardShopwareElasticEngine\Exception\UnknownPaymentException
+     * @throws \WirecardElasticEngine\Exception\UnknownPaymentException
      *
      * @since 1.0.0
      */
@@ -242,7 +242,9 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
     }
 
     /**
-     * Submit support mail to wirecard
+     * Send support mail to wirecard
+     *
+     * @since 1.0.0
      */
     public function submitMailAction()
     {
@@ -250,9 +252,8 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
         $message       = $this->Request()->getParam('message');
         $replyTo       = $this->Request()->getParam('replyTo');
 
-        $supportMail = $this->get('wirecard_elastic_engine.support_mailer');
-
         try {
+            $supportMail = $this->get('wirecard_elastic_engine.mail.support');
             $supportMail->send(
                 $this->container->getParameterBag(),
                 $senderAddress,
@@ -306,6 +307,11 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
         foreach ($result['data'] as $key => $current) {
             $order = $this->getManager()->getRepository(Order::class)
                           ->findOneBy(['number' => $current['orderNumber']]);
+
+            $createdAt = $result['data'][$key]['createdAt'];
+            if ($createdAt instanceof \DateTime) {
+                $result['data'][$key]['createdAt'] = $createdAt->format(\DateTime::W3C);
+            }
 
             /** @var Shopware\Models\Payment\Payment $payment */
             $payment = $order ? $order->getPayment() : null;

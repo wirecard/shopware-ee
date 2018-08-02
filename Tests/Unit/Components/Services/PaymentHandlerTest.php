@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Services;
+namespace WirecardElasticEngine\Tests\Unit\Components\Services;
 
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
@@ -44,17 +44,17 @@ use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Transaction\Transaction;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Actions\Action;
-use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
-use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
-use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
-use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
-use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
-use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
-use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
-use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
-use WirecardShopwareElasticEngine\Components\Services\PaymentHandler;
-use WirecardShopwareElasticEngine\Components\Services\TransactionManager;
+use WirecardElasticEngine\Components\Actions\Action;
+use WirecardElasticEngine\Components\Actions\ErrorAction;
+use WirecardElasticEngine\Components\Actions\RedirectAction;
+use WirecardElasticEngine\Components\Data\OrderSummary;
+use WirecardElasticEngine\Components\Data\PaymentConfig;
+use WirecardElasticEngine\Components\Mapper\BasketMapper;
+use WirecardElasticEngine\Components\Mapper\UserMapper;
+use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Components\Payments\PaymentInterface;
+use WirecardElasticEngine\Components\Services\PaymentHandler;
+use WirecardElasticEngine\Components\Services\TransactionManager;
 
 class PaymentHandlerTest extends TestCase
 {

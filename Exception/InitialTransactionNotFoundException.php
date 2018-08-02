@@ -29,16 +29,16 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Exception;
+namespace WirecardElasticEngine\Exception;
 
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 
 /**
  * Thrown when the `TransactionManager` fails to find the initial transaction from a response.
  *
- * @see     \WirecardShopwareElasticEngine\Components\Services\TransactionManager::findInitialTransaction()
+ * @see     \WirecardElasticEngine\Components\Services\TransactionManager::findInitialTransaction()
  *
- * @package WirecardShopwareElasticEngine\Exception
+ * @package WirecardElasticEngine\Exception
  *
  * @since   1.0.0
  */

@@ -29,11 +29,11 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Functional\Controllers\Frontend;
+namespace WirecardElasticEngine\Tests\Functional\Controllers\Frontend;
 
 use Doctrine\ORM\EntityRepository;
-use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
-use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardElasticEngine\Components\Payments\CreditCardPayment;
+use WirecardElasticEngine\Models\Transaction;
 
 /**
  * @runTestsInSeparateProcesses

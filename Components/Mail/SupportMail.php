@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Services;
+namespace WirecardElasticEngine\Components\Mail;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
@@ -37,26 +37,27 @@ use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Models\Payment\Payment;
 use Shopware\Models\Plugin\Plugin;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
+use WirecardElasticEngine\Components\Services\PaymentFactory;
+use WirecardElasticEngine\WirecardElasticEngine;
 
 /**
- * @package WirecardShopwareElasticEngine\Components\Services
+ * @package WirecardElasticEngine\Components\Mail
  *
  * @since   1.0.0
  */
-class SupportMailer
+class SupportMail
 {
     const SUPPORT_MAIL = 'shop-systems-support@wirecard.com';
-
-    /**
-     * @var EntityManagerInterface
-     */
-    private $em;
 
     /**
      * @var \Enlight_Components_Mail
      */
     private $mail;
+
+    /**
+     * @var EntityManagerInterface
+     */
+    private $em;
 
     /**
      * @var InstallerService
@@ -69,21 +70,21 @@ class SupportMailer
     private $paymentFactory;
 
     /**
-     * @param EntityManagerInterface   $em
      * @param \Enlight_Components_Mail $mail
+     * @param EntityManagerInterface   $em
      * @param InstallerService         $installerService
      * @param PaymentFactory           $paymentFactory
      *
      * @since 1.0.0
      */
     public function __construct(
-        EntityManagerInterface $em,
         \Enlight_Components_Mail $mail,
+        EntityManagerInterface $em,
         InstallerService $installerService,
         PaymentFactory $paymentFactory
     ) {
-        $this->em               = $em;
         $this->mail             = $mail;
+        $this->em               = $em;
         $this->installerService = $installerService;
         $this->paymentFactory   = $paymentFactory;
     }
@@ -95,28 +96,27 @@ class SupportMailer
      * @param string                $senderAddress
      * @param string                $message
      * @param string                $replyTo
+     *
      * @return \Zend_Mail
      * @throws \Zend_Mail_Exception
+     * @throws \WirecardElasticEngine\Exception\UnknownPaymentException
+     *
+     * @since 1.0.0
      */
     public function send(ParameterBagInterface $parameterBag, $senderAddress, $message, $replyTo = null)
     {
-        $serverInfo = $this->getServerInfo();
-        $shopInfo   = $this->getShopInfo($parameterBag);
-        $pluginInfo = $this->getPluginInfo();
-        $pluginList = $this->getPluginList();
-
         $message .= PHP_EOL . PHP_EOL . PHP_EOL;
         $message .= '*** Server Info: ***';
-        $message .= $this->arrayToText($serverInfo);
+        $message .= $this->arrayToText($this->getServerInfo());
 
         $message .= '*** Shop Info: ***';
-        $message .= $this->arrayToText($shopInfo);
+        $message .= $this->arrayToText($this->getShopInfo($parameterBag));
 
         $message .= '*** Plugin Info: ***';
-        $message .= $this->arrayToText($pluginInfo);
+        $message .= $this->arrayToText($this->getPluginInfo());
 
         $message .= '*** Plugin List: ***';
-        $message .= $this->arrayToText($pluginList);
+        $message .= $this->arrayToText($this->getPluginList());
 
         $this->mail->setFrom($senderAddress);
 
@@ -172,34 +172,44 @@ class SupportMailer
 
     /**
      * @return array
+     *
+     * @since 1.0.0
      */
     protected function getServerInfo()
     {
         return [
             'os'     => php_uname(),
             'server' => isset($_SERVER['SERVER_SOFTWARE']) ? $_SERVER['SERVER_SOFTWARE'] : 'unknown',
-            'php'    => phpversion()
+            'php'    => phpversion(),
         ];
     }
 
     /**
      * @param ParameterBagInterface $parameterBag
+     *
      * @return array
+     *
+     * @since 1.0.0
      */
     protected function getShopInfo(ParameterBagInterface $parameterBag)
     {
         return [
-            'name'    => $parameterBag->get('kernel.name'),
-            'version' => $parameterBag->get('shopware.release.version'),
+            'name'        => $parameterBag->get('kernel.name'),
+            'version'     => $parameterBag->get('shopware.release.version'),
+            'environment' => $parameterBag->get('kernel.environment'),
         ];
     }
 
     /**
      * @return array
+     *
+     * @throws \WirecardElasticEngine\Exception\UnknownPaymentException
+     *
+     * @since 1.0.0
      */
     protected function getPluginInfo()
     {
-        $plugin         = $this->installerService->getPluginByName(WirecardShopwareElasticEngine::NAME);
+        $plugin         = $this->installerService->getPluginByName(WirecardElasticEngine::NAME);
         $payments       = $this->paymentFactory->getSupportedPayments();
         $paymentConfigs = [];
 
@@ -218,7 +228,7 @@ class SupportMailer
         }
 
         return [
-            'name'     => WirecardShopwareElasticEngine::NAME,
+            'name'     => WirecardElasticEngine::NAME,
             'version'  => $plugin->getVersion(),
             'payments' => $paymentConfigs,
         ];
@@ -226,6 +236,8 @@ class SupportMailer
 
     /**
      * @return array
+     *
+     * @since 1.0.0
      */
     protected function getPluginList()
     {

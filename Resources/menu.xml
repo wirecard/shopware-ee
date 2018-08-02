@@ -44,7 +44,7 @@
                     <label lang="en">Transactions</label>
                     <controller>WirecardElasticEngineTransactions</controller>
                     <action>index</action>
-                    <class>sprite-wirecard</class>
+                    <class>sprite-money</class>
                 </entry>
                 <entry>
                     <name>WirecardElasticEngineLiveChat</name>
@@ -52,7 +52,7 @@
                     <label lang="en">LiveChat with support</label>
                     <controller>WirecardElasticEngineTransactions</controller>
                     <action>livechat</action>
-                    <class>sprite-wirecard</class>
+                    <class>sprite-balloons-box</class>
                     <onclick>
                         <![CDATA[
                             wirecardeeChatOpen();
@@ -65,7 +65,7 @@
                     <label lang="en">Mail support</label>
                     <controller>WirecardElasticEngineTransactions</controller>
                     <action>mailSupport</action>
-                    <class>sprite-wirecard</class>
+                    <class>sprite-mail-send</class>
                 </entry>
             </children>
         </entry>

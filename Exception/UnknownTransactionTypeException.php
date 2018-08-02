@@ -29,12 +29,12 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Exception;
+namespace WirecardElasticEngine\Exception;
 
 /**
- * @see     \WirecardShopwareElasticEngine\Components\Payments\Payment::getTransactionType()
+ * @see     \WirecardElasticEngine\Components\Payments\Payment::getTransactionType()
  *
- * @package WirecardShopwareElasticEngine\Exception
+ * @package WirecardElasticEngine\Exception
  *
  * @since   1.0.0
  */
@@ -42,6 +42,8 @@ class UnknownTransactionTypeException extends \Exception
 {
     /**
      * @param string $operation
+     *
+     * @since 1.0.0
      */
     public function __construct($operation)
     {

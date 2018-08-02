@@ -12,13 +12,14 @@
   },
   "require-dev": {
     "phpunit/phpunit": "5.4.3",
-    "squizlabs/php_codesniffer": "^2.7"
+    "squizlabs/php_codesniffer": "^2.7",
+    "codacy/coverage": "1.4.2"
   },
   "type": "shopware-plugin",
   "scripts": {
-    "upload-coverage": "coveralls -v",
+    "upload-coverage": "codacycoverage clover build/coverage.xml",
     "cs-check": "phpcs --standard=phpcs.xml --ignore=*/vendor/*,*/Tests/*,*/node_modules/*,*/Resources/* -s",
     "cs-fix": "phpcbf --standard=phpcs.xml",
-    "test-coverage": "phpunit --colors=always --coverage-clover clover.xml"
+    "test-coverage": "phpunit --colors=always --coverage-clover build/coverage.xml"
   }
 }

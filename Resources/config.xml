@@ -60,6 +60,36 @@ function (button) {
                 </handler>
             </options>
         </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineNotifyMail</name>
+            <label lang="de">E-Mail für Zahlungsbenachrichtigungen</label>
+            <label lang="en">E-mail for payment notifications</label>
+            <value></value>
+            <description lang="de">
+                Tragen Sie Ihre E-Mail-Adresse ein, um eine Zahlungsbenachrichtigung für jede eingehende
+                Zahlungsbestätigung per E-Mail zu erhalten.
+            </description>
+            <description lang="en">
+                Enter your e-mail address to receive a payment notification for each incoming payment confirmation
+                via e-mail.
+            </description>
+            <options>
+                <vtype>email</vtype>
+            </options>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEnginePendingMail</name>
+            <label lang="de">Sende Mails bei ausstehendem Zahlungsstatus</label>
+            <label lang="en">Send pending status mails</label>
+            <value>false</value>
+            <description lang="de">
+                Wenn diese Option aktiviert ist, erhalten Kunden eine E-Mail mit der Information,
+                dass die Zahlung noch nicht abgeschlossen ist.
+            </description>
+            <description lang="en">
+                If enabled, consumers get an e-mail containing the information that the payment is not yet finalized.
+            </description>
+        </element>
         <!-- General End -->
         <!-- Credit Card -->
         <element type="text" scope="shop">
@@ -287,20 +317,6 @@ function (button) {
                 Secret Key is mandatory to calculate the Digital Signature for payments.
             </description>
         </element>
-        <element type="button" scope="shop">
-            <name>wirecardElasticEngineIdealTestApi</name>
-            <label lang="de">[iDEAL] Konfiguration testen</label>
-            <label lang="en">[iDEAL] Test configuration</label>
-            <options>
-                <handler>
-                    <![CDATA[
-function (button) {
-    wirecardeeTestPaymentCredentials(button, 'Ideal', 'Wirecard iDEAL Test');
-}
-                    ]]>
-                </handler>
-            </options>
-        </element>
         <element type="boolean" scope="shop">
             <name>wirecardElasticEngineIdealFraudPrevention</name>
             <label lang="de">[iDEAL] Zusätzliche Informationen mitsenden</label>
@@ -314,6 +330,20 @@ function (button) {
                 Additional data will be sent for the purpose of fraud protection. This additional
                 data includes billing/shipping address, shopping basket and descriptor.
             </description>
+        </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEngineIdealTestApi</name>
+            <label lang="de">[iDEAL] Konfiguration testen</label>
+            <label lang="en">[iDEAL] Test configuration</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    wirecardeeTestPaymentCredentials(button, 'Ideal', 'Wirecard iDEAL Test');
+}
+                    ]]>
+                </handler>
+            </options>
         </element>
         <!-- iDEAL End -->
         <!-- PayPal -->

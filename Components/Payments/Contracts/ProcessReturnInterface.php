@@ -29,13 +29,13 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Payments\Contracts;
+namespace WirecardElasticEngine\Components\Payments\Contracts;
 
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\TransactionService;
 
 /**
- * @package WirecardShopwareElasticEngine\Components\Payments\Interfaces
+ * @package WirecardElasticEngine\Components\Payments\Interfaces
  *
  * @since   1.0.0
  */

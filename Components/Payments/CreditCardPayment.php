@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Payments;
+namespace WirecardElasticEngine\Components\Payments;
 
 use Shopware\Models\Shop\Currency;
 use Shopware\Models\Shop\Shop;
@@ -39,15 +39,15 @@ use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
-use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
-use WirecardShopwareElasticEngine\Components\Data\CreditCardPaymentConfig;
-use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
-use WirecardShopwareElasticEngine\Components\Payments\Contracts\ProcessReturnInterface;
-use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardElasticEngine\Components\Actions\ViewAction;
+use WirecardElasticEngine\Components\Data\OrderSummary;
+use WirecardElasticEngine\Components\Data\CreditCardPaymentConfig;
+use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Components\Payments\Contracts\ProcessReturnInterface;
+use WirecardElasticEngine\Models\Transaction;
 
 /**
- * @package WirecardShopwareElasticEngine\Components\Payments
+ * @package WirecardElasticEngine\Components\Payments
  *
  * @since   1.0.0
  */
@@ -161,7 +161,7 @@ class CreditCardPayment extends Payment implements ProcessReturnInterface, Proce
         $factor = $this->getCurrencyConversionFactor(strtoupper($selectedCurrency), $limit);
 
         $factor = Shopware()->Events()->filter(
-            'WirecardShopwareElasticEngine_CreditCardPayment_getLimitCurrencyConversionFactor',
+            'WirecardElasticEngine_CreditCardPayment_getLimitCurrencyConversionFactor',
             $factor,
             [
                 'subject' => $this,
@@ -265,11 +265,11 @@ class CreditCardPayment extends Payment implements ProcessReturnInterface, Proce
             $shop->getLocale()->getLocale()
         );
 
-        $transaction = new Transaction(Transaction::TYPE_INITIAL_REQUEST);
-        $transaction->setPaymentUniqueId($orderSummary->getPaymentUniqueId());
-        $transaction->setBasketSignature($orderSummary->getBasketMapper()->getSignature());
-        $transaction->setRequest(json_decode($requestData, true));
-        $this->em->persist($transaction);
+        $transactionModel = new Transaction(Transaction::TYPE_INITIAL_REQUEST);
+        $transactionModel->setPaymentUniqueId($orderSummary->getPaymentUniqueId());
+        $transactionModel->setBasketSignature($orderSummary->getBasketMapper()->getSignature());
+        $transactionModel->setRequest(json_decode($requestData, true));
+        $this->em->persist($transactionModel);
         $this->em->flush();
 
         return new ViewAction('credit_card.tpl', [

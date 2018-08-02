@@ -90,7 +90,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.TransactionDetai
         return Ext.create('Ext.XTemplate',
             '{literal}<tpl for=".">',
             '<div class="wirecardee-transaction-details-entry-pnl">',
-            '<p><label class="x-form-item-label">' + me.snippets.CreatedAt + ':</label> {createdAt}</p>',
+            '<p><label class="x-form-item-label">' + me.snippets.CreatedAt + ':</label> {[this.dateFormat(values.createdAt)]}</p>',
             '<p><label class="x-form-item-label">' + me.snippets.OrderNumber + ':</label> {orderNumber}</p>',
             '<p><label class="x-form-item-label">' + me.snippets.PaymentUniqueId + ':</label> {paymentUniqueId}</p>',
             '<p><label class="x-form-item-label">' + me.snippets.Type + ':</label> {type}</p>',
@@ -109,6 +109,12 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.TransactionDetai
             '<div><pre>{[this.asJson(values.request)]}</pre></div>',
             '</div>',
             '</tpl>{/literal}', {
+                dateFormat: function (value) {
+                    if (value === Ext.undefined) {
+                        return value;
+                    }
+                    return Ext.util.Format.date(value) + ' ' + Ext.util.Format.date(value, 'H:i:s');
+                },
                 formatNumber: function (value) {
                     return Ext.util.Format.number(value);
                 },

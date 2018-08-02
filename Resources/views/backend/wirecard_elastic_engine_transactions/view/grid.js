@@ -139,11 +139,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.Grid', {
             },
             getClass: function (value, meta, record) {
                 var transaction = record.data;
-                if (!transaction.statusMessage) {
-                    return 'sprite-magnifier-medium';
-                } else {
-                    return 'sprite-exclamation';
-                }
+                return transaction.statusMessage ? 'sprite-exclamation' : 'sprite-magnifier-medium';
             }
         });
 
@@ -180,9 +176,6 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.Grid', {
      */
     orderNumberRenderer: function (value, style, row) {
         var me = this;
-        if (value === Ext.undefined) {
-            return value;
-        }
         if (!row.data.orderId) {
             return me.snippets.NoOrderNumber;
         }
@@ -206,17 +199,5 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.Grid', {
             return value;
         }
         return '';
-    },
-
-    /**
-     * @param { String } value
-     * @returns { String }
-     */
-    dateColumnRenderer: function (value) {
-        if (value === Ext.undefined) {
-            return value;
-        }
-
-        return Ext.util.Format.date(value, 'm.d.Y H:i');
     }
 });

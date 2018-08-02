@@ -156,6 +156,6 @@ exports.getDriver = () => {
     }
 
     return new Builder()
-        .forBrowser('firefox')
+        .forBrowser('chrome')
         .build();
 };

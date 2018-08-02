@@ -29,18 +29,24 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Payments;
+namespace WirecardElasticEngine\Tests\Unit\Components\Payments;
 
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
+use Wirecard\PaymentSdk\Entity\Amount;
+use Wirecard\PaymentSdk\Entity\Redirect;
+use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
-use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
-use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
-use WirecardShopwareElasticEngine\Exception\UnknownTransactionTypeException;
-use WirecardShopwareElasticEngine\Tests\Unit\PaymentTestCase;
-use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
+use Wirecard\PaymentSdk\TransactionService;
+use WirecardElasticEngine\Components\Data\OrderSummary;
+use WirecardElasticEngine\Components\Data\PaymentConfig;
+use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Components\Payments\PaypalPayment;
+use WirecardElasticEngine\Exception\UnknownTransactionTypeException;
+use WirecardElasticEngine\Tests\Unit\PaymentTestCase;
+use WirecardElasticEngine\WirecardElasticEngine;
 
 class PaypalPaymentTest extends PaymentTestCase
 {
@@ -52,8 +58,8 @@ class PaypalPaymentTest extends PaymentTestCase
         parent::setUp();
 
         $this->config->method('getByNamespace')->willReturnMap([
-            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalMerchantId', null, 'MAID'],
-            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalSecret', null, 'Secret'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEnginePaypalMerchantId', null, 'MAID'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEnginePaypalSecret', null, 'Secret'],
         ]);
 
         $this->payment = new PaypalPayment(
@@ -69,12 +75,12 @@ class PaypalPaymentTest extends PaymentTestCase
     {
         $this->assertEquals('WirecardPayPal', $this->payment->getLabel());
         $this->assertEquals('wirecard_elastic_engine_paypal', $this->payment->getName());
-        $this->assertEquals(1, $this->payment->getPosition());
+        $this->assertEquals(5, $this->payment->getPosition());
         $this->assertPaymentOptions(
             $this->payment->getPaymentOptions(),
             'wirecard_elastic_engine_paypal',
             'WirecardPayPal',
-            1
+            5
         );
     }
 
@@ -123,7 +129,7 @@ class PaypalPaymentTest extends PaymentTestCase
             'headers' => [
                 'shop-system-name'    => 'Shopware',
                 'shop-system-version' => '__SW_VERSION__',
-                'plugin-name'         => 'WirecardShopwareElasticEngine',
+                'plugin-name'         => 'WirecardElasticEngine',
                 'plugin-version'      => '__PLUGIN_VERSION__',
             ],
         ], $config->getShopHeader());
@@ -140,16 +146,45 @@ class PaypalPaymentTest extends PaymentTestCase
         /** @var \Shopware_Components_Config|\PHPUnit_Framework_MockObject_MockObject $config */
         $config = $this->createMock(\Shopware_Components_Config::class);
         $config->method('getByNamespace')->willReturnMap([
-            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalTransactionType', null, 'pay'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEnginePaypalTransactionType', null, 'pay'],
         ]);
         $payment = new PaypalPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
         $this->assertEquals('purchase', $payment->getTransactionType());
 
         $config = $this->createMock(\Shopware_Components_Config::class);
         $config->method('getByNamespace')->willReturnMap([
-            [WirecardShopwareElasticEngine::NAME, 'wirecardElasticEnginePaypalTransactionType', null, 'reserve'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEnginePaypalTransactionType', null, 'reserve'],
         ]);
         $payment = new PaypalPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
         $this->assertEquals('authorization', $payment->getTransactionType());
+    }
+
+    public function testProcessPayment()
+    {
+        $this->assertInstanceOf(ProcessPaymentInterface::class, $this->payment);
+
+        $orderSummary = $this->createMock(OrderSummary::class);
+        $orderSummary->method('getPaymentUniqueId')->willReturn('1532501234exxxf');
+        $orderSummary->method('getAmount')->willReturn(new Amount(50, 'EUR'));
+        $transactionService = $this->createMock(TransactionService::class);
+        $shop               = $this->createMock(Shop::class);
+        $redirect           = $this->createMock(Redirect::class);
+        $request            = $this->createMock(\Enlight_Controller_Request_Request::class);
+        $order              = $this->createMock(\sOrder::class);
+
+        $this->assertNull($this->payment->processPayment(
+            $orderSummary,
+            $transactionService,
+            $shop,
+            $redirect,
+            $request,
+            $order
+        ));
+        $transaction = $this->payment->getTransaction();
+        $transaction->setOperation(Operation::PAY);
+        $this->assertArraySubset([
+            'transaction-type' => 'debit',
+            'order-detail'     => '1532501234exxxf - 50.00 EUR',
+        ], $transaction->mappedProperties());
     }
 }

@@ -36,8 +36,8 @@ const Mocha = require('mocha');
 const run = async () => {
     await asyncForEach(browsers, async browser => {
         const bsConfig = Object.assign({
-            'browserstack.user': process.env.TEST_BS_USER,
-            'browserstack.key': process.env.TEST_BS_KEY,
+            'browserstack.user': process.env.BROWSERSTACK_USER,
+            'browserstack.key': process.env.BROWSERSTACK_KEY,
             'browserstack.local': 'true',
             'browserstack.localIdentifier': process.env.BROWSERSTACK_LOCAL_IDENTIFIER
         }, browser);
@@ -46,7 +46,11 @@ const run = async () => {
             // Driver used by the Selenium tests.
             global.driver = await new Builder()
                 .usingServer('http://hub-cloud.browserstack.com/wd/hub')
-                .withCapabilities(bsConfig)
+                .withCapabilities(Object.assign({
+                    name: testCase.file,
+                    build: process.env.TRAVIS ? `${process.env.TRAVIS_JOB_NUMBER}` : 'local',
+                    project: 'Shopware:WirecardElasticEngine'
+                }, bsConfig))
                 .build();
 
             const mocha = new Mocha({
@@ -60,14 +64,14 @@ const run = async () => {
                     delete require.cache[file];
                 });
 
-                console.log(`Running ${testCase.file} against ${browser.browserName}`);
+                console.log(`Running ${testCase.file} against ${browser.browserName} (v${browser.browser_version}) on ${browser.os} (${browser.os_version})`);
 
                 mocha.addFile(`./Tests/Selenium/${testCase.file}.js`);
 
                 mocha.run()
                     .on('fail', test => {
+                        console.log(test);
                         reject(new Error(`Selenium test (${test.title}) failed.`));
-                        process.exit(1);
                     })
                     .on('end', () => {
                         resolve();

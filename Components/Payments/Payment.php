@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Payments;
+namespace WirecardElasticEngine\Components\Payments;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
@@ -38,13 +38,13 @@ use Shopware\Models\Shop\Shop;
 use Shopware_Components_Config;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
-use WirecardShopwareElasticEngine\Exception\UnknownTransactionTypeException;
-use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
+use WirecardElasticEngine\Exception\UnknownTransactionTypeException;
+use WirecardElasticEngine\WirecardElasticEngine;
 
 /**
  * Base class for payment implementations.
  *
- * @package WirecardShopwareElasticEngine\Components\Payments
+ * @package WirecardElasticEngine\Components\Payments
  *
  * @since   1.0.0
  */
@@ -177,7 +177,7 @@ abstract class Payment implements PaymentInterface
             $parameterBag->get('shopware.release.version')
         );
 
-        $plugin = $this->installerService->getPluginByName(WirecardShopwareElasticEngine::NAME);
+        $plugin = $this->installerService->getPluginByName(WirecardElasticEngine::NAME);
 
         $config->setPluginInfo($plugin->getName(), $plugin->getVersion());
 
@@ -202,6 +202,6 @@ abstract class Payment implements PaymentInterface
      */
     protected function getPluginConfig($name, $prefix = 'wirecardElasticEngine')
     {
-        return $this->shopwareConfig->getByNamespace(WirecardShopwareElasticEngine::NAME, $prefix . $name);
+        return $this->shopwareConfig->getByNamespace(WirecardElasticEngine::NAME, $prefix . $name);
     }
 }

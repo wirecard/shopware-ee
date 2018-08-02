@@ -29,12 +29,12 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Data;
+namespace WirecardElasticEngine\Tests\Unit\Components\Data;
 
 use PHPUnit\Framework\TestCase;
-use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
-use WirecardShopwareElasticEngine\Components\Data\SofortPaymentConfig;
-use WirecardShopwareElasticEngine\Components\Payments\Payment;
+use WirecardElasticEngine\Components\Data\PaymentConfig;
+use WirecardElasticEngine\Components\Data\SofortPaymentConfig;
+use WirecardElasticEngine\Components\Payments\Payment;
 
 class SofortPaymentConfigTest extends TestCase
 {

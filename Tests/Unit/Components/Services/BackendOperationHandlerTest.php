@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Components\Services;
+namespace WirecardElasticEngine\Tests\Unit\Components\Services;
 
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
@@ -43,11 +43,11 @@ use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\Transaction;
-use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
-use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
-use WirecardShopwareElasticEngine\Components\Services\BackendOperationHandler;
-use WirecardShopwareElasticEngine\Components\Services\TransactionManager;
-use WirecardShopwareElasticEngine\Models\Transaction as TransactionModel;
+use WirecardElasticEngine\Components\Actions\ErrorAction;
+use WirecardElasticEngine\Components\Actions\ViewAction;
+use WirecardElasticEngine\Components\Services\BackendOperationHandler;
+use WirecardElasticEngine\Components\Services\TransactionManager;
+use WirecardElasticEngine\Models\Transaction as TransactionModel;
 
 class BackendOperationHandlerTest extends TestCase
 {

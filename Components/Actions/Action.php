@@ -29,13 +29,13 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Actions;
+namespace WirecardElasticEngine\Components\Actions;
 
 /**
  * Actions are returned by Handlers to indicate what should happen after the Handler is done (e.g. redirection,
  * error handling, ...).
  *
- * @package WirecardShopwareElasticEngine\Components\Actions
+ * @package WirecardElasticEngine\Components\Actions
  *
  * @since   1.0.0
  */

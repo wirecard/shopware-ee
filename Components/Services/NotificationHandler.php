@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Services;
+namespace WirecardElasticEngine\Components\Services;
 
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
@@ -37,7 +37,7 @@ use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
-use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardElasticEngine\Models\Transaction;
 
 /**
  * Handles notification responses. Notification responses are server-to-server, meaning you must NEVER access session
@@ -45,7 +45,7 @@ use WirecardShopwareElasticEngine\Models\Transaction;
  * Additionally notifications are the "source of truth", hence they are responsible for setting - respectively
  * updating - the payment status.
  *
- * @package WirecardShopwareElasticEngine\Components\Services
+ * @package WirecardElasticEngine\Components\Services
  *
  * @since   1.0.0
  */
@@ -58,8 +58,8 @@ class NotificationHandler extends Handler
      * @param Response       $notification
      * @param BackendService $backendService
      *
-     * @return bool
-     * @throws \WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException
+     * @return Transaction|null
+     * @throws \WirecardElasticEngine\Exception\InitialTransactionNotFoundException
      *
      * @since 1.0.0
      */
@@ -68,21 +68,19 @@ class NotificationHandler extends Handler
         if ($notification instanceof SuccessResponse) {
             $initialTransaction = $this->handleSuccess($shopwareOrder, $notification, $backendService);
 
-            $this->transactionManager->createNotify($initialTransaction, $notification, $backendService);
-
-            return true;
+            return $this->transactionManager->createNotify($initialTransaction, $notification, $backendService);
         }
 
         if ($notification instanceof FailureResponse) {
             $this->logger->error("Failure response", $notification->getData());
-            return false;
+            return null;
         }
 
         $this->logger->error("Unexpected notification response", [
             'class'    => get_class($notification),
             'response' => $notification->getData(),
         ]);
-        return false;
+        return null;
     }
 
     /**
@@ -91,7 +89,9 @@ class NotificationHandler extends Handler
      * @param BackendService  $backendService
      *
      * @return Transaction
-     * @throws \WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException
+     * @throws \WirecardElasticEngine\Exception\InitialTransactionNotFoundException
+     *
+     * @since 1.0.0
      */
     protected function handleSuccess(
         \sOrder $shopwareOrder,
@@ -107,8 +107,6 @@ class NotificationHandler extends Handler
         }
         $initialTransaction->setPaymentStatus($paymentStatusId);
         $this->em->flush();
-        $this->logger->debug("NotificationHandler::handleSuccess: flushed initial transaction " .
-                             "{$initialTransaction->getId()} with payment status $paymentStatusId");
 
         /** @var Order $order */
         $order = $this->em->getRepository(Order::class)->findOneBy([
@@ -117,30 +115,26 @@ class NotificationHandler extends Handler
 
         // if we already have an order, we can update the payment status directly
         if ($order) {
-            $this->logger->debug('NotificationHandler::handleSuccess: order found, save payment status '
-                                 . $paymentStatusId);
+            $this->logger->debug("Order {$order->getNumber()} already exists, update payment status $paymentStatusId");
             $this->savePaymentStatus($shopwareOrder, $order, $paymentStatusId);
             if (! $initialTransaction->getOrderNumber() && $order->getNumber()) {
                 $initialTransaction->setOrderNumber($order->getNumber());
             }
             return $initialTransaction;
         }
-        $this->logger->debug('NotificationHandler::handleSuccess: no order');
 
         // otherwise, lets save the payment status to the initial transaction (see returnAction)
         $this->em->refresh($initialTransaction);
-        $this->logger->debug('NotificationHandler::handleSuccess: refreshed initial transaction');
 
         // check again if order exists and try to update payment status
         $order = $this->em->getRepository(Order::class)->findOneBy([
             'temporaryId' => $initialTransaction->getPaymentUniqueId(),
         ]);
-        $this->logger->debug('NotificationHandler::handleSuccess: order: ' . ($order ? ' found' : ' not found'));
         if ($order) {
+            $this->logger->debug("Order {$order->getNumber()} found, update payment status $paymentStatusId");
             $this->savePaymentStatus($shopwareOrder, $order, $paymentStatusId);
         }
 
-        $this->logger->debug('NotificationHandler::handleSuccess: finished');
         return $initialTransaction;
     }
 
@@ -148,11 +142,33 @@ class NotificationHandler extends Handler
      * @param \sOrder $shopwareOrder
      * @param Order   $order
      * @param int     $paymentStatusId
+     *
+     * @since 1.0.0
      */
     private function savePaymentStatus(\sOrder $shopwareOrder, Order $order, $paymentStatusId)
     {
-        $shopwareOrder->setPaymentStatus($order->getId(), $paymentStatusId, false);
-        return;
+        $shopwareOrder->setPaymentStatus(
+            $order->getId(),
+            $paymentStatusId,
+            self::shouldSendStatusMail($paymentStatusId)
+        );
+    }
+
+    /**
+     * Status mails should be sent if the payment is finalized.
+     *
+     * @param int $paymentStatusId
+     *
+     * @return bool
+     *
+     * @since 1.0.0
+     */
+    public static function shouldSendStatusMail($paymentStatusId)
+    {
+        return in_array($paymentStatusId, [
+            Status::PAYMENT_STATE_COMPLETELY_PAID,
+            Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
+        ]);
     }
 
     /**
@@ -160,6 +176,8 @@ class NotificationHandler extends Handler
      * @param Response       $notification
      *
      * @return int
+     *
+     * @since 1.0.0
      */
     private function getPaymentStatusId($backendService, $notification)
     {

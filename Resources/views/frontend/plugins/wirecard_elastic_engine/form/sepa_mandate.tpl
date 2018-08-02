@@ -28,7 +28,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  *}
 
-{namespace name="frontend/wirecard_elastic_engine/sepa"}
+{namespace name="frontend/wirecard_elastic_engine/sepa_direct_debit"}
 {block name="wirecard_elastic_engine_sepa_mandate"}
     <style>
         .wirecardee--sepa-mandate table {

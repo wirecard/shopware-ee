@@ -29,13 +29,13 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit;
+namespace WirecardElasticEngine\Tests\Unit;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Plugin\Plugin;
-use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
+use WirecardElasticEngine\WirecardElasticEngine;
 
 abstract class PaymentTestCase extends \PHPUnit_Framework_TestCase
 {
@@ -64,7 +64,7 @@ abstract class PaymentTestCase extends \PHPUnit_Framework_TestCase
         $this->eventManager = $this->createMock(\Enlight_Event_EventManager::class);
 
         $plugin = $this->createMock(Plugin::class);
-        $plugin->method('getName')->willReturn(WirecardShopwareElasticEngine::NAME);
+        $plugin->method('getName')->willReturn(WirecardElasticEngine::NAME);
         $plugin->method('getVersion')->willReturn('__PLUGIN_VERSION__');
         $this->installer->method('getPluginByName')->willReturn($plugin);
     }

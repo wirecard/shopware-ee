@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Payments;
+namespace WirecardElasticEngine\Tests\Functional\Components\Payments;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
@@ -40,8 +40,8 @@ use Symfony\Component\DependencyInjection\Container;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
-use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
-use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
+use WirecardElasticEngine\Components\Data\PaymentConfig;
+use WirecardElasticEngine\Components\Payments\PaypalPayment;
 
 class PaypalPaymentTest extends TestCase
 {
@@ -93,7 +93,7 @@ class PaypalPaymentTest extends TestCase
             'description'           => 'WirecardPayPal',
             'action'                => 'WirecardElasticEnginePayment',
             'active'                => 0,
-            'position'              => 1,
+            'position'              => 5,
             'additionalDescription' => '',
         ], $this->payment->getPaymentOptions());
     }
@@ -138,7 +138,7 @@ class PaypalPaymentTest extends TestCase
             'headers' => [
                 'shop-system-name'    => 'Shopware',
                 'shop-system-version' => '___VERSION___',
-                'plugin-name'         => 'WirecardShopwareElasticEngine',
+                'plugin-name'         => 'WirecardElasticEngine',
                 'plugin-version'      => '0.5.0',
             ],
         ], $config->getShopHeader());

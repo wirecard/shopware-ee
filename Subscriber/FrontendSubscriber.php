@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Subscriber;
+namespace WirecardElasticEngine\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -37,13 +37,13 @@ use Doctrine\ORM\EntityManagerInterface;
 use Shopware\Components\Theme\LessDefinition;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
-use WirecardShopwareElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
-use WirecardShopwareElasticEngine\Components\Services\PaymentFactory;
-use WirecardShopwareElasticEngine\Components\Services\SessionManager;
-use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
+use WirecardElasticEngine\Components\Services\PaymentFactory;
+use WirecardElasticEngine\Components\Services\SessionManager;
+use WirecardElasticEngine\Models\Transaction;
 
 /**
- * @package WirecardShopwareElasticEngine\Subscriber
+ * @package WirecardElasticEngine\Subscriber
  *
  * @since 1.0.0
  */
@@ -131,7 +131,7 @@ class FrontendSubscriber implements SubscriberInterface
     /**
      * @param \Enlight_Controller_ActionEventArgs $args
      *
-     * @throws \WirecardShopwareElasticEngine\Exception\UnknownPaymentException
+     * @throws \WirecardElasticEngine\Exception\UnknownPaymentException
      *
      * @since 1.0.0
      */
@@ -252,7 +252,7 @@ class FrontendSubscriber implements SubscriberInterface
     /**
      * @param \Enlight_View_Default $view
      *
-     * @throws \WirecardShopwareElasticEngine\Exception\UnknownPaymentException
+     * @throws \WirecardElasticEngine\Exception\UnknownPaymentException
      *
      * @since 1.0.0
      */
@@ -272,7 +272,7 @@ class FrontendSubscriber implements SubscriberInterface
      * @param \Enlight_View_Default $view
      * @param SessionManager        $sessionManager
      *
-     * @throws \WirecardShopwareElasticEngine\Exception\UnknownPaymentException
+     * @throws \WirecardElasticEngine\Exception\UnknownPaymentException
      *
      * @since 1.0.0
      */

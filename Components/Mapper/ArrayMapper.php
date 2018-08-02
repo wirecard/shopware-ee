@@ -29,15 +29,15 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Mapper;
+namespace WirecardElasticEngine\Components\Mapper;
 
-use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
+use WirecardElasticEngine\Exception\ArrayKeyNotFoundException;
 
 /**
  * Base class for an Array mapper. Since Shopware handles a lot of things (basket, current user, ...) as arrays we're
  * mapping them to objects for simplicity and architectural reasons.
  *
- * @package WirecardShopwareElasticEngine\Components\Mapper
+ * @package WirecardElasticEngine\Components\Mapper
  *
  * @since   1.0.0
  */

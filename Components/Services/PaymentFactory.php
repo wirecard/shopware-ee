@@ -29,27 +29,27 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Services;
+namespace WirecardElasticEngine\Components\Services;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Components\Routing\RouterInterface;
-use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
-use WirecardShopwareElasticEngine\Components\Payments\IdealPayment;
-use WirecardShopwareElasticEngine\Components\Payments\Payment;
-use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
-use WirecardShopwareElasticEngine\Components\Payments\PaypalPayment;
-use WirecardShopwareElasticEngine\Components\Payments\PaymentInAdvancePayment;
-use WirecardShopwareElasticEngine\Components\Payments\PaymentOnInvoicePayment;
-use WirecardShopwareElasticEngine\Components\Payments\SepaPayment;
-use WirecardShopwareElasticEngine\Components\Payments\SofortPayment;
-use WirecardShopwareElasticEngine\Exception\UnknownPaymentException;
-use WirecardShopwareElasticEngine\WirecardShopwareElasticEngine;
+use WirecardElasticEngine\Components\Payments\CreditCardPayment;
+use WirecardElasticEngine\Components\Payments\IdealPayment;
+use WirecardElasticEngine\Components\Payments\Payment;
+use WirecardElasticEngine\Components\Payments\PaymentInterface;
+use WirecardElasticEngine\Components\Payments\PaypalPayment;
+use WirecardElasticEngine\Components\Payments\PaymentInAdvancePayment;
+use WirecardElasticEngine\Components\Payments\PaymentOnInvoicePayment;
+use WirecardElasticEngine\Components\Payments\SepaPayment;
+use WirecardElasticEngine\Components\Payments\SofortPayment;
+use WirecardElasticEngine\Exception\UnknownPaymentException;
+use WirecardElasticEngine\WirecardElasticEngine;
 
 /**
  * Responsible for creating payment objects based on their name.
  *
- * @package WirecardShopwareElasticEngine\Components\Services
+ * @package WirecardElasticEngine\Components\Services
  *
  * @since   1.0.0
  */
@@ -130,7 +130,7 @@ class PaymentFactory
     /**
      * Used to register payments in Shopware.
      *
-     * @see   WirecardShopwareElasticEngine::getSupportedPayments()
+     * @see   WirecardElasticEngine::getSupportedPayments()
      *
      * @return PaymentInterface[]
      * @throws UnknownPaymentException
@@ -141,7 +141,7 @@ class PaymentFactory
     {
         $payments = [];
 
-        foreach ($this->getMappedPayments() as $identifier => $className) {
+        foreach (array_keys($this->getMappedPayments()) as $identifier) {
             $payments[] = $this->create($identifier);
         }
 
@@ -158,13 +158,13 @@ class PaymentFactory
     private function getMappedPayments()
     {
         return [
-            PaypalPayment::PAYMETHOD_IDENTIFIER           => PaypalPayment::class,
             CreditCardPayment::PAYMETHOD_IDENTIFIER       => CreditCardPayment::class,
             IdealPayment::PAYMETHOD_IDENTIFIER            => IdealPayment::class,
+            PaypalPayment::PAYMETHOD_IDENTIFIER           => PaypalPayment::class,
             PaymentInAdvancePayment::PAYMETHOD_IDENTIFIER => PaymentInAdvancePayment::class,
             PaymentOnInvoicePayment::PAYMETHOD_IDENTIFIER => PaymentOnInvoicePayment::class,
             SepaPayment::PAYMETHOD_IDENTIFIER             => SepaPayment::class,
-            SofortPayment::PAYMETHOD_IDENTIFIER           => SofortPayment::class
+            SofortPayment::PAYMETHOD_IDENTIFIER           => SofortPayment::class,
         ];
     }
 }

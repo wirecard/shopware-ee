@@ -29,22 +29,22 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Mapper;
+namespace WirecardElasticEngine\Components\Mapper;
 
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Basket;
 use Wirecard\PaymentSdk\Entity\Item;
 use Wirecard\PaymentSdk\Transaction\Transaction;
-use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
-use WirecardShopwareElasticEngine\Exception\InvalidBasketException;
-use WirecardShopwareElasticEngine\Exception\InvalidBasketItemException;
-use WirecardShopwareElasticEngine\Exception\NotAvailableBasketException;
-use WirecardShopwareElasticEngine\Exception\OutOfStockBasketException;
+use WirecardElasticEngine\Exception\ArrayKeyNotFoundException;
+use WirecardElasticEngine\Exception\InvalidBasketException;
+use WirecardElasticEngine\Exception\InvalidBasketItemException;
+use WirecardElasticEngine\Exception\NotAvailableBasketException;
+use WirecardElasticEngine\Exception\OutOfStockBasketException;
 
 /**
  * Represents the Shopware basket as object.
  *
- * @package WirecardShopwareElasticEngine\Components\Mapper
+ * @package WirecardElasticEngine\Components\Mapper
  *
  * @since   1.0.0
  */
@@ -260,7 +260,7 @@ class BasketMapper extends ArrayMapper
         $basket = $this->getShopwareBasket();
 
         if (! isset($basket[self::CONTENT])) {
-            throw new InvalidBasketException($this);
+            throw new InvalidBasketException();
         }
 
         foreach ($basket[self::CONTENT] as $item) {
@@ -273,10 +273,10 @@ class BasketMapper extends ArrayMapper
             }
 
             if (! $article[self::ARTICLE_IS_AVAILABLE]) {
-                throw new NotAvailableBasketException($article, $basketItem, $this);
+                throw new NotAvailableBasketException($basketItem);
             }
             if ($article[self::ARTICLE_LAST_STOCK] && $basketItem->getQuantity() > $article[self::ARTICLE_IN_STOCK]) {
-                throw new OutOfStockBasketException($article, $basketItem, $this);
+                throw new OutOfStockBasketException($basketItem);
             }
         }
     }

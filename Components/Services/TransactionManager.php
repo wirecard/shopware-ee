@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Services;
+namespace WirecardElasticEngine\Components\Services;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Wirecard\PaymentSdk\BackendService;
@@ -38,12 +38,12 @@ use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
-use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
-use WirecardShopwareElasticEngine\Exception\InitialTransactionNotFoundException;
-use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardElasticEngine\Components\Data\OrderSummary;
+use WirecardElasticEngine\Exception\InitialTransactionNotFoundException;
+use WirecardElasticEngine\Models\Transaction;
 
 /**
- * @package WirecardShopwareElasticEngine\Components\Services
+ * @package WirecardElasticEngine\Components\Services
  *
  * @since   1.0.0
  */

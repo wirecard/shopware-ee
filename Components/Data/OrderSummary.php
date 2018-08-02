@@ -29,20 +29,20 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Components\Data;
+namespace WirecardElasticEngine\Components\Data;
 
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Device;
-use WirecardShopwareElasticEngine\Components\Mapper\BasketMapper;
-use WirecardShopwareElasticEngine\Components\Mapper\UserMapper;
-use WirecardShopwareElasticEngine\Components\Payments\Payment;
-use WirecardShopwareElasticEngine\Components\Payments\PaymentInterface;
+use WirecardElasticEngine\Components\Mapper\BasketMapper;
+use WirecardElasticEngine\Components\Mapper\UserMapper;
+use WirecardElasticEngine\Components\Payments\Payment;
+use WirecardElasticEngine\Components\Payments\PaymentInterface;
 
 /**
  * The `OrderSummary` is passed to the `PaymentHandler` which processes the actual payment, based on the information
  * stored in the summary (e.g. used payment method, consumer information, etc..).
  *
- * @package WirecardShopwareElasticEngine\Components\Data
+ * @package WirecardElasticEngine\Components\Data
  *
  * @since   1.0.0
  */
@@ -194,7 +194,7 @@ class OrderSummary
 
     /**
      * @return array
-     * @throws \WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException
+     * @throws \WirecardElasticEngine\Exception\ArrayKeyNotFoundException
      *
      * @since 1.0.0
      */

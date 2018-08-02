@@ -29,14 +29,14 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Exception;
+namespace WirecardElasticEngine\Exception;
 
 /**
  * Thrown by the `PaymentFactory` if the payment could not be found.
  *
- * @see     \WirecardShopwareElasticEngine\Components\Services\PaymentFactory::create()
+ * @see     \WirecardElasticEngine\Components\Services\PaymentFactory::create()
  *
- * @package WirecardShopwareElasticEngine\Exception
+ * @package WirecardElasticEngine\Exception
  *
  * @since 1.0.0
  */

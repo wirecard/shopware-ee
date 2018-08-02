@@ -29,13 +29,12 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Subscriber;
+namespace WirecardElasticEngine\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
-use WirecardShopwareElasticEngine\Components\Payments\Payment;
 
 /**
- * @package WirecardShopwareElasticEngine\Subscriber
+ * @package WirecardElasticEngine\Subscriber
  *
  * @since 1.0.0
  */
@@ -61,12 +60,6 @@ class OrderSubscriber implements SubscriberInterface
     {
         if (getenv('SHOPWARE_ENV') === 'testing') {
             // Disable confirmation mail in testing environment
-            return false;
-        }
-        if (isset($args['variables']['additional']['payment']['action'])
-            && $args['variables']['additional']['payment']['action'] === Payment::ACTION
-        ) {
-            // We just disable the confirmation mail on WirecardElasticEnginePayment for now
             return false;
         }
 

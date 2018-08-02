@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Payments;
+namespace WirecardElasticEngine\Tests\Functional\Components\Payments;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
@@ -41,8 +41,9 @@ use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\Transaction\SepaDirectDebitTransaction;
-use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
-use WirecardShopwareElasticEngine\Components\Payments\SepaPayment;
+use WirecardElasticEngine\Components\Data\PaymentConfig;
+use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
+use WirecardElasticEngine\Components\Payments\SepaPayment;
 
 class SepaPaymentTest extends TestCase
 {
@@ -153,7 +154,7 @@ class SepaPaymentTest extends TestCase
             'headers' => [
                 'shop-system-name'    => 'Shopware',
                 'shop-system-version' => '___VERSION___',
-                'plugin-name'         => 'WirecardShopwareElasticEngine',
+                'plugin-name'         => 'WirecardElasticEngine',
                 'plugin-version'      => '0.5.0',
             ],
         ], $config->getShopHeader());
@@ -162,5 +163,17 @@ class SepaPaymentTest extends TestCase
     public function testGetTransactionType()
     {
         $this->assertEquals('purchase', $this->payment->getTransactionType());
+    }
+
+    public function testGetAdditionalViewAssignments()
+    {
+        $this->assertInstanceOf(AdditionalViewAssignmentsInterface::class, $this->payment);
+        $this->assertEquals([
+            'method'          => 'wirecard_elastic_engine_sepa',
+            'showBic'         => false,
+            'creditorId'      => 'DE98ZZZ09999999999',
+            'creditorName'    => '',
+            'creditorAddress' => '',
+        ], $this->payment->getAdditionalViewAssignments());
     }
 }
