@@ -90,7 +90,19 @@ class FrontendSubscriber implements SubscriberInterface
             'Enlight_Controller_Action_PreDispatch'                          => 'onPreDispatch',
             'Theme_Compiler_Collect_Plugin_Less'                             => 'onCollectLessFiles',
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchCheckout',
+            'Shopware_Modules_Admin_GetPaymentMeans_DataFilter'              => 'onGetPayments',
         ];
+    }
+
+    public function onGetPayments(\Enlight_Event_EventArgs $args)
+    {
+        $payments = $args->getReturn();
+
+        foreach ($payments as $key => $payment) {
+            // TODO check payments to be shown
+        }
+
+        $args->setReturn($payments);
     }
 
     /**
