@@ -32,15 +32,26 @@
 
 {block name='frontend_checkout_confirm_information_wrapper'}
     {$smarty.block.parent}
-    {if $wirecardElasticEngineViewAssignments and $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_sepa'}
-        <div class="panel has--border wirecardee--additional-form-fields">
-            <div class="panel--title primary is--underline">
-                {s name="SepaPaymentFormHeader" namespace="frontend/wirecard_elastic_engine/sepa_direct_debit"}{/s}
+    {if $wirecardElasticEngineViewAssignments}
+        {if $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_sepa'}
+            <div class="panel has--border wirecardee--additional-form-fields">
+                <div class="panel--title primary is--underline">
+                    {s name="SepaPaymentFormHeader" namespace="frontend/wirecard_elastic_engine/sepa_direct_debit"}{/s}
+                </div>
+                <div class="panel--body is--wide">
+                    {include file="frontend/plugins/wirecard_elastic_engine/form/sepa.tpl"}
+                </div>
             </div>
-            <div class="panel--body is--wide">
-                {include file="frontend/plugins/wirecard_elastic_engine/form/sepa.tpl"}
+        {elseif $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_ideal'}
+            <div class="panel has--border wirecardee--additional-form-fields">
+                <div class="panel--title primary is--underline">
+                    {s name="IdealPaymentFormHeader" namespace="frontend/wirecard_elastic_engine/ideal"}{/s}
+                </div>
+                <div class="panel--body is--wide">
+                    {include file="frontend/plugins/wirecard_elastic_engine/form/ideal.tpl"}
+                </div>
             </div>
-        </div>
+        {/if}
     {/if}
 
     {if $wirecardElasticEngineIncludeDeviceFingerprintIFrame}

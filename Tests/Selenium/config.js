@@ -75,6 +75,12 @@ exports.config = {
                 password: 'passwd',
                 tan: '12345'
             }
+        },
+        ideal: {
+            label: 'Wirecard iDEAL',
+            fields: {
+                bank: 'INGBNL2A'
+            }
         }
     }
 };
