@@ -38,6 +38,7 @@ use WirecardElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardElasticEngine\Components\Payments\Payment;
 use WirecardElasticEngine\Components\Payments\PaymentInterface;
 use WirecardElasticEngine\Components\Payments\PaypalPayment;
+use WirecardElasticEngine\Components\Payments\RatepayInvoicePayment;
 use WirecardElasticEngine\Components\Payments\SepaPayment;
 use WirecardElasticEngine\Components\Payments\SofortPayment;
 use WirecardElasticEngine\Exception\UnknownPaymentException;
@@ -155,10 +156,11 @@ class PaymentFactory
     private function getMappedPayments()
     {
         return [
-            PaypalPayment::PAYMETHOD_IDENTIFIER     => PaypalPayment::class,
-            CreditCardPayment::PAYMETHOD_IDENTIFIER => CreditCardPayment::class,
-            SepaPayment::PAYMETHOD_IDENTIFIER       => SepaPayment::class,
-            SofortPayment::PAYMETHOD_IDENTIFIER     => SofortPayment::class,
+            PaypalPayment::PAYMETHOD_IDENTIFIER         => PaypalPayment::class,
+            CreditCardPayment::PAYMETHOD_IDENTIFIER     => CreditCardPayment::class,
+            RatepayInvoicePayment::PAYMETHOD_IDENTIFIER => RatepayInvoicePayment::class,
+            SepaPayment::PAYMETHOD_IDENTIFIER           => SepaPayment::class,
+            SofortPayment::PAYMETHOD_IDENTIFIER         => SofortPayment::class,
         ];
     }
 }

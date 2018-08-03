@@ -38,7 +38,7 @@ namespace WirecardElasticEngine\Components\Data;
  *
  * @since   1.0.0
  */
-class SofortPaymentConfig extends PaymentConfig
+class RatepayInvoicePaymentConfig extends PaymentConfig
 {
     /**
      * @var float minAmount

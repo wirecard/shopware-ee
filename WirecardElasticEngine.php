@@ -242,8 +242,16 @@ class WirecardElasticEngine extends Plugin
     private function changeDefaultConfigValues()
     {
         $em = $this->container->get('models');
+        $acceptedCurrencies = $em->getRepository(Element::class)->findOneBy([
+            'name' => 'wirecardElasticEngineRatepayInvoiceAcceptedCurrencies'
+        ]);
+        if ($acceptedCurrencies) {
+            $acceptedCurrencies->setValue([1]);
+            $em->flush();
+        }
+
         $shippingCountry = $em->getRepository(Element::class)->findOneBy([
-            'name' => 'wirecardElasticEngineRatepayInvoiceShippingCountry'
+            'name' => 'wirecardElasticEngineRatepayInvoiceShippingCountries'
         ]);
         if ($shippingCountry) {
             $shippingCountry->setValue([2,23,26]);
@@ -251,7 +259,7 @@ class WirecardElasticEngine extends Plugin
         }
 
         $billingCountry = $em->getRepository(Element::class)->findOneBy([
-            'name' => 'wirecardElasticEngineRatepayInvoiceBillingCountry'
+            'name' => 'wirecardElasticEngineRatepayInvoiceBillingCountries'
         ]);
         if ($billingCountry) {
             $billingCountry->setValue([2,23,26]);
