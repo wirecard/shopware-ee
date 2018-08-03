@@ -345,7 +345,7 @@ function (button) {
             </description>
         </element>
         <element type="combo" scope="shop">
-            <name>wirecardElasticEngineRatepayInvoiceCurrency</name>
+            <name>wirecardElasticEngineRatepayInvoiceAcceptedCurrencies</name>
             <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Erlaubte Währungen</label>
             <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Allowed currencies</label>
             <value>Euro</value>
@@ -363,7 +363,7 @@ function (button) {
             </options>
         </element>
         <element type="combo" scope="shop">
-            <name>wirecardElasticEngineRatepayInvoiceShippingCountry</name>
+            <name>wirecardElasticEngineRatepayInvoiceShippingCountries</name>
             <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Erlaubte Lieferländer</label>
             <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Allowed shipping countries</label>
             <value>2</value>
@@ -383,7 +383,7 @@ function (button) {
             </options>
         </element>
         <element type="combo" scope="shop">
-            <name>wirecardElasticEngineRatepayInvoiceBillingCountry</name>
+            <name>wirecardElasticEngineRatepayInvoiceBillingCountries</name>
             <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Erlaubte Rechnungsländer</label>
             <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Allowed billing countries</label>
             <value>2</value>
@@ -414,6 +414,20 @@ function (button) {
             <description lang="en">
                 If activated, payment method Guaranteed Invoice will only be displayed if
                 Billing/Shipping address are identical
+            </description>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceFraudPrevention</name>
+            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Zusätzliche Informationen mitsenden</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Send additional information</label>
+            <value>true</value>
+            <description lang="de">
+                Zusätzliche Informationen werden für Betrugsschutz gesendet. In diesen Daten sind
+                Rechnungs- / Lieferadresse, Warenkorb und Deskriptor inkludiert.
+            </description>
+            <description lang="en">
+                Additional data will be sent for the purpose of fraud protection. This additional
+                data includes billing/shipping address, shopping basket and descriptor.
             </description>
         </element>
         <element type="button" scope="shop">
