@@ -370,17 +370,64 @@ function (button) {
             <description lang="de">
                 Garantierter Kauf auf Rechnung wird dem Endkunden beim Checkout nur
                 angezeigt, wenn die Lieferadresse einem der hier gewählten Länder entspricht.
-                Voreingestelle Auswahl: Österreich
-                und Deutschland.
+                Voreingestelle Auswahl: Österreich, Schweiz und Deutschland.
             </description>
             <description lang="en">
                 Payment method Guaranteed Invoice will only be displayed if consumers
                 shipping country equals one of these chosen countries.
-                Predefined the following countries are allowed: AT, DE.
+                Predefined the following countries are allowed: AT, CH, DE.
             </description>
             <store>Shopware.apps.Base.store.Country</store>
             <options>
                 <multiSelect>true</multiSelect>
+            </options>
+        </element>
+        <element type="combo" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceBillingCountry</name>
+            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Erlaubte Rechnungsländer</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Allowed billing countries</label>
+            <value>2</value>
+            <description lang="de">
+                Garantierter Kauf auf Rechnung wird dem Endkunden beim Checkout nur
+                angezeigt, wenn die Rechnungsadresse einem der hier gewählten Länder entspricht.
+                Voreingestelle Auswahl: Österreich, Schweiz und Deutschland.
+            </description>
+            <description lang="en">
+                Payment method Guaranteed Invoice will only be displayed if consumers
+                billing country equals one of these chosen countries.
+                Predefined the following countries are allowed: AT, CH, DE.
+            </description>
+            <store>Shopware.apps.Base.store.Country</store>
+            <options>
+                <multiSelect>true</multiSelect>
+            </options>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceDifferentBillingShipping</name>
+            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Unterschiedliche Rechnungs- und Versandadresse</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Different billing and shipping address</label>
+            <value>false</value>
+            <description lang="de">
+                Bei Aktivierung wird Garantierter Kauf auf Rechnung nur im Zahlungsprozess
+                angezeigt, wenn Rechnungs- und Lieferadresse übereinstimmen.
+            </description>
+            <description lang="en">
+                If activated, payment method Guaranteed Invoice will only be displayed if
+                Billing/Shipping address are identical
+            </description>
+        </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceTestApi</name>
+            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Konfiguration testen</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Test configuration</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    wirecardeeTestPaymentCredentials(button, 'RatepayInvoice', 'Wirecard Guaranteed Invoice by Wirecard / Ratepay Test');
+}
+                    ]]>
+                </handler>
             </options>
         </element>
         <!-- Ratepay Invoice End -->

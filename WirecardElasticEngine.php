@@ -36,6 +36,7 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once(__DIR__ . '/vendor/autoload.php');
 }
 
+use Shopware\Models\Config\Element;
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\ActivateContext;
 use Shopware\Components\Plugin\Context\DeactivateContext;
@@ -68,6 +69,8 @@ class WirecardElasticEngine extends Plugin
     {
         $this->registerPayments($context->getPlugin());
         $this->updateDatabase();
+
+        $this->changeDefaultConfigValues();
     }
 
     /**
@@ -231,6 +234,29 @@ class WirecardElasticEngine extends Plugin
             $this->container->get('events')
         );
         return $paymentFactory->getSupportedPayments();
+    }
+
+    /**
+     * Changes default values of specific config options
+     */
+    private function changeDefaultConfigValues()
+    {
+        $em = $this->container->get('models');
+        $shippingCountry = $em->getRepository(Element::class)->findOneBy([
+            'name' => 'wirecardElasticEngineRatepayInvoiceShippingCountry'
+        ]);
+        if ($shippingCountry) {
+            $shippingCountry->setValue([2,23,26]);
+            $em->flush();
+        }
+
+        $billingCountry = $em->getRepository(Element::class)->findOneBy([
+            'name' => 'wirecardElasticEngineRatepayInvoiceBillingCountry'
+        ]);
+        if ($billingCountry) {
+            $billingCountry->setValue([2,23,26]);
+            $em->flush();
+        }
     }
 
     /**
