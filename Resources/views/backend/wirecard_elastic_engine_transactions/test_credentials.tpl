@@ -43,6 +43,17 @@
                 values[el.elementName] = el.getSubmitValue();
             });
 
+            var server = values['wirecardElasticEngine' + method + 'Server'];
+            if (!new RegExp("{literal}^https?://([^/]+?\.[a-zA-Z]{2,4})/?${/literal}", "gm").test(server)) {
+                Shopware.Notification.createStickyGrowlMessage({
+                    title: '{s name="TestCredentialsFailed" namespace="backend/wirecard_elastic_engine/common"}{/s}',
+                    text: '<span style="color:red;font-weight:bold;">{s name="InvalidTestCredentialsURL" namespace="backend/wirecard_elastic_engine/common"}{/s}</span>',
+                    width: 440,
+                    log: false
+                });
+                return;
+            }
+
             Ext.Ajax.request({
                 url: document.location.pathname + 'wirecardElasticEngineTransactions/testCredentials',
                 params: values,

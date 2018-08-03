@@ -35,22 +35,23 @@ use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
-use Wirecard\PaymentSdk\Entity\Amount;
+use Wirecard\PaymentSdk\Entity\IdealBic;
 use Wirecard\PaymentSdk\Entity\Redirect;
+use Wirecard\PaymentSdk\Transaction\IdealTransaction;
 use Wirecard\PaymentSdk\Transaction\Operation;
-use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
+use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\PaymentConfig;
+use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
-use WirecardElasticEngine\Components\Payments\PaypalPayment;
-use WirecardElasticEngine\Exception\UnknownTransactionTypeException;
+use WirecardElasticEngine\Components\Payments\IdealPayment;
 use WirecardElasticEngine\Tests\Unit\PaymentTestCase;
 use WirecardElasticEngine\WirecardElasticEngine;
 
-class PaypalPaymentTest extends PaymentTestCase
+class IdealPaymentTest extends PaymentTestCase
 {
-    /** @var PaypalPayment */
+    /** @var IdealPayment */
     private $payment;
 
     public function setUp()
@@ -58,11 +59,13 @@ class PaypalPaymentTest extends PaymentTestCase
         parent::setUp();
 
         $this->config->method('getByNamespace')->willReturnMap([
-            [WirecardElasticEngine::NAME, 'wirecardElasticEnginePaypalMerchantId', null, 'MAID'],
-            [WirecardElasticEngine::NAME, 'wirecardElasticEnginePaypalSecret', null, 'Secret'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineIdealMerchantId', null, 'MAID'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineIdealSecret', null, 'Secret'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineSepaBackendMerchantId', null, 'CT-MAID'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineSepaBackendSecret', null, 'CT-Secret'],
         ]);
 
-        $this->payment = new PaypalPayment(
+        $this->payment = new IdealPayment(
             $this->em,
             $this->config,
             $this->installer,
@@ -73,22 +76,48 @@ class PaypalPaymentTest extends PaymentTestCase
 
     public function testGetPaymentOptions()
     {
-        $this->assertEquals('WirecardPayPal', $this->payment->getLabel());
-        $this->assertEquals('wirecard_elastic_engine_paypal', $this->payment->getName());
-        $this->assertEquals(5, $this->payment->getPosition());
+        $this->assertEquals('WirecardiDEAL', $this->payment->getLabel());
+        $this->assertEquals('wirecard_elastic_engine_ideal', $this->payment->getName());
+        $this->assertEquals(3, $this->payment->getPosition());
         $this->assertPaymentOptions(
             $this->payment->getPaymentOptions(),
-            'wirecard_elastic_engine_paypal',
-            'WirecardPayPal',
-            5
+            'wirecard_elastic_engine_ideal',
+            'WirecardiDEAL',
+            3
         );
     }
 
     public function testGetTransaction()
     {
         $transaction = $this->payment->getTransaction();
-        $this->assertInstanceOf(PayPalTransaction::class, $transaction);
+        $this->assertInstanceOf(IdealTransaction::class, $transaction);
         $this->assertSame($transaction, $this->payment->getTransaction());
+    }
+
+    public function testGetBackendTransaction()
+    {
+        $transaction = $this->payment->getBackendTransaction(Operation::REFUND, IdealTransaction::NAME);
+        $this->assertInstanceOf(IdealTransaction::class, $transaction);
+        $this->assertNotSame($transaction, $this->payment->getTransaction());
+        $this->assertNotSame($transaction, $this->payment->getBackendTransaction(
+            Operation::REFUND,
+            IdealTransaction::NAME
+        ));
+
+        $transaction = $this->payment->getBackendTransaction(Operation::CREDIT, IdealTransaction::NAME);
+        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
+
+        $transaction = $this->payment->getBackendTransaction(Operation::CANCEL, IdealTransaction::NAME);
+        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
+
+        $transaction = $this->payment->getBackendTransaction(Operation::REFUND, SepaCreditTransferTransaction::NAME);
+        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
+
+        $transaction = $this->payment->getBackendTransaction(Operation::CREDIT, SepaCreditTransferTransaction::NAME);
+        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
+
+        $transaction = $this->payment->getBackendTransaction(Operation::CANCEL, SepaCreditTransferTransaction::NAME);
+        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
     }
 
     public function testGetPaymentConfig()
@@ -120,11 +149,17 @@ class PaypalPaymentTest extends PaymentTestCase
         $this->assertNull($config->getHttpUser());
         $this->assertNull($config->getHttpPassword());
 
-        $paymentMethodConfig = $config->get(PayPalTransaction::NAME);
-        $this->assertInstanceOf(PaymentMethodConfig::class, $paymentMethodConfig);
-        $this->assertEquals('MAID', $paymentMethodConfig->getMerchantAccountId());
-        $this->assertEquals('Secret', $paymentMethodConfig->getSecret());
-        $this->assertEquals(PayPalTransaction::NAME, $paymentMethodConfig->getPaymentMethodName());
+        $sofortConfig = $config->get(IdealTransaction::NAME);
+        $this->assertInstanceOf(PaymentMethodConfig::class, $sofortConfig);
+        $this->assertEquals('MAID', $sofortConfig->getMerchantAccountId());
+        $this->assertEquals('Secret', $sofortConfig->getSecret());
+        $this->assertEquals(IdealTransaction::NAME, $sofortConfig->getPaymentMethodName());
+
+        $sofortCreditTransferConfig = $config->get(SepaCreditTransferTransaction::NAME);
+        $this->assertInstanceOf(PaymentMethodConfig::class, $sofortCreditTransferConfig);
+        $this->assertEquals('CT-MAID', $sofortCreditTransferConfig->getMerchantAccountId());
+        $this->assertEquals('CT-Secret', $sofortCreditTransferConfig->getSecret());
+        $this->assertEquals(SepaCreditTransferTransaction::NAME, $sofortCreditTransferConfig->getPaymentMethodName());
         $this->assertEquals([
             'headers' => [
                 'shop-system-name'    => 'Shopware',
@@ -135,10 +170,9 @@ class PaypalPaymentTest extends PaymentTestCase
         ], $config->getShopHeader());
     }
 
-    public function testGetTransactionTypeException()
+    public function testGetTransactionTypePurchase()
     {
-        $this->expectException(UnknownTransactionTypeException::class);
-        $this->assertEquals('', $this->payment->getTransactionType());
+        $this->assertEquals('purchase', $this->payment->getTransactionType());
     }
 
     public function testGetTransactionType()
@@ -146,17 +180,13 @@ class PaypalPaymentTest extends PaymentTestCase
         /** @var \Shopware_Components_Config|\PHPUnit_Framework_MockObject_MockObject $config */
         $config = $this->createMock(\Shopware_Components_Config::class);
         $config->method('getByNamespace')->willReturnMap([
-            [WirecardElasticEngine::NAME, 'wirecardElasticEnginePaypalTransactionType', null, 'pay'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineIdealTransactionType', null, 'pay'],
         ]);
-        $payment = new PaypalPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
+        $payment = new IdealPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
         $this->assertEquals('purchase', $payment->getTransactionType());
 
-        $config = $this->createMock(\Shopware_Components_Config::class);
-        $config->method('getByNamespace')->willReturnMap([
-            [WirecardElasticEngine::NAME, 'wirecardElasticEnginePaypalTransactionType', null, 'reserve'],
-        ]);
-        $payment = new PaypalPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
-        $this->assertEquals('authorization', $payment->getTransactionType());
+        $payment = new IdealPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
+        $this->assertEquals('purchase', $payment->getTransactionType());
     }
 
     public function testProcessPayment()
@@ -164,8 +194,9 @@ class PaypalPaymentTest extends PaymentTestCase
         $this->assertInstanceOf(ProcessPaymentInterface::class, $this->payment);
 
         $orderSummary = $this->createMock(OrderSummary::class);
-        $orderSummary->method('getPaymentUniqueId')->willReturn('1532501234exxxf');
-        $orderSummary->method('getAmount')->willReturn(new Amount(50, 'EUR'));
+        $orderSummary->method('getAdditionalPaymentData')->willReturn([
+            'idealBank' => 'INGBNL2A',
+        ]);
         $transactionService = $this->createMock(TransactionService::class);
         $shop               = $this->createMock(Shop::class);
         $redirect           = $this->createMock(Redirect::class);
@@ -182,9 +213,17 @@ class PaypalPaymentTest extends PaymentTestCase
         ));
         $transaction = $this->payment->getTransaction();
         $transaction->setOperation(Operation::PAY);
-        $this->assertArraySubset([
-            'transaction-type' => 'debit',
-            'order-detail'     => '1532501234exxxf - 50.00 EUR',
-        ], $transaction->mappedProperties());
+        $this->assertNull($transaction->getOrderNumber());
+    }
+
+    public function testGetAdditionalViewAssignments()
+    {
+        $idealBic = new \ReflectionClass(IdealBic::class);
+
+        $this->assertInstanceOf(AdditionalViewAssignmentsInterface::class, $this->payment);
+        $this->assertEquals([
+            'method'     => 'wirecard_elastic_engine_ideal',
+            'idealBanks' => $idealBic->getConstants(),
+        ], $this->payment->getAdditionalViewAssignments());
     }
 }

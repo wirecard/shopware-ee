@@ -39,11 +39,12 @@ use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\Container;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
-use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
+use Wirecard\PaymentSdk\Transaction\IdealTransaction;
+use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use WirecardElasticEngine\Components\Data\PaymentConfig;
-use WirecardElasticEngine\Components\Payments\PaypalPayment;
+use WirecardElasticEngine\Components\Payments\IdealPayment;
 
-class PaypalPaymentTest extends TestCase
+class IdealPaymentTest extends TestCase
 {
     /** @var Container */
     private $container;
@@ -63,7 +64,7 @@ class PaypalPaymentTest extends TestCase
     /** @var \Enlight_Event_EventManager $config */
     private $eventManager;
 
-    /** @var PaypalPayment */
+    /** @var IdealPayment */
     protected $payment;
 
     public function setUp()
@@ -75,7 +76,7 @@ class PaypalPaymentTest extends TestCase
         $this->router       = $this->container->get('router');
         $this->eventManager = $this->container->get('events');
 
-        $this->payment = new PaypalPayment(
+        $this->payment = new IdealPayment(
             $this->em,
             $this->config,
             $this->installer,
@@ -86,21 +87,21 @@ class PaypalPaymentTest extends TestCase
 
     public function testGetPaymentOptions()
     {
-        $this->assertEquals('WirecardPayPal', $this->payment->getLabel());
-        $this->assertEquals('wirecard_elastic_engine_paypal', $this->payment->getName());
+        $this->assertEquals('WirecardiDEAL', $this->payment->getLabel());
+        $this->assertEquals('wirecard_elastic_engine_ideal', $this->payment->getName());
         $this->assertEquals([
-            'name'                  => 'wirecard_elastic_engine_paypal',
-            'description'           => 'WirecardPayPal',
+            'name'                  => 'wirecard_elastic_engine_ideal',
+            'description'           => 'WirecardiDEAL',
             'action'                => 'WirecardElasticEnginePayment',
             'active'                => 0,
-            'position'              => 5,
+            'position'              => 3,
             'additionalDescription' => '',
         ], $this->payment->getPaymentOptions());
     }
 
     public function testGetTransaction()
     {
-        $this->assertInstanceOf(PayPalTransaction::class, $this->payment->getTransaction());
+        $this->assertInstanceOf(IdealTransaction::class, $this->payment->getTransaction());
     }
 
     public function testGetPaymentConfig()
@@ -109,10 +110,13 @@ class PaypalPaymentTest extends TestCase
 
         $this->assertInstanceOf(PaymentConfig::class, $config);
         $this->assertEquals('https://api-test.wirecard.com', $config->getBaseUrl());
-        $this->assertEquals('70000-APITEST-AP', $config->getHttpUser());
-        $this->assertEquals('qD2wzQ_hrc!8', $config->getHttpPassword());
-        $this->assertEquals('2a0e9351-24ed-4110-9a1b-fd0fee6bec26', $config->getTransactionMAID());
+        $this->assertEquals('16390-testing', $config->getHttpUser());
+        $this->assertEquals('3!3013=D3fD8X7', $config->getHttpPassword());
+        $this->assertEquals('4aeccf39-0d47-47f6-a399-c05c1f2fc819', $config->getTransactionMAID());
         $this->assertEquals('dbc5a498-9a66-43b9-bf1d-a618dd399684', $config->getTransactionSecret());
+        $this->assertEquals('59a01668-693b-49f0-8a1f-f3c1ba025d45', $config->getBackendTransactionMAID());
+        $this->assertEquals('ecdf5990-0372-47cd-a55d-037dccfe9d25', $config->getBackendTransactionSecret());
+        $this->assertEquals('DE98ZZZ09999999999', $config->getBackendCreditorId());
         $this->assertEquals('pay', $config->getTransactionOperation());
     }
 
@@ -124,15 +128,23 @@ class PaypalPaymentTest extends TestCase
 
         $this->assertInstanceOf(Config::class, $config);
         $this->assertEquals('https://api-test.wirecard.com', $config->getBaseUrl());
-        $this->assertEquals('70000-APITEST-AP', $config->getHttpUser());
-        $this->assertEquals('qD2wzQ_hrc!8', $config->getHttpPassword());
-        $this->assertInstanceOf(PaymentMethodConfig::class, $config->get(PayPalTransaction::NAME));
+        $this->assertEquals('16390-testing', $config->getHttpUser());
+        $this->assertEquals('3!3013=D3fD8X7', $config->getHttpPassword());
+        $this->assertInstanceOf(PaymentMethodConfig::class, $config->get(IdealTransaction::NAME));
         $this->assertEquals(
-            '2a0e9351-24ed-4110-9a1b-fd0fee6bec26',
-            $config->get(PayPalTransaction::NAME)->getMerchantAccountId());
+            '4aeccf39-0d47-47f6-a399-c05c1f2fc819',
+            $config->get(IdealTransaction::NAME)->getMerchantAccountId());
         $this->assertEquals(
             'dbc5a498-9a66-43b9-bf1d-a618dd399684',
-            $config->get(PayPalTransaction::NAME)->getSecret()
+            $config->get(IdealTransaction::NAME)->getSecret()
+        );
+        $this->assertInstanceOf(PaymentMethodConfig::class, $config->get(SepaCreditTransferTransaction::NAME));
+        $this->assertEquals(
+            '59a01668-693b-49f0-8a1f-f3c1ba025d45',
+            $config->get(SepaCreditTransferTransaction::NAME)->getMerchantAccountId());
+        $this->assertEquals(
+            'ecdf5990-0372-47cd-a55d-037dccfe9d25',
+            $config->get(SepaCreditTransferTransaction::NAME)->getSecret()
         );
         $this->assertEquals([
             'headers' => [
