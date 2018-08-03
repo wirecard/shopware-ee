@@ -76,7 +76,7 @@ class PaypalPayment extends Payment implements ProcessPaymentInterface
      */
     public function getPosition()
     {
-        return 1;
+        return 5;
     }
 
     /**
