@@ -29,7 +29,7 @@
  * Please do not use the plugin if you do not agree to these terms of use!
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/config.xsd">
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.4/engine/Shopware/Components/Plugin/schema/config.xsd">
     <elements>
         <!-- General -->
         <element type="button" scope="shop">
@@ -265,7 +265,7 @@ function (button) {
                 <handler>
                     <![CDATA[
 function (button) {
-    window.open('https://raw.githubusercontent.com/wiki/wirecard/woocommerce-ee/img/creditcard-ssl-3d-new.png','_blank');
+    window.open('https://raw.githubusercontent.com/wiki/wirecard/shopware-ee/img/creditcard-ssl-3d-new.png','_blank');
 }
                     ]]>
                 </handler>
