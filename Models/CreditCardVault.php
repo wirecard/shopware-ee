@@ -70,9 +70,17 @@ class CreditCardVault extends ModelEntity
 
     /**
      * @var \DateTime
-     * @ORM\Column(name="last_used", type="string", nullable=false)
+     * @ORM\Column(name="last_used", type="datetime", nullable=false)
      */
     private $lastUsed;
+
+    /**
+     * @since 1.0.0
+     */
+    public function __construct()
+    {
+        $this->setLastUsed(new \DateTime());
+    }
 
     /**
      * @return int|null

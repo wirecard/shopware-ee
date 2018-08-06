@@ -45,6 +45,7 @@ use WirecardElasticEngine\Components\Data\CreditCardPaymentConfig;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessReturnInterface;
+use WirecardElasticEngine\Models\CreditCardVault;
 use WirecardElasticEngine\Models\Transaction;
 
 /**
@@ -52,7 +53,10 @@ use WirecardElasticEngine\Models\Transaction;
  *
  * @since   1.0.0
  */
-class CreditCardPayment extends Payment implements ProcessReturnInterface, ProcessPaymentInterface, AdditionalViewAssignmentsInterface
+class CreditCardPayment extends Payment implements
+    ProcessReturnInterface,
+    ProcessPaymentInterface,
+    AdditionalViewAssignmentsInterface
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_credit_card';
 
@@ -296,10 +300,26 @@ class CreditCardPayment extends Payment implements ProcessReturnInterface, Proce
         if ($this->getPaymentConfig()->isVaultEnabled()) {
             $additionalPaymentData = Shopware()->Session()->offsetGet('WirecardElasticEnginePaymentData');
             if ($additionalPaymentData['saveToken']) {
+                $userId = Shopware()->Session()->offsetGet('sUserId');
                 $tokenId = $params['token_id'];
                 $maskedAccountNumber = $params['masked_account_number'];
 
-                // FIXXXXME save token
+                $creditCardVault = $this->em->getRepository(CreditCardVault::class)->findOneBy([
+                    'userId' => $userId,
+                    'token'  => $tokenId,
+                ]);
+
+                if ($creditCardVault) {
+                    $creditCardVault->setLastUsed(new \DateTime());
+                } else {
+                    $creditCardVault = new CreditCardVault();
+                    $creditCardVault->setToken($tokenId);
+                    $creditCardVault->setMaskedAccountNumber($maskedAccountNumber);
+                    $creditCardVault->setUserId($userId);
+
+                    $this->em->persist($creditCardVault);
+                }
+                $this->em->flush();
             }
         }
 
@@ -322,7 +342,7 @@ class CreditCardPayment extends Payment implements ProcessReturnInterface, Proce
 
         return [
             'method'       => $this->getName(),
-            'vaultEnabled' => $this->isVaultEnabled(),
+            'vaultEnabled' => $this->getPaymentConfig()->isVaultEnabled(),
         ];
     }
 }
