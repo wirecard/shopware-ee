@@ -45,6 +45,7 @@ use Shopware\Components\Plugin\Context\UpdateContext;
 use Shopware\Models\Payment\Payment;
 use Shopware\Models\Plugin\Plugin as PluginModel;
 use WirecardElasticEngine\Components\Services\PaymentFactory;
+use WirecardElasticEngine\Models\CreditCardVault;
 use WirecardElasticEngine\Models\Transaction;
 use Doctrine\ORM\Tools\SchemaTool;
 
@@ -137,6 +138,7 @@ class WirecardElasticEngine extends Plugin
         $schemaTool->updateSchema(
             [
                 $entityManager->getClassMetadata(Transaction::class),
+                $entityManager->getClassMetadata(CreditCardVault::class),
             ],
             true
         );
