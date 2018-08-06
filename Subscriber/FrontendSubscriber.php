@@ -37,8 +37,12 @@ use Shopware\Components\Theme\LessDefinition;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
+use WirecardElasticEngine\Components\Payments\Contracts\DisplayRestrictionInterface;
 use WirecardElasticEngine\Components\Services\PaymentFactory;
 use WirecardElasticEngine\Components\Services\SessionManager;
+use WirecardElasticEngine\Exception\UnknownPaymentException;
+
+use WirecardElasticEngine\Components\Mapper\BasketMapper;
 
 /**
  * @package WirecardElasticEngine\Subscriber
@@ -98,8 +102,19 @@ class FrontendSubscriber implements SubscriberInterface
     {
         $payments = $args->getReturn();
 
-        foreach ($payments as $key => $payment) {
-            // TODO check payments to be shown
+        foreach ($payments as $key => $paymentData) {
+            try {
+                // TODO check payments to be shown
+                $payment = $this->paymentFactory->create($paymentData['name']);
+
+                if ($payment instanceof DisplayRestrictionInterface) {
+                    $basket = Shopware()->Session()->sOrderVariables['sBasket'];
+                    if (!$payment->checkDisplayRestrictions()) {
+                        unset($payments[$key]);
+                    }
+                }
+            } catch (UnknownPaymentException $e) {
+            }
         }
 
         $args->setReturn($payments);

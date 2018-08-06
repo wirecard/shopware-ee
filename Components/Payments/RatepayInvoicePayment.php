@@ -39,6 +39,7 @@ use Wirecard\PaymentSdk\Transaction\RatepayInvoiceTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\RatepayInvoicePaymentConfig;
+use WirecardElasticEngine\Components\Payments\Contracts\DisplayRestrictionInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 
 /**
@@ -46,7 +47,7 @@ use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
  *
  * @since   1.0.0
  */
-class RatepayInvoicePayment extends Payment implements ProcessPaymentInterface
+class RatepayInvoicePayment extends Payment implements DisplayRestrictionInterface, ProcessPaymentInterface
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_ratepay_invoice';
 
@@ -158,5 +159,13 @@ class RatepayInvoicePayment extends Payment implements ProcessPaymentInterface
         if (empty($accountHolderProperties['date_of_birth'])) {
             // TODO add date of birth
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function checkDisplayRestrictions()
+    {
+        return false;
     }
 }
