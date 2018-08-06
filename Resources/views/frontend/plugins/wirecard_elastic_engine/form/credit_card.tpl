@@ -32,14 +32,23 @@
 {block name="wirecard_elastic_engine_credit_card_form"}
     {if $wirecardElasticEngineViewAssignments.vaultEnabled}
         {if !empty($wirecardElasticEngineViewAssignments.savedCards)}
-            <select name="wirecardElasticEngine[saveToken]">
-                {$wirecardElasticEngineViewAssignments.savedCards[0]|print_r}
-                <option value="">Select card</option>
+            <p>
+                Todo: saved cards
+            </p>
+            <ul class="list--radio list--unstyled">
                 {foreach from=$wirecardElasticEngineViewAssignments.savedCards item='card'}
-                    {$card|print_r}
-                    <option value="{$card.token}">{$card.maskedAccountNumber}</option>
+                    <li class="block-group">
+                        <span class="column--radio">
+                            <input type="radio" name="wirecardElasticEngine[token]" id="wirecard--token-{$card.token}" value="{$card.token}" />
+                        </span>
+                        <span class="column--label">
+                            <label for="wirecard--token-{$card.token}">
+                                {$card.maskedAccountNumber}
+                            </label>
+                        </span>
+                    </li>
                 {/foreach}
-            </select>
+            </ul>
         {/if}
         <ul class="list--checkbox list--unstyled">
             <li class="block-group">

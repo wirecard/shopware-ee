@@ -266,6 +266,31 @@ class CreditCardPayment extends Payment implements
         $transaction = $this->getTransaction();
         $transaction->setTermUrl($redirect->getSuccessUrl());
 
+        if ($this->getPaymentConfig()->isVaultEnabled()) {
+            $additionalPaymentData = $orderSummary->getAdditionalPaymentData();
+            $tokenId = $additionalPaymentData['token'];
+
+            if ($tokenId) {
+                $user = $orderSummary->getUserMapper()->getShopwareUser();
+                $userId = $user['additional']['user']['userID'];
+
+                $creditCardVault = $this->em->getRepository(CreditCardVault::class)->findOneBy([
+                    'userId' => $userId,
+                    'token'  => $tokenId,
+                ]);
+
+                if (!$creditCardVault) {
+                    // FIXXXME
+                    exit();
+                }
+
+                $creditCardVault->setLastUsed(new \DateTime());
+                $this->em->flush();
+                $transaction->setTokenId($tokenId);
+                return;
+            }
+        }
+
         $requestData = $transactionService->getCreditCardUiWithData(
             $transaction,
             $orderSummary->getPayment()->getTransactionType(),
