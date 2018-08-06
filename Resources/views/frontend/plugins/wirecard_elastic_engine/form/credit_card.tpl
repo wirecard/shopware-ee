@@ -31,6 +31,16 @@
 {namespace name="frontend/wirecard_elastic_engine/credit_card"}
 {block name="wirecard_elastic_engine_credit_card_form"}
     {if $wirecardElasticEngineViewAssignments.vaultEnabled}
+        {if !empty($wirecardElasticEngineViewAssignments.savedCards)}
+            <select name="wirecardElasticEngine[saveToken]">
+                {$wirecardElasticEngineViewAssignments.savedCards[0]|print_r}
+                <option value="">Select card</option>
+                {foreach from=$wirecardElasticEngineViewAssignments.savedCards item='card'}
+                    {$card|print_r}
+                    <option value="{$card.token}">{$card.maskedAccountNumber}</option>
+                {/foreach}
+            </select>
+        {/if}
         <ul class="list--checkbox list--unstyled">
             <li class="block-group">
                 <span class="column--checkbox">

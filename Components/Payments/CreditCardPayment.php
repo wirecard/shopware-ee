@@ -297,6 +297,8 @@ class CreditCardPayment extends Payment implements
         \Enlight_Controller_Request_Request $request
     ) {
         $params = $request->getParams();
+
+        // FIXXXME use of Shopware()->Session()
         if ($this->getPaymentConfig()->isVaultEnabled()) {
             $additionalPaymentData = Shopware()->Session()->offsetGet('WirecardElasticEnginePaymentData');
             if ($additionalPaymentData['saveToken']) {
@@ -340,9 +342,24 @@ class CreditCardPayment extends Payment implements
     {
         $paymentConfig = $this->getPaymentConfig();
 
-        return [
+        $formData = [
             'method'       => $this->getName(),
             'vaultEnabled' => $this->getPaymentConfig()->isVaultEnabled(),
         ];
+        // FIXXXME use of Shopware()->Session()
+        if ($this->getPaymentConfig()->isVaultEnabled()) {
+            $userId = Shopware()->Session()->offsetGet('sUserId');
+            $builder = $this->em->createQueryBuilder();
+            $builder->select('ccv.token, ccv.maskedAccountNumber')
+                ->from(CreditCardVault::class, 'ccv')
+                ->where('ccv.userId = :userId')
+                ->setParameter('userId', $userId)
+                ->orderBy('ccv.lastUsed', 'DESC');
+            $savedCards = $builder->getQuery()->getArrayResult();
+
+            $formData['savedCards'] = $savedCards;
+        }
+
+        return $formData;
     }
 }
