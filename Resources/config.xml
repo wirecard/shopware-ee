@@ -271,6 +271,18 @@ function (button) {
                 </handler>
             </options>
         </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineCreditCardEnableVault</name>
+            <label lang="de">[Kreditkarte] One-click-checkout aktivieren</label>
+            <label lang="en">[Credit Card] Enable Recurring Payment</label>
+            <value>false</value>
+            <description lang="de">
+                Kreditkarten können gespeichert und später wieder verwendet werden.
+            </description>
+            <description lang="en">
+                Credit Cards can be saved and used for later purpose without
+            </description>
+        </element>
         <!-- Credit Card End -->
         <!-- iDEAL -->
         <element type="text" scope="shop">

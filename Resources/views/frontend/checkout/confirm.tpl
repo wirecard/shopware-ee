@@ -51,6 +51,17 @@
                     {include file="frontend/plugins/wirecard_elastic_engine/form/ideal.tpl"}
                 </div>
             </div>
+        {elseif $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_credit_card'}
+            {if $wirecardElasticEngineViewAssignments.vaultEnabled}
+                <div class="panel has--border wirecardee--additional-form-fields">
+                    <div class="panel--title primary is--underline">
+                        TODO: Title
+                    </div>
+                    <div class="panel--body is--wide">
+                        {include file="frontend/plugins/wirecard_elastic_engine/form/credit_card.tpl"}
+                </div>
+                </div>
+            {/if}
         {/if}
     {/if}
 

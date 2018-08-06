@@ -71,6 +71,11 @@ class CreditCardPaymentConfig extends PaymentConfig
     protected $sslMaxLimitCurrency;
 
     /**
+     * @var bool
+     */
+    protected $vaultEnabled;
+
+    /**
      * @return string If "null", ThreeD credentials are disabled
      *
      * @since 1.0.0
@@ -188,6 +193,22 @@ class CreditCardPaymentConfig extends PaymentConfig
     public function setSslMaxLimitCurrency($sslMaxLimitCurrency)
     {
         $this->sslMaxLimitCurrency = $sslMaxLimitCurrency;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isVaultEnabled()
+    {
+        return $this->vaultEnabled;
+    }
+
+    /**
+     * @param null
+     */
+    public function setVaultEnabled($vaultEnabled)
+    {
+        $this->vaultEnabled = $vaultEnabled;
     }
 
     /**

@@ -42,6 +42,7 @@ use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Actions\ViewAction;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\CreditCardPaymentConfig;
+use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessReturnInterface;
 use WirecardElasticEngine\Models\Transaction;
@@ -51,7 +52,7 @@ use WirecardElasticEngine\Models\Transaction;
  *
  * @since   1.0.0
  */
-class CreditCardPayment extends Payment implements ProcessReturnInterface, ProcessPaymentInterface
+class CreditCardPayment extends Payment implements ProcessReturnInterface, ProcessPaymentInterface, AdditionalViewAssignmentsInterface
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_credit_card';
 
@@ -242,6 +243,8 @@ class CreditCardPayment extends Payment implements ProcessReturnInterface, Proce
 
         $paymentConfig->setFraudPrevention($this->getPluginConfig('CreditCardFraudPrevention'));
 
+        $paymentConfig->setVaultEnabled($this->getPluginConfig('CreditCardEnableVault'));
+
         return $paymentConfig;
     }
 
@@ -290,6 +293,16 @@ class CreditCardPayment extends Payment implements ProcessReturnInterface, Proce
         \Enlight_Controller_Request_Request $request
     ) {
         $params = $request->getParams();
+        if ($this->getPaymentConfig()->isVaultEnabled()) {
+            $additionalPaymentData = Shopware()->Session()->offsetGet('WirecardElasticEnginePaymentData');
+            if ($additionalPaymentData['saveToken']) {
+                $tokenId = $params['token_id'];
+                $maskedAccountNumber = $params['masked_account_number'];
+
+                // FIXXXXME save token
+            }
+        }
+
         if (! empty($params['jsresponse'])) {
             return $transactionService->processJsResponse($request->getParams(), $this->router->assemble([
                 'action' => 'return',
@@ -298,5 +311,18 @@ class CreditCardPayment extends Payment implements ProcessReturnInterface, Proce
         }
 
         return null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getAdditionalViewAssignments()
+    {
+        $paymentConfig = $this->getPaymentConfig();
+
+        return [
+            'method'       => $this->getName(),
+            'vaultEnabled' => $this->isVaultEnabled(),
+        ];
     }
 }
