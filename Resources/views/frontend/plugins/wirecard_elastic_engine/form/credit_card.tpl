@@ -32,16 +32,26 @@
 {block name="wirecard_elastic_engine_credit_card_form"}
     {if $wirecardElasticEngineViewAssignments.vaultEnabled}
         {if !empty($wirecardElasticEngineViewAssignments.savedCards)}
-            <p>
-                Todo: saved cards
+            <p class="title">
+                {s name="UseSavedCard"}{/s}
             </p>
             <ul class="list--radio list--unstyled">
+                <li class="block-group">
+                    <span class="block column--radio">
+                        <input type="radio" name="wirecardElasticEngine[token]" id="wirecard--token-no-card" value="" checked="checked" />
+                    </span>
+                    <span class="block column--label">
+                        <label for="wirecard--token-no-card">
+                            {s name="NewCard"}{/s}
+                        </label>
+                    </span>
+                </li>
                 {foreach from=$wirecardElasticEngineViewAssignments.savedCards item='card'}
                     <li class="block-group">
-                        <span class="column--radio">
+                        <span class="block column--radio">
                             <input type="radio" name="wirecardElasticEngine[token]" id="wirecard--token-{$card.token}" value="{$card.token}" />
                         </span>
-                        <span class="column--label">
+                        <span class="block column--label">
                             <label for="wirecard--token-{$card.token}">
                                 {$card.maskedAccountNumber}
                             </label>
@@ -50,12 +60,15 @@
                 {/foreach}
             </ul>
         {/if}
+        <p class="title">
+            {s name="NewCard"}{/s}
+        </p>
         <ul class="list--checkbox list--unstyled">
             <li class="block-group">
-                <span class="column--checkbox">
+                <span class="block column--checkbox">
                     <input id="wirecard--save-token" type="checkbox" name="wirecardElasticEngine[saveToken]" value="true" />
                 </span>
-                <span class="column--label">
+                <span class="block column--label">
                     <label for="wirecard--save-token">{s name="SaveToken"}{/s}</label>
                 </span>
             </li>
