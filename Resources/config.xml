@@ -283,6 +283,18 @@ function (button) {
                 Credit Cards can be saved and used for later purpose without
             </description>
         </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineCreditCardAllowAddressChanges</name>
+            <label lang="de">[Kreditkarte] Adressänderungen zulassen</label>
+            <label lang="en">[Credit Card] Allow address changes</label>
+            <value>false</value>
+            <description lang="de">
+                One-click-checkout Zahlungen bei Adressänderung zulassen.
+            </description>
+            <description lang="en">
+                Allow address changes on recurring payment.
+            </description>
+        </element>
         <!-- Credit Card End -->
         <!-- iDEAL -->
         <element type="text" scope="shop">

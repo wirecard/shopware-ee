@@ -248,6 +248,7 @@ class CreditCardPayment extends Payment implements
         $paymentConfig->setFraudPrevention($this->getPluginConfig('CreditCardFraudPrevention'));
 
         $paymentConfig->setVaultEnabled($this->getPluginConfig('CreditCardEnableVault'));
+        $paymentConfig->setAllowAddressChanges($this->getPluginConfig('CreditCardAllowAddressChanges'));
 
         return $paymentConfig;
     }
@@ -284,8 +285,14 @@ class CreditCardPayment extends Payment implements
                     exit();
                 }
 
+                $oldBillingAddress = $creditCardVault->getLastBillingAddress();
+                $oldShippingAddress = $creditCardVault->getLastShippingAddress();
                 $billingAddress = $orderSummary->getUserMapper()->getBillingAddress();
                 $shippingAddress = $orderSummary->getUserMapper()->getShippingAddress();
+
+                if (! $this->compareAddresses($oldBillingAddress, $billingAddress)) {
+                    // TODO
+                }
 
                 $creditCardVault->setLastUsed(new \DateTime());
                 $creditCardVault->setLastBillingAddress($billingAddress);
@@ -318,6 +325,28 @@ class CreditCardPayment extends Payment implements
                 'method' => CreditCardPayment::PAYMETHOD_IDENTIFIER,
             ]),
         ]);
+    }
+
+    /**
+     */
+    private function compareAddresses($oldAddress, $newAddress)
+    {
+        $compareableKeys = [
+            "firstname",
+            "lastname",
+            "street",
+            "zipcode",
+            "city",
+            "countryId",
+            "stateId",
+        ];
+
+        foreach ($compareableKeys as $key) {
+            if($oldAddress[$key] !== $newAddress[$key])
+                return false;
+        }
+
+        return true;
     }
 
     /**

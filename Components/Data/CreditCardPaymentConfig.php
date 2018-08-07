@@ -76,6 +76,11 @@ class CreditCardPaymentConfig extends PaymentConfig
     protected $vaultEnabled;
 
     /**
+     * @var bool
+     */
+    protected $allowAddressChanges;
+
+    /**
      * @return string If "null", ThreeD credentials are disabled
      *
      * @since 1.0.0
@@ -204,11 +209,27 @@ class CreditCardPaymentConfig extends PaymentConfig
     }
 
     /**
-     * @param null
+     * @param bool $vaultEnabled
      */
     public function setVaultEnabled($vaultEnabled)
     {
         $this->vaultEnabled = $vaultEnabled;
+    }
+
+    /**
+     * @return bool
+     */
+    public function allowAddressChanges()
+    {
+        return $this->allowAddressChanges;
+    }
+
+    /**
+     * @param bool $allowAddressChanges
+     */
+    public function setAllowAddressChanges($allowAddressChanges)
+    {
+        $this->allowAddressChanges = $allowAddressChanges;
     }
 
     /**
@@ -224,6 +245,8 @@ class CreditCardPaymentConfig extends PaymentConfig
                 'threeDMinLimitCurrency' => $this->getThreeDMinLimitCurrency(),
                 'sslMaxLimit'            => $this->getSslMaxLimit(),
                 'sslMaxLimitCurrency'    => $this->getSslMaxLimitCurrency(),
+                'vaultEnabled'           => $this->isVaultEnabled(),
+                'allowAddressChanges'    => $this->allowAddressChanges(),
             ]
         );
     }
