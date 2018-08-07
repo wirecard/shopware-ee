@@ -55,7 +55,7 @@
             {if $wirecardElasticEngineViewAssignments.vaultEnabled}
                 <div class="panel has--border wirecardee--additional-form-fields">
                     <div class="panel--title primary is--underline">
-                        TODO: Title
+                        {s name="CreditCardVaultFormHeader" namespace="frontend/wirecard_elastic_engine/credit_card"}{/s}
                     </div>
                     <div class="panel--body is--wide">
                         {include file="frontend/plugins/wirecard_elastic_engine/form/credit_card.tpl"}

@@ -35,11 +35,22 @@
     }
     .list--radio {
         .unitize-margin(0, 0, 21, 0);
+        .block-group {
+            border-bottom: 1px solid @border-color;
+            .unitize-padding(15, 0, 10);
+        }
         .column--radio {
             width: 10%;
         }
         .column--label {
-            width: 90%;
+            width: 70%;
+        }
+        .column--button {
+            width: 20%;
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
         }
     }
     .title {
