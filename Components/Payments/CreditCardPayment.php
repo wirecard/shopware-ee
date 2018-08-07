@@ -284,8 +284,14 @@ class CreditCardPayment extends Payment implements
                     exit();
                 }
 
+                $billingAddress = $orderSummary->getUserMapper()->getBillingAddress();
+                $shippingAddress = $orderSummary->getUserMapper()->getShippingAddress();
+
                 $creditCardVault->setLastUsed(new \DateTime());
+                $creditCardVault->setLastBillingAddress($billingAddress);
+                $creditCardVault->setLastShippingAddress($shippingAddress);
                 $this->em->flush();
+
                 $transaction->setTokenId($tokenId);
                 return;
             }
@@ -330,6 +336,8 @@ class CreditCardPayment extends Payment implements
                 $userId = Shopware()->Session()->offsetGet('sUserId');
                 $tokenId = $params['token_id'];
                 $maskedAccountNumber = $params['masked_account_number'];
+                $billingAddress = Shopware()->Session()->sOrderVariables['sUserData']['billingaddress'];
+                $shippingAddress = Shopware()->Session()->sOrderVariables['sUserData']['shippingaddress'];
 
                 $creditCardVault = $this->em->getRepository(CreditCardVault::class)->findOneBy([
                     'userId' => $userId,
@@ -346,6 +354,8 @@ class CreditCardPayment extends Payment implements
 
                     $this->em->persist($creditCardVault);
                 }
+                $creditCardVault->setLastBillingAddress($billingAddress);
+                $creditCardVault->setLastShippingAddress($shippingAddress);
                 $this->em->flush();
             }
         }

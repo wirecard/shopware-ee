@@ -75,6 +75,18 @@ class CreditCardVault extends ModelEntity
     private $lastUsed;
 
     /**
+     * @var array
+     * @ORM\Column(name="last_billing_address", type="array", nullable=false)
+     */
+    private $lastBillingAddress;
+
+    /**
+     * @var array
+     * @ORM\Column(name="last_shipping_address", type="array", nullable=false)
+     */
+    private $lastShippingAddress;
+
+    /**
      * @since 1.0.0
      */
     public function __construct()
@@ -177,6 +189,46 @@ class CreditCardVault extends ModelEntity
      *
      * @since 1.0.0
      */
+    public function getLastBillingAddress()
+    {
+        return $this->lastBillingAddress;
+    }
+
+    /**
+     * @param array $lastBillingAddress
+     *
+     * @since 1.0.0
+     */
+    public function setLastBillingAddress(array $lastBillingAddress)
+    {
+        $this->lastBillingAddress = $lastBillingAddress;
+    }
+
+    /**
+     * @return array
+     *
+     * @since 1.0.0
+     */
+    public function getLastShippingAddress()
+    {
+        return $this->lastShippingAddress;
+    }
+
+    /**
+     * @param array $lastShippingAddress
+     *
+     * @since 1.0.0
+     */
+    public function setLastShippingAddress(array $lastShippingAddress)
+    {
+        $this->lastShippingAddress = $lastShippingAddress;
+    }
+
+    /**
+     * @return array
+     *
+     * @since 1.0.0
+     */
     public function toArray()
     {
         return [
@@ -185,6 +237,8 @@ class CreditCardVault extends ModelEntity
             'token'               => $this->getToken(),
             'maskedAccountNumber' => $this->getMaskedAccountNumber(),
             'lastUsed'            => $this->getLastUsed(),
+            'lastBillingAddress'  => $this->getLastBillingAddress(),
+            'lastShippingAddress' => $this->getLastShippingAddress(),
         ];
     }
 }
