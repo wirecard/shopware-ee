@@ -249,6 +249,7 @@ class CreditCardPayment extends Payment implements
 
         $paymentConfig->setVaultEnabled($this->getPluginConfig('CreditCardEnableVault'));
         $paymentConfig->setAllowAddressChanges($this->getPluginConfig('CreditCardAllowAddressChanges'));
+        $paymentConfig->setThreeDUsageOnTokens($this->getPluginConfig('CreditCardThreeDUsageOnTokens'));
 
         return $paymentConfig;
     }
@@ -285,12 +286,20 @@ class CreditCardPayment extends Payment implements
                     exit();
                 }
 
+                if (! $this->getPaymentConfig()->useThreeDOnTokens()) {
+                    $transaction->setThreeD(false);
+                }
+
                 $oldBillingAddress = $creditCardVault->getLastBillingAddress();
                 $oldShippingAddress = $creditCardVault->getLastShippingAddress();
                 $billingAddress = $orderSummary->getUserMapper()->getBillingAddress();
                 $shippingAddress = $orderSummary->getUserMapper()->getShippingAddress();
 
                 if (! $this->compareAddresses($oldBillingAddress, $billingAddress)) {
+                    // TODO
+                }
+
+                if (! $this->compareAddresses($oldShippingAddress, $shippingAddress)) {
                     // TODO
                 }
 
@@ -367,6 +376,8 @@ class CreditCardPayment extends Payment implements
                 $maskedAccountNumber = $params['masked_account_number'];
                 $billingAddress = Shopware()->Session()->sOrderVariables['sUserData']['billingaddress'];
                 $shippingAddress = Shopware()->Session()->sOrderVariables['sUserData']['shippingaddress'];
+                $firstName = $params['first_name'];
+                $lastName = $params['last_name'];
 
                 $creditCardVault = $this->em->getRepository(CreditCardVault::class)->findOneBy([
                     'userId' => $userId,

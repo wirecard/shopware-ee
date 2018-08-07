@@ -295,6 +295,18 @@ function (button) {
                 Allow address changes on recurring payment.
             </description>
         </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineCreditCardThreeDUsageOnTokens</name>
+            <label lang="de">[Kreditkarte] 3-D Secure aktivieren</label>
+            <label lang="en">[Credit Card] Enable 3-D Secure</label>
+            <value>true</value>
+            <description lang="de">
+                3-D Secure bei One-click-checkout Zahlungen aktivieren.
+            </description>
+            <description lang="en">
+                Enable 3-D secure on recurring payment.
+            </description>
+        </element>
         <!-- Credit Card End -->
         <!-- iDEAL -->
         <element type="text" scope="shop">
