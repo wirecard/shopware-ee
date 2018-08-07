@@ -87,6 +87,12 @@ class CreditCardVault extends ModelEntity
     private $lastShippingAddress;
 
     /**
+     * @var array
+     * @ORM\Column(name="additional_data", type="array", nullable=true)
+     */
+    private $additionalData;
+
+    /**
      * @since 1.0.0
      */
     public function __construct()
@@ -229,6 +235,26 @@ class CreditCardVault extends ModelEntity
      *
      * @since 1.0.0
      */
+    public function getAdditionalData()
+    {
+        return $this->additionalData;
+    }
+
+    /**
+     * @param array $additionalData
+     *
+     * @since 1.0.0
+     */
+    public function setAdditionalData(array $additionalData)
+    {
+        $this->additionalData = $additionalData;
+    }
+
+    /**
+     * @return array
+     *
+     * @since 1.0.0
+     */
     public function toArray()
     {
         return [
@@ -239,6 +265,7 @@ class CreditCardVault extends ModelEntity
             'lastUsed'            => $this->getLastUsed(),
             'lastBillingAddress'  => $this->getLastBillingAddress(),
             'lastShippingAddress' => $this->getLastShippingAddress(),
+            'additionalData'      => $this->getAdditionalData(),
         ];
     }
 }

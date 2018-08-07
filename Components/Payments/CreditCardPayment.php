@@ -391,6 +391,10 @@ class CreditCardPayment extends Payment implements
                     $creditCardVault->setToken($tokenId);
                     $creditCardVault->setMaskedAccountNumber($maskedAccountNumber);
                     $creditCardVault->setUserId($userId);
+                    $creditCardVault->setAdditionalData([
+                        'firstName' => $firstName,
+                        'lastName'  => $lastName,
+                    ]);
 
                     $this->em->persist($creditCardVault);
                 }
@@ -425,14 +429,20 @@ class CreditCardPayment extends Payment implements
         if ($this->getPaymentConfig()->isVaultEnabled()) {
             $userId = Shopware()->Session()->offsetGet('sUserId');
             $builder = $this->em->createQueryBuilder();
-            $builder->select('ccv.token, ccv.maskedAccountNumber')
+            $builder->select('ccv')
                 ->from(CreditCardVault::class, 'ccv')
                 ->where('ccv.userId = :userId')
                 ->setParameter('userId', $userId)
                 ->orderBy('ccv.lastUsed', 'DESC');
-            $savedCards = $builder->getQuery()->getArrayResult();
+            $savedCards = $builder->getQuery()->getResult();
 
-            $formData['savedCards'] = $savedCards;
+            foreach ($savedCards as $card) {
+                $formData['savedCards'][] = [
+                    'token'               => $card->getToken(),
+                    'maskedAccountNumber' => $card->getMaskedAccountNumber(),
+                    'additionalData'      => $card->getAdditionalData(),
+                ];
+            }
         }
 
         return $formData;

@@ -54,6 +54,9 @@
                         <span class="block column--label">
                             <label for="wirecard--token-{$card.token}">
                                 {$card.maskedAccountNumber}
+                                {if $card.additionalData}
+                                    - {$card.additionalData.firstName} {$card.additionalData.lastName}
+                                {/if}
                             </label>
                         </span>
                     </li>
