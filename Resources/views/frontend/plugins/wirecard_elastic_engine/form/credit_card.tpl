@@ -59,6 +59,11 @@
                                 {/if}
                             </label>
                         </span>
+                        <span class="block column--button">
+                            <button class="btn button--delete-token" type="button" data-token="{$card.token}">
+                                {s name="DeleteButton"}{/s}
+                            </button>
+                        </span>
                     </li>
                 {/foreach}
             </ul>

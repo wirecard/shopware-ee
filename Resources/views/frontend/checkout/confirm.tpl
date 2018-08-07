@@ -138,5 +138,18 @@
                 });
             });
         </script>
+    {elseif $wirecardElasticEngineViewAssignments and $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_credit_card'}
+        {block name="wirecard_elastic_engine_credit_card_form_javascript"}
+            <script type="text/javascript">
+                document.asyncReady(function() {
+                    var $ = jQuery,
+                        url = "{url controller="wirecardElasticEnginePayment" action="deleteCreditCardToken"}";
+
+                    $(".button--delete-token").click(function() {
+                        window.location.href = url + '/token/' + $(this).data('token');
+                    })
+                });
+            </script>
+        {/block}
     {/if}
 {/block}
