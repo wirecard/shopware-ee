@@ -31,6 +31,8 @@
 
 namespace WirecardElasticEngine\Components\Payments\Contracts;
 
+use WirecardElasticEngine\Components\Mapper\UserMapper;
+
 /**
  * @package WirecardElasticEngine\Components\Payments\Interfaces
  *
@@ -39,7 +41,9 @@ namespace WirecardElasticEngine\Components\Payments\Contracts;
 interface DisplayRestrictionInterface
 {
     /**
-     * return bool
+     * @params UserMapper $userMapper
+     *
+     * @return bool
      */
-    public function checkDisplayRestrictions();
+    public function checkDisplayRestrictions(UserMapper $userMapper);
 }

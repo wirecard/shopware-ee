@@ -39,6 +39,7 @@ use Wirecard\PaymentSdk\Transaction\RatepayInvoiceTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\RatepayInvoicePaymentConfig;
+use WirecardElasticEngine\Components\Mapper\UserMapper;
 use WirecardElasticEngine\Components\Payments\Contracts\DisplayRestrictionInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 
@@ -164,8 +165,31 @@ class RatepayInvoicePayment extends Payment implements DisplayRestrictionInterfa
     /**
      * {@inheritdoc}
      */
-    public function checkDisplayRestrictions()
+    public function checkDisplayRestrictions(UserMapper $userMapper)
     {
-        return false;
+        $acceptedBillingCountries = $this->getPaymentConfig()->getBillingCountries();
+        $acceptedShippingCountries = $this->getPaymentConfig()->getShippingCountries();
+        $billingAddress = $userMapper->getBillingAddress();
+        $shippingAddress = $userMapper->getShippingAddress();
+
+        // no digital goods
+
+        // shopping basket amount within the range
+
+        // age above 18
+
+        // currency accepted
+
+        // shipping country
+        if (! in_array($shippingAddress['countryId'], $acceptedShippingCountries)) {
+            return false;
+        }
+
+        // billing country
+        if (! in_array($billingAddress['countryId'], $acceptedBillingCountries)) {
+            return false;
+        }
+
+        return true;
     }
 }

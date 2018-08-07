@@ -36,6 +36,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Shopware\Components\Theme\LessDefinition;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
+use WirecardElasticEngine\Components\Mapper\UserMapper;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\DisplayRestrictionInterface;
 use WirecardElasticEngine\Components\Services\PaymentFactory;
@@ -101,15 +102,19 @@ class FrontendSubscriber implements SubscriberInterface
     public function onGetPayments(\Enlight_Event_EventArgs $args)
     {
         $payments = $args->getReturn();
+        $admin = $args->getSubject();
+
+        $userData = $admin->sGetUserData();
+
+        $userMapper = new UserMapper($userData, '', '');
 
         foreach ($payments as $key => $paymentData) {
             try {
                 // TODO check payments to be shown
                 $payment = $this->paymentFactory->create($paymentData['name']);
-
                 if ($payment instanceof DisplayRestrictionInterface) {
                     $basket = Shopware()->Session()->sOrderVariables['sBasket'];
-                    if (!$payment->checkDisplayRestrictions()) {
+                    if (!$payment->checkDisplayRestrictions($userMapper)) {
                         unset($payments[$key]);
                     }
                 }
