@@ -15,10 +15,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Shopware\Components\Theme\LessDefinition;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
+use WirecardElasticEngine\Components\Payments\Contracts\AdditionalPaymentInformationInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Services\PaymentFactory;
 use WirecardElasticEngine\Components\Services\SessionManager;
-use WirecardElasticEngine\Models\Transaction;
 
 /**
  * @package WirecardElasticEngine\Subscriber
@@ -27,11 +27,6 @@ use WirecardElasticEngine\Models\Transaction;
  */
 class FrontendSubscriber implements SubscriberInterface
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    private $em;
-
     /**
      * @var string
      */
@@ -48,9 +43,15 @@ class FrontendSubscriber implements SubscriberInterface
     private $paymentFactory;
 
     /**
+     * @var EntityManagerInterface
+     */
+    private $em;
+
+    /**
      * @param string                    $pluginDirectory
      * @param \Enlight_Template_Manager $templateManager
      * @param PaymentFactory            $paymentFactory
+     * @param EntityManagerInterface    $em
      *
      * @since 1.0.0
      */
@@ -118,8 +119,7 @@ class FrontendSubscriber implements SubscriberInterface
         $controller = $args->getSubject();
         $request    = $controller->Request();
         $view       = $controller->View();
-
-        $params = $request->getParams();
+        $params     = $request->getParams();
 
         // In case additional payment data is provided it is stored in the session and later passed to
         // the `OrderSummary` by the controller. Keep in mind that this additional payment data should be passed as
@@ -130,18 +130,15 @@ class FrontendSubscriber implements SubscriberInterface
             $sessionManager->storePaymentData($params['wirecardElasticEngine']);
         }
 
-        // Display payment status on finish page.
+        // On checkout finish page
         if ($request->getActionName() === 'finish') {
             $this->assignPaymentStatus($view);
-            $this->assignAdditionalPaymentInformations($view);
+            $this->assignAdditionalPaymentInformation($view);
         }
 
+        // On checkout confirm page
         if ($request->getActionName() === 'confirm') {
-            // Assigns the device fingerprint id to the view in case the payment has fraud prevention enabled.
             $this->assignDeviceFingerprint($view, $controller->get('wirecard_elastic_engine.session_manager'));
-
-            // Some payments may require additional view assignments (e.g. SEPA input fields) which will be assigned
-            // here.
             $this->assignAdditionalViewAssignments($view);
         }
 
@@ -163,16 +160,16 @@ class FrontendSubscriber implements SubscriberInterface
      */
     private function assignPaymentStatus(\Enlight_View_Default $view)
     {
-        $payment = $view->getAssign('sPayment');
-        if (isset($payment['name']) && strpos($payment['name'], 'wirecard_elastic_engine') === false) {
-            return;
-        }
-        $sOrderNumber = $view->getAssign('sOrderNumber');
-        if (! $sOrderNumber) {
+        $payment     = $view->getAssign('sPayment');
+        $orderNumber = $view->getAssign('sOrderNumber');
+        if (! isset($payment['name'])
+            || ! $this->paymentFactory->isSupportedPayment($payment['name'])
+            || ! $orderNumber
+        ) {
             return;
         }
         /** @var Order $order */
-        $order = $this->em->getRepository(Order::class)->findOneBy(['number' => $sOrderNumber]);
+        $order = $this->em->getRepository(Order::class)->findOneBy(['number' => $orderNumber]);
         if (! $order) {
             return;
         }
@@ -195,58 +192,25 @@ class FrontendSubscriber implements SubscriberInterface
     /**
      * @param \Enlight_View_Default $view
      *
-     * @since 1.0.0
-     */
-    private function assignAdditionalPaymentInformations(\Enlight_View_Default $view)
-    {
-        $payment = $view->getAssign('sPayment');
-        if (isset($payment['name']) && $payment['name'] !== 'wirecard_elastic_engine_pia') {
-            return;
-        }
-        $sOrderNumber = $view->getAssign('sOrderNumber');
-        if (! $sOrderNumber) {
-            return;
-        }
-
-        $transaction = $this->em->getRepository(Transaction::class)->findOneBy([
-            'orderNumber' => $sOrderNumber,
-            'type' => 'initial-response'
-        ]);
-
-        $response = $transaction->getResponse();
-        $bankData = [
-            'bankName'  => $response['merchant-bank-account.0.bank-name'],
-            'bic'       => $response['merchant-bank-account.0.bic'],
-            'iban'      => $response['merchant-bank-account.0.iban'],
-            'address'   => $response['merchant-bank-account.0.branch-address'],
-            'city'      => $response['merchant-bank-account.0.branch-city'],
-            'state'     => $response['merchant-bank-account.0.branch-state'],
-            'reference' => $response['provider-transaction-reference-id']
-        ];
-
-        $view->assign('wirecardElasticEngineBankData', $bankData);
-    }
-    
-    /**
-     * @param \Enlight_View_Default $view
-     *
      * @throws \WirecardElasticEngine\Exception\UnknownPaymentException
      *
      * @since 1.0.0
      */
-    private function assignAdditionalViewAssignments(\Enlight_View_Default $view)
+    private function assignAdditionalPaymentInformation(\Enlight_View_Default $view)
     {
-        $sPayment = $view->getAssign('sPayment');
-        if (strpos($sPayment['name'], 'wirecard_elastic_engine') === false) {
+        $payment = $view->getAssign('sPayment');
+        if (! isset($payment['name']) || ! $this->paymentFactory->isSupportedPayment($payment['name'])) {
             return;
         }
-        $payment = $this->paymentFactory->create($sPayment['name']);
-        if ($payment instanceof AdditionalViewAssignmentsInterface) {
-            $view->assign('wirecardElasticEngineViewAssignments', $payment->getAdditionalViewAssignments());
+        $paymentMethod = $this->paymentFactory->create($payment['name']);
+        if ($paymentMethod instanceof AdditionalPaymentInformationInterface) {
+            $paymentMethod->assignAdditionalPaymentInformation($view);
         }
     }
 
     /**
+     * Assigns the device fingerprint id to the view in case the payment has fraud prevention enabled.
+     *
      * @param \Enlight_View_Default $view
      * @param SessionManager        $sessionManager
      *
@@ -256,18 +220,38 @@ class FrontendSubscriber implements SubscriberInterface
      */
     private function assignDeviceFingerprint(\Enlight_View_Default $view, SessionManager $sessionManager)
     {
-        $sPayment = $view->getAssign('sPayment');
-        if (strpos($sPayment['name'], 'wirecard_elastic_engine') === false) {
+        $payment = $view->getAssign('sPayment');
+        if (! isset($payment['name']) || ! $this->paymentFactory->isSupportedPayment($payment['name'])) {
             return;
         }
-        $payment = $this->paymentFactory->create($sPayment['name']);
-
-        if ($payment->getPaymentConfig()->hasFraudPrevention()) {
+        $paymentMethod = $this->paymentFactory->create($payment['name']);
+        if ($paymentMethod->getPaymentConfig()->hasFraudPrevention()) {
             $view->assign('wirecardElasticEngineIncludeDeviceFingerprintIFrame', true);
             $view->assign(
                 'wirecardElasticEngineDeviceFingerprintId',
-                $sessionManager->getDeviceFingerprintId($payment->getPaymentConfig()->getTransactionMAID())
+                $sessionManager->getDeviceFingerprintId($paymentMethod->getPaymentConfig()->getTransactionMAID())
             );
+        }
+    }
+
+    /**
+     * Some payments may require additional view assignments (e.g. SEPA input fields) which will be assigned here.
+     *
+     * @param \Enlight_View_Default $view
+     *
+     * @throws \WirecardElasticEngine\Exception\UnknownPaymentException
+     *
+     * @since 1.0.0
+     */
+    private function assignAdditionalViewAssignments(\Enlight_View_Default $view)
+    {
+        $payment = $view->getAssign('sPayment');
+        if (! isset($payment['name']) || ! $this->paymentFactory->isSupportedPayment($payment['name'])) {
+            return;
+        }
+        $paymentMethod = $this->paymentFactory->create($payment['name']);
+        if ($paymentMethod instanceof AdditionalViewAssignmentsInterface) {
+            $view->assign('wirecardElasticEngineViewAssignments', $paymentMethod->getAdditionalViewAssignments());
         }
     }
 }

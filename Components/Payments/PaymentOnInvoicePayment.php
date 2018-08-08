@@ -120,7 +120,7 @@ class PaymentOnInvoicePayment extends Payment implements ProcessPaymentInterface
             $accountHolder = new AccountHolder();
             $accountHolder->setLastName($orderSummary->getUserMapper()->getLastName());
             $accountHolder->setFirstName($orderSummary->getUserMapper()->getFirstName());
-            $this->transactionInstance->setAccountHolder($accountHolder);
+            $this->getTransaction()->setAccountHolder($accountHolder);
         }
     }
 }

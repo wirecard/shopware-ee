@@ -18,14 +18,16 @@ use Wirecard\PaymentSdk\Transaction\PoiPiaTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\PaymentConfig;
+use WirecardElasticEngine\Components\Payments\Contracts\AdditionalPaymentInformationInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Models\Transaction;
 
 /**
  * @package WirecardElasticEngine\Components\Payments
  *
  * @since   1.0.0
  */
-class PaymentInAdvancePayment extends Payment implements ProcessPaymentInterface
+class PaymentInAdvancePayment extends Payment implements ProcessPaymentInterface, AdditionalPaymentInformationInterface
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_pia';
 
@@ -120,7 +122,42 @@ class PaymentInAdvancePayment extends Payment implements ProcessPaymentInterface
             $accountHolder = new AccountHolder();
             $accountHolder->setLastName($orderSummary->getUserMapper()->getLastName());
             $accountHolder->setFirstName($orderSummary->getUserMapper()->getFirstName());
-            $this->transactionInstance->setAccountHolder($accountHolder);
+            $this->getTransaction()->setAccountHolder($accountHolder);
         }
+    }
+
+    /**
+     * Some payments (e.g. PIA) require additional payment information on the checkout finish page (e.g. bank data).
+     *
+     * @param \Enlight_View_Default $view
+     *
+     * @since 1.0.0
+     */
+    public function assignAdditionalPaymentInformation(\Enlight_View_Default $view)
+    {
+        $payment     = $view->getAssign('sPayment');
+        $orderNumber = $view->getAssign('sOrderNumber');
+        if (! isset($payment['name']) || $payment['name'] !== self::PAYMETHOD_IDENTIFIER || ! $orderNumber) {
+            return;
+        }
+
+        $transaction = $this->em->getRepository(Transaction::class)->findOneBy([
+            'orderNumber' => $orderNumber,
+            'type'        => Transaction::TYPE_INITIAL_RESPONSE,
+        ]);
+        if (! $transaction) {
+            return;
+        }
+
+        $response = $transaction->getResponse();
+        $view->assign('wirecardElasticEngineBankData', [
+            'bankName'  => $response['merchant-bank-account.0.bank-name'],
+            'bic'       => $response['merchant-bank-account.0.bic'],
+            'iban'      => $response['merchant-bank-account.0.iban'],
+            'address'   => $response['merchant-bank-account.0.branch-address'],
+            'city'      => $response['merchant-bank-account.0.branch-city'],
+            'state'     => $response['merchant-bank-account.0.branch-state'],
+            'reference' => $response['provider-transaction-reference-id'],
+        ]);
     }
 }

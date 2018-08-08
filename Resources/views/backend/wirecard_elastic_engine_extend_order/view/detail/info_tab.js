@@ -325,25 +325,12 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                         infoPanel.add(me.getInfoPanelItem(transaction));
 
                         if (me.record.getPayment().first().get('name') === 'wirecard_elastic_engine_poi') {
-                            var poi = {
-                                'bankName': transaction.response['merchant-bank-account.0.bank-name'],
-                                'bic': transaction.response['merchant-bank-account.0.bic'],
-                                'iban': transaction.response['merchant-bank-account.0.iban'],
-                                'address': transaction.response['merchant-bank-account.0.branch-address'],
-                                'city': transaction.response['merchant-bank-account.0.branch-city'],
-                                'state': transaction.response['merchant-bank-account.0.branch-state']
-                            };
-
-                            infoPanel.add({
-                                xtype: 'container',
-                                renderTpl: me.createBankDataTemplate(),
-                                renderData: poi,
-                                margin: '0 0 10px'
-                            });
+                            infoPanel.add(me.getInfoPanelPoiInfoItem(transaction));
                         }
-                    }
-                    if (transaction.type === 'initial-response' && transaction.paymentMethod === 'sepadirectdebit') {
-                        infoPanel.add(me.getInfoPanelSepaMandateInfoItem(transaction));
+
+                        if (transaction.paymentMethod === 'sepadirectdebit') {
+                            infoPanel.add(me.getInfoPanelSepaMandateInfoItem(transaction));
+                        }
                     }
                 });
 
@@ -372,11 +359,46 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
         };
     },
 
+    /**
+     * Bank data for payment on invoice
+     * @param transaction
+     * @returns { * }
+     */
+    getInfoPanelPoiInfoItem: function (transaction) {
+        var me = this;
+        return {
+            xtype: 'container',
+            renderTpl: new Ext.XTemplate(
+                '{literal}<tpl for=".">',
+                '<p><label class="x-form-item-label">' + me.snippets.bankData.title + ':</label></p>',
+                '<tpl if="bankName"><p>{bankName}</p></tpl>',
+                '<p>' + me.snippets.bankData.iban + ': {iban}</p>',
+                '<tpl if="bic"><p>' + me.snippets.bankData.bic + ': {bic}</p></tpl>',
+                '<tpl if="address"><p>{address}<br>{city} {state}</p></tpl>',
+                '</tpl>{/literal}'
+            ),
+            renderData: {
+                'bankName': transaction.response['merchant-bank-account.0.bank-name'],
+                'iban': transaction.response['merchant-bank-account.0.iban'],
+                'bic': transaction.response['merchant-bank-account.0.bic'],
+                'address': transaction.response['merchant-bank-account.0.branch-address'],
+                'city': transaction.response['merchant-bank-account.0.branch-city'],
+                'state': transaction.response['merchant-bank-account.0.branch-state']
+            },
+            margin: '0 0 10px'
+        };
+    },
+
+    /**
+     * SEPA mandate information
+     * @param transaction
+     * @returns { * }
+     */
     getInfoPanelSepaMandateInfoItem: function (transaction) {
         var me = this;
         return {
             xtype: 'container',
-            renderTpl: Ext.create('Ext.XTemplate',
+            renderTpl: new Ext.XTemplate(
                 '{literal}<tpl for=".">',
                 '<div class="wirecardee-info-panel-sepa">',
                 '<h3>' + me.snippets.sepaMandate.title + '</h3>',
@@ -433,31 +455,6 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 }
             }
         });
-    },
-
-    /**
-     * Bank data for payment on invoice
-     * @return { Ext.XTemplate }
-     */
-    createBankDataTemplate: function() {
-        var me = this;
-        return new Ext.XTemplate(
-            '{literal}<tpl for=".">',
-            '<p><label class="x-form-item-label">' + me.snippets.bankData.title + ':</label></p>',
-            '<tpl if="bankName">',
-            '<p>{bankName}</p>',
-            '</tpl>',
-            '<p>' + me.snippets.bankData.iban + ': {iban}</p>',
-            '<tpl if="bic">',
-            '<p>' + me.snippets.bankData.bic + ': {bic}</p>',
-            '</tpl>',
-            '<tpl if="address">',
-            '<p> {address} <br>',
-            '{city} {state}',
-            '</p>',
-            '</tpl>',
-            '</tpl>{/literal}'
-        );
     }
 });
 // {/block}

@@ -145,4 +145,19 @@ class PaymentFactory
             SofortPayment::PAYMETHOD_IDENTIFIER           => SofortPayment::class,
         ];
     }
+
+    /**
+     * Return true, if payment identifier matches a supported Wirecard payment
+     *
+     * @param string $identifier
+     *
+     * @return bool
+     *
+     * @since 1.0.0
+     */
+    public function isSupportedPayment($identifier)
+    {
+        $payments = $this->getMappedPayments();
+        return isset($payments[$identifier]);
+    }
 }
