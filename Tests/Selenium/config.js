@@ -81,6 +81,13 @@ exports.config = {
             fields: {
                 bank: 'INGBNL2A'
             }
+        },
+        upi: {
+            label: 'Wirecard UnionPay International',
+            fields: {
+                last_name: 'Lastname',
+                account_number: '6210943123456786'
+            }
         }
     }
 };
