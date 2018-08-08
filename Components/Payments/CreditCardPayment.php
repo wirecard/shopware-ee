@@ -40,6 +40,7 @@ use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
+use WirecardElasticEngine\Components\Actions\ErrorAction;
 use WirecardElasticEngine\Components\Actions\ViewAction;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\CreditCardPaymentConfig;
@@ -283,8 +284,8 @@ class CreditCardPayment extends Payment implements
                 ]);
 
                 if (!$creditCardVault) {
-                    // FIXXXME
-                    exit();
+                    return new ErrorAction(ErrorAction::PROCESSING_FAILED,
+                                           'credit card token not found');
                 }
 
                 if (! $this->getPaymentConfig()->useThreeDOnTokens()) {
@@ -297,11 +298,13 @@ class CreditCardPayment extends Payment implements
                 $shippingAddress = $orderSummary->getUserMapper()->getShippingAddress();
 
                 if (! $this->compareAddresses($oldBillingAddress, $billingAddress)) {
-                    // TODO
+                    return new ErrorAction(ErrorAction::PROCESSING_FAILED,
+                                           'wrong billing address for credit card token');
                 }
 
                 if (! $this->compareAddresses($oldShippingAddress, $shippingAddress)) {
-                    // TODO
+                    return new ErrorAction(ErrorAction::PROCESSING_FAILED,
+                                           'wrong shipping address for credit card token');
                 }
 
                 $creditCardVault->setLastUsed(new \DateTime());
@@ -446,6 +449,9 @@ class CreditCardPayment extends Payment implements
         // FIXXXME use of Shopware()->Session()
         if ($this->getPaymentConfig()->isVaultEnabled()) {
             $userId = Shopware()->Session()->offsetGet('sUserId');
+            $billingAddress = Shopware()->Session()->sOrderVariables['sUserData']['billingaddress'];
+            $shippingAddress = Shopware()->Session()->sOrderVariables['sUserData']['shippingaddress'];
+
             $builder = $this->em->createQueryBuilder();
             $builder->select('ccv')
                 ->from(CreditCardVault::class, 'ccv')
@@ -455,10 +461,15 @@ class CreditCardPayment extends Payment implements
             $savedCards = $builder->getQuery()->getResult();
 
             foreach ($savedCards as $card) {
+                $acceptedCriteria = $this->getPaymentConfig()->allowAddressChanges()
+                                  || ( $this->compareAddresses($card->getLastBillingAddress(), $billingAddress)
+                                       && $this->compareAddresses($card->getLastShippingAddress(), $shippingAddress));
+
                 $formData['savedCards'][] = [
                     'token'               => $card->getToken(),
                     'maskedAccountNumber' => $card->getMaskedAccountNumber(),
                     'additionalData'      => $card->getAdditionalData(),
+                    'acceptedCriteria'    => $acceptedCriteria,
                 ];
             }
         }

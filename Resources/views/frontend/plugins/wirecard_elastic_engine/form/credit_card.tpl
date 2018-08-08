@@ -47,12 +47,35 @@
                     </div>
                 </li>
                 {foreach from=$wirecardElasticEngineViewAssignments.savedCards item='card'}
-                    <li class="block-group">
-                        <div class="block column--radio">
-                            <input type="radio" name="wirecardElasticEngine[token]" id="wirecard--token-{$card.token}" value="{$card.token}" />
-                        </div>
-                        <div class="block column--label">
-                            <label for="wirecard--token-{$card.token}">
+                    {if $card.acceptedCriteria}
+                        <li class="block-group">
+                            <div class="block column--radio">
+                                <input type="radio" name="wirecardElasticEngine[token]" id="wirecard--token-{$card.token}" value="{$card.token}" />
+                            </div>
+                            <div class="block column--label">
+                                <label for="wirecard--token-{$card.token}">
+                                    <span class="wirecard--masked-account-number">
+                                        {$card.maskedAccountNumber}
+                                    </span>
+                                    {if $card.additionalData}
+                                        <span class="wirecard--card-info wirecard--card-holder">
+                                            {$card.additionalData.firstName} {$card.additionalData.lastName}
+                                        </span>
+                                    {/if}
+                                </label>
+                            </div>
+                            <div class="block column--button">
+                                <button class="btn button--delete-token" type="button" data-token="{$card.token}">
+                                    {s name="DeleteButton"}{/s}
+                                </button>
+                            </div>
+                        </li>
+                    {else}
+                        <li class="block-group wirecard--disabled-card">
+                            <div class="block column--radio">
+                                <input type="radio" name="wirecardElasticEngine[token]" id="wirecard--token-{$card.token}" value="" disabled="disabled" />
+                            </div>
+                            <div class="block column--label">
                                 <span class="wirecard--masked-account-number">
                                     {$card.maskedAccountNumber}
                                 </span>
@@ -61,14 +84,17 @@
                                         {$card.additionalData.firstName} {$card.additionalData.lastName}
                                     </span>
                                 {/if}
-                            </label>
-                        </div>
-                        <div class="block column--button">
-                            <button class="btn button--delete-token" type="button" data-token="{$card.token}">
-                                {s name="DeleteButton"}{/s}
-                            </button>
-                        </div>
-                    </li>
+                                <span class="wircard--disabled-note">
+                                    {s name="WrongAddressNote"}{/s}
+                                </span>
+                            </div>
+                            <div class="block column--button">
+                                <button class="btn button--delete-token" type="button" data-token="{$card.token}">
+                                    {s name="DeleteButton"}{/s}
+                                </button>
+                            </div>
+                        </li>
+                    {/if}
                 {/foreach}
             </ul>
         {/if}
