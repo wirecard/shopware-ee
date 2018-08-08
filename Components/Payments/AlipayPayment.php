@@ -116,13 +116,11 @@ class AlipayPayment extends Payment implements ProcessPaymentInterface
         \Enlight_Controller_Request_Request $request,
         \sOrder $shopwareOrder
     ) {
-        $transaction = $this->getTransaction();
-
         if (! $this->getPaymentConfig()->hasFraudPrevention()) {
             $accountHolder = new AccountHolder();
             $accountHolder->setLastName($orderSummary->getUserMapper()->getLastName());
             $accountHolder->setFirstName($orderSummary->getUserMapper()->getFirstName());
-            $transaction->setAccountHolder($accountHolder);
+            $this->getTransaction()->setAccountHolder($accountHolder);
         }
     }
 }
