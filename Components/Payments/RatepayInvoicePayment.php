@@ -228,4 +228,19 @@ class RatepayInvoicePayment extends Payment implements
 
         return true;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getAdditionalViewAssignments()
+    {
+        $userData = Shopware()->Session()->sOrderVariables['sUserData'];
+
+        $userMapper = new UserMapper($userData, '', '');
+
+        return [
+            'method'   => $this->getName(),
+            'showForm' => (! $userMapper->getBirthday()),
+        ];
+    }
 }
