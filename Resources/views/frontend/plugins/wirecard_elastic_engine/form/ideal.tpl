@@ -1,5 +1,4 @@
-<?php
-/**
+{**
  * Shop System Plugins - Terms of Use
  *
  * The plugins offered are provided free of charge by Wirecard AG and are explicitly not part
@@ -27,32 +26,13 @@
  *
  * By installing the plugin into the shop system the customer agrees to these terms of use.
  * Please do not use the plugin if you do not agree to these terms of use!
- */
+ *}
 
-if (isset($_SERVER['HTTP_CLIENT_IP'])
-    || isset($_SERVER['HTTP_X_FORWARDED_FOR'])
-    || ! (in_array(@$_SERVER['REMOTE_ADDR'], ['127.0.0.1', '::1']) || php_sapi_name() === 'cli-server')
-) {
-    http_response_code(403);
-    exit('Forbidden');
-}
-
-$shopwareDir = (getenv('SHOPWARE_TESTS_BASEDIR') ?: __DIR__ . '/../../..');
-$filePath    = $shopwareDir . '/' . ltrim(explode('?', $_SERVER['REQUEST_URI'])[0], '/');
-
-if (preg_match('/\.(?:png|jpg|jpeg|gif|css|js|woff|woff2|eot|svg|tff|cur|ico|html)$/', $filePath)) {
-    if (is_file($filePath)) {
-        // Workaround for `mime_content_type` returning `text/plain` for CSS files.
-        $mimeType = substr($filePath, -4) === '.css' ? 'text/css' : mime_content_type($filePath);
-        header('Content-Type: ' . $mimeType);
-
-        readfile($filePath);
-
-        exit(0);
-    } else {
-        http_response_code(404);
-        exit('File not found: ' . $filePath);
-    }
-}
-
-require_once $shopwareDir . '/shopware.php';
+{namespace name="frontend/wirecard_elastic_engine/ideal"}
+{block name="wirecard_elastic_engine_ideal_form"}
+    <select name="wirecardElasticEngine[idealBank]">
+        {foreach from=$wirecardElasticEngineViewAssignments.idealBanks key="idealBankKey" item="idealBankLabel"}
+            <option value="{$idealBankKey}">{$idealBankLabel}</option>
+        {/foreach}
+    </select>
+{/block}
