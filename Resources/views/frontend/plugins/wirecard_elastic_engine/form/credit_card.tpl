@@ -37,33 +37,37 @@
             </p>
             <ul class="list--radio list--unstyled">
                 <li class="block-group">
-                    <span class="block column--radio">
+                    <div class="block column--radio">
                         <input type="radio" name="wirecardElasticEngine[token]" id="wirecard--token-no-card" value="" checked="checked" />
-                    </span>
-                    <span class="block column--label">
+                    </div>
+                    <div class="block column--label">
                         <label for="wirecard--token-no-card">
                             {s name="NewCard"}{/s}
                         </label>
-                    </span>
+                    </div>
                 </li>
                 {foreach from=$wirecardElasticEngineViewAssignments.savedCards item='card'}
                     <li class="block-group">
-                        <span class="block column--radio">
+                        <div class="block column--radio">
                             <input type="radio" name="wirecardElasticEngine[token]" id="wirecard--token-{$card.token}" value="{$card.token}" />
-                        </span>
-                        <span class="block column--label">
+                        </div>
+                        <div class="block column--label">
                             <label for="wirecard--token-{$card.token}">
-                                {$card.maskedAccountNumber}
+                                <span class="wirecard--masked-account-number">
+                                    {$card.maskedAccountNumber}
+                                </span>
                                 {if $card.additionalData}
-                                    - {$card.additionalData.firstName} {$card.additionalData.lastName}
+                                    <span class="wirecard--card-info wirecard--card-holder">
+                                        {$card.additionalData.firstName} {$card.additionalData.lastName}
+                                    </span>
                                 {/if}
                             </label>
-                        </span>
-                        <span class="block column--button">
+                        </div>
+                        <div class="block column--button">
                             <button class="btn button--delete-token" type="button" data-token="{$card.token}">
                                 {s name="DeleteButton"}{/s}
                             </button>
-                        </span>
+                        </div>
                     </li>
                 {/foreach}
             </ul>

@@ -31,6 +31,7 @@
 
 namespace WirecardElasticEngine\Components\Payments;
 
+use Shopware\Models\Customer\Customer;
 use Shopware\Models\Shop\Currency;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -351,8 +352,9 @@ class CreditCardPayment extends Payment implements
         ];
 
         foreach ($compareableKeys as $key) {
-            if($oldAddress[$key] !== $newAddress[$key])
+            if ($oldAddress[$key] !== $newAddress[$key]) {
                 return false;
+            }
         }
 
         return true;
@@ -379,6 +381,19 @@ class CreditCardPayment extends Payment implements
                 $firstName = $params['first_name'];
                 $lastName = $params['last_name'];
 
+                $transactionDetails = $transactionService->getTransactionByTransactionId(
+                    $params['transaction_id'],
+                    CreditCardTransaction::NAME
+                );
+
+                $additionalCardData = [
+                        'firstName'       => $firstName,
+                        'lastName'        => $lastName,
+                        'expirationMonth' => $transactionDetails['payment']['card']['expiration-month'],
+                        'expirationYear'  => $transactionDetails['payment']['card']['expiration-year'],
+                        'cardType'        => $transactionDetails['payment']['card']['card-type'],
+                ];
+
                 $creditCardVault = $this->em->getRepository(CreditCardVault::class)->findOneBy([
                     'userId' => $userId,
                     'token'  => $tokenId,
@@ -391,15 +406,12 @@ class CreditCardPayment extends Payment implements
                     $creditCardVault->setToken($tokenId);
                     $creditCardVault->setMaskedAccountNumber($maskedAccountNumber);
                     $creditCardVault->setUserId($userId);
-                    $creditCardVault->setAdditionalData([
-                        'firstName' => $firstName,
-                        'lastName'  => $lastName,
-                    ]);
 
                     $this->em->persist($creditCardVault);
                 }
                 $creditCardVault->setLastBillingAddress($billingAddress);
                 $creditCardVault->setLastShippingAddress($shippingAddress);
+                $creditCardVault->setAdditionalData($additionalCardData);
                 $this->em->flush();
             }
         }
@@ -421,10 +433,16 @@ class CreditCardPayment extends Payment implements
     {
         $paymentConfig = $this->getPaymentConfig();
 
+        // FIXXXME use of Shopware()->Session()
+        $userInfo = Shopware()->Session()->offsetGet('userInfo');
+        $accountMode = $userInfo['accountmode'];
+
         $formData = [
             'method'       => $this->getName(),
-            'vaultEnabled' => $this->getPaymentConfig()->isVaultEnabled(),
+            'vaultEnabled' => intval($accountMode) === Customer::ACCOUNT_MODE_CUSTOMER
+                              && $this->getPaymentConfig()->isVaultEnabled(),
         ];
+
         // FIXXXME use of Shopware()->Session()
         if ($this->getPaymentConfig()->isVaultEnabled()) {
             $userId = Shopware()->Session()->offsetGet('sUserId');

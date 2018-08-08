@@ -44,6 +44,12 @@
         }
         .column--label {
             width: 70%;
+            .wirecard--card-info {
+                &::before {
+                    content: "–";
+                    .unitize-margin(0, 5);
+                }
+            }
         }
         .column--button {
             width: 20%;
