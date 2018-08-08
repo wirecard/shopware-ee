@@ -31,6 +31,7 @@
 
 namespace WirecardElasticEngine\Components\Payments;
 
+use Shopware\Models\Shop\Currency;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
@@ -40,6 +41,7 @@ use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\RatepayInvoicePaymentConfig;
 use WirecardElasticEngine\Components\Mapper\UserMapper;
+use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\DisplayRestrictionInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 
@@ -48,7 +50,10 @@ use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
  *
  * @since   1.0.0
  */
-class RatepayInvoicePayment extends Payment implements DisplayRestrictionInterface, ProcessPaymentInterface
+class RatepayInvoicePayment extends Payment implements
+    DisplayRestrictionInterface,
+    ProcessPaymentInterface,
+    AdditionalViewAssignmentsInterface
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_ratepay_invoice';
 
@@ -156,7 +161,7 @@ class RatepayInvoicePayment extends Payment implements DisplayRestrictionInterfa
         }
 
         $accountHolder = $transaction->getAccountHolder();
-        $accountHolderProperties = $accountHolder->mappedProperties(); 
+        $accountHolderProperties = $accountHolder->mappedProperties();
         if (empty($accountHolderProperties['date_of_birth'])) {
             // TODO add date of birth
         }
@@ -169,12 +174,11 @@ class RatepayInvoicePayment extends Payment implements DisplayRestrictionInterfa
     {
         $acceptedBillingCountries = $this->getPaymentConfig()->getBillingCountries();
         $acceptedShippingCountries = $this->getPaymentConfig()->getShippingCountries();
+        $acceptedCurrencies = $this->getPaymentConfig()->getAcceptedCurrencies();
         $billingAddress = $userMapper->getBillingAddress();
         $shippingAddress = $userMapper->getShippingAddress();
-
-        // no digital goods
-
-        // shopping basket amount within the range
+        $minAmount = $this->getPaymentConfig()->getMinAmount();
+        $maxAmount = $this->getPaymentConfig()->getMaxAmount();
 
         // age above 18
         $birthDay = $userMapper->getBirthday();
@@ -182,12 +186,35 @@ class RatepayInvoicePayment extends Payment implements DisplayRestrictionInterfa
             $now = new \DateTime();
             $age = $birthDay->diff($now);
 
-            if($age->y < 18) {
+            if ($age->y < 18) {
                 return false;
             }
         }
 
         // currency accepted
+        $currency = Shopware()->Shop()->getCurrency();
+        if (! in_array($currency->getId(), $acceptedCurrencies)) {
+            return false;
+        }
+
+        // shopping basket amount within the range
+        $basket = Shopware()->Modules()->Basket();
+        $amount = $basket->sGetAmount();
+        $amount = empty($amount['totalAmount']) ? 0 : $amount['totalAmount'];
+        $amount = floatval($amount);
+
+        if (! $currency->getDefault()) {
+            $amount /= $currency->getFactor();
+        }
+
+        if ($amount < $minAmount || $amount > $maxAmount) {
+            return false;
+        }
+
+        // no digital goods
+        if ($basket->sCheckForESD()) {
+            return false;
+        }
 
         // shipping country
         if (! in_array($shippingAddress['countryId'], $acceptedShippingCountries)) {

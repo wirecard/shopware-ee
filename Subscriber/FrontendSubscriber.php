@@ -36,14 +36,13 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Shopware\Components\Theme\LessDefinition;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
+use WirecardElasticEngine\Components\Mapper\BasketMapper;
 use WirecardElasticEngine\Components\Mapper\UserMapper;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\DisplayRestrictionInterface;
 use WirecardElasticEngine\Components\Services\PaymentFactory;
 use WirecardElasticEngine\Components\Services\SessionManager;
 use WirecardElasticEngine\Exception\UnknownPaymentException;
-
-use WirecardElasticEngine\Components\Mapper\BasketMapper;
 
 /**
  * @package WirecardElasticEngine\Subscriber
@@ -99,6 +98,9 @@ class FrontendSubscriber implements SubscriberInterface
         ];
     }
 
+    /**
+     * @param \Enlight_Event_EventArgs
+     */
     public function onGetPayments(\Enlight_Event_EventArgs $args)
     {
         $payments = $args->getReturn();
@@ -113,7 +115,6 @@ class FrontendSubscriber implements SubscriberInterface
                 // TODO check payments to be shown
                 $payment = $this->paymentFactory->create($paymentData['name']);
                 if ($payment instanceof DisplayRestrictionInterface) {
-                    $basket = Shopware()->Session()->sOrderVariables['sBasket'];
                     if (!$payment->checkDisplayRestrictions($userMapper)) {
                         unset($payments[$key]);
                     }

@@ -205,5 +205,4 @@ class RatepayInvoicePaymentConfig extends PaymentConfig
             ]
         );
     }
-
 }

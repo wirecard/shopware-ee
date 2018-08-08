@@ -41,7 +41,9 @@ use WirecardElasticEngine\Components\Mapper\UserMapper;
 interface DisplayRestrictionInterface
 {
     /**
-     * @params UserMapper $userMapper
+     * @param UserMapper $userMapper
+     * @param array $basket
+     * @param string $currency
      *
      * @return bool
      */
