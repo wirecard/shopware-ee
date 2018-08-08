@@ -38,6 +38,7 @@ use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\RatepayInvoiceTransaction;
 use Wirecard\PaymentSdk\TransactionService;
+use WirecardElasticEngine\Components\Actions\ErrorAction;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\RatepayInvoicePaymentConfig;
 use WirecardElasticEngine\Components\Mapper\UserMapper;
@@ -156,14 +157,29 @@ class RatepayInvoicePayment extends Payment implements
         if (! $this->getPaymentConfig()->hasFraudPrevention()) {
             $transaction->setOrderNumber($orderSummary->getPaymentUniqueId());
             $accountHolder = $orderSummary->getUserMapper()->getWirecardBillingAccountHolder();
-            $accountHolder->setDateOfBirth('1973-12-07');
             $transaction->setAccountHolder($accountHolder);
         }
 
         $accountHolder = $transaction->getAccountHolder();
         $accountHolderProperties = $accountHolder->mappedProperties();
         if (empty($accountHolderProperties['date_of_birth'])) {
-            // TODO add date of birth
+            $additionalPaymentData = $orderSummary->getAdditionalPaymentData();
+
+            $birthDay = new \DateTime();
+            $birthDay->setDate(
+                $additionalPaymentData['birthday']['year'],
+                $additionalPaymentData['birthday']['month'],
+                $additionalPaymentData['birthday']['day']
+            );
+
+            $age = $birthDay->diff(new \DateTime);
+
+            if ($age->y < 18) {
+                return new ErrorAction(ErrorAction::PROCESSING_FAILED,
+                                       'customer is too young');
+            }
+            $accountHolder->setDateOfBirth($birthDay);
+            $transaction->setAccountHolder($accountHolder);
         }
     }
 
@@ -207,7 +223,7 @@ class RatepayInvoicePayment extends Payment implements
             $amount /= $currency->getFactor();
         }
 
-        if ($amount < $minAmount || $amount > $maxAmount) {
+        if ($amount !== 0.0 && ($amount < $minAmount || $amount > $maxAmount)) {
             return false;
         }
 
