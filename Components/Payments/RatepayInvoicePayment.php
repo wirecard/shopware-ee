@@ -177,6 +177,15 @@ class RatepayInvoicePayment extends Payment implements DisplayRestrictionInterfa
         // shopping basket amount within the range
 
         // age above 18
+        $birthDay = $userMapper->getBirthday();
+        if ($birthDay) {
+            $now = new \DateTime();
+            $age = $birthDay->diff($now);
+
+            if($age->y < 18) {
+                return false;
+            }
+        }
 
         // currency accepted
 
