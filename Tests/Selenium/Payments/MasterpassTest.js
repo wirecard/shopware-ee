@@ -39,24 +39,29 @@ describe('Masterpass test', () => {
         await driver.wait(until.elementLocated(By.id('MasterPass_frame')), 20000);
         console.log('switch to iframe #MasterPass_frame');
         await driver.wait(until.ableToSwitchToFrame(By.id('MasterPass_frame')));
+        await driver.sleep(1000);
 
         // will fail for mobile!
         console.log('wait for .container-wallet-collision.visible-sm-inline-block .link');
         await driver.wait(until.elementLocated(By.css('.container-wallet-collision.visible-sm-inline-block .link')), 20000);
         await driver.findElement(By.css('.container-wallet-collision.visible-sm-inline-block .link')).click();
+        await driver.sleep(1000);
 
         // will fail for mobile!
         console.log('wait for .locale-selector.visible-sm-inline-block .locale-selector-current');
         await driver.wait(until.elementLocated(By.css('.locale-selector.visible-sm-inline-block .locale-selector-current')), 20000);
         await driver.findElement(By.css('.locale-selector.visible-sm-inline-block .locale-selector-current')).click();
+        await driver.sleep(1000);
 
         console.log('wait for a[data-locale-selector="de-DE"]');
         await driver.wait(until.elementLocated(By.css('a[data-locale-selector="de-DE"]')), 20000);
         await driver.findElement(By.css('a[data-locale-selector="de-DE"]')).click();
+        await driver.sleep(1000);
 
         console.log('wait for div[data-automation="MasterpassDESBX"]');
         await driver.wait(until.elementLocated(By.css('div[data-automation="MasterpassDESBX"]')), 20000);
         await driver.findElement(By.css('div[data-automation="MasterpassDESBX"]')).click();
+        await driver.sleep(1000);
 
         console.log('wait for #wallet');
         await driver.wait(until.elementLocated(By.id('wallet')), 20000);
