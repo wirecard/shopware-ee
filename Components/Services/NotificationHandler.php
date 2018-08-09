@@ -15,6 +15,7 @@ use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
+use Wirecard\PaymentSdk\Transaction\PoiPiaTransaction;
 use WirecardElasticEngine\Models\Transaction;
 
 /**
@@ -33,53 +34,59 @@ class NotificationHandler extends Handler
      * Handles a notification response.
      *
      * @param \sOrder        $shopwareOrder
-     * @param Response       $notification
+     * @param Response       $response
      * @param BackendService $backendService
      *
      * @return Transaction|null
      * @throws \WirecardElasticEngine\Exception\InitialTransactionNotFoundException
-     *
      * @since 1.0.0
      */
-    public function handleResponse(\sOrder $shopwareOrder, Response $notification, BackendService $backendService)
+    public function handleResponse(\sOrder $shopwareOrder, Response $response, BackendService $backendService)
     {
-        if ($notification instanceof SuccessResponse) {
-            $initialTransaction = $this->handleSuccess($shopwareOrder, $notification, $backendService);
+        if ($response instanceof SuccessResponse) {
+            $initialTransaction = $this->handleSuccess($shopwareOrder, $response, $backendService);
 
-            return $this->transactionManager->createNotify($initialTransaction, $notification, $backendService);
+            return $this->transactionManager->createNotify($initialTransaction, $response, $backendService);
         }
 
-        if ($notification instanceof FailureResponse) {
-            $this->logger->error("Failure response", $notification->getData());
+        if ($response instanceof FailureResponse) {
+            $this->logger->error("Failure response", $response->getData());
             return null;
         }
 
         $this->logger->error("Unexpected notification response", [
-            'class'    => get_class($notification),
-            'response' => $notification->getData(),
+            'class'    => get_class($response),
+            'response' => $response->getData(),
         ]);
         return null;
     }
 
     /**
      * @param \sOrder         $shopwareOrder
-     * @param SuccessResponse $notification
+     * @param SuccessResponse $response
      * @param BackendService  $backendService
      *
      * @return Transaction
      * @throws \WirecardElasticEngine\Exception\InitialTransactionNotFoundException
-     *
      * @since 1.0.0
      */
     protected function handleSuccess(
         \sOrder $shopwareOrder,
-        SuccessResponse $notification,
+        SuccessResponse $response,
         BackendService $backendService
     ) {
-        $this->logger->info('Incoming success notification', $notification->getData());
+        $this->logger->info('Incoming success notification', $response->getData());
 
-        $paymentStatusId    = $this->getPaymentStatusId($backendService, $notification);
-        $initialTransaction = $this->transactionManager->getInitialTransaction($notification);
+        $paymentStatusId    = $this->getPaymentStatusId($backendService, $response);
+        $initialTransaction = $this->transactionManager->getInitialTransaction($response);
+
+        // POI/PIA: Set payment status "review necessary", if PTRID of initial transaction and notification do not match
+        if ($response->getPaymentMethod() === PoiPiaTransaction::NAME
+            && $response->getProviderTransactionReference() !== $initialTransaction->getProviderTransactionReference()
+        ) {
+            $paymentStatusId = Status::PAYMENT_STATE_REVIEW_NECESSARY;
+        }
+
         if ($paymentStatusId === Status::PAYMENT_STATE_OPEN) {
             return $initialTransaction;
         }
@@ -151,18 +158,18 @@ class NotificationHandler extends Handler
 
     /**
      * @param BackendService $backendService
-     * @param Response       $notification
+     * @param Response       $response
      *
      * @return int
      *
      * @since 1.0.0
      */
-    private function getPaymentStatusId($backendService, $notification)
+    private function getPaymentStatusId($backendService, $response)
     {
-        if ($notification->getTransactionType() === 'check-payer-response') {
+        if ($response->getTransactionType() === 'check-payer-response') {
             return Status::PAYMENT_STATE_OPEN;
         }
-        switch ($backendService->getOrderState($notification->getTransactionType())) {
+        switch ($backendService->getOrderState($response->getTransactionType())) {
             case BackendService::TYPE_AUTHORIZED:
                 return Status::PAYMENT_STATE_RESERVED;
             case BackendService::TYPE_CANCELLED:

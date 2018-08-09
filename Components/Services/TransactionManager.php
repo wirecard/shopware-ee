@@ -16,6 +16,7 @@ use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
+use Wirecard\PaymentSdk\Transaction\PoiPiaTransaction;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Exception\InitialTransactionNotFoundException;
 use WirecardElasticEngine\Models\Transaction;
@@ -125,6 +126,17 @@ class TransactionManager
         $transaction->setPaymentUniqueId($initialTransaction->getPaymentUniqueId());
         $transaction->setOrderNumber($initialTransaction->getOrderNumber());
         $transaction->setResponse($response);
+
+        // POI/PIA: Set status message, if PTRID of initial transaction and notification transaction do not match
+        $expectReference = $initialTransaction->getProviderTransactionReference();
+        $actualReference = $transaction->getProviderTransactionReference();
+        if ($transaction->getPaymentMethod() === PoiPiaTransaction::NAME && $expectReference !== $actualReference) {
+            $transaction->setStatusMessage(
+                "Provider Transaction Reference IDs do not match. " .
+                "Expected '$expectReference', got '$actualReference'"
+            );
+        }
+
         $transaction = $this->persist($transaction);
 
         $parentTransaction = $this->em->getRepository(Transaction::class)->findOneBy([
