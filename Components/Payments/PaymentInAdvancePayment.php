@@ -157,7 +157,7 @@ class PaymentInAdvancePayment extends Payment implements ProcessPaymentInterface
             'address'   => $response['merchant-bank-account.0.branch-address'],
             'city'      => $response['merchant-bank-account.0.branch-city'],
             'state'     => $response['merchant-bank-account.0.branch-state'],
-            'reference' => $response['provider-transaction-reference-id'],
+            'reference' => $transaction->getProviderTransactionReference(),
         ]);
     }
 }

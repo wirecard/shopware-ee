@@ -48,7 +48,8 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
         bankData: {
             title: '{s name="BankDataTitle"}{/s}',
             iban: '{s name="IBAN"}{/s}',
-            bic: '{s name="BIC"}{/s}'
+            bic: '{s name="BIC"}{/s}',
+            reference: '{s name="ProviderTransactionReference" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}'
         },
         sepaMandate: {
             title: '{s name="SepaMandateTitle" namespace="frontend/wirecard_elastic_engine/sepa_direct_debit"}{/s}',
@@ -374,6 +375,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 '<tpl if="bankName"><p>{bankName}</p></tpl>',
                 '<p>' + me.snippets.bankData.iban + ': {iban}</p>',
                 '<tpl if="bic"><p>' + me.snippets.bankData.bic + ': {bic}</p></tpl>',
+                '<p>' + me.snippets.bankData.reference + ': {reference}</p>',
                 '<tpl if="address"><p>{address}<br>{city} {state}</p></tpl>',
                 '</tpl>{/literal}'
             ),
@@ -381,6 +383,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 'bankName': transaction.response['merchant-bank-account.0.bank-name'],
                 'iban': transaction.response['merchant-bank-account.0.iban'],
                 'bic': transaction.response['merchant-bank-account.0.bic'],
+                'reference': transaction.providerTransactionReference,
                 'address': transaction.response['merchant-bank-account.0.branch-address'],
                 'city': transaction.response['merchant-bank-account.0.branch-city'],
                 'state': transaction.response['merchant-bank-account.0.branch-state']
