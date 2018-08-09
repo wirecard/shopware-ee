@@ -17,7 +17,7 @@ use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Services\PaymentHandler;
 
 /**
- * @package WirecardElasticEngine\Components\Payments\Interfaces
+ * @package WirecardElasticEngine\Components\Payments\Contracts
  *
  * @since   1.0.0
  */

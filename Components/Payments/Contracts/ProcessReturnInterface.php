@@ -13,7 +13,7 @@ use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\TransactionService;
 
 /**
- * @package WirecardElasticEngine\Components\Payments\Interfaces
+ * @package WirecardElasticEngine\Components\Payments\Contracts
  *
  * @since   1.0.0
  */

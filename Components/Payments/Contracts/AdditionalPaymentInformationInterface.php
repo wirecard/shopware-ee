@@ -12,7 +12,7 @@ namespace WirecardElasticEngine\Components\Payments\Contracts;
 use WirecardElasticEngine\Models\Transaction;
 
 /**
- * @package WirecardElasticEngine\Components\Payments\Interfaces
+ * @package WirecardElasticEngine\Components\Payments\Contracts
  *
  * @since   1.0.0
  */
