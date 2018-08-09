@@ -1,46 +1,35 @@
 {**
- * Shop System Plugins - Terms of Use
- *
- * The plugins offered are provided free of charge by Wirecard AG and are explicitly not part
- * of the Wirecard AG range of products and services.
- *
- * They have been tested and approved for full functionality in the standard configuration
- * (status on delivery) of the corresponding shop system. They are under General Public
- * License version 3 (GPLv3) and can be used, developed and passed on to third parties under
- * the same terms.
- *
- * However, Wirecard AG does not provide any guarantee or accept any liability for any errors
- * occurring when used in an enhanced, customized shop system configuration.
- *
- * Operation in an enhanced, customized configuration is at your own risk and requires a
- * comprehensive test phase by the user of the plugin.
- *
- * Customers use the plugins at their own risk. Wirecard AG does not guarantee their full
- * functionality neither does Wirecard AG assume liability for any disadvantages related to
- * the use of the plugins. Additionally, Wirecard AG does not guarantee the full functionality
- * for customized shop systems or installed plugins of other vendors of plugins within the same
- * shop system.
- *
- * Customers are responsible for testing the plugin's functionality before starting productive
- * operation.
- *
- * By installing the plugin into the shop system the customer agrees to these terms of use.
- * Please do not use the plugin if you do not agree to these terms of use!
+ * Shop System Plugins:
+ * - Terms of Use can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/_TERMS_OF_USE
+ * - License can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/LICENSE
  *}
 
 {extends file="parent:frontend/checkout/confirm.tpl"}
 
 {block name='frontend_checkout_confirm_information_wrapper'}
     {$smarty.block.parent}
-    {if $wirecardElasticEngineViewAssignments and $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_sepa'}
-        <div class="panel has--border wirecardee--additional-form-fields">
-            <div class="panel--title primary is--underline">
-                {s name="SepaPaymentFormHeader" namespace="frontend/wirecard_elastic_engine/sepa_direct_debit"}{/s}
+    {if $wirecardElasticEngineViewAssignments}
+        {if $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_sepa'}
+            <div class="panel has--border wirecardee--additional-form-fields">
+                <div class="panel--title primary is--underline">
+                    {s name="SepaPaymentFormHeader" namespace="frontend/wirecard_elastic_engine/sepa_direct_debit"}{/s}
+                </div>
+                <div class="panel--body is--wide">
+                    {include file="frontend/plugins/wirecard_elastic_engine/form/sepa.tpl"}
+                </div>
             </div>
-            <div class="panel--body is--wide">
-                {include file="frontend/plugins/wirecard_elastic_engine/form/sepa.tpl"}
+        {elseif $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_ideal'}
+            <div class="panel has--border wirecardee--additional-form-fields">
+                <div class="panel--title primary is--underline">
+                    {s name="IdealPaymentFormHeader" namespace="frontend/wirecard_elastic_engine/ideal"}{/s}
+                </div>
+                <div class="panel--body is--wide">
+                    {include file="frontend/plugins/wirecard_elastic_engine/form/ideal.tpl"}
+                </div>
             </div>
-        </div>
+        {/if}
     {/if}
 
     {if $wirecardElasticEngineIncludeDeviceFingerprintIFrame}
