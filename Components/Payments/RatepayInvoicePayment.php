@@ -175,8 +175,10 @@ class RatepayInvoicePayment extends Payment implements
             $age = $birthDay->diff(new \DateTime);
 
             if ($age->y < 18) {
-                return new ErrorAction(ErrorAction::PROCESSING_FAILED,
-                                       'customer is too young');
+                return new ErrorAction(
+                    ErrorAction::PROCESSING_FAILED,
+                    'customer is too young'
+                );
             }
             $accountHolder->setDateOfBirth($birthDay);
             $transaction->setAccountHolder($accountHolder);

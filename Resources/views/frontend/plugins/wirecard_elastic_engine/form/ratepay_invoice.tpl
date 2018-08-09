@@ -33,11 +33,11 @@
     <div>
         <strong class="birthday--label">{s name='RegisterPlaceholderBirthday' namespace="frontend/register/personal_fieldset"}{/s}{s name="RequiredField" namespace="frontend/register/index"}{/s}</strong>
     </div>
-
-    <div class="wirecardee-ratepay-invoce--birthdate">
+    <input class="wirecard--hidden-age-field" type="number" size="4" name="age" min="18" required style="display:none;">
+    <div class="wirecardee-ratepay-invoice--birthdate">
         <div class="field--select select-field">
             <select name="wirecardElasticEngine[birthday][day]" required="required" aria-required="true"
-                    class="is--required{if $errorFlags.birthday} has--error{/if}">
+                    class="wirecard--birthday-day is--required{if $errorFlags.birthday} has--error{/if}">
                 <option disabled="disabled"value="">{s name='RegisterBirthdaySelectDay' namespace="frontend/register/personal_fieldset"}{/s}</option>
 
                 {for $day = 1 to 31}
@@ -47,7 +47,7 @@
         </div>
         <div class="field--select select-field">
             <select name="wirecardElasticEngine[birthday][month]" required="required" aria-required="true"
-                    class="is--required{if $errorFlags.birthday} has--error{/if}">
+                    class="wirecard--birthday-month is--required{if $errorFlags.birthday} has--error{/if}">
                 <option disabled="disabled" value="">{s name='RegisterBirthdaySelectMonth' namespace="frontend/register/personal_fieldset"}{/s}</option>
 
                 {for $month = 1 to 12}
@@ -57,7 +57,7 @@
         </div>
         <div class="field--select select-field">
             <select name="wirecardElasticEngine[birthday][year]" required="required" aria-required="true"
-                    class="is--required{if $errorFlags.birthday} has--error{/if}">
+                    class="wirecard--birthday-year is--required{if $errorFlags.birthday} has--error{/if}">
                 <option disabled="disabled" value="">{s name='RegisterBirthdaySelectYear' namespace="frontend/register/personal_fieldset"}{/s}</option>
 
                 {for $year = date("Y") to date("Y")-120 step=-1}

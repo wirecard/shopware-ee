@@ -127,5 +127,37 @@
                 });
             });
         </script>
+    {elseif $wirecardElasticEngineViewAssignments and $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_ratepay_invoice'}
+        <script type="text/javascript">
+            document.asyncReady(function () {
+                var $ = jQuery;
+
+                var validateAge = function() {
+                    var ageField = $('.wirecard--hidden-age-field')[0];
+
+                    if (! ageField.validity.valid) {
+                        $('.wirecardee-ratepay-invoice--birthdate select').addClass('has--error');
+                        return;
+                    }
+                    $('.wirecardee-ratepay-invoice--birthdate select').removeClass('has--error');
+                };
+
+                $('.wirecard--hidden-age-field')[0].addEventListener('invalid', validateAge);
+
+                $('.wirecardee-ratepay-invoice--birthdate select').on('change', function() {
+                    var day = $('.wirecard--birthday-day').val() - 1,
+                        month = $('.wirecard--birthday-month').val() - 1,
+                        year = $('.wirecard--birthday-year').val(),
+                        birthdate = new Date(year, month, day),
+                        diffSeconds = Date.now() - birthdate.getTime(),
+                        diffDate = new Date(diffSeconds),
+                        age = diffDate.getFullYear() - 1970;
+
+                    $('.wirecard--hidden-age-field').val(age);
+
+                    validateAge();
+                });
+            });
+        </script>
     {/if}
 {/block}
