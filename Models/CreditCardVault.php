@@ -76,15 +76,27 @@ class CreditCardVault extends ModelEntity
 
     /**
      * @var array
-     * @ORM\Column(name="last_billing_address", type="array", nullable=false)
+     * @ORM\Column(name="bind_billing_address", type="array", nullable=false)
      */
-    private $lastBillingAddress;
+    private $bindBillingAddress;
+
+    /**
+     * @var string
+     * @ORM\Column(name="bind_billing_address_hash", type="string", nullable=false)
+     */
+    private $bindBillingAddressHash;
 
     /**
      * @var array
-     * @ORM\Column(name="last_shipping_address", type="array", nullable=false)
+     * @ORM\Column(name="bind_shipping_address", type="array", nullable=false)
      */
-    private $lastShippingAddress;
+    private $bindShippingAddress;
+
+    /**
+     * @var array
+     * @ORM\Column(name="bind_shipping_address_hash", type="string", nullable=false)
+     */
+    private $bindShippingAddressHash;
 
     /**
      * @var array
@@ -195,19 +207,39 @@ class CreditCardVault extends ModelEntity
      *
      * @since 1.0.0
      */
-    public function getLastBillingAddress()
+    public function getBindBillingAddress()
     {
-        return $this->lastBillingAddress;
+        return $this->bindBillingAddress;
     }
 
     /**
-     * @param array $lastBillingAddress
+     * @param array $bindBillingAddress
      *
      * @since 1.0.0
      */
-    public function setLastBillingAddress(array $lastBillingAddress)
+    public function setBindBillingAddress(array $bindBillingAddress)
     {
-        $this->lastBillingAddress = $lastBillingAddress;
+        $this->bindBillingAddress = $bindBillingAddress;
+    }
+
+    /**
+     * @return string
+     *
+     * @since 1.0.0
+     */
+    public function getBindBillingAddressHash()
+    {
+        return $this->bindBillingAddressHash;
+    }
+
+    /**
+     * @param string $bindBillingAddressHash
+     *
+     * @since 1.0.0
+     */
+    public function setBindBillingAddressHash($bindBillingAddressHash)
+    {
+        $this->bindBillingAddressHash = $bindBillingAddressHash;
     }
 
     /**
@@ -215,19 +247,39 @@ class CreditCardVault extends ModelEntity
      *
      * @since 1.0.0
      */
-    public function getLastShippingAddress()
+    public function getBindShippingAddress()
     {
-        return $this->lastShippingAddress;
+        return $this->bindShippingAddress;
     }
 
     /**
-     * @param array $lastShippingAddress
+     * @param array $bindShippingAddress
      *
      * @since 1.0.0
      */
-    public function setLastShippingAddress(array $lastShippingAddress)
+    public function setBindShippingAddress(array $bindShippingAddress)
     {
-        $this->lastShippingAddress = $lastShippingAddress;
+        $this->bindShippingAddress = $bindShippingAddress;
+    }
+
+    /**
+     * @return string
+     *
+     * @since 1.0.0
+     */
+    public function getBindShippingAddressHash()
+    {
+        return $this->bindShippingAddressHash;
+    }
+
+    /**
+     * @param string $bindShippingAddressHash
+     *
+     * @since 1.0.0
+     */
+    public function setBindShippingAddressHash($bindShippingAddressHash)
+    {
+        $this->bindShippingAddressHash = $bindShippingAddressHash;
     }
 
     /**
@@ -258,14 +310,16 @@ class CreditCardVault extends ModelEntity
     public function toArray()
     {
         return [
-            'id'                  => $this->getId(),
-            'userId'              => $this->getUserId(),
-            'token'               => $this->getToken(),
-            'maskedAccountNumber' => $this->getMaskedAccountNumber(),
-            'lastUsed'            => $this->getLastUsed(),
-            'lastBillingAddress'  => $this->getLastBillingAddress(),
-            'lastShippingAddress' => $this->getLastShippingAddress(),
-            'additionalData'      => $this->getAdditionalData(),
+            'id'                      => $this->getId(),
+            'userId'                  => $this->getUserId(),
+            'token'                   => $this->getToken(),
+            'maskedAccountNumber'     => $this->getMaskedAccountNumber(),
+            'lastUsed'                => $this->getLastUsed(),
+            'bindBillingAddress'      => $this->getBindBillingAddress(),
+            'bindBillingAddressHash'  => $this->getBindBillingAddressHash(),
+            'bindShippingAddress'     => $this->getBindShippingAddress(),
+            'bindShippingAddressHash' => $this->getBindShippingAddressHash(),
+            'additionalData'          => $this->getAdditionalData(),
         ];
     }
 }

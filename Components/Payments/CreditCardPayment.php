@@ -278,38 +278,35 @@ class CreditCardPayment extends Payment implements
                 $user = $orderSummary->getUserMapper()->getShopwareUser();
                 $userId = $user['additional']['user']['userID'];
 
-                $creditCardVault = $this->em->getRepository(CreditCardVault::class)->findOneBy([
+                $conditions = [
                     'userId' => $userId,
                     'token'  => $tokenId,
-                ]);
+                ];
+
+                $billingAddress = $orderSummary->getUserMapper()->getBillingAddress();
+                $shippingAddress = $orderSummary->getUserMapper()->getShippingAddress();
+                $billingAddressHash = $this->createAddressHash($billingAddress);
+                $shippingAddressHash = $this->createAddressHash($shippingAddress);
+
+                if (!$this->getPaymentConfig()->allowAddressChanges()) {
+                    $conditions['bindBillingAddressHash'] = $billingAddressHash;
+                    $conditions['bindShippingAddressHash'] = $shippingAddressHash;
+                }
+
+                $creditCardVault = $this->em->getRepository(CreditCardVault::class)->findOneBy($conditions);
 
                 if (!$creditCardVault) {
-                    return new ErrorAction(ErrorAction::PROCESSING_FAILED,
-                                           'credit card token not found');
+                    return new ErrorAction(
+                        ErrorAction::PROCESSING_FAILED,
+                        'no valid credit card for token found'
+                    );
                 }
 
                 if (! $this->getPaymentConfig()->useThreeDOnTokens()) {
                     $transaction->setThreeD(false);
                 }
 
-                $oldBillingAddress = $creditCardVault->getLastBillingAddress();
-                $oldShippingAddress = $creditCardVault->getLastShippingAddress();
-                $billingAddress = $orderSummary->getUserMapper()->getBillingAddress();
-                $shippingAddress = $orderSummary->getUserMapper()->getShippingAddress();
-
-                if (! $this->compareAddresses($oldBillingAddress, $billingAddress)) {
-                    return new ErrorAction(ErrorAction::PROCESSING_FAILED,
-                                           'wrong billing address for credit card token');
-                }
-
-                if (! $this->compareAddresses($oldShippingAddress, $shippingAddress)) {
-                    return new ErrorAction(ErrorAction::PROCESSING_FAILED,
-                                           'wrong shipping address for credit card token');
-                }
-
                 $creditCardVault->setLastUsed(new \DateTime());
-                $creditCardVault->setLastBillingAddress($billingAddress);
-                $creditCardVault->setLastShippingAddress($shippingAddress);
                 $this->em->flush();
 
                 $transaction->setTokenId($tokenId);
@@ -341,10 +338,11 @@ class CreditCardPayment extends Payment implements
     }
 
     /**
+     * @return array
      */
-    private function compareAddresses($oldAddress, $newAddress)
+    private function getAddressKeys()
     {
-        $compareableKeys = [
+        return [
             "firstname",
             "lastname",
             "street",
@@ -353,6 +351,17 @@ class CreditCardPayment extends Payment implements
             "countryId",
             "stateId",
         ];
+    }
+
+    /**
+     * @param array $oldAddress
+     * @param array $newAddress
+     *
+     * @return bool
+     */
+    private function compareAddresses(array $oldAddress, array $newAddress)
+    {
+        $compareableKeys = $this->getAddressKeys();
 
         foreach ($compareableKeys as $key) {
             if ($oldAddress[$key] !== $newAddress[$key]) {
@@ -361,6 +370,23 @@ class CreditCardPayment extends Payment implements
         }
 
         return true;
+    }
+
+    /**
+     * @param array $address
+     *
+     * @return string
+     */
+    private function createAddressHash(array $address)
+    {
+        $compareableKeys = $this->getAddressKeys();
+
+        $hashabelAddress = [];
+        foreach ($compareableKeys as $key) {
+            $hashabelAddress[$key] = $address[$key];
+        }
+
+        return md5(serialize($hashabelAddress));
     }
 
     /**
@@ -381,6 +407,8 @@ class CreditCardPayment extends Payment implements
                 $maskedAccountNumber = $params['masked_account_number'];
                 $billingAddress = Shopware()->Session()->sOrderVariables['sUserData']['billingaddress'];
                 $shippingAddress = Shopware()->Session()->sOrderVariables['sUserData']['shippingaddress'];
+                $billingAddressHash = $this->createAddressHash($billingAddress);
+                $shippingAddressHash = $this->createAddressHash($shippingAddress);
                 $firstName = $params['first_name'];
                 $lastName = $params['last_name'];
 
@@ -400,6 +428,8 @@ class CreditCardPayment extends Payment implements
                 $creditCardVault = $this->em->getRepository(CreditCardVault::class)->findOneBy([
                     'userId' => $userId,
                     'token'  => $tokenId,
+                    'bindBillingAddressHash'  => $billingAddressHash,
+                    'bindShippingAddressHash' => $shippingAddressHash,
                 ]);
 
                 if ($creditCardVault) {
@@ -409,11 +439,13 @@ class CreditCardPayment extends Payment implements
                     $creditCardVault->setToken($tokenId);
                     $creditCardVault->setMaskedAccountNumber($maskedAccountNumber);
                     $creditCardVault->setUserId($userId);
+                    $creditCardVault->setBindBillingAddress($billingAddress);
+                    $creditCardVault->setBindBillingAddressHash($billingAddressHash);
+                    $creditCardVault->setBindShippingAddress($shippingAddress);
+                    $creditCardVault->setBindShippingAddressHash($shippingAddressHash);
 
                     $this->em->persist($creditCardVault);
                 }
-                $creditCardVault->setLastBillingAddress($billingAddress);
-                $creditCardVault->setLastShippingAddress($shippingAddress);
                 $creditCardVault->setAdditionalData($additionalCardData);
                 $this->em->flush();
             }
@@ -451,6 +483,8 @@ class CreditCardPayment extends Payment implements
             $userId = Shopware()->Session()->offsetGet('sUserId');
             $billingAddress = Shopware()->Session()->sOrderVariables['sUserData']['billingaddress'];
             $shippingAddress = Shopware()->Session()->sOrderVariables['sUserData']['shippingaddress'];
+            $billingAddressHash = $this->createAddressHash($billingAddress);
+            $shippingAddressHash = $this->createAddressHash($shippingAddress);
 
             $builder = $this->em->createQueryBuilder();
             $builder->select('ccv')
@@ -462,8 +496,8 @@ class CreditCardPayment extends Payment implements
 
             foreach ($savedCards as $card) {
                 $acceptedCriteria = $this->getPaymentConfig()->allowAddressChanges()
-                                  || ( $this->compareAddresses($card->getLastBillingAddress(), $billingAddress)
-                                       && $this->compareAddresses($card->getLastShippingAddress(), $shippingAddress));
+                                    || ( $billingAddressHash === $card->getBindBillingAddressHash()
+                                         && $shippingAddressHash === $card->getBindShippingAddressHash() );
 
                 $formData['savedCards'][] = [
                     'token'               => $card->getToken(),
