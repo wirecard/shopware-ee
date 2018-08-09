@@ -54,6 +54,12 @@ exports.config = {
                 tan: '12345'
             }
         },
+        pia: {
+            label: 'Wirecard Vorauskasse'
+        },
+        poi: {
+            label: 'Wirecard Kauf auf Rechnung'
+        },
         ideal: {
             label: 'Wirecard iDEAL',
             fields: {
