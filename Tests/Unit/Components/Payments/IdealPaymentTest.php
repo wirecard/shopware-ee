@@ -18,6 +18,7 @@ use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\IdealTransaction;
 use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
+use Wirecard\PaymentSdk\Transaction\Transaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\PaymentConfig;
@@ -74,27 +75,32 @@ class IdealPaymentTest extends PaymentTestCase
 
     public function testGetBackendTransaction()
     {
-        $transaction = $this->payment->getBackendTransaction(Operation::REFUND, IdealTransaction::NAME);
+        $transaction = $this->payment->getBackendTransaction(Operation::REFUND, IdealTransaction::NAME, null);
         $this->assertInstanceOf(IdealTransaction::class, $transaction);
         $this->assertNotSame($transaction, $this->payment->getTransaction());
         $this->assertNotSame($transaction, $this->payment->getBackendTransaction(
             Operation::REFUND,
-            IdealTransaction::NAME
+            IdealTransaction::NAME,
+            Transaction::TYPE_DEBIT
         ));
 
-        $transaction = $this->payment->getBackendTransaction(Operation::CREDIT, IdealTransaction::NAME);
+        $ideal       = IdealTransaction::NAME;
+        $transaction = $this->payment->getBackendTransaction(null, $ideal, Transaction::TYPE_CREDIT);
+        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
+        $transaction = $this->payment->getBackendTransaction(Operation::CREDIT, $ideal, null);
         $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
 
-        $transaction = $this->payment->getBackendTransaction(Operation::CANCEL, IdealTransaction::NAME);
+        $transaction = $this->payment->getBackendTransaction(Operation::CANCEL, $ideal, null);
         $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
 
-        $transaction = $this->payment->getBackendTransaction(Operation::REFUND, SepaCreditTransferTransaction::NAME);
+        $sepaCredit  = SepaCreditTransferTransaction::NAME;
+        $transaction = $this->payment->getBackendTransaction(Operation::REFUND, $sepaCredit, null);
         $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
 
-        $transaction = $this->payment->getBackendTransaction(Operation::CREDIT, SepaCreditTransferTransaction::NAME);
+        $transaction = $this->payment->getBackendTransaction(Operation::CREDIT, $sepaCredit, Transaction::TYPE_CREDIT);
         $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
 
-        $transaction = $this->payment->getBackendTransaction(Operation::CANCEL, SepaCreditTransferTransaction::NAME);
+        $transaction = $this->payment->getBackendTransaction(Operation::CANCEL, $sepaCredit, null);
         $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
     }
 

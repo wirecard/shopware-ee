@@ -13,14 +13,11 @@ use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
-use Wirecard\PaymentSdk\Entity\Amount;
-use Wirecard\PaymentSdk\Entity\Redirect;
+use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
 use Wirecard\PaymentSdk\Transaction\MasterpassTransaction;
 use Wirecard\PaymentSdk\Transaction\Operation;
-use Wirecard\PaymentSdk\TransactionService;
-use WirecardElasticEngine\Components\Data\OrderSummary;
+use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardElasticEngine\Components\Data\PaymentConfig;
-use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Payments\MasterpassPayment;
 use WirecardElasticEngine\Exception\UnknownTransactionTypeException;
 use WirecardElasticEngine\Tests\Unit\PaymentTestCase;
@@ -67,6 +64,23 @@ class MasterpassPaymentTest extends PaymentTestCase
         $transaction = $this->payment->getTransaction();
         $this->assertInstanceOf(MasterpassTransaction::class, $transaction);
         $this->assertSame($transaction, $this->payment->getTransaction());
+    }
+
+    public function testGetBackendTransaction()
+    {
+        $masterpass  = MasterpassTransaction::NAME;
+        $transaction = $this->payment->getBackendTransaction(Operation::CANCEL, $masterpass, null);
+        $this->assertInstanceOf(MasterpassTransaction::class, $transaction);
+        $this->assertNotSame($transaction, $this->payment->getTransaction());
+
+        $this->assertNull($this->payment->getBackendTransaction(null, $masterpass, Transaction::TYPE_DEBIT));
+        $this->assertNull($this->payment->getBackendTransaction(null, $masterpass, Transaction::TYPE_AUTHORIZATION));
+
+        $creditcard  = CreditCardTransaction::NAME;
+        $transaction = $this->payment->getBackendTransaction(null, $creditcard, Transaction::TYPE_DEBIT);
+        $this->assertInstanceOf(MasterpassTransaction::class, $transaction);
+        $transaction = $this->payment->getBackendTransaction(null, $creditcard, Transaction::TYPE_AUTHORIZATION);
+        $this->assertInstanceOf(MasterpassTransaction::class, $transaction);
     }
 
     public function testGetPaymentConfig()

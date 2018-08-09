@@ -121,14 +121,19 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
         foreach ($transactions as $transaction) {
             /** @var Transaction $transaction */
             $paymentTransaction = $payment->getBackendTransaction(
-                $transaction->getTransactionType(),
-                $transaction->getPaymentMethod()
+                null,
+                $transaction->getPaymentMethod(),
+                $transaction->getTransactionType()
             );
 
-            $paymentTransaction->setParentTransactionId($transaction->getTransactionId());
+            $backendOperations = [];
+            if ($paymentTransaction) {
+                $paymentTransaction->setParentTransactionId($transaction->getTransactionId());
+                $backendOperations = $backendService->retrieveBackendOperations($paymentTransaction, true);
+            }
 
             $result['transactions'][] = array_merge($transaction->toArray(), [
-                'backendOperations' => $backendService->retrieveBackendOperations($paymentTransaction, true),
+                'backendOperations' => $backendOperations,
                 'isFinal'           => $backendService->isFinal($transaction->getTransactionType()),
             ]);
         }
@@ -201,7 +206,11 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
         );
         $backendService = new BackendService($config, $this->getLogger());
 
-        $transaction = $payment->getBackendTransaction($operation, null);
+        $transaction = $payment->getBackendTransaction($operation, null, null);
+        if (! $transaction) {
+            $this->handleError('BackendOperationFailed');
+            return;
+        }
         $transaction->setParentTransactionId($transactionId);
 
         if ($amount) {

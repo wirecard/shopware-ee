@@ -18,6 +18,7 @@ use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\Transaction\IdealTransaction;
+use Wirecard\PaymentSdk\Transaction\Transaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\IdealPaymentConfig;
@@ -80,16 +81,18 @@ class IdealPayment extends Payment implements ProcessPaymentInterface, Additiona
      *
      * @param string|null $operation
      * @param string|null $paymentMethod
+     * @param string|null $transactionType
      *
      * @return IdealTransaction|SepaCreditTransferTransaction
      *
      * @since 1.0.0
      */
-    public function getBackendTransaction($operation, $paymentMethod)
+    public function getBackendTransaction($operation, $paymentMethod, $transactionType)
     {
         if ($paymentMethod === SepaCreditTransferTransaction::NAME
             || $operation === Operation::CREDIT
             || $operation === Operation::CANCEL
+            || $transactionType === Transaction::TYPE_CREDIT
         ) {
             return new SepaCreditTransferTransaction();
         }

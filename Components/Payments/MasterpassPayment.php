@@ -13,6 +13,7 @@ use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Transaction\MasterpassTransaction;
+use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardElasticEngine\Components\Data\PaymentConfig;
 
 /**
@@ -65,6 +66,28 @@ class MasterpassPayment extends Payment
             $this->transactionInstance = new MasterpassTransaction();
         }
         return $this->transactionInstance;
+    }
+
+    /**
+     * If paymentMethod is 'masterpass' and transaction type is 'debit' or 'authorization',
+     * no backend operation is allowed.
+     *
+     * @param string|null $operation
+     * @param string|null $paymentMethod
+     * @param string|null $transactionType
+     *
+     * @return MasterpassTransaction|null
+     *
+     * @since 1.0.0
+     */
+    public function getBackendTransaction($operation, $paymentMethod, $transactionType)
+    {
+        if ($paymentMethod === MasterpassTransaction::NAME
+            && ($transactionType === Transaction::TYPE_DEBIT || $transactionType === Transaction::TYPE_AUTHORIZATION)
+        ) {
+            return null;
+        }
+        return new MasterpassTransaction();
     }
 
     /**
