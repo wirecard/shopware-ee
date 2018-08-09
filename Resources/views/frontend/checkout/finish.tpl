@@ -37,9 +37,6 @@
                     <strong>{s name="Amount"}{/s}:</strong>
                     {if $sAmountWithTax && $sUserData.additional.charge_vat}{$sAmountWithTax|currency}{else}{$sAmount|currency}{/if}
                 </div>
-                {if $wirecardElasticEngineBankData.bankName}
-                    <div class="wirecardee--bankdata-name">{$wirecardElasticEngineBankData.bankName}</div>
-                {/if}
                 <div class="wirecardee--bankdata-iban">
                     <strong>{s name="IBAN"}{/s}:</strong>
                     {$wirecardElasticEngineBankData.iban}
@@ -54,6 +51,9 @@
                     <strong>{s name="ProviderTransactionReferenceID"}{/s}:</strong>
                     {$wirecardElasticEngineBankData.reference}
                 </div>
+                {if $wirecardElasticEngineBankData.bankName}
+                    <div class="wirecardee--bankdata-name">{$wirecardElasticEngineBankData.bankName}</div>
+                {/if}
                 {if $wirecardElasticEngineBankData.address}
                     <div class="wirecardee--bankdata-address">
                         {$wirecardElasticEngineBankData.address}<br>

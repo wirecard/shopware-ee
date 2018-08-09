@@ -372,18 +372,18 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
             renderTpl: new Ext.XTemplate(
                 '{literal}<tpl for=".">',
                 '<p><label class="x-form-item-label">' + me.snippets.bankData.title + ':</label></p>',
-                '<tpl if="bankName"><p>{bankName}</p></tpl>',
                 '<p>' + me.snippets.bankData.iban + ': {iban}</p>',
                 '<tpl if="bic"><p>' + me.snippets.bankData.bic + ': {bic}</p></tpl>',
                 '<p>' + me.snippets.bankData.reference + ': {reference}</p>',
+                '<tpl if="bankName"><p>{bankName}</p></tpl>',
                 '<tpl if="address"><p>{address}<br>{city} {state}</p></tpl>',
                 '</tpl>{/literal}'
             ),
             renderData: {
-                'bankName': transaction.response['merchant-bank-account.0.bank-name'],
                 'iban': transaction.response['merchant-bank-account.0.iban'],
                 'bic': transaction.response['merchant-bank-account.0.bic'],
                 'reference': transaction.providerTransactionReference,
+                'bankName': transaction.response['merchant-bank-account.0.bank-name'],
                 'address': transaction.response['merchant-bank-account.0.branch-address'],
                 'city': transaction.response['merchant-bank-account.0.branch-city'],
                 'state': transaction.response['merchant-bank-account.0.branch-state']

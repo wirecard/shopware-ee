@@ -492,20 +492,6 @@ function (button) {
                 Secret Key is mandatory to calculate the Digital Signature for payments.
             </description>
         </element>
-        <element type="button" scope="shop">
-            <name>wirecardElasticEnginePoiPiaTestApi</name>
-            <label lang="de">[Kauf auf Rechnung / Vorauskasse] Konfiguration testen</label>
-            <label lang="en">[Payment on Invoice / Payment in Advance] Test configuration</label>
-            <options>
-                <handler>
-                    <![CDATA[
-function (button) {
-    wirecardeeTestPaymentCredentials(button, 'PoiPia', 'Wirecard Payment on Invoice / Payment in Advance Test');
-}
-                    ]]>
-                </handler>
-            </options>
-        </element>
         <element type="boolean" scope="shop">
             <name>wirecardElasticEnginePoiPiaFraudPrevention</name>
             <label lang="de">[Kauf auf Rechnung / Vorauskasse] Zusätzliche Informationen mitsenden</label>
@@ -519,6 +505,20 @@ function (button) {
                 Additional data will be sent for the purpose of fraud protection. This additional
                 data includes billing/shipping address, shopping basket and descriptor.
             </description>
+        </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEnginePoiPiaTestApi</name>
+            <label lang="de">[Kauf auf Rechnung / Vorauskasse] Konfiguration testen</label>
+            <label lang="en">[Payment on Invoice / Payment in Advance] Test configuration</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    wirecardeeTestPaymentCredentials(button, 'PoiPia', 'Wirecard Payment on Invoice / Payment in Advance Test');
+}
+                    ]]>
+                </handler>
+            </options>
         </element>
         <!-- Poi / Pia End -->
         <!-- SEPA Direct Debit -->
