@@ -287,6 +287,12 @@ class CreditCardPaymentTest extends PaymentTestCase
         $transactionService = $this->createMock(TransactionService::class);
         $request            = $this->createMock(\Enlight_Controller_Request_Request::class);
         $sessionManager     = $this->createMock(SessionManager::class);
+        $sessionManager->expects($this->atLeastOnce())->method('getPaymentData')->willReturn(['saveToken' => true]);
+        $sessionManager->method('getOrderBilldingAddress')->willReturn([]);
+        $sessionManager->method('getOrderShippingAddress')->willReturn([]);
+
+        $repo = $this->createMock(EntityRepository::class);
+        $this->em->method('getRepository')->willReturn($repo);
 
         $response = $this->payment->processReturn($transactionService, $request, $sessionManager);
         $this->assertNull($response);

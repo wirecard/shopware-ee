@@ -386,11 +386,8 @@ class CreditCardPayment extends Payment implements
      *
      * @since 1.0.0
      */
-    private function saveToken(
-        TransactionService $transactionService,
-        SessionManager $sessionManager,
-        $params
-    ) {
+    private function saveToken(TransactionService $transactionService, SessionManager $sessionManager, $params)
+    {
         $paymentData = $sessionManager->getPaymentData();
         if (empty($paymentData['saveToken'])) {
             return;
