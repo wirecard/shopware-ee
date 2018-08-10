@@ -187,6 +187,39 @@ class RatepayInvoicePayment extends Payment implements
     }
 
     /**
+     * @return array
+     */
+    private function getAddressKeys()
+    {
+        return [
+            "firstname",
+            "lastname",
+            "street",
+            "zipcode",
+            "city",
+            "countryId",
+            "stateId",
+        ];
+    }
+
+    /**
+     * @param array $srcAddress
+     * @param array $destAddress
+     *
+     * @return bool
+     */
+    private function compareAddresses(array $srcAddress, array $destAddress)
+    {
+        $compareableKeys = $this->getAddressKeys();
+        foreach ($compareableKeys as $key) {
+            if ($srcAddress[$key] !== $destAddress[$key]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function checkDisplayRestrictions(UserMapper $userMapper)
@@ -202,6 +235,12 @@ class RatepayInvoicePayment extends Payment implements
             $shippingAddress = $userMapper->getShippingAddress();
         } catch (ArrayKeyNotFoundException $e) {
             return false;
+        }
+
+        if (! $this->getPaymentConfig()->isAllowedDifferentBillingShipping()) {
+            if(! $this->compareAddresses($billingAddress, $shippingAddress)) {
+                return false;
+            }
         }
 
         // age above 18

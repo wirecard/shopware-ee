@@ -332,7 +332,7 @@ function (button) {
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineRatepayInvoiceMaxAmount</name>
-            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay]</label>
+            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Maximaler Betrag</label>
             <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Maximum Amount</label>
             <value>3500</value>
             <description lang="de">
