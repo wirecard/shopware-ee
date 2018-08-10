@@ -16,10 +16,11 @@
             <ul class="list--radio list--unstyled">
                 <li class="block-group">
                     <div class="block column--radio">
-                        <input type="radio" name="wirecardElasticEngine[token]" id="wirecard--token-no-card" value="" checked="checked" />
+                        <input type="radio" name="wirecardElasticEngine[token]" id="wirecardee--token-no-card" value=""
+                               checked="checked"/>
                     </div>
                     <div class="block column--label">
-                        <label for="wirecard--token-no-card">
+                        <label for="wirecardee--token-no-card">
                             {s name="NewCard"}{/s}
                         </label>
                     </div>
@@ -28,46 +29,48 @@
                     {if $card.acceptedCriteria}
                         <li class="block-group">
                             <div class="block column--radio">
-                                <input type="radio" name="wirecardElasticEngine[token]" id="wirecard--token-{$card.token}" value="{$card.token}" />
+                                <input type="radio" name="wirecardElasticEngine[token]"
+                                       id="wirecardee--token-{$card.token}" value="{$card.token}"/>
                             </div>
                             <div class="block column--label">
-                                <label for="wirecard--token-{$card.token}">
-                                    <span class="wirecard--masked-account-number">
+                                <label for="wirecardee--token-{$card.token}">
+                                    <span class="wirecardee--masked-account-number">
                                         {$card.maskedAccountNumber}
                                     </span>
                                     {if $card.additionalData}
-                                        <span class="wirecard--card-info wirecard--card-holder">
+                                        <span class="wirecardee--card-info wirecardee--card-holder">
                                             {$card.additionalData.firstName} {$card.additionalData.lastName}
                                         </span>
                                     {/if}
                                 </label>
                             </div>
                             <div class="block column--button">
-                                <button class="btn button--delete-token" type="button" data-token="{$card.token}">
+                                <button class="btn wirecardee--delete-token" type="button" data-token="{$card.token}">
                                     {s name="DeleteButton"}{/s}
                                 </button>
                             </div>
                         </li>
                     {else}
-                        <li class="block-group wirecard--disabled-card">
+                        <li class="block-group wirecardee--disabled-card">
                             <div class="block column--radio">
-                                <input type="radio" name="wirecardElasticEngine[token]" id="wirecard--token-{$card.token}" value="" disabled="disabled" />
+                                <input type="radio" name="wirecardElasticEngine[token]"
+                                       id="wirecardee--token-{$card.token}" value="" disabled="disabled"/>
                             </div>
                             <div class="block column--label">
-                                <span class="wirecard--masked-account-number">
+                                <span class="wirecardee--masked-account-number">
                                     {$card.maskedAccountNumber}
                                 </span>
                                 {if $card.additionalData}
-                                    <span class="wirecard--card-info wirecard--card-holder">
+                                    <span class="wirecardee--card-info wirecardee--card-holder">
                                         {$card.additionalData.firstName} {$card.additionalData.lastName}
                                     </span>
                                 {/if}
-                                <span class="wircard--disabled-note">
+                                <span class="wircardee--disabled-note">
                                     {s name="WrongAddressNote"}{/s}
                                 </span>
                             </div>
                             <div class="block column--button">
-                                <button class="btn button--delete-token" type="button" data-token="{$card.token}">
+                                <button class="btn wirecardee--delete-token" type="button" data-token="{$card.token}">
                                     {s name="DeleteButton"}{/s}
                                 </button>
                             </div>
@@ -82,10 +85,11 @@
         <ul class="list--checkbox list--unstyled">
             <li class="block-group">
                 <span class="block column--checkbox">
-                    <input id="wirecard--save-token" type="checkbox" name="wirecardElasticEngine[saveToken]" value="true" />
+                    <input id="wirecardee--save-token" type="checkbox" name="wirecardElasticEngine[saveToken]"
+                           value="true"/>
                 </span>
                 <span class="block column--label">
-                    <label for="wirecard--save-token">{s name="SaveToken"}{/s}</label>
+                    <label for="wirecardee--save-token">{s name="SaveToken"}{/s}</label>
                 </span>
             </li>
         </ul>

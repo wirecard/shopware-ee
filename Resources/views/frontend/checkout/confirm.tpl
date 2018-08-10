@@ -37,7 +37,7 @@
                     </div>
                     <div class="panel--body is--wide">
                         {include file="frontend/plugins/wirecard_elastic_engine/form/credit_card.tpl"}
-                </div>
+                    </div>
                 </div>
             {/if}
         {/if}
@@ -119,11 +119,11 @@
     {elseif $wirecardElasticEngineViewAssignments and $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_credit_card'}
         {block name="wirecard_elastic_engine_credit_card_form_javascript"}
             <script type="text/javascript">
-                document.asyncReady(function() {
+                document.asyncReady(function () {
                     var $ = jQuery,
                         url = "{url controller="wirecardElasticEnginePayment" action="deleteCreditCardToken"}";
 
-                    $(".button--delete-token").click(function() {
+                    $(".wirecardee--delete-token").click(function () {
                         window.location.href = url + '/token/' + $(this).data('token');
                     })
                 });
