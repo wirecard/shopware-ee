@@ -127,39 +127,5 @@
                 });
             });
         </script>
-    {elseif $wirecardElasticEngineViewAssignments and $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_ratepay_invoice'}
-        <script type="text/javascript">
-            document.asyncReady(function () {
-                var $ = jQuery;
-
-                var validateAge = function() {
-                    var ageField = $('.wirecardee--hidden-age-field')[0];
-
-                    if (! ageField.validity.valid) {
-                        $('.wirecardee-ratepay-invoice--birthdate select').addClass('has--error');
-                        $('.wirecardee--error-box').show();
-                        return;
-                    }
-                    $('.wirecardee--error-box').hide();
-                    $('.wirecardee-ratepay-invoice--birthdate select').removeClass('has--error');
-                };
-
-                $('.wirecardee--hidden-age-field')[0].addEventListener('invalid', validateAge);
-
-                $('.wirecardee-ratepay-invoice--birthdate select').on('change', function() {
-                    var day = $('.wirecardee--birthday-day').val() - 1,
-                        month = $('.wirecardee--birthday-month').val() - 1,
-                        year = $('.wirecardee--birthday-year').val(),
-                        birthdate = new Date(year, month, day),
-                        diffSeconds = Date.now() - birthdate.getTime(),
-                        diffDate = new Date(diffSeconds),
-                        age = diffDate.getFullYear() - 1970;
-
-                    $('.wirecardee--hidden-age-field').val(age);
-
-                    validateAge();
-                });
-            });
-        </script>
     {/if}
 {/block}

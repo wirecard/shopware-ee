@@ -33,7 +33,6 @@
     <div>
         <strong class="birthday--label">{s name='RegisterPlaceholderBirthday' namespace="frontend/register/personal_fieldset"}{/s}{s name="RequiredField" namespace="frontend/register/index"}{/s}</strong>
     </div>
-    <input class="wirecardee--hidden-age-field" type="number" size="4" name="age" min="18" required style="display:none;">
     <div class="wirecardee-ratepay-invoice--birthdate">
         <div class="field--select select-field">
             <select name="wirecardElasticEngine[birthday][day]" required="required" aria-required="true"
@@ -64,17 +63,6 @@
                     <option value="{$year}">{$year}</option>
                 {/for}
             </select>
-        </div>
-    </div>
-    <div class="wirecardee--error-box">
-        <div class="alert is--error is--rounded">
-            <div class="alert--icon">
-                <i class="icon--element icon--cross">
-                </i>
-            </div>
-            <div class="alert--content">
-                {s name="FormErrorTooYoung"}{/s}
-            </div>
         </div>
     </div>
 {/block}
