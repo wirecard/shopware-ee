@@ -23,7 +23,7 @@ use WirecardElasticEngine\Exception\ArrayKeyNotFoundException;
 class UserMapper extends ArrayMapper
 {
     const CUSTOMER_NUMBER = 'customernumber';
-    const USER_ID = 'userID';
+    const USER_ID = 'id';
     const FIRST_NAME = 'firstname';
     const LAST_NAME = 'lastname';
     const EMAIL = 'email';
