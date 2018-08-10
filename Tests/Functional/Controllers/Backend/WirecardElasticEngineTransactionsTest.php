@@ -109,7 +109,8 @@ class WirecardElasticEngineTransactionsTest extends \Enlight_Components_Test_Plu
 
         $this->Request()->setParam('payment', 'wirecard_elastic_engine_credit_card');
         $this->Request()->setParam('operation', Operation::CANCEL);
-        $this->Request()->setParam('transactionId', '0');
+        $this->Request()->setParam('transactionId', '1');
+        $this->Request()->setParam('orderNumber', '20001');
         $response = $this->dispatch('/backend/WirecardElasticEngineTransactions/processBackendOperations');
 
         $this->assertEquals(200, $response->getHttpResponseCode());

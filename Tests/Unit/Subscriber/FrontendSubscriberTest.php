@@ -18,6 +18,7 @@ class FrontendSubscriberTest extends TestCase
     public function testSubscribedEvents()
     {
         $this->assertEquals([
+            'Shopware_Modules_Admin_GetPaymentMeans_DataFilter'              => 'onGetPayments',
             'Enlight_Controller_Action_PreDispatch'                          => 'onPreDispatch',
             'Theme_Compiler_Collect_Plugin_Less'                             => 'onCollectLessFiles',
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchCheckout',
