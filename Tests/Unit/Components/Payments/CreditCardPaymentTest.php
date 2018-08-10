@@ -9,7 +9,9 @@
 
 namespace WirecardElasticEngine\Tests\Unit\Components\Payments;
 
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Shopware\Models\Shop\Locale;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -17,16 +19,20 @@ use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
-use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\TransactionService;
+use WirecardElasticEngine\Components\Actions\ErrorAction;
 use WirecardElasticEngine\Components\Actions\ViewAction;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\PaymentConfig;
 use WirecardElasticEngine\Components\Mapper\BasketMapper;
+use WirecardElasticEngine\Components\Mapper\UserMapper;
+use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Components\Payments\Contracts\ProcessReturnInterface;
 use WirecardElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardElasticEngine\Components\Payments\PaypalPayment;
-use WirecardElasticEngine\Exception\UnknownTransactionTypeException;
+use WirecardElasticEngine\Components\Services\SessionManager;
+use WirecardElasticEngine\Models\CreditCardVault;
 use WirecardElasticEngine\Tests\Unit\PaymentTestCase;
 use WirecardElasticEngine\WirecardElasticEngine;
 
@@ -45,6 +51,9 @@ class CreditCardPaymentTest extends PaymentTestCase
             [WirecardElasticEngine::NAME, 'wirecardElasticEngineCreditCardSslMaxLimit', null, '300'],
             [WirecardElasticEngine::NAME, 'wirecardElasticEngineCreditCardThreeDMinLimit', null, '100'],
             [WirecardElasticEngine::NAME, 'wirecardElasticEngineCreditCardTransactionType', null, 'pay'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineCreditCardEnableVault', null, true],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineCreditCardAllowAddressChanges', null, false],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineCreditCardThreeDUsageOnTokens', null, false],
         ]);
 
         $this->payment = new CreditCardPayment(
@@ -84,6 +93,9 @@ class CreditCardPaymentTest extends PaymentTestCase
         $this->assertNull($config->getBaseUrl());
         $this->assertNull($config->getHttpUser());
         $this->assertNull($config->getHttpPassword());
+        $this->assertTrue($config->isVaultEnabled());
+        $this->assertFalse($config->allowAddressChanges());
+        $this->assertFalse($config->useThreeDOnTokens());
     }
 
     public function testGetTransactionConfig()
@@ -178,5 +190,148 @@ class CreditCardPaymentTest extends PaymentTestCase
             'wirecardRequestData' => $requestData,
             'url'                 => null,
         ], $action->getAssignments());
+    }
+
+    public function testProcessPaymentWithVaultEnabled()
+    {
+        $orderSummary = $this->createMock(OrderSummary::class);
+        $orderSummary->method('getAdditionalPaymentData')->willReturn(['token' => 'FOOTOKEN123']);
+        $userMapper = $this->createMock(UserMapper::class);
+        $userMapper->expects($this->atLeastOnce())->method('getUserId')->willReturn(1);
+        $userMapper->expects($this->atLeastOnce())->method('getBillingAddress')->willReturn([
+            'city'    => 'Footown',
+            'street'  => 'Barstreet',
+            'zipcode' => 1337,
+        ]);
+        $userMapper->expects($this->atLeastOnce())->method('getShippingAddress')->willReturn([
+            'city'    => 'ShipFootown',
+            'street'  => 'ShipBarstreet',
+            'zipcode' => 1338,
+        ]);
+        $orderSummary->method('getUserMapper')->willReturn($userMapper);
+
+        $repo            = $this->createMock(EntityRepository::class);
+        $creditCardVault = new CreditCardVault();
+        $lastUsed        = $creditCardVault->getLastUsed();
+        $repo->expects($this->once())->method('findOneBy')->with([
+            'userId'                  => 1,
+            'token'                   => 'FOOTOKEN123',
+            'bindBillingAddressHash'  => '5958eb93c0b510df3961d03ff1bf3975',
+            'bindShippingAddressHash' => 'e8269246ec003988d43a212a960f0518',
+        ])->willReturn($creditCardVault);
+        $this->em->method('getRepository')->willReturn($repo);
+
+        $transactionService = $this->createMock(TransactionService::class);
+        $shop               = $this->createMock(Shop::class);
+        $redirect           = $this->createMock(Redirect::class);
+        $request            = $this->createMock(\Enlight_Controller_Request_Request::class);
+        $order              = $this->createMock(\sOrder::class);
+
+        $this->assertNull($this->payment->processPayment(
+            $orderSummary,
+            $transactionService,
+            $shop,
+            $redirect,
+            $request,
+            $order
+        ));
+        $this->assertNotSame($lastUsed, $creditCardVault->getLastUsed());
+    }
+
+    public function testProcessPaymentWithVaultNotFoundError()
+    {
+        $orderSummary = $this->createMock(OrderSummary::class);
+        $orderSummary->method('getAdditionalPaymentData')->willReturn(['token' => 'FOOTOKEN123']);
+        $userMapper = $this->createMock(UserMapper::class);
+        $userMapper->method('getUserId')->willReturn(1);
+        $userMapper->method('getBillingAddress')->willReturn([
+            'city'                   => 'Footown',
+            'street'                 => 'Barstreet',
+            'zipcode'                => 1337,
+            'additionalAddressLine1' => 'Hodor',
+        ]);
+        $userMapper->method('getShippingAddress')->willReturn([
+            'city'                   => 'ShipFootown',
+            'street'                 => 'ShipBarstreet',
+            'zipcode'                => 1338,
+            'additionalAddressLine1' => 'ShipHodor',
+        ]);
+        $orderSummary->method('getUserMapper')->willReturn($userMapper);
+
+        $repo = $this->createMock(EntityRepository::class);
+        $this->em->method('getRepository')->willReturn($repo);
+
+        $transactionService = $this->createMock(TransactionService::class);
+        $shop               = $this->createMock(Shop::class);
+        $redirect           = $this->createMock(Redirect::class);
+        $request            = $this->createMock(\Enlight_Controller_Request_Request::class);
+        $order              = $this->createMock(\sOrder::class);
+
+        $action = $this->payment->processPayment(
+            $orderSummary,
+            $transactionService,
+            $shop,
+            $redirect,
+            $request,
+            $order
+        );
+        $this->assertInstanceOf(ErrorAction::class, $action);
+        $this->assertEquals('no valid credit card for token found', $action->getMessage());
+        $this->assertEquals(1, $action->getCode());
+    }
+
+    public function testProcessReturn()
+    {
+        $this->assertInstanceOf(ProcessReturnInterface::class, $this->payment);
+
+        $transactionService = $this->createMock(TransactionService::class);
+        $request            = $this->createMock(\Enlight_Controller_Request_Request::class);
+        $sessionManager     = $this->createMock(SessionManager::class);
+
+        $response = $this->payment->processReturn($transactionService, $request, $sessionManager);
+        $this->assertNull($response);
+    }
+
+    public function testAdditionalViewAssignments()
+    {
+        $this->assertInstanceOf(AdditionalViewAssignmentsInterface::class, $this->payment);
+
+        $qb = $this->createMock(QueryBuilder::class);
+        $qb->method('select')->willReturnSelf();
+        $qb->method('from')->willReturnSelf();
+        $qb->method('where')->willReturnSelf();
+        $qb->method('setParameter')->willReturnSelf();
+        $qb->method('orderBy')->willReturnSelf();
+        $query = $this->createMock(AbstractQuery::class);
+        $qb->method('getQuery')->willReturn($query);
+        $this->em->method('createQueryBuilder')->willReturn($qb);
+
+        $sessionManager = $this->createMock(SessionManager::class);
+        $sessionManager->method('getOrderBilldingAddress')->willReturn([]);
+        $sessionManager->method('getOrderShippingAddress')->willReturn([]);
+
+        $this->assertEquals([
+            'method'       => CreditCardPayment::PAYMETHOD_IDENTIFIER,
+            'vaultEnabled' => true,
+        ], $this->payment->getAdditionalViewAssignments($sessionManager));
+
+        $creditCardVault = new CreditCardVault();
+        $creditCardVault->setToken('FOOTOKER321');
+        $creditCardVault->setMaskedAccountNumber('4444****8888');
+        $creditCardVault->setAdditionalData(['add']);
+        $query->method('getResult')->willReturn([$creditCardVault]);
+
+        $this->assertEquals([
+            'method'       => CreditCardPayment::PAYMETHOD_IDENTIFIER,
+            'vaultEnabled' => true,
+            'savedCards'   => [
+                [
+                    'token'               => 'FOOTOKER321',
+                    'maskedAccountNumber' => '4444****8888',
+                    'additionalData'      => ['add'],
+                    'acceptedCriteria'    => false,
+                ],
+            ],
+        ], $this->payment->getAdditionalViewAssignments($sessionManager));
     }
 }
