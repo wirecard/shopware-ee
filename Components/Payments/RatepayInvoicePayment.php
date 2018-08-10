@@ -45,6 +45,7 @@ use WirecardElasticEngine\Components\Mapper\UserMapper;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\DisplayRestrictionInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Exception\ArrayKeyNotFoundException;
 
 /**
  * @package WirecardElasticEngine\Components\Payments
@@ -193,10 +194,15 @@ class RatepayInvoicePayment extends Payment implements
         $acceptedBillingCountries = $this->getPaymentConfig()->getBillingCountries();
         $acceptedShippingCountries = $this->getPaymentConfig()->getShippingCountries();
         $acceptedCurrencies = $this->getPaymentConfig()->getAcceptedCurrencies();
-        $billingAddress = $userMapper->getBillingAddress();
-        $shippingAddress = $userMapper->getShippingAddress();
         $minAmount = $this->getPaymentConfig()->getMinAmount();
         $maxAmount = $this->getPaymentConfig()->getMaxAmount();
+
+        try {
+            $billingAddress = $userMapper->getBillingAddress();
+            $shippingAddress = $userMapper->getShippingAddress();
+        } catch (ArrayKeyNotFoundException $e) {
+            return false;
+        }
 
         // age above 18
         $birthDay = $userMapper->getBirthday();
