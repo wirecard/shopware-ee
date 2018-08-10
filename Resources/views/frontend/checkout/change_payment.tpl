@@ -21,6 +21,16 @@
                 <img title="{$payment_mean.description}" alt="{$payment_mean.description}"
                      src="{s name="iDEALLogo" namespace="frontend/wirecard_elastic_engine/payments"}{/s}" />
             </div>
+        {elseif $payment_mean.name == "wirecard_elastic_engine_pia"}
+            <div class="wirecardee--payments">
+                <img title="{$payment_mean.description}" alt="{$payment_mean.description}"
+                     src="{s name="PaymentInAdvanceLogo" namespace="frontend/wirecard_elastic_engine/payments"}{/s}" />
+            </div>
+        {elseif $payment_mean.name == "wirecard_elastic_engine_poi"}
+            <div class="wirecardee--payments">
+                <img title="{$payment_mean.description}" alt="{$payment_mean.description}"
+                     src="{s name="PaymentOnInvoiceLogo" namespace="frontend/wirecard_elastic_engine/payments"}{/s}" />
+            </div>
         {elseif $payment_mean.name == "wirecard_elastic_engine_paypal"}
             <div class="wirecardee--payments">
                 <img title="{$payment_mean.description}" alt="{$payment_mean.description}"

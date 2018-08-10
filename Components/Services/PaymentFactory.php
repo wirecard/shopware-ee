@@ -17,6 +17,8 @@ use WirecardElasticEngine\Components\Payments\IdealPayment;
 use WirecardElasticEngine\Components\Payments\Payment;
 use WirecardElasticEngine\Components\Payments\PaymentInterface;
 use WirecardElasticEngine\Components\Payments\PaypalPayment;
+use WirecardElasticEngine\Components\Payments\PaymentInAdvancePayment;
+use WirecardElasticEngine\Components\Payments\PaymentOnInvoicePayment;
 use WirecardElasticEngine\Components\Payments\SepaPayment;
 use WirecardElasticEngine\Components\Payments\SofortPayment;
 use WirecardElasticEngine\Exception\UnknownPaymentException;
@@ -134,11 +136,28 @@ class PaymentFactory
     private function getMappedPayments()
     {
         return [
-            CreditCardPayment::PAYMETHOD_IDENTIFIER => CreditCardPayment::class,
-            IdealPayment::PAYMETHOD_IDENTIFIER      => IdealPayment::class,
-            PaypalPayment::PAYMETHOD_IDENTIFIER     => PaypalPayment::class,
-            SepaPayment::PAYMETHOD_IDENTIFIER       => SepaPayment::class,
-            SofortPayment::PAYMETHOD_IDENTIFIER     => SofortPayment::class,
+            CreditCardPayment::PAYMETHOD_IDENTIFIER       => CreditCardPayment::class,
+            IdealPayment::PAYMETHOD_IDENTIFIER            => IdealPayment::class,
+            PaypalPayment::PAYMETHOD_IDENTIFIER           => PaypalPayment::class,
+            PaymentInAdvancePayment::PAYMETHOD_IDENTIFIER => PaymentInAdvancePayment::class,
+            PaymentOnInvoicePayment::PAYMETHOD_IDENTIFIER => PaymentOnInvoicePayment::class,
+            SepaPayment::PAYMETHOD_IDENTIFIER             => SepaPayment::class,
+            SofortPayment::PAYMETHOD_IDENTIFIER           => SofortPayment::class,
         ];
+    }
+
+    /**
+     * Return true, if payment identifier matches a supported Wirecard payment
+     *
+     * @param string $identifier
+     *
+     * @return bool
+     *
+     * @since 1.0.0
+     */
+    public function isSupportedPayment($identifier)
+    {
+        $payments = $this->getMappedPayments();
+        return isset($payments[$identifier]);
     }
 }
