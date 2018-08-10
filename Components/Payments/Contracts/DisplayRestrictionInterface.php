@@ -12,7 +12,7 @@ namespace WirecardElasticEngine\Components\Payments\Contracts;
 use WirecardElasticEngine\Components\Mapper\UserMapper;
 
 /**
- * @package WirecardElasticEngine\Components\Payments\Interfaces
+ * @package WirecardElasticEngine\Components\Payments\Contracts
  *
  * @since   1.0.0
  */
@@ -20,10 +20,10 @@ interface DisplayRestrictionInterface
 {
     /**
      * @param UserMapper $userMapper
-     * @param array $basket
-     * @param string $currency
      *
      * @return bool
+     *
+     * @since 1.0.0
      */
     public function checkDisplayRestrictions(UserMapper $userMapper);
 }

@@ -14,7 +14,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Shopware\Components\Theme\LessDefinition;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
-use WirecardElasticEngine\Components\Mapper\BasketMapper;
 use WirecardElasticEngine\Components\Mapper\UserMapper;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\DisplayRestrictionInterface;
@@ -69,39 +68,42 @@ class FrontendSubscriber implements SubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
+            'Shopware_Modules_Admin_GetPaymentMeans_DataFilter'              => 'onGetPayments',
             'Enlight_Controller_Action_PreDispatch'                          => 'onPreDispatch',
             'Theme_Compiler_Collect_Plugin_Less'                             => 'onCollectLessFiles',
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchCheckout',
-            'Shopware_Modules_Admin_GetPaymentMeans_DataFilter'              => 'onGetPayments',
         ];
     }
 
     /**
-     * @param \Enlight_Event_EventArgs
+     * Remove payments that implement DisplayRestrictionInterface and fail the checkDisplayRestrictions test
+     * (e.g. RatepayInvoicePayment)
+     *
+     * @param \Enlight_Event_EventArgs $args
+     *
+     * @since 1.0.0
      */
     public function onGetPayments(\Enlight_Event_EventArgs $args)
     {
-        $payments = $args->getReturn();
-        $admin = $args->getSubject();
-
-        $userData = $admin->sGetUserData();
-
+        /** @var \sAdmin $admin */
+        $admin      = $args->get('subject');
+        $userData   = $admin->sGetUserData();
         $userMapper = new UserMapper($userData, '', '');
 
-        foreach ($payments as $key => $paymentData) {
+        $paymentMeans = $args->getReturn();
+        foreach ($paymentMeans as $key => $paymentData) {
             try {
-                // TODO check payments to be shown
                 $payment = $this->paymentFactory->create($paymentData['name']);
                 if ($payment instanceof DisplayRestrictionInterface) {
-                    if (!$payment->checkDisplayRestrictions($userMapper)) {
-                        unset($payments[$key]);
+                    if (! $payment->checkDisplayRestrictions($userMapper)) {
+                        unset($paymentMeans[$key]);
                     }
                 }
             } catch (UnknownPaymentException $e) {
             }
         }
 
-        $args->setReturn($payments);
+        $args->setReturn($paymentMeans);
     }
 
     /**

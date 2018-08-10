@@ -174,7 +174,7 @@ abstract class Payment implements PaymentInterface
      * @param string $name
      * @param string $prefix
      *
-     * @return string
+     * @return string|array
      *
      * @since 1.0.0
      */

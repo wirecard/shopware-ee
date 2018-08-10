@@ -136,8 +136,8 @@ class PaymentFactory
     {
         return [
             CreditCardPayment::PAYMETHOD_IDENTIFIER     => CreditCardPayment::class,
-            IdealPayment::PAYMETHOD_IDENTIFIER          => IdealPayment::class,
             RatepayInvoicePayment::PAYMETHOD_IDENTIFIER => RatepayInvoicePayment::class,
+            IdealPayment::PAYMETHOD_IDENTIFIER          => IdealPayment::class,
             PaypalPayment::PAYMETHOD_IDENTIFIER         => PaypalPayment::class,
             SepaPayment::PAYMETHOD_IDENTIFIER           => SepaPayment::class,
             SofortPayment::PAYMETHOD_IDENTIFIER         => SofortPayment::class,

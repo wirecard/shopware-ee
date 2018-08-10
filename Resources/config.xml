@@ -300,12 +300,12 @@ function (button) {
             <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Minimum Amount</label>
             <value>20</value>
             <description lang="de">
-                Garantierter Kauf auf Rechnung wird nur angezeigt, wenn der Bestellbetrag höher ist als der hier
-                definierte Wert (in Standardwährung).
+                Garantierter Kauf auf Rechnung wird nur angezeigt, wenn der Bestellbetrag
+                höher ist als der hier definierte Wert (in Standardwährung).
             </description>
             <description lang="en">
                 Payment method Guaranteed Invoice will only be displayed if the ordered
-                amount is bigger than this defined amount. Amount in default shop currency
+                amount exceeds the amount defined here. Amount in default shop currency.
             </description>
         </element>
         <element type="text" scope="shop">
@@ -333,7 +333,7 @@ function (button) {
             </description>
             <description lang="en">
                 Payment method Guaranteed Invoice will only be displayed if the active
-                currency equals one of these chosen currencies.
+                currency is one of these selected currencies.
             </description>
             <store>Shopware.apps.Base.store.Currency</store>
             <options>
@@ -348,12 +348,12 @@ function (button) {
             <description lang="de">
                 Garantierter Kauf auf Rechnung wird dem Endkunden beim Checkout nur
                 angezeigt, wenn die Lieferadresse einem der hier gewählten Länder entspricht.
-                Voreingestelle Auswahl: Österreich, Schweiz und Deutschland.
+                Voreingestelle Auswahl: Deutschland, Österreich und Schweiz.
             </description>
             <description lang="en">
-                Payment method Guaranteed Invoice will only be displayed if consumers
-                shipping country equals one of these chosen countries.
-                Predefined the following countries are allowed: AT, CH, DE.
+                Payment method Guaranteed Invoice is only displayed if the consumer's
+                shipping country equals one of these selected countries.
+                Default pre-selection: Germany, Austria and Switzerland.
             </description>
             <store>Shopware.apps.Base.store.Country</store>
             <options>
@@ -362,18 +362,18 @@ function (button) {
         </element>
         <element type="combo" scope="shop">
             <name>wirecardElasticEngineRatepayInvoiceBillingCountries</name>
-            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Erlaubte Rechnungsländer</label>
+            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Erlaubte Rechnungsempfängerländer</label>
             <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Allowed billing countries</label>
             <value>2</value>
             <description lang="de">
                 Garantierter Kauf auf Rechnung wird dem Endkunden beim Checkout nur
                 angezeigt, wenn die Rechnungsadresse einem der hier gewählten Länder entspricht.
-                Voreingestelle Auswahl: Österreich, Schweiz und Deutschland.
+                Voreingestelle Auswahl: Deutschland, Österreich und Schweiz.
             </description>
             <description lang="en">
-                Payment method Guaranteed Invoice will only be displayed if consumers
-                billing country equals one of these chosen countries.
-                Predefined the following countries are allowed: AT, CH, DE.
+                Payment method Guaranteed Invoice is only displayed during checkout if the
+                consumer's billing country is one of the selected countries.
+                Default pre-selection: Germany, Austria and Switzerland.
             </description>
             <store>Shopware.apps.Base.store.Country</store>
             <options>
@@ -391,7 +391,7 @@ function (button) {
             </description>
             <description lang="en">
                 If activated, payment method Guaranteed Invoice will only be displayed if
-                Billing/Shipping address are identical
+                billing/shipping address are identical.
             </description>
         </element>
         <element type="boolean" scope="shop">

@@ -9,10 +9,10 @@
 
 namespace WirecardElasticEngine\Components\Payments;
 
-use Shopware\Models\Shop\Currency;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
+use Wirecard\PaymentSdk\Entity\AccountHolder;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\RatepayInvoiceTransaction;
 use Wirecard\PaymentSdk\TransactionService;
@@ -116,7 +116,6 @@ class RatepayInvoicePayment extends Payment implements
         $paymentConfig->setShippingCountries($this->getPluginConfig('RatepayInvoiceShippingCountries'));
         $paymentConfig->setBillingCountries($this->getPluginConfig('RatepayInvoiceBillingCountries'));
         $paymentConfig->setDifferentBillingShipping($this->getPluginConfig('RatepayInvoiceDifferentBillingShipping'));
-
         $paymentConfig->setFraudPrevention($this->getPluginConfig('RatepayInvoiceFraudPrevention'));
 
         return $paymentConfig;
@@ -134,41 +133,51 @@ class RatepayInvoicePayment extends Payment implements
         \sOrder $shopwareOrder
     ) {
         $transaction = $this->getTransaction();
+
         if (! $this->getPaymentConfig()->hasFraudPrevention()) {
             $transaction->setOrderNumber($orderSummary->getPaymentUniqueId());
-            $accountHolder = $orderSummary->getUserMapper()->getWirecardBillingAccountHolder();
-            $transaction->setAccountHolder($accountHolder);
+            $transaction->setAccountHolder($orderSummary->getUserMapper()->getWirecardBillingAccountHolder());
         }
 
-        $accountHolder = $transaction->getAccountHolder();
+        return $this->validateConsumerDateOfBirth($orderSummary, $transaction->getAccountHolder());
+    }
+
+    /**
+     * @param OrderSummary  $orderSummary
+     * @param AccountHolder $accountHolder
+     *
+     * @return ErrorAction|null
+     *
+     * @since 1.0.0
+     */
+    private function validateConsumerDateOfBirth(OrderSummary $orderSummary, AccountHolder $accountHolder)
+    {
         $accountHolderProperties = $accountHolder->mappedProperties();
-        if (empty($accountHolderProperties['date_of_birth'])) {
-            $additionalPaymentData = $orderSummary->getAdditionalPaymentData();
 
-            $birthDay = new \DateTime();
-            $birthDay->setDate(
-                $additionalPaymentData['birthday']['year'],
-                $additionalPaymentData['birthday']['month'],
-                $additionalPaymentData['birthday']['day']
-            );
-
-            $age = $birthDay->diff(new \DateTime);
-
-            if ($age->y < 18) {
-                return new ErrorAction(
-                    ErrorAction::PROCESSING_FAILED_WRONG_AGE,
-                    'customer is too young'
-                );
-            }
-            $accountHolder->setDateOfBirth($birthDay);
-            $transaction->setAccountHolder($accountHolder);
+        // Date of bith is part of consumer data: check has already been done via checkDisplayRestrictions method
+        if (! empty($accountHolderProperties['date_of_birth'])) {
+            return null;
         }
+
+        // Otherwise validate against birthday in payment data from checkout page
+        $birthDay = $this->getDateOfBirthFromPaymentData($orderSummary->getAdditionalPaymentData());
+        if (! $birthDay || $this->isBelowAgeRestriction($birthDay)) {
+            return new ErrorAction(
+                ErrorAction::PROCESSING_FAILED_WRONG_AGE,
+                $birthDay ? 'Consumer must be at least 18 years old' : 'Consumer birthday missing'
+            );
+        }
+
+        $accountHolder->setDateOfBirth($birthDay);
+        return null;
     }
 
     /**
      * @return array
+     *
+     * @since 1.0.0
      */
-    private function getAddressKeys()
+    private function getComparableAddressKeys()
     {
         return [
             "firstname",
@@ -186,12 +195,15 @@ class RatepayInvoicePayment extends Payment implements
      * @param array $destAddress
      *
      * @return bool
+     *
+     * @since 1.0.0
      */
-    private function compareAddresses(array $srcAddress, array $destAddress)
+    private function addressEquals(array $srcAddress, array $destAddress)
     {
-        $compareableKeys = $this->getAddressKeys();
-        foreach ($compareableKeys as $key) {
-            if ($srcAddress[$key] !== $destAddress[$key]) {
+        foreach ($this->getComparableAddressKeys() as $key) {
+            $srcValue  = isset($srcAddress[$key]) ? $srcAddress[$key] : '';
+            $destValue = isset($destAddress[$key]) ? $destAddress[$key] : '';
+            if ($srcValue !== $destValue) {
                 return false;
             }
         }
@@ -203,85 +215,99 @@ class RatepayInvoicePayment extends Payment implements
      */
     public function checkDisplayRestrictions(UserMapper $userMapper)
     {
-        $acceptedBillingCountries = $this->getPaymentConfig()->getBillingCountries();
-        $acceptedShippingCountries = $this->getPaymentConfig()->getShippingCountries();
-        $acceptedCurrencies = $this->getPaymentConfig()->getAcceptedCurrencies();
-        $minAmount = $this->getPaymentConfig()->getMinAmount();
-        $maxAmount = $this->getPaymentConfig()->getMaxAmount();
-
+        $paymentConfig = $this->getPaymentConfig();
         try {
-            $billingAddress = $userMapper->getBillingAddress();
+            $billingAddress  = $userMapper->getBillingAddress();
             $shippingAddress = $userMapper->getShippingAddress();
         } catch (ArrayKeyNotFoundException $e) {
             return false;
         }
 
-        if (! $this->getPaymentConfig()->isAllowedDifferentBillingShipping()) {
-            if(! $this->compareAddresses($billingAddress, $shippingAddress)) {
-                return false;
-            }
-        }
-
-        // age above 18
-        $birthDay = $userMapper->getBirthday();
-
-        if (! $birthDay) {
-            if (Shopware()->Session()->offsetExists(SessionManager::PAYMENT_DATA)) {
-                $additionalPaymentData = Shopware()->Session()->offsetGet(SessionManager::PAYMENT_DATA);
-
-                $birthDay = new \DateTime();
-                $birthDay->setDate(
-                    $additionalPaymentData['birthday']['year'],
-                    $additionalPaymentData['birthday']['month'],
-                    $additionalPaymentData['birthday']['day']
-                );
-            }
-        }
-        if ($birthDay) {
-            $now = new \DateTime();
-            $age = $birthDay->diff($now);
-
-            if ($age->y < 18) {
-                return false;
-            }
-        }
-
-        // currency accepted
-        $currency = Shopware()->Shop()->getCurrency();
-        if (! in_array($currency->getId(), $acceptedCurrencies)) {
+        // Check if merchant disallows different billing/shipping address and compare both
+        if (! $paymentConfig->isAllowedDifferentBillingShipping()
+            && ! $this->addressEquals($billingAddress, $shippingAddress)
+        ) {
             return false;
         }
 
-        // shopping basket amount within the range
-        $basket = Shopware()->Modules()->Basket();
-        $amount = $basket->sGetAmount();
-        $amount = empty($amount['totalAmount']) ? 0 : $amount['totalAmount'];
-        $amount = floatval($amount);
+        // Check if consumer age is above 18, either via user data or payment data from checkout page
+        $birthDay = $userMapper->getBirthday();
+        if (! $birthDay && Shopware()->Session()->offsetExists(SessionManager::PAYMENT_DATA)) {
+            $paymentData = Shopware()->Session()->offsetGet(SessionManager::PAYMENT_DATA);
+            $birthDay    = $this->getDateOfBirthFromPaymentData($paymentData);
+        }
+        if ($birthDay && $this->isBelowAgeRestriction($birthDay)) {
+            return false;
+        }
 
+        // Check if currency is accepted
+        $currency = Shopware()->Shop()->getCurrency();
+        if (! in_array($currency->getId(), $paymentConfig->getAcceptedCurrencies())) {
+            return false;
+        }
+
+        $basket = Shopware()->Modules()->Basket();
+
+        // Check if shopping basket amount is within the set range (allow if amount is 0.0)
+        $amount = $basket->sGetAmount();
+        $amount = empty($amount['totalAmount']) ? 0.0 : floatval($amount['totalAmount']);
         if (! $currency->getDefault()) {
             $amount /= $currency->getFactor();
         }
-
-        if ($amount !== 0.0 && ($amount < $minAmount || $amount > $maxAmount)) {
+        if ($amount !== 0.0 && ($amount < $paymentConfig->getMinAmount() || $amount > $paymentConfig->getMaxAmount())) {
             return false;
         }
 
-        // no digital goods
+        // Check if no digital goods are part of the shopping basket
         if ($basket->sCheckForESD()) {
             return false;
         }
 
-        // shipping country
-        if (! in_array($shippingAddress['countryId'], $acceptedShippingCountries)) {
-            return false;
-        }
-
-        // billing country
-        if (! in_array($billingAddress['countryId'], $acceptedBillingCountries)) {
+        // Check shipping/billing country
+        if (! in_array($shippingAddress['countryId'], $paymentConfig->getShippingCountries())
+            || ! in_array($billingAddress['countryId'], $paymentConfig->getBillingCountries())
+        ) {
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * @param \DateTime $birthDay
+     *
+     * @return bool
+     *
+     * @since 1.0.0
+     */
+    private function isBelowAgeRestriction(\DateTime $birthDay)
+    {
+        $age = $birthDay->diff(new \DateTime());
+        return $age->y < 18;
+    }
+
+    /**
+     * @param array $paymentData
+     *
+     * @return \DateTime|null
+     *
+     * @since 1.0.0
+     */
+    private function getDateOfBirthFromPaymentData($paymentData)
+    {
+        if (! isset($paymentData['birthday']['year'])
+            || ! isset($paymentData['birthday']['month'])
+            || ! isset($paymentData['birthday']['day'])
+        ) {
+            return null;
+        }
+        $birthDay = new \DateTime();
+        $birthDay->setDate(
+            intval($paymentData['birthday']['year']),
+            intval($paymentData['birthday']['month']),
+            intval($paymentData['birthday']['day'])
+        );
+        return $birthDay;
     }
 
     /**
@@ -295,7 +321,7 @@ class RatepayInvoicePayment extends Payment implements
 
         return [
             'method'   => $this->getName(),
-            'showForm' => (! $userMapper->getBirthday()),
+            'showForm' => ! $userMapper->getBirthday(),
         ];
     }
 }

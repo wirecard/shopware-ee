@@ -47,7 +47,6 @@ class WirecardElasticEngine extends Plugin
     {
         $this->registerPayments($context->getPlugin());
         $this->updateDatabase();
-
         $this->changeDefaultConfigValues();
     }
 
@@ -215,32 +214,32 @@ class WirecardElasticEngine extends Plugin
     }
 
     /**
-     * Changes default values of specific config options
+     * Changes default values of specific config options.
+     *
+     * @since 1.0.0
      */
     private function changeDefaultConfigValues()
     {
-        $em = $this->container->get('models');
-        $acceptedCurrencies = $em->getRepository(Element::class)->findOneBy([
-            'name' => 'wirecardElasticEngineRatepayInvoiceAcceptedCurrencies'
-        ]);
+        $em                 = $this->container->get('models');
+        $prefix             = 'wirecardElasticEngineRatepayInvoice';
+        $acceptedCurrencies = $em->getRepository(Element::class)->findOneBy(['name' => $prefix . 'AcceptedCurrencies']);
         if ($acceptedCurrencies) {
+            // default value: EUR
             $acceptedCurrencies->setValue([1]);
             $em->flush();
         }
 
-        $shippingCountry = $em->getRepository(Element::class)->findOneBy([
-            'name' => 'wirecardElasticEngineRatepayInvoiceShippingCountries'
-        ]);
+        $shippingCountry = $em->getRepository(Element::class)->findOneBy(['name' => $prefix . 'ShippingCountries']);
         if ($shippingCountry) {
-            $shippingCountry->setValue([2,23,26]);
+            // default value: DE, AT, CH
+            $shippingCountry->setValue([2, 23, 26]);
             $em->flush();
         }
 
-        $billingCountry = $em->getRepository(Element::class)->findOneBy([
-            'name' => 'wirecardElasticEngineRatepayInvoiceBillingCountries'
-        ]);
+        $billingCountry = $em->getRepository(Element::class)->findOneBy(['name' => $prefix . 'BillingCountries']);
         if ($billingCountry) {
-            $billingCountry->setValue([2,23,26]);
+            // default value: DE, AT, CH
+            $billingCountry->setValue([2, 23, 26]);
             $em->flush();
         }
     }

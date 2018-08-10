@@ -39,7 +39,7 @@ class ErrorAction implements Action
     const BACKEND_OPERATION_FAILED = 4;
 
     /**
-     * Payment processing failed cause of wrong age
+     * Payment processing failed due to wrong age
      */
     const PROCESSING_FAILED_WRONG_AGE = 5;
 

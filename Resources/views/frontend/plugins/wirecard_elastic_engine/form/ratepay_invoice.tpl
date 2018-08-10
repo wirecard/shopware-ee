@@ -16,7 +16,6 @@
             <select name="wirecardElasticEngine[birthday][day]" required="required" aria-required="true"
                     class="wirecardee--birthday-day is--required{if $errorFlags.birthday} has--error{/if}">
                 <option disabled="disabled"value="">{s name='RegisterBirthdaySelectDay' namespace="frontend/register/personal_fieldset"}{/s}</option>
-
                 {for $day = 1 to 31}
                     <option value="{$day}">{$day}</option>
                 {/for}
@@ -26,7 +25,6 @@
             <select name="wirecardElasticEngine[birthday][month]" required="required" aria-required="true"
                     class="wirecardee--birthday-month is--required{if $errorFlags.birthday} has--error{/if}">
                 <option disabled="disabled" value="">{s name='RegisterBirthdaySelectMonth' namespace="frontend/register/personal_fieldset"}{/s}</option>
-
                 {for $month = 1 to 12}
                     <option value="{$month}">{$month}</option>
                 {/for}
@@ -36,7 +34,6 @@
             <select name="wirecardElasticEngine[birthday][year]" required="required" aria-required="true"
                     class="wirecardee--birthday-year is--required{if $errorFlags.birthday} has--error{/if}">
                 <option disabled="disabled" value="">{s name='RegisterBirthdaySelectYear' namespace="frontend/register/personal_fieldset"}{/s}</option>
-
                 {for $year = date("Y") to date("Y")-120 step=-1}
                     <option value="{$year}">{$year}</option>
                 {/for}
