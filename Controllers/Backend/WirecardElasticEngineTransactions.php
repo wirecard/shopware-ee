@@ -94,9 +94,12 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
         $payment        = $paymentFactory->create($this->Request()->getParam('payment'));
 
         $orderNumber = $this->Request()->getParam('orderNumber');
-
         if (! $orderNumber) {
             return $this->handleError('Order number not found');
+        }
+        $order = $this->getOrderByNumber($orderNumber);
+        if (! $order) {
+            return $this->handleError('Order not found');
         }
 
         $transactions = $this->getModelManager()
@@ -121,6 +124,7 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
         foreach ($transactions as $transaction) {
             /** @var Transaction $transaction */
             $paymentTransaction = $payment->getBackendTransaction(
+                $order,
                 $transaction->getTransactionType(),
                 $transaction->getPaymentMethod()
             );
@@ -181,11 +185,11 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
     {
         $operation     = $this->Request()->getParam('operation');
         $transactionId = $this->Request()->getParam('transactionId');
+        $orderNumber   = $this->Request()->getParam('orderNumber');
+        $amount        = $this->Request()->getParam('amount');
+        $currency      = $this->Request()->getParam('currency');
 
-        $amount   = $this->Request()->getParam('amount');
-        $currency = $this->Request()->getParam('currency');
-
-        if (! $operation) {
+        if (! $operation || ! $orderNumber || ! $transactionId || ! ($order = $this->getOrderByNumber($orderNumber))) {
             $this->handleError('BackendOperationFailed');
             return;
         }
@@ -201,7 +205,7 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
         );
         $backendService = new BackendService($config, $this->getLogger());
 
-        $transaction = $payment->getBackendTransaction($operation, null);
+        $transaction = $payment->getBackendTransaction($order, $operation, null);
         $transaction->setParentTransactionId($transactionId);
 
         if ($amount) {
@@ -283,9 +287,7 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
         $result = parent::getList($offset, $limit, $sort, $filter, $wholeParams);
 
         foreach ($result['data'] as $key => $current) {
-            $order = $this->getManager()->getRepository(Order::class)
-                          ->findOneBy(['number' => $current['orderNumber']]);
-
+            $order     = $this->getOrderByNumber($current['orderNumber']);
             $createdAt = $result['data'][$key]['createdAt'];
             if ($createdAt instanceof \DateTime) {
                 $result['data'][$key]['createdAt'] = $createdAt->format(\DateTime::W3C);
@@ -302,6 +304,19 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
         }
 
         return $result;
+    }
+
+    /**
+     * @param string $orderNumber
+     *
+     * @return null|Order
+     *
+     * @since 1.0.0
+     */
+    private function getOrderByNumber($orderNumber)
+    {
+        return $this->getManager()->getRepository(Order::class)
+                    ->findOneBy(['number' => $orderNumber]);
     }
 
     /**

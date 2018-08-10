@@ -9,16 +9,19 @@
 
 namespace WirecardElasticEngine\Components\Payments;
 
+use Shopware\Models\Order\Order;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Entity\AccountHolder;
+use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\RatepayInvoiceTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Actions\ErrorAction;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\RatepayInvoicePaymentConfig;
+use WirecardElasticEngine\Components\Mapper\OrderBasketMapper;
 use WirecardElasticEngine\Components\Mapper\UserMapper;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\DisplayRestrictionInterface;
@@ -81,6 +84,28 @@ class RatepayInvoicePayment extends Payment implements
     }
 
     /**
+     * Set amount and basket for RatepayInvoicePayment
+     *
+     * @param Order       $order
+     * @param null|string $operation
+     * @param null|string $paymentMethod
+     *
+     * @return RatepayInvoiceTransaction
+     *
+     * @since 1.0.0
+     */
+    public function getBackendTransaction(Order $order, $operation, $paymentMethod)
+    {
+        $transaction = new RatepayInvoiceTransaction();
+        $transaction->setOrderNumber($order->getTemporaryId());
+        $transaction->setAmount(new Amount($order->getInvoiceAmount(), $order->getCurrency()));
+
+        $mapper = new OrderBasketMapper();
+        $transaction->setBasket($mapper->createBasket($order));
+        return $transaction;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag, $selectedCurrency)
@@ -115,7 +140,8 @@ class RatepayInvoicePayment extends Payment implements
         $paymentConfig->setAcceptedCurrencies($this->getPluginConfig('RatepayInvoiceAcceptedCurrencies'));
         $paymentConfig->setShippingCountries($this->getPluginConfig('RatepayInvoiceShippingCountries'));
         $paymentConfig->setBillingCountries($this->getPluginConfig('RatepayInvoiceBillingCountries'));
-        $paymentConfig->setAllowDifferentBillingShipping(! $this->getPluginConfig('RatepayInvoiceBillingShippingMustBeIdentical'));
+        $billingShippingMustBeIdentical = $this->getPluginConfig('RatepayInvoiceBillingShippingMustBeIdentical');
+        $paymentConfig->setAllowDifferentBillingShipping(! $billingShippingMustBeIdentical);
         $paymentConfig->setFraudPrevention($this->getPluginConfig('RatepayInvoiceFraudPrevention'));
 
         return $paymentConfig;
