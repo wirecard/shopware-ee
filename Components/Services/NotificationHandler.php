@@ -16,6 +16,7 @@ use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\Transaction\PoiPiaTransaction;
+use WirecardElasticEngine\Exception\InitialTransactionNotFoundException;
 use WirecardElasticEngine\Models\Transaction;
 
 /**
@@ -77,8 +78,21 @@ class NotificationHandler extends Handler
     ) {
         $this->logger->info('Incoming success notification', $response->getData());
 
-        $paymentStatusId    = $this->getPaymentStatusId($backendService, $response);
-        $initialTransaction = $this->transactionManager->getInitialTransaction($response);
+        $paymentStatusId = $this->getPaymentStatusId($backendService, $response);
+        try {
+            $initialTransaction = $this->transactionManager->getInitialTransaction($response);
+        } catch (InitialTransactionNotFoundException $exception) {
+            // POI/PIA: initial transaction not found: create unassigned notify transaction
+            if ($response->getPaymentMethod() === PoiPiaTransaction::NAME) {
+                $this->logger->info(
+                    "No matching transaction for " . PoiPiaTransaction::NAME
+                    . " payment with PTRID '{$response->getProviderTransactionReference()}' found"
+                );
+                $initialTransaction = new Transaction(Transaction::TYPE_INITIAL_RESPONSE);
+                return $initialTransaction;
+            }
+            throw $exception;
+        }
 
         // POI/PIA: Set payment status "review necessary", if PTRID of initial transaction and notification do not match
         if ($response->getPaymentMethod() === PoiPiaTransaction::NAME

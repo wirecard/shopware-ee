@@ -132,8 +132,8 @@ class TransactionManager
         $actualReference = $transaction->getProviderTransactionReference();
         if ($transaction->getPaymentMethod() === PoiPiaTransaction::NAME && $expectReference !== $actualReference) {
             $transaction->setStatusMessage(
-                "Provider Transaction Reference IDs do not match. " .
-                "Expected '$expectReference', got '$actualReference'"
+                "Provider Transaction Reference ID mismatch: " .
+                ($expectReference ? ("Expected '$expectReference', got '$actualReference'") : "'$actualReference'")
             );
         }
 
@@ -254,40 +254,50 @@ class TransactionManager
     }
 
     /**
-     * @param string|null $parentTransactionId
-     * @param string|null $requestId
+     * @param string|null      $parentTransactionId
+     * @param string|null      $requestId
+     * @param Transaction|null $previousTransaction
      *
      * @return Transaction|null
      *
      * @since 1.0.0
      */
-    private function findInitialTransaction($parentTransactionId, $requestId)
+    private function findInitialTransaction($parentTransactionId, $requestId, Transaction $previousTransaction = null)
     {
         $repo = $this->em->getRepository(Transaction::class);
         if ($parentTransactionId) {
             $transaction = $repo->findOneBy(['transactionId' => $parentTransactionId]);
             if ($transaction) {
-                return $this->returnInitialTransaction($transaction);
+                return $this->returnInitialTransaction($transaction, $previousTransaction);
             }
         }
         if (! $requestId || ! ($transaction = $repo->findOneBy(['requestId' => $requestId]))) {
             return null;
         }
-        return $this->returnInitialTransaction($transaction);
+        return $this->returnInitialTransaction($transaction, $previousTransaction);
     }
 
     /**
-     * @param Transaction $transaction
+     * @param Transaction      $transaction
+     * @param Transaction|null $previousTransaction
      *
      * @return Transaction|null
      *
      * @since 1.0.0
      */
-    private function returnInitialTransaction(Transaction $transaction)
+    private function returnInitialTransaction(Transaction $transaction, Transaction $previousTransaction = null)
     {
         if (! $transaction->getParentTransactionId() && $transaction->isInitial()) {
             return $transaction;
         }
-        return $this->findInitialTransaction($transaction->getParentTransactionId(), $transaction->getRequestId());
+        // loop detection
+        if ($transaction === $previousTransaction) {
+            return null;
+        }
+        return $this->findInitialTransaction(
+            $transaction->getParentTransactionId(),
+            $transaction->getRequestId(),
+            $transaction
+        );
     }
 }
