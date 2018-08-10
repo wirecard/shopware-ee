@@ -23,6 +23,7 @@ use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\IdealPaymentConfig;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Components\Services\SessionManager;
 
 /**
  * @package WirecardElasticEngine\Components\Payments
@@ -148,7 +149,7 @@ class IdealPayment extends Payment implements ProcessPaymentInterface, Additiona
     /**
      * {@inheritdoc}
      */
-    public function getAdditionalViewAssignments()
+    public function getAdditionalViewAssignments(SessionManager $sessionManager)
     {
         $idealBic = new \ReflectionClass(IdealBic::class);
 

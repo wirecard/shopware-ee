@@ -127,12 +127,14 @@ class FrontendSubscriber implements SubscriberInterface
         }
 
         if ($request->getActionName() === 'confirm') {
+            $sessionManager = $controller->get('wirecard_elastic_engine.session_manager');
+
             // Assigns the device fingerprint id to the view in case the payment has fraud prevention enabled.
-            $this->assignDeviceFingerprint($view, $controller->get('wirecard_elastic_engine.session_manager'));
+            $this->assignDeviceFingerprint($view, $sessionManager);
 
             // Some payments may require additional view assignments (e.g. SEPA input fields) which will be assigned
             // here.
-            $this->assignAdditionalViewAssignments($view);
+            $this->assignAdditionalViewAssignments($view, $sessionManager);
         }
 
         $errorCode = $request->getParam('wirecard_elastic_engine_error_code');
@@ -184,12 +186,12 @@ class FrontendSubscriber implements SubscriberInterface
 
     /**
      * @param \Enlight_View_Default $view
+     * @param SessionManager        $sessionManager
      *
      * @throws \WirecardElasticEngine\Exception\UnknownPaymentException
-     *
      * @since 1.0.0
      */
-    private function assignAdditionalViewAssignments(\Enlight_View_Default $view)
+    private function assignAdditionalViewAssignments(\Enlight_View_Default $view, SessionManager $sessionManager)
     {
         $sPayment = $view->getAssign('sPayment');
         if (strpos($sPayment['name'], 'wirecard_elastic_engine') === false) {
@@ -197,7 +199,10 @@ class FrontendSubscriber implements SubscriberInterface
         }
         $payment = $this->paymentFactory->create($sPayment['name']);
         if ($payment instanceof AdditionalViewAssignmentsInterface) {
-            $view->assign('wirecardElasticEngineViewAssignments', $payment->getAdditionalViewAssignments());
+            $view->assign(
+                'wirecardElasticEngineViewAssignments',
+                $payment->getAdditionalViewAssignments($sessionManager)
+            );
         }
     }
 

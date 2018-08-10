@@ -26,6 +26,7 @@ use WirecardElasticEngine\Components\Mapper\UserMapper;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessReturnInterface;
+use WirecardElasticEngine\Components\Services\SessionManager;
 use WirecardElasticEngine\Models\CreditCardVault;
 use WirecardElasticEngine\Models\Transaction;
 
@@ -347,7 +348,9 @@ class CreditCardPayment extends Payment implements
     {
         $hashAddress = [];
         foreach ($this->getComparableAddressKeys() as $key) {
-            $hashAddress[$key] = $address[$key];
+            if (isset($address[$key])) {
+                $hashAddress[$key] = $address[$key];
+            }
         }
         return md5(serialize($hashAddress));
     }
@@ -357,15 +360,13 @@ class CreditCardPayment extends Payment implements
      */
     public function processReturn(
         TransactionService $transactionService,
-        \Enlight_Controller_Request_Request $request
+        \Enlight_Controller_Request_Request $request,
+        SessionManager $sessionManager
     ) {
         $params = $request->getParams();
 
         if ($this->getPaymentConfig()->isVaultEnabled()) {
-            // FIXXXME use of Shopware()->Session()
-            $session     = Shopware()->Session();
-            $paymentData = $session->offsetGet('WirecardElasticEnginePaymentData');
-            $this->saveToken($transactionService, $session, $paymentData, $params);
+            $this->saveToken($transactionService, $sessionManager, $params);
         }
 
         if (! empty($params['jsresponse'])) {
@@ -379,28 +380,26 @@ class CreditCardPayment extends Payment implements
     }
 
     /**
-     * @param TransactionService                    $transactionService
-     * @param \Enlight_Components_Session_Namespace $session
-     * @param array                                 $paymentData
-     * @param array                                 $params
+     * @param TransactionService $transactionService
+     * @param SessionManager     $sessionManager
+     * @param array              $params
      *
      * @since 1.0.0
      */
     private function saveToken(
         TransactionService $transactionService,
-        \Enlight_Components_Session_Namespace $session,
-        $paymentData,
+        SessionManager $sessionManager,
         $params
     ) {
+        $paymentData = $sessionManager->getPaymentData();
         if (empty($paymentData['saveToken'])) {
             return;
         }
 
         $tokenId             = $params['token_id'];
-        $userId              = $session->offsetGet('sUserId');
-        $orderVariables      = $session->offsetGet('sOrderVariables');
-        $billingAddress      = $orderVariables['sUserData']['billingaddress'];
-        $shippingAddress     = $orderVariables['sUserData']['shippingaddress'];
+        $userId              = $sessionManager->getUserId();
+        $billingAddress      = $sessionManager->getOrderBilldingAddress();
+        $shippingAddress     = $sessionManager->getOrderShippingAddress();
         $billingAddressHash  = $this->createAddressHash($billingAddress);
         $shippingAddressHash = $this->createAddressHash($shippingAddress);
 
@@ -430,8 +429,8 @@ class CreditCardPayment extends Payment implements
 
         $creditCardVault->setLastUsed(new \DateTime());
         $creditCardVault->setAdditionalData([
-            'firstName'       => $params['first_name'],
-            'lastName'        => $params['last_name'],
+            'firstName'       => isset($params['first_name']) ? $params['first_name'] : '',
+            'lastName'        => isset($params['last_name']) ? $params['last_name'] : '',
             'expirationMonth' => $transactionDetails['payment']['card']['expiration-month'],
             'expirationYear'  => $transactionDetails['payment']['card']['expiration-year'],
             'cardType'        => $transactionDetails['payment']['card']['card-type'],
@@ -442,14 +441,11 @@ class CreditCardPayment extends Payment implements
     /**
      * {@inheritdoc}
      */
-    public function getAdditionalViewAssignments()
+    public function getAdditionalViewAssignments(SessionManager $sessionManager)
     {
         $paymentConfig = $this->getPaymentConfig();
-
-        // FIXXXME use of Shopware()->Session()
-        $session     = Shopware()->Session();
-        $userInfo    = $session->offsetGet('userInfo');
-        $accountMode = isset($userInfo['accountmode']) ? intval($userInfo['accountmode']) : 0;
+        $userInfo      = $sessionManager->getUserInfo();
+        $accountMode   = isset($userInfo['accountmode']) ? intval($userInfo['accountmode']) : 0;
 
         $formData = [
             'method'       => $this->getName(),
@@ -457,18 +453,14 @@ class CreditCardPayment extends Payment implements
         ];
 
         if ($paymentConfig->isVaultEnabled()) {
-            $userId              = $session->offsetGet('sUserId');
-            $orderVariables      = $session->offsetGet('sOrderVariables');
-            $billingAddress      = $orderVariables['sUserData']['billingaddress'];
-            $shippingAddress     = $orderVariables['sUserData']['shippingaddress'];
-            $billingAddressHash  = $this->createAddressHash($billingAddress);
-            $shippingAddressHash = $this->createAddressHash($shippingAddress);
+            $billingAddressHash  = $this->createAddressHash($sessionManager->getOrderBilldingAddress());
+            $shippingAddressHash = $this->createAddressHash($sessionManager->getOrderShippingAddress());
 
             $builder = $this->em->createQueryBuilder();
             $builder->select('ccv')
                     ->from(CreditCardVault::class, 'ccv')
                     ->where('ccv.userId = :userId')
-                    ->setParameter('userId', $userId)
+                    ->setParameter('userId', $sessionManager->getUserId())
                     ->orderBy('ccv.lastUsed', 'DESC');
             $savedCards = $builder->getQuery()->getResult();
 

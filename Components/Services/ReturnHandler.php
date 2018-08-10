@@ -37,6 +37,7 @@ class ReturnHandler extends Handler
      * @param Payment                             $payment
      * @param TransactionService                  $transactionService
      * @param \Enlight_Controller_Request_Request $request
+     * @param SessionManager                      $sessionManager
      *
      * @return Response
      *
@@ -45,10 +46,11 @@ class ReturnHandler extends Handler
     public function handleRequest(
         Payment $payment,
         TransactionService $transactionService,
-        \Enlight_Controller_Request_Request $request
+        \Enlight_Controller_Request_Request $request,
+        SessionManager $sessionManager
     ) {
         if ($payment instanceof ProcessReturnInterface) {
-            $response = $payment->processReturn($transactionService, $request);
+            $response = $payment->processReturn($transactionService, $request, $sessionManager);
             if ($response) {
                 return $response;
             }
