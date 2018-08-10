@@ -221,6 +221,42 @@ function (button) {
             <description lang="de">Leer lassen für Standard Shop Währung.</description>
             <description lang="en">Leave blank for default shop currency.</description>
         </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineCreditCardEnableVault</name>
+            <label lang="de">[Kreditkarte] One-click-checkout aktivieren</label>
+            <label lang="en">[Credit Card] Enable One-click-checkout</label>
+            <value>false</value>
+            <description lang="de">
+                Kreditkarten können gespeichert und später wieder verwendet werden.
+            </description>
+            <description lang="en">
+                Credit Cards can be saved for further use without re-entering credit card details.
+            </description>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineCreditCardAllowAddressChanges</name>
+            <label lang="de">[Kreditkarte] One-click-checkout mit anderer Adresse zulassen</label>
+            <label lang="en">[Credit Card] Allow One-click-checkout with different address</label>
+            <value>false</value>
+            <description lang="de">
+                Kreditkarten können wieder verwendet werden, auch wenn die Rechnungs- oder Lieferadresse geändert wurde.
+            </description>
+            <description lang="en">
+                Credit card One-click-checkout is allowed, even if the billing or shipping address has been changed.
+            </description>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineCreditCardThreeDUsageOnTokens</name>
+            <label lang="de">[Kreditkarte] 3-D Secure für One-click-checkout aktivieren</label>
+            <label lang="en">[Credit Card] Enable 3-D Secure for One-click-checkout</label>
+            <value>true</value>
+            <description lang="de">
+                3-D Secure bei One-click-checkout Zahlungen mit Kreditkarte aktivieren.
+            </description>
+            <description lang="en">
+                Enable 3-D Secure for One-click-checkout payments with Credit Card.
+            </description>
+        </element>
         <element type="button" scope="shop">
             <name>wirecardElasticEngineCreditCardTestApi</name>
             <label lang="de">[Kreditkarte] Konfiguration testen</label>
@@ -248,42 +284,6 @@ function (button) {
                     ]]>
                 </handler>
             </options>
-        </element>
-        <element type="boolean" scope="shop">
-            <name>wirecardElasticEngineCreditCardEnableVault</name>
-            <label lang="de">[Kreditkarte] One-click-checkout aktivieren</label>
-            <label lang="en">[Credit Card] Enable Recurring Payment</label>
-            <value>false</value>
-            <description lang="de">
-                Kreditkarten können gespeichert und später wieder verwendet werden.
-            </description>
-            <description lang="en">
-                Credit Cards can be saved and used for later purpose without
-            </description>
-        </element>
-        <element type="boolean" scope="shop">
-            <name>wirecardElasticEngineCreditCardAllowAddressChanges</name>
-            <label lang="de">[Kreditkarte] Adressänderungen zulassen</label>
-            <label lang="en">[Credit Card] Allow address changes</label>
-            <value>false</value>
-            <description lang="de">
-                One-click-checkout Zahlungen bei Adressänderung zulassen.
-            </description>
-            <description lang="en">
-                Allow address changes on recurring payment.
-            </description>
-        </element>
-        <element type="boolean" scope="shop">
-            <name>wirecardElasticEngineCreditCardThreeDUsageOnTokens</name>
-            <label lang="de">[Kreditkarte] 3-D Secure aktivieren</label>
-            <label lang="en">[Credit Card] Enable 3-D Secure</label>
-            <value>true</value>
-            <description lang="de">
-                3-D Secure bei One-click-checkout Zahlungen aktivieren.
-            </description>
-            <description lang="en">
-                Enable 3-D secure on recurring payment.
-            </description>
         </element>
         <!-- Credit Card End -->
         <!-- iDEAL -->
