@@ -115,7 +115,7 @@ class RatepayInvoicePayment extends Payment implements
         $paymentConfig->setAcceptedCurrencies($this->getPluginConfig('RatepayInvoiceAcceptedCurrencies'));
         $paymentConfig->setShippingCountries($this->getPluginConfig('RatepayInvoiceShippingCountries'));
         $paymentConfig->setBillingCountries($this->getPluginConfig('RatepayInvoiceBillingCountries'));
-        $paymentConfig->setDifferentBillingShipping($this->getPluginConfig('RatepayInvoiceDifferentBillingShipping'));
+        $paymentConfig->setAllowDifferentBillingShipping(! $this->getPluginConfig('RatepayInvoiceBillingShippingMustBeIdentical'));
         $paymentConfig->setFraudPrevention($this->getPluginConfig('RatepayInvoiceFraudPrevention'));
 
         return $paymentConfig;

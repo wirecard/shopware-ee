@@ -253,40 +253,40 @@ function (button) {
         <!-- Ratepay Invoice -->
         <element type="text" scope="shop">
             <name>wirecardElasticEngineRatepayInvoiceServer</name>
-            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Base URL</label>
-            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Base URL</label>
+            <label lang="de">[Garantierter Kauf auf Rechnung] Base URL</label>
+            <label lang="en">[Wirecard Guaranteed Invoice] Base URL</label>
             <value>https://api-test.wirecard.com</value>
             <description lang="de">Wirecard Base URL (z.B. https://api.wirecard.com)</description>
             <description lang="en">Wirecard Base URL (e.g. https://api.wirecard.com)</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineRatepayInvoiceHttpUser</name>
-            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] HTTP Benutzer</label>
-            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] HTTP User</label>
+            <label lang="de">[Garantierter Kauf auf Rechnung] HTTP Benutzer</label>
+            <label lang="en">[Wirecard Guaranteed Invoice] HTTP User</label>
             <value>70000-APITEST-AP</value>
             <description lang="de">Wirecard HTTP Benutzer laut Vertrag mit Wirecard.</description>
             <description lang="en">HTTP User as provided in your Wirecard contract.</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineRatepayInvoiceHttpPassword</name>
-            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] HTTP Passwort</label>
-            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] HTTP Password</label>
+            <label lang="de">[Garantierter Kauf auf Rechnung] HTTP Passwort</label>
+            <label lang="en">[Wirecard Guaranteed Invoice] HTTP Password</label>
             <value>qD2wzQ_hrc!8</value>
             <description lang="de">Wirecard HTTP Passwort laut Vertrag mit Wirecard.</description>
             <description lang="en">HTTP Password as provided in your Wirecard contract.</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineRatepayInvoiceMerchantId</name>
-            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Händler-Konto-ID</label>
-            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Merchant Account ID</label>
+            <label lang="de">[Garantierter Kauf auf Rechnung] Händler-Konto-ID</label>
+            <label lang="en">[Wirecard Guaranteed Invoice] Merchant Account ID</label>
             <value>fa02d1d4-f518-4e22-b42b-2abab5867a84</value>
             <description lang="de">Eindeutige Händler-Konto-ID laut Vertrag mit Wirecard.</description>
             <description lang="en">Unique identifier assigned to your merchant account.</description>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineRatepayInvoiceSecret</name>
-            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Geheimschlüssel</label>
-            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Secret Key</label>
+            <label lang="de">[Garantierter Kauf auf Rechnung] Geheimschlüssel</label>
+            <label lang="en">[Wirecard Guaranteed Invoice] Secret Key</label>
             <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
             <description lang="de">Der Geheimschlüssel wird benötigt, um die Digitale Signatur für Zahlungen zu
                 berechnen.
@@ -296,8 +296,8 @@ function (button) {
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineRatepayInvoiceMinAmount</name>
-            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Minimaler Betrag</label>
-            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Minimum Amount</label>
+            <label lang="de">[Garantierter Kauf auf Rechnung] Minimaler Betrag</label>
+            <label lang="en">[Wirecard Guaranteed Invoice] Minimum Amount</label>
             <value>20</value>
             <description lang="de">
                 Garantierter Kauf auf Rechnung wird nur angezeigt, wenn der Bestellbetrag
@@ -310,8 +310,8 @@ function (button) {
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineRatepayInvoiceMaxAmount</name>
-            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Maximaler Betrag</label>
-            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Maximum Amount</label>
+            <label lang="de">[Garantierter Kauf auf Rechnung] Maximaler Betrag</label>
+            <label lang="en">[Wirecard Guaranteed Invoice] Maximum Amount</label>
             <value>3500</value>
             <description lang="de">
                 Garantierter Kauf auf Rechnung wird nur angezeigt, wenn der Bestellbetrag
@@ -324,8 +324,8 @@ function (button) {
         </element>
         <element type="combo" scope="shop">
             <name>wirecardElasticEngineRatepayInvoiceAcceptedCurrencies</name>
-            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Erlaubte Währungen</label>
-            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Allowed currencies</label>
+            <label lang="de">[Garantierter Kauf auf Rechnung] Erlaubte Währungen</label>
+            <label lang="en">[Wirecard Guaranteed Invoice] Allowed currencies</label>
             <value>1</value>
             <description lang="de">
                 Garantierter Kauf auf Rechnung wird nur angezeigt, wenn eine der
@@ -342,8 +342,8 @@ function (button) {
         </element>
         <element type="combo" scope="shop">
             <name>wirecardElasticEngineRatepayInvoiceShippingCountries</name>
-            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Erlaubte Lieferländer</label>
-            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Allowed shipping countries</label>
+            <label lang="de">[Garantierter Kauf auf Rechnung] Erlaubte Lieferländer</label>
+            <label lang="en">[Wirecard Guaranteed Invoice] Allowed shipping countries</label>
             <value>2</value>
             <description lang="de">
                 Garantierter Kauf auf Rechnung wird dem Endkunden beim Checkout nur
@@ -362,8 +362,8 @@ function (button) {
         </element>
         <element type="combo" scope="shop">
             <name>wirecardElasticEngineRatepayInvoiceBillingCountries</name>
-            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Erlaubte Rechnungsempfängerländer</label>
-            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Allowed billing countries</label>
+            <label lang="de">[Garantierter Kauf auf Rechnung] Erlaubte Rechnungsempfängerländer</label>
+            <label lang="en">[Wirecard Guaranteed Invoice] Allowed billing countries</label>
             <value>2</value>
             <description lang="de">
                 Garantierter Kauf auf Rechnung wird dem Endkunden beim Checkout nur
@@ -381,10 +381,10 @@ function (button) {
             </options>
         </element>
         <element type="boolean" scope="shop">
-            <name>wirecardElasticEngineRatepayInvoiceDifferentBillingShipping</name>
-            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Unterschiedliche Rechnungs- und Versandadresse</label>
-            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Different billing and shipping address</label>
-            <value>false</value>
+            <name>wirecardElasticEngineRatepayInvoiceBillingShippingMustBeIdentical</name>
+            <label lang="de">[Garantierter Kauf auf Rechnung] Rechnungsadresse und Versandadresse müssen übereinstimmen</label>
+            <label lang="en">[Wirecard Guaranteed Invoice] Billing/shipping address must be identical</label>
+            <value>true</value>
             <description lang="de">
                 Bei Aktivierung wird Garantierter Kauf auf Rechnung nur im Zahlungsprozess
                 angezeigt, wenn Rechnungs- und Lieferadresse übereinstimmen.
@@ -396,8 +396,8 @@ function (button) {
         </element>
         <element type="boolean" scope="shop">
             <name>wirecardElasticEngineRatepayInvoiceFraudPrevention</name>
-            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Zusätzliche Informationen mitsenden</label>
-            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Send additional information</label>
+            <label lang="de">[Garantierter Kauf auf Rechnung] Zusätzliche Informationen mitsenden</label>
+            <label lang="en">[Wirecard Guaranteed Invoice] Send additional information</label>
             <value>true</value>
             <description lang="de">
                 Zusätzliche Informationen werden für Betrugsschutz gesendet. In diesen Daten sind
@@ -410,13 +410,13 @@ function (button) {
         </element>
         <element type="button" scope="shop">
             <name>wirecardElasticEngineRatepayInvoiceTestApi</name>
-            <label lang="de">[Wirecard Garantierter Kauf auf Rechnung / Ratepay] Konfiguration testen</label>
-            <label lang="en">[Guaranteed Invoice by Wirecard / Ratepay] Test configuration</label>
+            <label lang="de">[Garantierter Kauf auf Rechnung] Konfiguration testen</label>
+            <label lang="en">[Wirecard Guaranteed Invoice] Test configuration</label>
             <options>
                 <handler>
                     <![CDATA[
 function (button) {
-    wirecardeeTestPaymentCredentials(button, 'RatepayInvoice', 'Wirecard Guaranteed Invoice by Wirecard / Ratepay Test');
+    wirecardeeTestPaymentCredentials(button, 'RatepayInvoice', 'Wirecard Wirecard Guaranteed Invoice Test');
 }
                     ]]>
                 </handler>

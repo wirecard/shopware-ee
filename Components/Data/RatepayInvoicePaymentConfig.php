@@ -19,34 +19,34 @@ namespace WirecardElasticEngine\Components\Data;
 class RatepayInvoicePaymentConfig extends PaymentConfig
 {
     /**
-     * @var float minAmount
+     * @var float
      */
     protected $minAmount;
 
     /**
-     * @var float maxAmount;
+     * @var float
      */
     protected $maxAmount;
 
     /**
-     * @var array acceptedCurrencies
+     * @var array
      */
     protected $acceptedCurrencies;
 
     /**
-     * @var array shippingCountries
+     * @var array
      */
     protected $shippingCountries;
 
     /**
-     * @var array billingCountries
+     * @var array
      */
     protected $billingCountries;
 
     /**
-     * @var bool differentBillingShipping
+     * @var bool
      */
-    protected $differentBillingShipping;
+    protected $allowDifferentBillingShipping;
 
     /**
      * @return float
@@ -155,15 +155,15 @@ class RatepayInvoicePaymentConfig extends PaymentConfig
      */
     public function isAllowedDifferentBillingShipping()
     {
-        return $this->differentBillingShipping;
+        return $this->allowDifferentBillingShipping;
     }
 
     /**
-     * @param bool $differentBillingShipping
+     * @param bool $allowDifferentBillingShipping
      */
-    public function setDifferentBillingShipping($differentBillingShipping)
+    public function setAllowDifferentBillingShipping($allowDifferentBillingShipping)
     {
-        $this->differentBillingShipping = $differentBillingShipping;
+        $this->allowDifferentBillingShipping = $allowDifferentBillingShipping;
     }
 
     /**
@@ -174,12 +174,12 @@ class RatepayInvoicePaymentConfig extends PaymentConfig
         return array_merge(
             parent::toArray(),
             [
-                'minAmount'                => $this->getMinAmount(),
-                'maxAmount'                => $this->getMaxAmount(),
-                'acceptedCurrencies'       => $this->getAcceptedCurrencies(),
-                'shippingCountries'        => $this->getShippingCountries(),
-                'billingCountries'         => $this->getBillingCountries(),
-                'differentBillingShipping' => $this->isAllowedDifferentBillingShipping(),
+                'minAmount'                     => $this->getMinAmount(),
+                'maxAmount'                     => $this->getMaxAmount(),
+                'acceptedCurrencies'            => $this->getAcceptedCurrencies(),
+                'shippingCountries'             => $this->getShippingCountries(),
+                'billingCountries'              => $this->getBillingCountries(),
+                'allowDifferentBillingShipping' => $this->isAllowedDifferentBillingShipping(),
             ]
         );
     }
