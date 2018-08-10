@@ -20,6 +20,8 @@ use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Services\TransactionManager;
 
 /**
+ * @package WirecardElasticEngine\Models
+ *
  * @ORM\Entity
  * @ORM\Table(name="wirecard_elastic_engine_transactions")
  *

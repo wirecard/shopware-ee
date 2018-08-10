@@ -13,8 +13,12 @@ use Shopware\Components\Model\ModelEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * @package WirecardElasticEngine\Models
+ *
  * @ORM\Entity
  * @ORM\Table(name="wirecard_elastic_engine_credit_card_vault")
+ *
+ * The credit card vault model holds credit card tokens for one-click checkout.
  *
  * @since 1.0.0
  */
@@ -71,7 +75,7 @@ class CreditCardVault extends ModelEntity
     private $bindShippingAddress;
 
     /**
-     * @var array
+     * @var string
      * @ORM\Column(name="bind_shipping_address_hash", type="string", nullable=false)
      */
     private $bindShippingAddressHash;
@@ -151,7 +155,7 @@ class CreditCardVault extends ModelEntity
     }
 
     /**
-     * @param string $masked
+     * @param string $maskedAccountNumber
      *
      * @since 1.0.0
      */
@@ -292,7 +296,7 @@ class CreditCardVault extends ModelEntity
             'userId'                  => $this->getUserId(),
             'token'                   => $this->getToken(),
             'maskedAccountNumber'     => $this->getMaskedAccountNumber(),
-            'lastUsed'                => $this->getLastUsed(),
+            'lastUsed'                => $this->getLastUsed()->format(\DateTime::W3C),
             'bindBillingAddress'      => $this->getBindBillingAddress(),
             'bindBillingAddressHash'  => $this->getBindBillingAddressHash(),
             'bindShippingAddress'     => $this->getBindShippingAddress(),

@@ -428,18 +428,19 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
     /**
      * Delete credit card token from vault
+     *
+     * @since 1.0.0
      */
     public function deleteCreditCardTokenAction()
     {
-        $userId = $this->container->get('session')->offsetGet('sUserId');
+        $em      = $this->container->get('models');
+        $userId  = $this->container->get('session')->offsetGet('sUserId');
         $tokenId = $this->Request()->getParam('token');
-        $em = $this->container->get('models');
 
         $creditCardVault = $em->getRepository(CreditCardVault::class)->findOneBy([
             'userId' => $userId,
             'token'  => $tokenId,
         ]);
-
         if ($creditCardVault) {
             $em->remove($creditCardVault);
             $em->flush();
