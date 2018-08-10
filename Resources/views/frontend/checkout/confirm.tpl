@@ -137,8 +137,10 @@
 
                     if (! ageField.validity.valid) {
                         $('.wirecardee-ratepay-invoice--birthdate select').addClass('has--error');
+                        $('.wirecardee--error-box').show();
                         return;
                     }
+                    $('.wirecardee--error-box').hide();
                     $('.wirecardee-ratepay-invoice--birthdate select').removeClass('has--error');
                 };
 
