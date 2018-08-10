@@ -13,6 +13,9 @@ exports.config = {
         password: 'shopware'
     },
     payments: {
+        ratepay: {
+            label: 'Wirecard Garantierter Kauf auf Rechnung'
+        },
         paypal: {
             label: 'Wirecard PayPal',
             fields: {
