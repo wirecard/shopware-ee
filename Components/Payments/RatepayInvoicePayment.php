@@ -45,6 +45,7 @@ use WirecardElasticEngine\Components\Mapper\UserMapper;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\DisplayRestrictionInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Components\Services\SessionManager;
 use WirecardElasticEngine\Exception\ArrayKeyNotFoundException;
 
 /**
@@ -177,7 +178,7 @@ class RatepayInvoicePayment extends Payment implements
 
             if ($age->y < 18) {
                 return new ErrorAction(
-                    ErrorAction::PROCESSING_FAILED,
+                    ErrorAction::PROCESSING_FAILED_WRONG_AGE,
                     'customer is too young'
                 );
             }
@@ -245,6 +246,19 @@ class RatepayInvoicePayment extends Payment implements
 
         // age above 18
         $birthDay = $userMapper->getBirthday();
+
+        if (! $birthDay) {
+            if (Shopware()->Session()->offsetExists(SessionManager::PAYMENT_DATA)) {
+                $additionalPaymentData = Shopware()->Session()->offsetGet(SessionManager::PAYMENT_DATA);
+
+                $birthDay = new \DateTime();
+                $birthDay->setDate(
+                    $additionalPaymentData['birthday']['year'],
+                    $additionalPaymentData['birthday']['month'],
+                    $additionalPaymentData['birthday']['day']
+                );
+            }
+        }
         if ($birthDay) {
             $now = new \DateTime();
             $age = $birthDay->diff($now);

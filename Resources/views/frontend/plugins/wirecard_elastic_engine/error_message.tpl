@@ -36,6 +36,8 @@
             {include file='frontend/_includes/messages.tpl' type='error' content="{s name="MsgErrorFailureResponse" namespace="frontend/wirecard_elastic_engine/checkout"}{/s}"}
         {elseif $wirecardElasticEngineErrorCode == 3}
             {include file='frontend/_includes/messages.tpl' type='error' content="{s name="MsgCanceledByUser" namespace="frontend/wirecard_elastic_engine/checkout"}{/s}"}
+        {elseif $wirecardElasticEngineErrorCode == 5}
+            {include file='frontend/_includes/messages.tpl' type='error' content="{s name="MsgUserTooYoung" namespace="frontend/wirecard_elastic_engine/checkout"}{/s}"}
         {/if}
     </div>
 {/block}
