@@ -47,7 +47,7 @@ class WirecardElasticEngine extends Plugin
     {
         $this->registerPayments($context->getPlugin());
         $this->updateDatabase();
-        $this->changeDefaultConfigValues();
+        $this->setDefaultConfigValues();
     }
 
     /**
@@ -214,33 +214,25 @@ class WirecardElasticEngine extends Plugin
     }
 
     /**
-     * Changes default values of specific config options.
+     * Set default values for config options (Shopware does not allow to set default values for multiselects)
      *
      * @since 1.0.0
      */
-    private function changeDefaultConfigValues()
+    private function setDefaultConfigValues()
     {
-        $em                 = $this->container->get('models');
-        $prefix             = 'wirecardElasticEngineRatepayInvoice';
-        $acceptedCurrencies = $em->getRepository(Element::class)->findOneBy(['name' => $prefix . 'AcceptedCurrencies']);
-        if ($acceptedCurrencies) {
-            // default value: EUR
-            $acceptedCurrencies->setValue([1]);
-            $em->flush();
-        }
-
-        $shippingCountry = $em->getRepository(Element::class)->findOneBy(['name' => $prefix . 'ShippingCountries']);
-        if ($shippingCountry) {
-            // default value: DE, AT, CH
-            $shippingCountry->setValue([2, 23, 26]);
-            $em->flush();
-        }
-
-        $billingCountry = $em->getRepository(Element::class)->findOneBy(['name' => $prefix . 'BillingCountries']);
-        if ($billingCountry) {
-            // default value: DE, AT, CH
-            $billingCountry->setValue([2, 23, 26]);
-            $em->flush();
+        $em       = $this->container->get('models');
+        $defaults = [
+            'wirecardElasticEngineRatepayInvoiceAcceptedCurrencies' => [1], // EUR
+            'wirecardElasticEngineRatepayInvoiceShippingCountries'  => [2, 23, 26], // DE, AT, CH
+            'wirecardElasticEngineRatepayInvoiceBillingCountries'   => [2, 23, 26], // DE, AT, CH
+        ];
+        foreach ($defaults as $name => $value) {
+            /** @var Element $element */
+            $element = $em->getRepository(Element::class)->findOneBy(['name' => $name]);
+            if ($element) {
+                $element->setValue($value);
+                $em->flush();
+            }
         }
     }
 
