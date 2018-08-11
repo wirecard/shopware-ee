@@ -49,7 +49,7 @@ class RatepayInvoicePaymentConfig extends PaymentConfig
     protected $allowDifferentBillingShipping;
 
     /**
-     * @return float
+     * @return string|float
      *
      * @since 1.0.0
      */
@@ -59,7 +59,7 @@ class RatepayInvoicePaymentConfig extends PaymentConfig
     }
 
     /**
-     * @param float $minAmount
+     * @param string|float $minAmount
      *
      * @since 1.0.0
      */
@@ -69,7 +69,7 @@ class RatepayInvoicePaymentConfig extends PaymentConfig
     }
 
     /**
-     * @return float
+     * @return string|float
      *
      * @since 1.0.0
      */
@@ -79,7 +79,7 @@ class RatepayInvoicePaymentConfig extends PaymentConfig
     }
 
     /**
-     * @param float $maxAmount
+     * @param string|float $maxAmount
      *
      * @since 1.0.0
      */
@@ -103,8 +103,11 @@ class RatepayInvoicePaymentConfig extends PaymentConfig
      *
      * @since 1.0.0
      */
-    public function setAcceptedCurrencies(array $acceptedCurrencies)
+    public function setAcceptedCurrencies($acceptedCurrencies)
     {
+        if (! is_array($acceptedCurrencies)) {
+            $acceptedCurrencies = [];
+        }
         $this->acceptedCurrencies = $acceptedCurrencies;
     }
 
@@ -123,8 +126,11 @@ class RatepayInvoicePaymentConfig extends PaymentConfig
      *
      * @since 1.0.0
      */
-    public function setShippingCountries(array $shippingCountries)
+    public function setShippingCountries($shippingCountries)
     {
+        if (! is_array($shippingCountries)) {
+            $shippingCountries = [];
+        }
         $this->shippingCountries = $shippingCountries;
     }
 
@@ -143,8 +149,11 @@ class RatepayInvoicePaymentConfig extends PaymentConfig
      *
      * @since 1.0.0
      */
-    public function setBillingCountries(array $billingCountries)
+    public function setBillingCountries($billingCountries)
     {
+        if (! is_array($billingCountries)) {
+            $billingCountries = [];
+        }
         $this->billingCountries = $billingCountries;
     }
 
