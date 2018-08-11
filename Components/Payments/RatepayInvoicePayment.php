@@ -181,7 +181,7 @@ class RatepayInvoicePayment extends Payment implements
         $accountHolderProperties = $accountHolder->mappedProperties();
 
         // Date of bith is part of consumer data: check has already been done via checkDisplayRestrictions method
-        if (! empty($accountHolderProperties['date_of_birth'])) {
+        if (! empty($accountHolderProperties['date-of-birth'])) {
             return null;
         }
 
@@ -280,7 +280,9 @@ class RatepayInvoicePayment extends Payment implements
         if (! $currency->getDefault()) {
             $amount /= $currency->getFactor();
         }
-        if ($amount !== 0.0 && ($amount < $paymentConfig->getMinAmount() || $amount > $paymentConfig->getMaxAmount())) {
+        $minAmount = floatval($paymentConfig->getMinAmount());
+        $maxAmount = floatval($paymentConfig->getMaxAmount());
+        if ($amount !== 0.0 && ($amount < $minAmount || $amount > $maxAmount)) {
             return false;
         }
 
