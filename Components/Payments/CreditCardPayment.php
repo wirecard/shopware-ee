@@ -389,7 +389,11 @@ class CreditCardPayment extends Payment implements
     private function saveToken(TransactionService $transactionService, SessionManager $sessionManager, $params)
     {
         $paymentData = $sessionManager->getPaymentData();
-        if (empty($paymentData['saveToken'])) {
+        if (empty($paymentData['saveToken'])
+            || ! isset($params['token_id'])
+            || ! isset($params['transaction_id'])
+            || ! isset($params['masked_account_number'])
+        ) {
             return;
         }
 
