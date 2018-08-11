@@ -161,8 +161,11 @@ class RatepayInvoicePayment extends Payment implements
         $transaction = $this->getTransaction();
 
         if (! $this->getPaymentConfig()->hasFraudPrevention()) {
+            // Enable Ratepay related fraud prevention
+            $transaction->setDevice($orderSummary->getWirecardDevice());
             $transaction->setOrderNumber($orderSummary->getPaymentUniqueId());
             $transaction->setAccountHolder($orderSummary->getUserMapper()->getWirecardBillingAccountHolder());
+            $transaction->setShipping($orderSummary->getUserMapper()->getWirecardShippingAccountHolder());
         }
 
         return $this->validateConsumerDateOfBirth($orderSummary, $transaction->getAccountHolder());

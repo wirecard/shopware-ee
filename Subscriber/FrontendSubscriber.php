@@ -17,6 +17,7 @@ use Shopware\Models\Order\Status;
 use WirecardElasticEngine\Components\Mapper\UserMapper;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\DisplayRestrictionInterface;
+use WirecardElasticEngine\Components\Payments\RatepayInvoicePayment;
 use WirecardElasticEngine\Components\Services\PaymentFactory;
 use WirecardElasticEngine\Components\Services\SessionManager;
 use WirecardElasticEngine\Exception\UnknownPaymentException;
@@ -252,8 +253,11 @@ class FrontendSubscriber implements SubscriberInterface
         }
         $payment = $this->paymentFactory->create($sPayment['name']);
 
-        if ($payment->getPaymentConfig()->hasFraudPrevention()) {
+        $fraudPrevention = $payment->getPaymentConfig()->hasFraudPrevention();
+        if ($fraudPrevention) {
             $view->assign('wirecardElasticEngineIncludeDeviceFingerprintIFrame', true);
+        }
+        if ($fraudPrevention || $payment instanceof RatepayInvoicePayment) {
             $view->assign(
                 'wirecardElasticEngineDeviceFingerprintId',
                 $sessionManager->getDeviceFingerprintId($payment->getPaymentConfig()->getTransactionMAID())
