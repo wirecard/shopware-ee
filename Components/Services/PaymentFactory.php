@@ -12,6 +12,7 @@ namespace WirecardElasticEngine\Components\Services;
 use Doctrine\ORM\EntityManagerInterface;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Components\Routing\RouterInterface;
+use WirecardElasticEngine\Components\Payments\AlipayPayment;
 use WirecardElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardElasticEngine\Components\Payments\IdealPayment;
 use WirecardElasticEngine\Components\Payments\Payment;
@@ -136,6 +137,7 @@ class PaymentFactory
     {
         return [
             CreditCardPayment::PAYMETHOD_IDENTIFIER            => CreditCardPayment::class,
+            AlipayPayment::PAYMETHOD_IDENTIFIER                => AlipayPayment::class,
             IdealPayment::PAYMETHOD_IDENTIFIER                 => IdealPayment::class,
             PaypalPayment::PAYMETHOD_IDENTIFIER                => PaypalPayment::class,
             SepaPayment::PAYMETHOD_IDENTIFIER                  => SepaPayment::class,
