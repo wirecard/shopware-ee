@@ -18,6 +18,7 @@ use WirecardElasticEngine\Components\Payments\IdealPayment;
 use WirecardElasticEngine\Components\Payments\Payment;
 use WirecardElasticEngine\Components\Payments\PaymentInterface;
 use WirecardElasticEngine\Components\Payments\PaypalPayment;
+use WirecardElasticEngine\Components\Payments\MasterpassPayment;
 use WirecardElasticEngine\Components\Payments\SepaPayment;
 use WirecardElasticEngine\Components\Payments\SofortPayment;
 use WirecardElasticEngine\Components\Payments\UnionpayInternationalPayment;
@@ -139,6 +140,7 @@ class PaymentFactory
             CreditCardPayment::PAYMETHOD_IDENTIFIER            => CreditCardPayment::class,
             AlipayPayment::PAYMETHOD_IDENTIFIER                => AlipayPayment::class,
             IdealPayment::PAYMETHOD_IDENTIFIER                 => IdealPayment::class,
+            MasterpassPayment::PAYMETHOD_IDENTIFIER            => MasterpassPayment::class,
             PaypalPayment::PAYMETHOD_IDENTIFIER                => PaypalPayment::class,
             SepaPayment::PAYMETHOD_IDENTIFIER                  => SepaPayment::class,
             SofortPayment::PAYMETHOD_IDENTIFIER                => SofortPayment::class,

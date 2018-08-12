@@ -18,6 +18,7 @@ use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\Transaction\SepaDirectDebitTransaction;
+use Wirecard\PaymentSdk\Transaction\Transaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\SepaPaymentConfig;
@@ -82,14 +83,18 @@ class SepaPayment extends Payment implements ProcessPaymentInterface, Additional
      *
      * @param string|null $operation
      * @param string|null $paymentMethod
+     * @param string|null $transactionType
      *
      * @return SepaDirectDebitTransaction|SepaCreditTransferTransaction
      *
      * @since 1.0.0
      */
-    public function getBackendTransaction($operation, $paymentMethod)
+    public function getBackendTransaction($operation, $paymentMethod, $transactionType)
     {
-        if ($paymentMethod === SepaCreditTransferTransaction::NAME || $operation === Operation::CREDIT) {
+        if ($paymentMethod === SepaCreditTransferTransaction::NAME
+            || $operation === Operation::CREDIT
+            || $transactionType === Transaction::TYPE_CREDIT
+        ) {
             return new SepaCreditTransferTransaction();
         }
         return new SepaDirectDebitTransaction();

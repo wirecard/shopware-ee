@@ -45,6 +45,13 @@ exports.config = {
                 paymentPasswordDigit: '1'
             }
         },
+        masterpass: {
+            label: 'Wirecard Masterpass',
+            fields: {
+                email: 'masterpass@mailadresse.net',
+                password: 'WirecardPass42'
+            }
+        },
         sepa: {
             label: 'Wirecard SEPA-Lastschrift',
             fields: {
