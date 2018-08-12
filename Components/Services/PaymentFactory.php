@@ -19,6 +19,8 @@ use WirecardElasticEngine\Components\Payments\Payment;
 use WirecardElasticEngine\Components\Payments\PaymentInterface;
 use WirecardElasticEngine\Components\Payments\PaypalPayment;
 use WirecardElasticEngine\Components\Payments\MasterpassPayment;
+use WirecardElasticEngine\Components\Payments\PaymentInAdvancePayment;
+use WirecardElasticEngine\Components\Payments\PaymentOnInvoicePayment;
 use WirecardElasticEngine\Components\Payments\SepaPayment;
 use WirecardElasticEngine\Components\Payments\SofortPayment;
 use WirecardElasticEngine\Components\Payments\UnionpayInternationalPayment;
@@ -142,9 +144,26 @@ class PaymentFactory
             IdealPayment::PAYMETHOD_IDENTIFIER                 => IdealPayment::class,
             MasterpassPayment::PAYMETHOD_IDENTIFIER            => MasterpassPayment::class,
             PaypalPayment::PAYMETHOD_IDENTIFIER                => PaypalPayment::class,
+            PaymentInAdvancePayment::PAYMETHOD_IDENTIFIER      => PaymentInAdvancePayment::class,
+            PaymentOnInvoicePayment::PAYMETHOD_IDENTIFIER      => PaymentOnInvoicePayment::class,
             SepaPayment::PAYMETHOD_IDENTIFIER                  => SepaPayment::class,
             SofortPayment::PAYMETHOD_IDENTIFIER                => SofortPayment::class,
             UnionpayInternationalPayment::PAYMETHOD_IDENTIFIER => UnionpayInternationalPayment::class,
         ];
+    }
+
+    /**
+     * Return true, if payment identifier matches a supported Wirecard payment
+     *
+     * @param string $identifier
+     *
+     * @return bool
+     *
+     * @since 1.0.0
+     */
+    public function isSupportedPayment($identifier)
+    {
+        $payments = $this->getMappedPayments();
+        return isset($payments[$identifier]);
     }
 }

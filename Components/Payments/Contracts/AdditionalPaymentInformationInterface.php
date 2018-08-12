@@ -9,19 +9,21 @@
 
 namespace WirecardElasticEngine\Components\Payments\Contracts;
 
+use WirecardElasticEngine\Models\Transaction;
+
 /**
  * @package WirecardElasticEngine\Components\Payments\Contracts
  *
  * @since   1.0.0
  */
-interface AdditionalViewAssignmentsInterface
+interface AdditionalPaymentInformationInterface
 {
     /**
-     * Some payments (e.g. SEPA) require additional view assignments (e.g. for displaying additional input fields).
+     * Some payments (e.g. PIA) require additional payment information on the checkout finish page (e.g. bank data).
      *
-     * @return array
+     * @param \Enlight_View_Default $view
      *
      * @since 1.0.0
      */
-    public function getAdditionalViewAssignments();
+    public function assignAdditionalPaymentInformation(\Enlight_View_Default $view);
 }

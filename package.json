@@ -12,6 +12,8 @@
     "test:paypal": "node_modules/.bin/mocha Tests/Selenium/Payments/PaypalTest.js --timeout 180000",
     "test:sepa": "node_modules/.bin/mocha Tests/Selenium/Payments/SepaTest.js --timeout 60000",
     "test:sofort": "node_modules/.bin/mocha Tests/Selenium/Payments/SofortTest.js --timeout 60000",
+    "test:pia": "node_modules/.bin/mocha Tests/Selenium/Payments/PiaTest.js --timeout 60000",
+    "test:poi": "node_modules/.bin/mocha Tests/Selenium/Payments/PoiTest.js --timeout 60000",
     "test:ideal": "node_modules/.bin/mocha Tests/Selenium/Payments/IdealTest.js --timeout 60000",
     "test:upi": "node_modules/.bin/mocha Tests/Selenium/Payments/UpiTest.js --timeout 60000",
     "test:runner": "node Tests/Selenium/runner.js"
