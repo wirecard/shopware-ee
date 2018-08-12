@@ -89,12 +89,13 @@ class RatepayInvoicePayment extends Payment implements
      * @param Order       $order
      * @param null|string $operation
      * @param null|string $paymentMethod
+     * @param string|null $transactionType
      *
      * @return RatepayInvoiceTransaction
      *
      * @since 1.0.0
      */
-    public function getBackendTransaction(Order $order, $operation, $paymentMethod)
+    public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType)
     {
         $transaction = new RatepayInvoiceTransaction();
         $transaction->setOrderNumber($order->getTemporaryId());
@@ -344,12 +345,11 @@ class RatepayInvoicePayment extends Payment implements
     /**
      * {@inheritdoc}
      */
-    public function getAdditionalViewAssignments()
+    public function getAdditionalViewAssignments(SessionManager $sessionManager)
     {
-        $userData = Shopware()->Session()->sOrderVariables['sUserData'];
-
-        $userMapper = new UserMapper($userData, '', '');
-
+        $orderVariables = $sessionManager->getOrderVariables();
+        $userData       = isset($orderVariables['sUserData']) ? $orderVariables['sUserData'] : [];
+        $userMapper     = new UserMapper($userData, '', '');
         return [
             'method'   => $this->getName(),
             'showForm' => ! $userMapper->getBirthday(),

@@ -20,6 +20,7 @@ use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\PaymentConfig;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessReturnInterface;
+use WirecardElasticEngine\Components\Services\SessionManager;
 use WirecardElasticEngine\Models\Transaction;
 
 /**
@@ -148,7 +149,8 @@ class UnionpayInternationalPayment extends Payment implements ProcessReturnInter
      */
     public function processReturn(
         TransactionService $transactionService,
-        \Enlight_Controller_Request_Request $request
+        \Enlight_Controller_Request_Request $request,
+        SessionManager $sessionManager
     ) {
         $params = $request->getParams();
         if (! empty($params['jsresponse'])) {

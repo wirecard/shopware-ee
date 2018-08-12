@@ -9,6 +9,7 @@
 
 namespace WirecardElasticEngine\Tests\Unit\Components\Payments;
 
+use Shopware\Models\Order\Order;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
@@ -69,17 +70,28 @@ class MasterpassPaymentTest extends PaymentTestCase
     public function testGetBackendTransaction()
     {
         $masterpass  = MasterpassTransaction::NAME;
-        $transaction = $this->payment->getBackendTransaction(Operation::CANCEL, $masterpass, null);
+        $order       = new Order();
+        $transaction = $this->payment->getBackendTransaction($order, Operation::CANCEL, $masterpass, null);
         $this->assertInstanceOf(MasterpassTransaction::class, $transaction);
         $this->assertNotSame($transaction, $this->payment->getTransaction());
 
-        $this->assertNull($this->payment->getBackendTransaction(null, $masterpass, Transaction::TYPE_DEBIT));
-        $this->assertNull($this->payment->getBackendTransaction(null, $masterpass, Transaction::TYPE_AUTHORIZATION));
+        $this->assertNull($this->payment->getBackendTransaction($order, null, $masterpass, Transaction::TYPE_DEBIT));
+        $this->assertNull($this->payment->getBackendTransaction(
+            $order,
+            null,
+            $masterpass,
+            Transaction::TYPE_AUTHORIZATION
+        ));
 
         $creditcard  = CreditCardTransaction::NAME;
-        $transaction = $this->payment->getBackendTransaction(null, $creditcard, Transaction::TYPE_DEBIT);
+        $transaction = $this->payment->getBackendTransaction($order, null, $creditcard, Transaction::TYPE_DEBIT);
         $this->assertInstanceOf(MasterpassTransaction::class, $transaction);
-        $transaction = $this->payment->getBackendTransaction(null, $creditcard, Transaction::TYPE_AUTHORIZATION);
+        $transaction = $this->payment->getBackendTransaction(
+            $order,
+            null,
+            $creditcard,
+            Transaction::TYPE_AUTHORIZATION
+        );
         $this->assertInstanceOf(MasterpassTransaction::class, $transaction);
     }
 

@@ -27,6 +27,7 @@ use WirecardElasticEngine\Components\Mapper\UserMapper;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Payments\RatepayInvoicePayment;
+use WirecardElasticEngine\Components\Services\SessionManager;
 use WirecardElasticEngine\Tests\Unit\PaymentTestCase;
 use WirecardElasticEngine\WirecardElasticEngine;
 
@@ -83,12 +84,12 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
         $order->setInvoiceAmount(123.98);
         $order->setCurrency('USD');
 
-        $transaction = $this->payment->getBackendTransaction($order, null, RatepayInvoiceTransaction::NAME);
+        $transaction = $this->payment->getBackendTransaction($order, null, RatepayInvoiceTransaction::NAME, null);
         $this->assertInstanceOf(RatepayInvoiceTransaction::class, $transaction);
         $this->assertNotSame($transaction, $this->payment->getTransaction());
-        $this->assertNotSame($transaction, $this->payment->getBackendTransaction($order, null, null));
+        $this->assertNotSame($transaction, $this->payment->getBackendTransaction($order, null, null, null));
 
-        $transaction = $this->payment->getBackendTransaction($order, null, null);
+        $transaction = $this->payment->getBackendTransaction($order, null, null, null);
         $this->assertEquals(123.98, $transaction->getAmount()->getValue());
         $this->assertEquals('USD', $transaction->getAmount()->getCurrency());
         $basket = $transaction->getBasket();
@@ -236,12 +237,12 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
 
     public function testGetAdditionalViewAssignments()
     {
-        $this->markTestIncomplete('Complete test after merge and SessionManager is available!');
+        $sessionManager = $this->createMock(SessionManager::class);
 
         $this->assertInstanceOf(AdditionalViewAssignmentsInterface::class, $this->payment);
         $this->assertEquals([
             'method'   => 'wirecard_elastic_engine_ratepay_invoice',
             'showForm' => true,
-        ], $this->payment->getAdditionalViewAssignments());
+        ], $this->payment->getAdditionalViewAssignments($sessionManager));
     }
 }

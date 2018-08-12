@@ -298,8 +298,10 @@ class FrontendSubscriber implements SubscriberInterface
         }
         $paymentMethod = $this->paymentFactory->create($payment['name']);
         if ($paymentMethod instanceof AdditionalViewAssignmentsInterface) {
-            $view->assign('wirecardElasticEngineViewAssignments',
-                $paymentMethod->getAdditionalViewAssignments($sessionManager));
+            $view->assign(
+                'wirecardElasticEngineViewAssignments',
+                $paymentMethod->getAdditionalViewAssignments($sessionManager)
+            );
         }
     }
 }

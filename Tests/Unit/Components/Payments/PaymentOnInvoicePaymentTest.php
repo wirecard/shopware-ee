@@ -9,6 +9,7 @@
 
 namespace WirecardElasticEngine\Tests\Unit\Components\Payments;
 
+use Shopware\Models\Order\Order;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
@@ -70,7 +71,11 @@ class PaymentOnInvoicePaymentTest extends PaymentTestCase
 
     public function testGetBackendTransaction()
     {
-        $transaction = $this->payment->getBackendTransaction(Operation::REFUND, PoiPiaTransaction::NAME);
+        $transaction = $this->payment->getBackendTransaction(
+            new Order(),
+            Operation::REFUND,
+            PoiPiaTransaction::NAME,
+            null);
         $this->assertInstanceOf(PoiPiaTransaction::class, $transaction);
         $this->assertSame($transaction, $this->payment->getTransaction());
     }

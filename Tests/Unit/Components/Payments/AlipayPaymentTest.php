@@ -9,6 +9,7 @@
 
 namespace WirecardElasticEngine\Tests\Unit\Components\Payments;
 
+use Shopware\Models\Order\Order;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
@@ -70,13 +71,21 @@ class AlipayPaymentTest extends PaymentTestCase
 
     public function testGetBackendTransaction()
     {
-        $transaction = $this->payment->getBackendTransaction(Operation::REFUND, AlipayCrossborderTransaction::NAME);
+        $order       = new Order();
+        $transaction = $this->payment->getBackendTransaction(
+            $order,
+            Operation::REFUND,
+            AlipayCrossborderTransaction::NAME,
+            null
+        );
         $this->assertInstanceOf(AlipayCrossborderTransaction::class, $transaction);
         $this->assertSame($transaction, $this->payment->getTransaction());
 
         $backendTransaction = $this->payment->getBackendTransaction(
+            $order,
             Operation::CANCEL,
-            AlipayCrossborderTransaction::NAME
+            AlipayCrossborderTransaction::NAME,
+            null
         );
         $this->assertSame($transaction, $backendTransaction);
         $this->assertInstanceOf(AlipayCrossborderTransaction::class, $backendTransaction);
