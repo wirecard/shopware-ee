@@ -12,6 +12,7 @@ namespace WirecardElasticEngine\Components\Payments;
 use Doctrine\ORM\EntityManagerInterface;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Components\Routing\RouterInterface;
+use Shopware\Models\Order\Order;
 use Shopware\Models\Shop\Shop;
 use Shopware_Components_Config;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -165,7 +166,7 @@ abstract class Payment implements PaymentInterface
     /**
      * {@inheritdoc}
      */
-    public function getBackendTransaction($operation, $paymentMethod, $transactionType)
+    public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType)
     {
         return $this->getTransaction();
     }
@@ -174,7 +175,7 @@ abstract class Payment implements PaymentInterface
      * @param string $name
      * @param string $prefix
      *
-     * @return string
+     * @return string|array
      *
      * @since 1.0.0
      */

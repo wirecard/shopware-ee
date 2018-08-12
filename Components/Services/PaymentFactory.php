@@ -21,6 +21,7 @@ use WirecardElasticEngine\Components\Payments\PaypalPayment;
 use WirecardElasticEngine\Components\Payments\MasterpassPayment;
 use WirecardElasticEngine\Components\Payments\PaymentInAdvancePayment;
 use WirecardElasticEngine\Components\Payments\PaymentOnInvoicePayment;
+use WirecardElasticEngine\Components\Payments\RatepayInvoicePayment;
 use WirecardElasticEngine\Components\Payments\SepaPayment;
 use WirecardElasticEngine\Components\Payments\SofortPayment;
 use WirecardElasticEngine\Components\Payments\UnionpayInternationalPayment;
@@ -141,6 +142,7 @@ class PaymentFactory
         return [
             CreditCardPayment::PAYMETHOD_IDENTIFIER            => CreditCardPayment::class,
             AlipayPayment::PAYMETHOD_IDENTIFIER                => AlipayPayment::class,
+            RatepayInvoicePayment::PAYMETHOD_IDENTIFIER        => RatepayInvoicePayment::class,
             IdealPayment::PAYMETHOD_IDENTIFIER                 => IdealPayment::class,
             MasterpassPayment::PAYMETHOD_IDENTIFIER            => MasterpassPayment::class,
             PaypalPayment::PAYMETHOD_IDENTIFIER                => PaypalPayment::class,

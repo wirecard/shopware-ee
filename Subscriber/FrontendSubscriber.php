@@ -16,9 +16,13 @@ use Shopware\Components\Theme\LessDefinition;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalPaymentInformationInterface;
+use WirecardElasticEngine\Components\Mapper\UserMapper;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
+use WirecardElasticEngine\Components\Payments\Contracts\DisplayRestrictionInterface;
+use WirecardElasticEngine\Components\Payments\RatepayInvoicePayment;
 use WirecardElasticEngine\Components\Services\PaymentFactory;
 use WirecardElasticEngine\Components\Services\SessionManager;
+use WirecardElasticEngine\Exception\UnknownPaymentException;
 
 /**
  * @package WirecardElasticEngine\Subscriber
@@ -75,10 +79,42 @@ class FrontendSubscriber implements SubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
+            'Shopware_Modules_Admin_GetPaymentMeans_DataFilter'              => 'onGetPayments',
             'Enlight_Controller_Action_PreDispatch'                          => 'onPreDispatch',
             'Theme_Compiler_Collect_Plugin_Less'                             => 'onCollectLessFiles',
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onPostDispatchCheckout',
         ];
+    }
+
+    /**
+     * Remove payments that implement DisplayRestrictionInterface and fail the checkDisplayRestrictions test
+     * (e.g. RatepayInvoicePayment)
+     *
+     * @param \Enlight_Event_EventArgs $args
+     *
+     * @since 1.0.0
+     */
+    public function onGetPayments(\Enlight_Event_EventArgs $args)
+    {
+        /** @var \sAdmin $admin */
+        $admin      = $args->get('subject');
+        $userData   = $admin->sGetUserData();
+        $userMapper = new UserMapper($userData, '', '');
+
+        $paymentMeans = $args->getReturn();
+        foreach ($paymentMeans as $key => $paymentData) {
+            try {
+                $payment = $this->paymentFactory->create($paymentData['name']);
+                if ($payment instanceof DisplayRestrictionInterface) {
+                    if (! $payment->checkDisplayRestrictions($userMapper)) {
+                        unset($paymentMeans[$key]);
+                    }
+                }
+            } catch (UnknownPaymentException $e) {
+            }
+        }
+
+        $args->setReturn($paymentMeans);
     }
 
     /**
@@ -224,9 +260,13 @@ class FrontendSubscriber implements SubscriberInterface
         if (! isset($payment['name']) || ! $this->paymentFactory->isSupportedPayment($payment['name'])) {
             return;
         }
-        $paymentMethod = $this->paymentFactory->create($payment['name']);
-        if ($paymentMethod->getPaymentConfig()->hasFraudPrevention()) {
+
+        $paymentMethod   = $this->paymentFactory->create($payment['name']);
+        $fraudPrevention = $paymentMethod->getPaymentConfig()->hasFraudPrevention();
+        if ($fraudPrevention) {
             $view->assign('wirecardElasticEngineIncludeDeviceFingerprintIFrame', true);
+        }
+        if ($fraudPrevention || $paymentMethod instanceof RatepayInvoicePayment) {
             $view->assign(
                 'wirecardElasticEngineDeviceFingerprintId',
                 $sessionManager->getDeviceFingerprintId($paymentMethod->getPaymentConfig()->getTransactionMAID())

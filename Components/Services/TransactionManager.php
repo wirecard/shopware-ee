@@ -171,16 +171,14 @@ class TransactionManager
         $transaction->setPaymentUniqueId($initialTransaction->getPaymentUniqueId());
         $transaction->setOrderNumber($initialTransaction->getOrderNumber());
         $transaction->setResponse($response);
-
         $transaction = $this->persist($transaction);
 
-        $repo              = $this->em->getRepository(Transaction::class);
-        $parentTransaction = $repo->findOneBy([
+        $repo               = $this->em->getRepository(Transaction::class);
+        $parentTransactions = $repo->findBy([
             'transactionId' => $transaction->getParentTransactionId(),
             'type'          => Transaction::TYPE_NOTIFY,
         ]);
-
-        if (! $parentTransaction) {
+        if (! count($parentTransactions)) {
             return $transaction;
         }
 
@@ -188,16 +186,15 @@ class TransactionManager
             'parentTransactionId' => $transaction->getParentTransactionId(),
             'transactionType'     => $transaction->getTransactionType(),
         ]);
-
-        $totalAmount = (float)$parentTransaction->getAmount();
-
-        foreach ($childTransactions as $childTransaction) {
-            $totalAmount -= (float)$childTransaction->getAmount();
-        }
-
-        if ($totalAmount <= 0) {
-            $parentTransaction->setState(Transaction::STATE_CLOSED);
-            $this->em->flush();
+        foreach ($parentTransactions as $parentTransaction) {
+            $totalAmount = (float)$parentTransaction->getAmount();
+            foreach ($childTransactions as $childTransaction) {
+                $totalAmount -= (float)$childTransaction->getAmount();
+            }
+            if ($totalAmount <= 0) {
+                $parentTransaction->setState(Transaction::STATE_CLOSED);
+                $this->em->flush();
+            }
         }
         return $transaction;
     }

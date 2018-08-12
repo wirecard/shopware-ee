@@ -9,6 +9,7 @@
 
 namespace WirecardElasticEngine\Components\Payments;
 
+use Shopware\Models\Order\Order;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
@@ -79,6 +80,7 @@ class IdealPayment extends Payment implements ProcessPaymentInterface, Additiona
      * If the paymentMethod is 'sepacredit' or a 'credit'/'cancel' operation is requested, we need a
      * SepaCreditTransferTransaction instead of IdealTransaction for this payment method.
      *
+     * @param Order       $order
      * @param string|null $operation
      * @param string|null $paymentMethod
      * @param string|null $transactionType
@@ -87,7 +89,7 @@ class IdealPayment extends Payment implements ProcessPaymentInterface, Additiona
      *
      * @since 1.0.0
      */
-    public function getBackendTransaction($operation, $paymentMethod, $transactionType)
+    public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType)
     {
         if ($paymentMethod === SepaCreditTransferTransaction::NAME
             || $operation === Operation::CREDIT

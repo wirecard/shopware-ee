@@ -9,6 +9,7 @@
 
 namespace WirecardElasticEngine\Components\Payments;
 
+use Shopware\Models\Order\Order;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
@@ -66,6 +67,7 @@ interface PaymentInterface
      * Returns payment specific transaction object for backend operations (always returns a new instance!).
      * Returns null, if no backend operations are allowed on this payment
      *
+     * @param Order       $order
      * @param string|null $operation
      * @param string|null $paymentMethod
      * @param string|null $transactionType
@@ -74,7 +76,7 @@ interface PaymentInterface
      *
      * @since 1.0.0
      */
-    public function getBackendTransaction($operation, $paymentMethod, $transactionType);
+    public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType);
 
     /**
      * Returns the transaction type from `getPaymentOptions`.

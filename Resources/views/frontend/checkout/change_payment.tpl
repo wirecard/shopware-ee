@@ -26,6 +26,11 @@
                 <img title="{$payment_mean.description}" alt="{$payment_mean.description}"
                      src="{s name="MasterpassLogo" namespace="frontend/wirecard_elastic_engine/payments"}{/s}" />
             </div>
+        {elseif $payment_mean.name == "wirecard_elastic_engine_ratepay_invoice"}
+            <div class="wirecardee--payments">
+                <img title="{$payment_mean.description}" alt="{$payment_mean.description}"
+                     src="{s name="RatepayInvoiceLogo" namespace="frontend/wirecard_elastic_engine/payments"}{/s}" />
+            </div>
         {elseif $payment_mean.name == "wirecard_elastic_engine_ideal"}
             <div class="wirecardee--payments">
                 <img title="{$payment_mean.description}" alt="{$payment_mean.description}"

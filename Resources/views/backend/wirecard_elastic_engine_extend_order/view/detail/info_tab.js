@@ -436,6 +436,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 operation: operation,
                 payment: me.record.getPayment().first().get('name'),
                 transactionId: transaction.transactionId,
+                orderNumber: transaction.orderNumber,
                 amount: amount,
                 currency: transaction.currency
             },

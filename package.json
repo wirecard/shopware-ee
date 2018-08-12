@@ -16,6 +16,7 @@
     "test:poi": "node_modules/.bin/mocha Tests/Selenium/Payments/PoiTest.js --timeout 60000",
     "test:ideal": "node_modules/.bin/mocha Tests/Selenium/Payments/IdealTest.js --timeout 60000",
     "test:upi": "node_modules/.bin/mocha Tests/Selenium/Payments/UpiTest.js --timeout 60000",
+    "test:ratepay": "node_modules/.bin/mocha Tests/Selenium/Payments/RatepayTest.js --timeout 60000",
     "test:runner": "node Tests/Selenium/runner.js"
   },
   "private": true,
