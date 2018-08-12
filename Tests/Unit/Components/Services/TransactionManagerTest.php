@@ -163,8 +163,46 @@ class TransactionManagerTest extends TestCase
         $initialTransaction->expects($this->atLeastOnce())->method('getPaymentUniqueId')
                            ->willReturn('parent-payUniqueId');
 
-        $parentTransaction = new Transaction(Transaction::TYPE_NOTIFY);
-        $this->repo->method('findOneBy')->willReturnOnConsecutiveCalls($initialTransaction, $parentTransaction);
+        $parentTransaction = $this->createMock(Transaction::class);
+        $parentTransaction->method('getAmount')->willReturn(55.99);
+        $parentTransaction->expects($this->never())->method('setState');
+        $this->repo->expects($this->once())->method('findOneBy')->willReturn($initialTransaction);
+        $this->repo->expects($this->atLeast(2))->method('findBy')
+                   ->willReturnOnConsecutiveCalls([$parentTransaction]);
+
+        $response = $this->createMock(SuccessResponse::class);
+        $response->method('findElement')->willReturn('response-payUniqueId');
+        $response->method('getRequestId')->willReturn('req-id');
+
+        $transaction = $this->manager->createBackend($response);
+        $this->assertInstanceOf(Transaction::class, $transaction);
+        $this->assertEquals(Transaction::TYPE_BACKEND, $transaction->getType());
+        $this->assertEquals('parent-payUniqueId', $transaction->getPaymentUniqueId());
+        $this->assertNull($transaction->getBasketSignature());
+        $this->assertEquals('req-id', $transaction->getRequestId());
+        $this->assertEquals('order-num', $transaction->getOrderNumber());
+        $this->assertEquals(Transaction::STATE_OPEN, $transaction->getState());
+    }
+
+    public function testCreateBackendAndCloseParentTransaction()
+    {
+        $initialTransaction = $this->createMock(Transaction::class);
+        $initialTransaction->expects($this->atLeastOnce())->method('isInitial')->willReturn(true);
+        $initialTransaction->expects($this->atLeastOnce())->method('getOrderNumber')->willReturn('order-num');
+        $initialTransaction->expects($this->atLeastOnce())->method('getPaymentUniqueId')
+                           ->willReturn('parent-payUniqueId');
+
+        $childTransaction = $this->createMock(Transaction::class);
+        $childTransaction->method('getAmount')->willReturn(35.99);
+        $childTransaction2 = $this->createMock(Transaction::class);
+        $childTransaction2->method('getAmount')->willReturn(20);
+
+        $parentTransaction = $this->createMock(Transaction::class);
+        $parentTransaction->method('getAmount')->willReturn(55.99);
+        $parentTransaction->expects($this->once())->method('setState')->with(Transaction::STATE_CLOSED);
+        $this->repo->expects($this->once())->method('findOneBy')->willReturn($initialTransaction);
+        $this->repo->expects($this->atLeast(2))->method('findBy')
+                   ->willReturnOnConsecutiveCalls([$parentTransaction], [$childTransaction, $childTransaction2]);
 
         $response = $this->createMock(SuccessResponse::class);
         $response->method('findElement')->willReturn('response-payUniqueId');
