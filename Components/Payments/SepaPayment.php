@@ -25,6 +25,7 @@ use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\SepaPaymentConfig;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Components\Services\SessionManager;
 use WirecardElasticEngine\Exception\InsufficientDataException;
 
 /**
@@ -160,7 +161,7 @@ class SepaPayment extends Payment implements ProcessPaymentInterface, Additional
     /**
      * {@inheritdoc}
      */
-    public function getAdditionalViewAssignments()
+    public function getAdditionalViewAssignments(SessionManager $sessionManager)
     {
         $paymentConfig = $this->getPaymentConfig();
 

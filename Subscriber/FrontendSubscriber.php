@@ -174,8 +174,13 @@ class FrontendSubscriber implements SubscriberInterface
 
         // On checkout confirm page
         if ($request->getActionName() === 'confirm') {
-            $this->assignDeviceFingerprint($view, $controller->get('wirecard_elastic_engine.session_manager'));
-            $this->assignAdditionalViewAssignments($view);
+            $sessionManager = $controller->get('wirecard_elastic_engine.session_manager');
+
+            // Assigns the device fingerprint id to the view in case the payment has fraud prevention enabled.
+            $this->assignDeviceFingerprint($view, $sessionManager);
+
+            // Some payments may require additional view assignments (e.g. SEPA input fields)
+            $this->assignAdditionalViewAssignments($view, $sessionManager);
         }
 
         $errorCode = $request->getParam('wirecard_elastic_engine_error_code');
@@ -226,10 +231,11 @@ class FrontendSubscriber implements SubscriberInterface
     }
 
     /**
+     * Some payments may require additional info on checkout finish page (e.g. PIA).
+     *
      * @param \Enlight_View_Default $view
      *
      * @throws \WirecardElasticEngine\Exception\UnknownPaymentException
-     *
      * @since 1.0.0
      */
     private function assignAdditionalPaymentInformation(\Enlight_View_Default $view)
@@ -275,15 +281,16 @@ class FrontendSubscriber implements SubscriberInterface
     }
 
     /**
-     * Some payments may require additional view assignments (e.g. SEPA input fields) which will be assigned here.
+     * Some payments may require additional view assignments (e.g. SEPA input fields) on checkout confirm page.
      *
      * @param \Enlight_View_Default $view
+     * @param SessionManager        $sessionManager
      *
      * @throws \WirecardElasticEngine\Exception\UnknownPaymentException
      *
      * @since 1.0.0
      */
-    private function assignAdditionalViewAssignments(\Enlight_View_Default $view)
+    private function assignAdditionalViewAssignments(\Enlight_View_Default $view, SessionManager $sessionManager)
     {
         $payment = $view->getAssign('sPayment');
         if (! isset($payment['name']) || ! $this->paymentFactory->isSupportedPayment($payment['name'])) {
@@ -291,7 +298,8 @@ class FrontendSubscriber implements SubscriberInterface
         }
         $paymentMethod = $this->paymentFactory->create($payment['name']);
         if ($paymentMethod instanceof AdditionalViewAssignmentsInterface) {
-            $view->assign('wirecardElasticEngineViewAssignments', $paymentMethod->getAdditionalViewAssignments());
+            $view->assign('wirecardElasticEngineViewAssignments',
+                $paymentMethod->getAdditionalViewAssignments($sessionManager));
         }
     }
 }

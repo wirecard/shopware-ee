@@ -9,6 +9,7 @@
 
 namespace WirecardElasticEngine\Components\Payments;
 
+use Shopware\Models\Customer\Customer;
 use Shopware\Models\Shop\Currency;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -17,11 +18,16 @@ use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
+use WirecardElasticEngine\Components\Actions\ErrorAction;
 use WirecardElasticEngine\Components\Actions\ViewAction;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\CreditCardPaymentConfig;
+use WirecardElasticEngine\Components\Mapper\UserMapper;
+use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessReturnInterface;
+use WirecardElasticEngine\Components\Services\SessionManager;
+use WirecardElasticEngine\Models\CreditCardVault;
 use WirecardElasticEngine\Models\Transaction;
 
 /**
@@ -29,7 +35,10 @@ use WirecardElasticEngine\Models\Transaction;
  *
  * @since   1.0.0
  */
-class CreditCardPayment extends Payment implements ProcessReturnInterface, ProcessPaymentInterface
+class CreditCardPayment extends Payment implements
+    ProcessReturnInterface,
+    ProcessPaymentInterface,
+    AdditionalViewAssignmentsInterface
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_credit_card';
 
@@ -220,6 +229,10 @@ class CreditCardPayment extends Payment implements ProcessReturnInterface, Proce
 
         $paymentConfig->setFraudPrevention($this->getPluginConfig('CreditCardFraudPrevention'));
 
+        $paymentConfig->setVaultEnabled($this->getPluginConfig('CreditCardEnableVault'));
+        $paymentConfig->setAllowAddressChanges($this->getPluginConfig('CreditCardAllowAddressChanges'));
+        $paymentConfig->setThreeDUsageOnTokens($this->getPluginConfig('CreditCardThreeDUsageOnTokens'));
+
         return $paymentConfig;
     }
 
@@ -236,6 +249,14 @@ class CreditCardPayment extends Payment implements ProcessReturnInterface, Proce
     ) {
         $transaction = $this->getTransaction();
         $transaction->setTermUrl($redirect->getSuccessUrl());
+
+        if ($this->getPaymentConfig()->isVaultEnabled()) {
+            $paymentData = $orderSummary->getAdditionalPaymentData();
+            $tokenId     = isset($paymentData['token']) ? $paymentData['token'] : null;
+            if ($tokenId) {
+                return $this->useToken($transaction, $tokenId, $orderSummary);
+            }
+        }
 
         $requestData = $transactionService->getCreditCardUiWithData(
             $transaction,
@@ -261,13 +282,93 @@ class CreditCardPayment extends Payment implements ProcessReturnInterface, Proce
     }
 
     /**
+     * @param CreditCardTransaction $transaction
+     * @param string                $tokenId
+     * @param OrderSummary          $orderSummary
+     *
+     * @return ErrorAction|null
+     * @throws \WirecardElasticEngine\Exception\ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
+     */
+    private function useToken(CreditCardTransaction $transaction, $tokenId, OrderSummary $orderSummary)
+    {
+        $userMapper = $orderSummary->getUserMapper();
+        $conditions = [
+            'userId' => $userMapper->getUserId(),
+            'token'  => $tokenId,
+        ];
+        if (! $this->getPaymentConfig()->allowAddressChanges()) {
+            $conditions['bindBillingAddressHash']  = $this->createAddressHash($userMapper->getBillingAddress());
+            $conditions['bindShippingAddressHash'] = $this->createAddressHash($userMapper->getShippingAddress());
+        }
+
+        $creditCardVault = $this->em->getRepository(CreditCardVault::class)->findOneBy($conditions);
+        if (! $creditCardVault) {
+            return new ErrorAction(ErrorAction::PROCESSING_FAILED, 'no valid credit card for token found');
+        }
+
+        if (! $this->getPaymentConfig()->useThreeDOnTokens()) {
+            $transaction->setThreeD(false);
+        }
+
+        $creditCardVault->setLastUsed(new \DateTime());
+        $this->em->flush();
+
+        $transaction->setTokenId($tokenId);
+        return null;
+    }
+
+    /**
+     * @return array
+     *
+     * @since 1.0.0
+     */
+    private function getComparableAddressKeys()
+    {
+        return [
+            UserMapper::ADDRESS_FIRST_NAME,
+            UserMapper::ADDRESS_LAST_NAME,
+            UserMapper::ADDRESS_STREET,
+            UserMapper::ADDRESS_ZIP,
+            UserMapper::ADDRESS_CITY,
+            UserMapper::ADDRESS_COUNTRY_ID,
+            UserMapper::ADDRESS_STATE_ID,
+        ];
+    }
+
+    /**
+     * @param array $address
+     *
+     * @return string
+     *
+     * @since 1.0.0
+     */
+    private function createAddressHash(array $address)
+    {
+        $hashAddress = [];
+        foreach ($this->getComparableAddressKeys() as $key) {
+            if (isset($address[$key])) {
+                $hashAddress[$key] = $address[$key];
+            }
+        }
+        return md5(serialize($hashAddress));
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function processReturn(
         TransactionService $transactionService,
-        \Enlight_Controller_Request_Request $request
+        \Enlight_Controller_Request_Request $request,
+        SessionManager $sessionManager
     ) {
         $params = $request->getParams();
+
+        if ($this->getPaymentConfig()->isVaultEnabled()) {
+            $this->saveToken($transactionService, $sessionManager, $params);
+        }
+
         if (! empty($params['jsresponse'])) {
             return $transactionService->processJsResponse($request->getParams(), $this->router->assemble([
                 'action' => 'return',
@@ -276,5 +377,109 @@ class CreditCardPayment extends Payment implements ProcessReturnInterface, Proce
         }
 
         return null;
+    }
+
+    /**
+     * @param TransactionService $transactionService
+     * @param SessionManager     $sessionManager
+     * @param array              $params
+     *
+     * @since 1.0.0
+     */
+    private function saveToken(TransactionService $transactionService, SessionManager $sessionManager, $params)
+    {
+        $paymentData = $sessionManager->getPaymentData();
+        if (empty($paymentData['saveToken'])
+            || ! isset($params['token_id'])
+            || ! isset($params['transaction_id'])
+            || ! isset($params['masked_account_number'])
+        ) {
+            return;
+        }
+
+        $tokenId             = $params['token_id'];
+        $userId              = $sessionManager->getUserId();
+        $billingAddress      = $sessionManager->getOrderBilldingAddress();
+        $shippingAddress     = $sessionManager->getOrderShippingAddress();
+        $billingAddressHash  = $this->createAddressHash($billingAddress);
+        $shippingAddressHash = $this->createAddressHash($shippingAddress);
+
+        $transactionDetails = $transactionService->getTransactionByTransactionId(
+            $params['transaction_id'],
+            CreditCardTransaction::NAME
+        );
+
+        $creditCardVault = $this->em->getRepository(CreditCardVault::class)->findOneBy([
+            'userId'                  => $userId,
+            'token'                   => $tokenId,
+            'bindBillingAddressHash'  => $billingAddressHash,
+            'bindShippingAddressHash' => $shippingAddressHash,
+        ]);
+
+        if (! $creditCardVault) {
+            $creditCardVault = new CreditCardVault();
+            $creditCardVault->setToken($tokenId);
+            $creditCardVault->setMaskedAccountNumber($params['masked_account_number']);
+            $creditCardVault->setUserId($userId);
+            $creditCardVault->setBindBillingAddress($billingAddress);
+            $creditCardVault->setBindBillingAddressHash($billingAddressHash);
+            $creditCardVault->setBindShippingAddress($shippingAddress);
+            $creditCardVault->setBindShippingAddressHash($shippingAddressHash);
+            $this->em->persist($creditCardVault);
+        }
+
+        $creditCardVault->setLastUsed(new \DateTime());
+        $creditCardVault->setAdditionalData([
+            'firstName'       => isset($params['first_name']) ? $params['first_name'] : '',
+            'lastName'        => isset($params['last_name']) ? $params['last_name'] : '',
+            'expirationMonth' => $transactionDetails['payment']['card']['expiration-month'],
+            'expirationYear'  => $transactionDetails['payment']['card']['expiration-year'],
+            'cardType'        => $transactionDetails['payment']['card']['card-type'],
+        ]);
+        $this->em->flush();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getAdditionalViewAssignments(SessionManager $sessionManager)
+    {
+        $paymentConfig = $this->getPaymentConfig();
+        $userInfo      = $sessionManager->getUserInfo();
+        $accountMode   = isset($userInfo['accountmode']) ? intval($userInfo['accountmode']) : 0;
+
+        $formData = [
+            'method'       => $this->getName(),
+            'vaultEnabled' => $accountMode === Customer::ACCOUNT_MODE_CUSTOMER && $paymentConfig->isVaultEnabled(),
+        ];
+
+        if ($paymentConfig->isVaultEnabled()) {
+            $billingAddressHash  = $this->createAddressHash($sessionManager->getOrderBilldingAddress());
+            $shippingAddressHash = $this->createAddressHash($sessionManager->getOrderShippingAddress());
+
+            $builder = $this->em->createQueryBuilder();
+            $builder->select('ccv')
+                    ->from(CreditCardVault::class, 'ccv')
+                    ->where('ccv.userId = :userId')
+                    ->setParameter('userId', $sessionManager->getUserId())
+                    ->orderBy('ccv.lastUsed', 'DESC');
+            $savedCards = $builder->getQuery()->getResult();
+
+            /** @var CreditCardVault $card */
+            foreach ($savedCards as $card) {
+                $acceptedCriteria = $paymentConfig->allowAddressChanges()
+                                    || ($billingAddressHash === $card->getBindBillingAddressHash()
+                                        && $shippingAddressHash === $card->getBindShippingAddressHash());
+
+                $formData['savedCards'][] = [
+                    'token'               => $card->getToken(),
+                    'maskedAccountNumber' => $card->getMaskedAccountNumber(),
+                    'additionalData'      => $card->getAdditionalData(),
+                    'acceptedCriteria'    => $acceptedCriteria,
+                ];
+            }
+        }
+
+        return $formData;
     }
 }

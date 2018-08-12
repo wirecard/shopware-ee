@@ -53,6 +53,17 @@
                 <param name="flashvars" value="t={$wirecardElasticEngineDeviceFingerprintId}&v=WDWL"/>
                 <param name="AllowScriptAccess" value="always"/>
             </object>
+        {elseif $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_credit_card'}
+            {if $wirecardElasticEngineViewAssignments.vaultEnabled}
+                <div class="panel has--border wirecardee--additional-form-fields">
+                    <div class="panel--title primary is--underline">
+                        {s name="CreditCardVaultFormHeader" namespace="frontend/wirecard_elastic_engine/credit_card"}{/s}
+                    </div>
+                    <div class="panel--body is--wide">
+                        {include file="frontend/plugins/wirecard_elastic_engine/form/credit_card.tpl"}
+                    </div>
+                </div>
+            {/if}
         {/if}
     {/if}
 
@@ -129,5 +140,18 @@
                 });
             });
         </script>
+    {elseif $wirecardElasticEngineViewAssignments and $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_credit_card'}
+        {block name="wirecard_elastic_engine_credit_card_form_javascript"}
+            <script type="text/javascript">
+                document.asyncReady(function () {
+                    var $ = jQuery,
+                        url = "{url controller="wirecardElasticEnginePayment" action="deleteCreditCardToken"}";
+
+                    $(".wirecardee--delete-token").click(function () {
+                        window.location.href = url + '/token/' + $(this).data('token');
+                    })
+                });
+            </script>
+        {/block}
     {/if}
 {/block}

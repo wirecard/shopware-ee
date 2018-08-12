@@ -22,6 +22,7 @@ use Wirecard\PaymentSdk\Transaction\SepaDirectDebitTransaction;
 use WirecardElasticEngine\Components\Data\PaymentConfig;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\SepaPayment;
+use WirecardElasticEngine\Components\Services\SessionManager;
 
 class SepaPaymentTest extends TestCase
 {
@@ -145,6 +146,8 @@ class SepaPaymentTest extends TestCase
 
     public function testGetAdditionalViewAssignments()
     {
+        $sessionManager = $this->createMock(SessionManager::class);
+
         $this->assertInstanceOf(AdditionalViewAssignmentsInterface::class, $this->payment);
         $this->assertEquals([
             'method'          => 'wirecard_elastic_engine_sepa',
@@ -152,6 +155,6 @@ class SepaPaymentTest extends TestCase
             'creditorId'      => 'DE98ZZZ09999999999',
             'creditorName'    => '',
             'creditorAddress' => '',
-        ], $this->payment->getAdditionalViewAssignments());
+        ], $this->payment->getAdditionalViewAssignments($sessionManager));
     }
 }

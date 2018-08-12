@@ -26,6 +26,7 @@ use WirecardElasticEngine\Components\Data\PaymentConfig;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Payments\IdealPayment;
+use WirecardElasticEngine\Components\Services\SessionManager;
 use WirecardElasticEngine\Tests\Unit\PaymentTestCase;
 use WirecardElasticEngine\WirecardElasticEngine;
 
@@ -206,12 +207,14 @@ class IdealPaymentTest extends PaymentTestCase
 
     public function testGetAdditionalViewAssignments()
     {
+        $sessionManager = $this->createMock(SessionManager::class);
+
         $idealBic = new \ReflectionClass(IdealBic::class);
 
         $this->assertInstanceOf(AdditionalViewAssignmentsInterface::class, $this->payment);
         $this->assertEquals([
             'method'     => 'wirecard_elastic_engine_ideal',
             'idealBanks' => $idealBic->getConstants(),
-        ], $this->payment->getAdditionalViewAssignments());
+        ], $this->payment->getAdditionalViewAssignments($sessionManager));
     }
 }
