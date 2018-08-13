@@ -1,40 +1,25 @@
 <?php
 /**
- * Shop System Plugins - Terms of Use
- *
- * The plugins offered are provided free of charge by Wirecard AG and are explicitly not part
- * of the Wirecard AG range of products and services.
- *
- * They have been tested and approved for full functionality in the standard configuration
- * (status on delivery) of the corresponding shop system. They are under General Public
- * License version 3 (GPLv3) and can be used, developed and passed on to third parties under
- * the same terms.
- *
- * However, Wirecard AG does not provide any guarantee or accept any liability for any errors
- * occurring when used in an enhanced, customized shop system configuration.
- *
- * Operation in an enhanced, customized configuration is at your own risk and requires a
- * comprehensive test phase by the user of the plugin.
- *
- * Customers use the plugins at their own risk. Wirecard AG does not guarantee their full
- * functionality neither does Wirecard AG assume liability for any disadvantages related to
- * the use of the plugins. Additionally, Wirecard AG does not guarantee the full functionality
- * for customized shop systems or installed plugins of other vendors of plugins within the same
- * shop system.
- *
- * Customers are responsible for testing the plugin's functionality before starting productive
- * operation.
- *
- * By installing the plugin into the shop system the customer agrees to these terms of use.
- * Please do not use the plugin if you do not agree to these terms of use!
+ * Shop System Plugins:
+ * - Terms of Use can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/_TERMS_OF_USE
+ * - License can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/LICENSE
  */
 
-namespace WirecardShopwareElasticEngine\Components\Mapper;
+namespace WirecardElasticEngine\Components\Mapper;
 
 use Wirecard\PaymentSdk\Entity\AccountHolder;
 use Wirecard\PaymentSdk\Entity\Address;
-use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
+use WirecardElasticEngine\Exception\ArrayKeyNotFoundException;
 
+/**
+ * Represents a Shopware user as object.
+ *
+ * @package WirecardElasticEngine\Components\Mapper
+ *
+ * @since   1.0.0
+ */
 class UserMapper extends ArrayMapper
 {
     const CUSTOMER_NUMBER = 'customernumber';
@@ -73,11 +58,11 @@ class UserMapper extends ArrayMapper
     protected $locale;
 
     /**
-     * UserMapper constructor.
-     *
      * @param array  $shopwareUser
      * @param string $clientIp
      * @param string $locale
+     *
+     * @since 1.0.0
      */
     public function __construct(array $shopwareUser, $clientIp, $locale)
     {
@@ -88,6 +73,8 @@ class UserMapper extends ArrayMapper
 
     /**
      * @return array
+     *
+     * @since 1.0.0
      */
     public function getShopwareUser()
     {
@@ -99,6 +86,8 @@ class UserMapper extends ArrayMapper
      *
      * @return AccountHolder
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getWirecardBillingAccountHolder()
     {
@@ -120,6 +109,8 @@ class UserMapper extends ArrayMapper
      * Returns a Wirecard AccountHolder object based on shipping data.
      *
      * @return AccountHolder
+     *
+     * @since 1.0.0
      */
     public function getWirecardShippingAccountHolder()
     {
@@ -137,6 +128,8 @@ class UserMapper extends ArrayMapper
      *
      * @return Address
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getWirecardBillingAddress()
     {
@@ -155,6 +148,8 @@ class UserMapper extends ArrayMapper
      * Returns a Wirecard Address object based on the shipping address.
      *
      * @return Address
+     *
+     * @since 1.0.0
      */
     public function getWirecardShippingAddress()
     {
@@ -172,6 +167,8 @@ class UserMapper extends ArrayMapper
     /**
      * @return mixed
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getFirstName()
     {
@@ -181,6 +178,8 @@ class UserMapper extends ArrayMapper
     /**
      * @return string
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getLastName()
     {
@@ -189,6 +188,8 @@ class UserMapper extends ArrayMapper
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getCustomerNumber()
     {
@@ -198,6 +199,8 @@ class UserMapper extends ArrayMapper
     /**
      * @return string
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getEmail()
     {
@@ -206,6 +209,8 @@ class UserMapper extends ArrayMapper
 
     /**
      * @return \DateTime|null
+     *
+     * @since 1.0.0
      */
     public function getBirthday()
     {
@@ -216,6 +221,8 @@ class UserMapper extends ArrayMapper
     /**
      * @return array
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getBillingAddress()
     {
@@ -224,6 +231,8 @@ class UserMapper extends ArrayMapper
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getPhone()
     {
@@ -232,6 +241,8 @@ class UserMapper extends ArrayMapper
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getCountryIso()
     {
@@ -241,6 +252,8 @@ class UserMapper extends ArrayMapper
     /**
      * @return string|null
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getBillingAddressCity()
     {
@@ -251,6 +264,8 @@ class UserMapper extends ArrayMapper
     /**
      * @return string|null
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getBillingAddressStreet()
     {
@@ -261,6 +276,8 @@ class UserMapper extends ArrayMapper
     /**
      * @return string|null
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getBillingAddressZip()
     {
@@ -271,6 +288,8 @@ class UserMapper extends ArrayMapper
     /**
      * @return string|null
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getBillingAddressAdditional()
     {
@@ -280,6 +299,8 @@ class UserMapper extends ArrayMapper
 
     /**
      * @return array
+     *
+     * @since 1.0.0
      */
     public function getShippingAddress()
     {
@@ -288,6 +309,8 @@ class UserMapper extends ArrayMapper
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getShippingFirstName()
     {
@@ -296,6 +319,8 @@ class UserMapper extends ArrayMapper
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getShippingLastName()
     {
@@ -304,6 +329,8 @@ class UserMapper extends ArrayMapper
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getShippingPhone()
     {
@@ -312,6 +339,8 @@ class UserMapper extends ArrayMapper
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getShippingAddressCountryIso()
     {
@@ -324,6 +353,8 @@ class UserMapper extends ArrayMapper
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getShippingAddressCity()
     {
@@ -332,6 +363,8 @@ class UserMapper extends ArrayMapper
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getShippingAddressStreet()
     {
@@ -340,6 +373,8 @@ class UserMapper extends ArrayMapper
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getShippingAddressZip()
     {
@@ -348,6 +383,8 @@ class UserMapper extends ArrayMapper
 
     /**
      * @return string|null
+     *
+     * @since 1.0.0
      */
     public function getShippingAddressAdditional()
     {
@@ -356,6 +393,8 @@ class UserMapper extends ArrayMapper
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getClientIp()
     {
@@ -364,6 +403,8 @@ class UserMapper extends ArrayMapper
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getLocale()
     {
@@ -373,6 +414,8 @@ class UserMapper extends ArrayMapper
     /**
      * @return array
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function toArray()
     {

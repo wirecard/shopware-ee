@@ -1,35 +1,13 @@
 <?php
 /**
- * Shop System Plugins - Terms of Use
- *
- * The plugins offered are provided free of charge by Wirecard AG and are explicitly not part
- * of the Wirecard AG range of products and services.
- *
- * They have been tested and approved for full functionality in the standard configuration
- * (status on delivery) of the corresponding shop system. They are under General Public
- * License version 3 (GPLv3) and can be used, developed and passed on to third parties under
- * the same terms.
- *
- * However, Wirecard AG does not provide any guarantee or accept any liability for any errors
- * occurring when used in an enhanced, customized shop system configuration.
- *
- * Operation in an enhanced, customized configuration is at your own risk and requires a
- * comprehensive test phase by the user of the plugin.
- *
- * Customers use the plugins at their own risk. Wirecard AG does not guarantee their full
- * functionality neither does Wirecard AG assume liability for any disadvantages related to
- * the use of the plugins. Additionally, Wirecard AG does not guarantee the full functionality
- * for customized shop systems or installed plugins of other vendors of plugins within the same
- * shop system.
- *
- * Customers are responsible for testing the plugin's functionality before starting productive
- * operation.
- *
- * By installing the plugin into the shop system the customer agrees to these terms of use.
- * Please do not use the plugin if you do not agree to these terms of use!
+ * Shop System Plugins:
+ * - Terms of Use can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/_TERMS_OF_USE
+ * - License can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/LICENSE
  */
 
-namespace WirecardShopwareElasticEngine\Components\Services;
+namespace WirecardElasticEngine\Components\Services;
 
 use Shopware\Models\Shop\Shop;
 use Wirecard\PaymentSdk\Entity\CustomField;
@@ -40,16 +18,28 @@ use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Actions\Action;
-use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
-use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
-use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
-use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
-use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
+use WirecardElasticEngine\Components\Actions\Action;
+use WirecardElasticEngine\Components\Actions\ErrorAction;
+use WirecardElasticEngine\Components\Actions\RedirectAction;
+use WirecardElasticEngine\Components\Actions\ViewAction;
+use WirecardElasticEngine\Components\Data\OrderSummary;
+use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Exception\ArrayKeyNotFoundException;
 
+/**
+ * Responsible for handling the payment. Payments may implement their own way of handling payments by implementing
+ * the `ProcessPaymentInterface` interface.
+ * Ultimately a proper `Action` is returned to the controller.
+ *
+ * @package WirecardElasticEngine\Components\Services
+ *
+ * @since   1.0.0
+ */
 class PaymentHandler extends Handler
 {
     /**
+     * Executes the payment process.
+     *
      * @param OrderSummary                        $orderSummary
      * @param TransactionService                  $transactionService
      * @param Redirect                            $redirect
@@ -59,6 +49,8 @@ class PaymentHandler extends Handler
      *
      * @return Action
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function execute(
         OrderSummary $orderSummary,
@@ -73,17 +65,19 @@ class PaymentHandler extends Handler
         $payment = $orderSummary->getPayment();
 
         try {
-            $action = $payment->processPayment(
-                $orderSummary,
-                $transactionService,
-                $this->em->getRepository(Shop::class)->getActiveDefault(),
-                $redirect,
-                $request,
-                $shopwareOrder
-            );
+            if ($payment instanceof ProcessPaymentInterface) {
+                $action = $payment->processPayment(
+                    $orderSummary,
+                    $transactionService,
+                    $this->em->getRepository(Shop::class)->getActiveDefault(),
+                    $redirect,
+                    $request,
+                    $shopwareOrder
+                );
 
-            if ($action !== null) {
-                return $action;
+                if ($action) {
+                    return $action;
+                }
             }
 
             $response = $transactionService->process(
@@ -122,12 +116,16 @@ class PaymentHandler extends Handler
     /**
      * Prepares the transaction for being sent to Wirecard by adding specific (e.g. amount) and optional (e.g. fraud
      * prevention data) data to the `Transaction` object of the payment.
+     * Keep in mind that the transaction returned by the payment is ALWAYS the same instance, hence we don't need to
+     * return the transaction here.
      *
      * @param OrderSummary $orderSummary
      * @param Redirect     $redirect
      * @param string       $notificationUrl
      *
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     private function prepareTransaction(OrderSummary $orderSummary, Redirect $redirect, $notificationUrl)
     {
@@ -168,10 +166,12 @@ class PaymentHandler extends Handler
      * @param $orderNumber
      *
      * @return string
+     *
+     * @since 1.0.0
      */
     protected function getDescriptor($orderNumber)
     {
         $shopName = substr($this->shopwareConfig->get('shopName'), 0, 9);
-        return substr("${shopName} ${orderNumber}", 0, 20);
+        return substr($shopName . ' ' . $orderNumber, 0, 20);
     }
 }

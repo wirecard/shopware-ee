@@ -1,41 +1,26 @@
 <?php
 /**
- * Shop System Plugins - Terms of Use
- *
- * The plugins offered are provided free of charge by Wirecard AG and are explicitly not part
- * of the Wirecard AG range of products and services.
- *
- * They have been tested and approved for full functionality in the standard configuration
- * (status on delivery) of the corresponding shop system. They are under General Public
- * License version 3 (GPLv3) and can be used, developed and passed on to third parties under
- * the same terms.
- *
- * However, Wirecard AG does not provide any guarantee or accept any liability for any errors
- * occurring when used in an enhanced, customized shop system configuration.
- *
- * Operation in an enhanced, customized configuration is at your own risk and requires a
- * comprehensive test phase by the user of the plugin.
- *
- * Customers use the plugins at their own risk. Wirecard AG does not guarantee their full
- * functionality neither does Wirecard AG assume liability for any disadvantages related to
- * the use of the plugins. Additionally, Wirecard AG does not guarantee the full functionality
- * for customized shop systems or installed plugins of other vendors of plugins within the same
- * shop system.
- *
- * Customers are responsible for testing the plugin's functionality before starting productive
- * operation.
- *
- * By installing the plugin into the shop system the customer agrees to these terms of use.
- * Please do not use the plugin if you do not agree to these terms of use!
+ * Shop System Plugins:
+ * - Terms of Use can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/_TERMS_OF_USE
+ * - License can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/LICENSE
  */
 
-namespace WirecardShopwareElasticEngine\Components\Mapper;
+namespace WirecardElasticEngine\Components\Mapper;
 
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Item;
-use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
-use WirecardShopwareElasticEngine\Exception\InvalidBasketItemException;
+use WirecardElasticEngine\Exception\ArrayKeyNotFoundException;
+use WirecardElasticEngine\Exception\InvalidBasketItemException;
 
+/**
+ * Represents a single item from the Shopware basket as object.
+ *
+ * @package WirecardElasticEngine\Components\Mapper
+ *
+ * @since   1.0.0
+ */
 class BasketItemMapper extends ArrayMapper
 {
     const ARTICLE_NAME = 'articlename';
@@ -60,13 +45,15 @@ class BasketItemMapper extends ArrayMapper
     protected $currency;
 
     /**
-     * BasketItemMapper constructor.
+     * Additionally creates a Wirecard `Item` object which can be retrieved via `getWirecardItem()`.
      *
      * @param array  $shopwareItem
      * @param string $currency
      *
      * @throws InvalidBasketItemException
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function __construct(array $shopwareItem, $currency)
     {
@@ -77,6 +64,8 @@ class BasketItemMapper extends ArrayMapper
 
     /**
      * @return array
+     *
+     * @since 1.0.0
      */
     public function getShopwareItem()
     {
@@ -85,6 +74,8 @@ class BasketItemMapper extends ArrayMapper
 
     /**
      * @return Item
+     *
+     * @since 1.0.0
      */
     public function getWirecardItem()
     {
@@ -94,6 +85,8 @@ class BasketItemMapper extends ArrayMapper
     /**
      * @return string
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getArticleName()
     {
@@ -102,8 +95,11 @@ class BasketItemMapper extends ArrayMapper
 
     /**
      * The shopware basket item "ordernumber" is actually the article-number/sku
+     *
      * @return string
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getArticleNumber()
     {
@@ -113,6 +109,8 @@ class BasketItemMapper extends ArrayMapper
     /**
      * @return float
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getTaxRate()
     {
@@ -122,6 +120,8 @@ class BasketItemMapper extends ArrayMapper
     /**
      * @return float
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getTax()
     {
@@ -131,6 +131,8 @@ class BasketItemMapper extends ArrayMapper
     /**
      * @return int
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getQuantity()
     {
@@ -139,6 +141,8 @@ class BasketItemMapper extends ArrayMapper
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getDescription()
     {
@@ -148,6 +152,8 @@ class BasketItemMapper extends ArrayMapper
     /**
      * @return float
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getPrice()
     {
@@ -174,6 +180,8 @@ class BasketItemMapper extends ArrayMapper
      * @return Item
      * @throws InvalidBasketItemException
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     protected function createWirecardItem()
     {
@@ -200,6 +208,8 @@ class BasketItemMapper extends ArrayMapper
      * Validates the shopware array item.
      *
      * @throws InvalidBasketItemException
+     *
+     * @since 1.0.0
      */
     private function validateItem()
     {
@@ -211,7 +221,7 @@ class BasketItemMapper extends ArrayMapper
             $item[self::QUANTITY],
             $item[self::PRICE]
         )) {
-            throw new InvalidBasketItemException($this);
+            throw new InvalidBasketItemException();
         }
     }
 }

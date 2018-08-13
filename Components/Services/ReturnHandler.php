@@ -1,35 +1,13 @@
 <?php
 /**
- * Shop System Plugins - Terms of Use
- *
- * The plugins offered are provided free of charge by Wirecard AG and are explicitly not part
- * of the Wirecard AG range of products and services.
- *
- * They have been tested and approved for full functionality in the standard configuration
- * (status on delivery) of the corresponding shop system. They are under General Public
- * License version 3 (GPLv3) and can be used, developed and passed on to third parties under
- * the same terms.
- *
- * However, Wirecard AG does not provide any guarantee or accept any liability for any errors
- * occurring when used in an enhanced, customized shop system configuration.
- *
- * Operation in an enhanced, customized configuration is at your own risk and requires a
- * comprehensive test phase by the user of the plugin.
- *
- * Customers use the plugins at their own risk. Wirecard AG does not guarantee their full
- * functionality neither does Wirecard AG assume liability for any disadvantages related to
- * the use of the plugins. Additionally, Wirecard AG does not guarantee the full functionality
- * for customized shop systems or installed plugins of other vendors of plugins within the same
- * shop system.
- *
- * Customers are responsible for testing the plugin's functionality before starting productive
- * operation.
- *
- * By installing the plugin into the shop system the customer agrees to these terms of use.
- * Please do not use the plugin if you do not agree to these terms of use!
+ * Shop System Plugins:
+ * - Terms of Use can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/_TERMS_OF_USE
+ * - License can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/LICENSE
  */
 
-namespace WirecardShopwareElasticEngine\Components\Services;
+namespace WirecardElasticEngine\Components\Services;
 
 use Wirecard\PaymentSdk\Response\FailureResponse;
 use Wirecard\PaymentSdk\Response\FormInteractionResponse;
@@ -37,13 +15,22 @@ use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Actions\Action;
-use WirecardShopwareElasticEngine\Components\Actions\ErrorAction;
-use WirecardShopwareElasticEngine\Components\Actions\RedirectAction;
-use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
-use WirecardShopwareElasticEngine\Components\Payments\Payment;
-use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardElasticEngine\Components\Actions\Action;
+use WirecardElasticEngine\Components\Actions\ErrorAction;
+use WirecardElasticEngine\Components\Actions\RedirectAction;
+use WirecardElasticEngine\Components\Actions\ViewAction;
+use WirecardElasticEngine\Components\Payments\Contracts\ProcessReturnInterface;
+use WirecardElasticEngine\Components\Payments\Payment;
+use WirecardElasticEngine\Models\Transaction;
 
+/**
+ * Responsible for handling return actions. Payments may implement their own way of handling returns by implementing
+ * the `ProcessReturnInterface` interface.
+ *
+ * @package WirecardElasticEngine\Components\Services
+ *
+ * @since   1.0.0
+ */
 class ReturnHandler extends Handler
 {
     /**
@@ -52,25 +39,30 @@ class ReturnHandler extends Handler
      * @param \Enlight_Controller_Request_Request $request
      *
      * @return Response
+     *
+     * @since 1.0.0
      */
-    public function execute(
+    public function handleRequest(
         Payment $payment,
         TransactionService $transactionService,
         \Enlight_Controller_Request_Request $request
     ) {
-        $response = $payment->processReturn($transactionService, $request);
-
-        if (! $response) {
-            $response = $transactionService->handleResponse($request->getParams());
+        if ($payment instanceof ProcessReturnInterface) {
+            $response = $payment->processReturn($transactionService, $request);
+            if ($response) {
+                return $response;
+            }
         }
 
-        return $response;
+        return $transactionService->handleResponse($request->getParams());
     }
 
     /**
      * @param Response $response
      *
-     * @return Action|ViewAction
+     * @return Action
+     *
+     * @since 1.0.0
      */
     public function handleResponse(Response $response)
     {
@@ -87,6 +79,8 @@ class ReturnHandler extends Handler
      * @param FormInteractionResponse $response
      *
      * @return ViewAction
+     *
+     * @since 1.0.0
      */
     protected function handleFormInteraction(FormInteractionResponse $response)
     {
@@ -103,12 +97,15 @@ class ReturnHandler extends Handler
     /**
      * @param SuccessResponse $response
      * @param Transaction     $initialTransaction
+     * @param string          $statusMessage
      *
      * @return Action
+     *
+     * @since 1.0.0
      */
-    public function handleSuccess(SuccessResponse $response, Transaction $initialTransaction)
+    public function handleSuccess(SuccessResponse $response, Transaction $initialTransaction, $statusMessage = null)
     {
-        $this->transactionManager->createReturn($initialTransaction, $response);
+        $this->transactionManager->createReturn($initialTransaction, $response, $statusMessage);
 
         // `sUniqueID` should match the order temporaryId/paymentUniqueId to show proper information after redirect.
         return new RedirectAction($this->router->assemble([
@@ -123,6 +120,8 @@ class ReturnHandler extends Handler
      * @param InteractionResponse $response
      *
      * @return Action
+     *
+     * @since 1.0.0
      */
     protected function handleInteraction(InteractionResponse $response)
     {
@@ -135,6 +134,8 @@ class ReturnHandler extends Handler
      * @param FailureResponse|Response|mixed $response
      *
      * @return Action
+     *
+     * @since 1.0.0
      */
     protected function handleFailure($response)
     {

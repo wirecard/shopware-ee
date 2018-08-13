@@ -1,46 +1,31 @@
 <?php
 /**
- * Shop System Plugins - Terms of Use
- *
- * The plugins offered are provided free of charge by Wirecard AG and are explicitly not part
- * of the Wirecard AG range of products and services.
- *
- * They have been tested and approved for full functionality in the standard configuration
- * (status on delivery) of the corresponding shop system. They are under General Public
- * License version 3 (GPLv3) and can be used, developed and passed on to third parties under
- * the same terms.
- *
- * However, Wirecard AG does not provide any guarantee or accept any liability for any errors
- * occurring when used in an enhanced, customized shop system configuration.
- *
- * Operation in an enhanced, customized configuration is at your own risk and requires a
- * comprehensive test phase by the user of the plugin.
- *
- * Customers use the plugins at their own risk. Wirecard AG does not guarantee their full
- * functionality neither does Wirecard AG assume liability for any disadvantages related to
- * the use of the plugins. Additionally, Wirecard AG does not guarantee the full functionality
- * for customized shop systems or installed plugins of other vendors of plugins within the same
- * shop system.
- *
- * Customers are responsible for testing the plugin's functionality before starting productive
- * operation.
- *
- * By installing the plugin into the shop system the customer agrees to these terms of use.
- * Please do not use the plugin if you do not agree to these terms of use!
+ * Shop System Plugins:
+ * - Terms of Use can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/_TERMS_OF_USE
+ * - License can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/LICENSE
  */
 
-namespace WirecardShopwareElasticEngine\Components\Mapper;
+namespace WirecardElasticEngine\Components\Mapper;
 
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Basket;
 use Wirecard\PaymentSdk\Entity\Item;
 use Wirecard\PaymentSdk\Transaction\Transaction;
-use WirecardShopwareElasticEngine\Exception\ArrayKeyNotFoundException;
-use WirecardShopwareElasticEngine\Exception\InvalidBasketException;
-use WirecardShopwareElasticEngine\Exception\InvalidBasketItemException;
-use WirecardShopwareElasticEngine\Exception\NotAvailableBasketException;
-use WirecardShopwareElasticEngine\Exception\OutOfStockBasketException;
+use WirecardElasticEngine\Exception\ArrayKeyNotFoundException;
+use WirecardElasticEngine\Exception\InvalidBasketException;
+use WirecardElasticEngine\Exception\InvalidBasketItemException;
+use WirecardElasticEngine\Exception\NotAvailableBasketException;
+use WirecardElasticEngine\Exception\OutOfStockBasketException;
 
+/**
+ * Represents the Shopware basket as object.
+ *
+ * @package WirecardElasticEngine\Components\Mapper
+ *
+ * @since   1.0.0
+ */
 class BasketMapper extends ArrayMapper
 {
     const CONTENT = 'content';
@@ -87,7 +72,7 @@ class BasketMapper extends ArrayMapper
     protected $shippingMethod;
 
     /**
-     * BasketMapper constructor.
+     * Additionally creates a Wirecard `Basket` object which can be retrieved via `getWirecardBasket()`.
      *
      * @param array                                $shopwareBasket
      * @param string                               $signature
@@ -102,6 +87,8 @@ class BasketMapper extends ArrayMapper
      * @throws InvalidBasketItemException
      * @throws NotAvailableBasketException
      * @throws OutOfStockBasketException
+     *
+     * @since 1.0.0
      */
     public function __construct(
         array $shopwareBasket,
@@ -124,6 +111,8 @@ class BasketMapper extends ArrayMapper
 
     /**
      * @return array
+     *
+     * @since 1.0.0
      */
     public function getShopwareBasket()
     {
@@ -132,6 +121,8 @@ class BasketMapper extends ArrayMapper
 
     /**
      * @return Basket
+     *
+     * @since 1.0.0
      */
     public function getWirecardBasket()
     {
@@ -141,6 +132,8 @@ class BasketMapper extends ArrayMapper
     /**
      * @return array
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     protected function getShopwareBasketContent()
     {
@@ -153,6 +146,8 @@ class BasketMapper extends ArrayMapper
      * @return string
      * @throws InvalidBasketItemException
      * @throws ArrayKeyNotFoundException
+     *
+     * @since 1.0.0
      */
     public function getBasketText()
     {
@@ -188,6 +183,8 @@ class BasketMapper extends ArrayMapper
      * @throws ArrayKeyNotFoundException
      * @throws OutOfStockBasketException
      * @throws NotAvailableBasketException
+     *
+     * @since 1.0.0
      */
     protected function createWirecardBasket()
     {
@@ -233,13 +230,15 @@ class BasketMapper extends ArrayMapper
      * @throws OutOfStockBasketException
      * @throws InvalidBasketException
      * @throws NotAvailableBasketException
+     *
+     * @since 1.0.0
      */
     private function validateBasket()
     {
         $basket = $this->getShopwareBasket();
 
         if (! isset($basket[self::CONTENT])) {
-            throw new InvalidBasketException($this);
+            throw new InvalidBasketException();
         }
 
         foreach ($basket[self::CONTENT] as $item) {
@@ -252,16 +251,18 @@ class BasketMapper extends ArrayMapper
             }
 
             if (! $article[self::ARTICLE_IS_AVAILABLE]) {
-                throw new NotAvailableBasketException($article, $basketItem, $this);
+                throw new NotAvailableBasketException($basketItem);
             }
             if ($article[self::ARTICLE_LAST_STOCK] && $basketItem->getQuantity() > $article[self::ARTICLE_IN_STOCK]) {
-                throw new OutOfStockBasketException($article, $basketItem, $this);
+                throw new OutOfStockBasketException($basketItem);
             }
         }
     }
 
     /**
      * @return array
+     *
+     * @since 1.0.0
      */
     public function toArray()
     {
@@ -270,6 +271,8 @@ class BasketMapper extends ArrayMapper
 
     /**
      * @return string
+     *
+     * @since 1.0.0
      */
     public function getSignature()
     {
@@ -277,9 +280,13 @@ class BasketMapper extends ArrayMapper
     }
 
     /**
+     * Helper function to format numbers throughout the plugin.
+     *
      * @param string|float $amount
      *
      * @return string
+     *
+     * @since 1.0.0
      */
     public static function numberFormat($amount)
     {
