@@ -1,35 +1,13 @@
 <?php
 /**
- * Shop System Plugins - Terms of Use
- *
- * The plugins offered are provided free of charge by Wirecard AG and are explicitly not part
- * of the Wirecard AG range of products and services.
- *
- * They have been tested and approved for full functionality in the standard configuration
- * (status on delivery) of the corresponding shop system. They are under General Public
- * License version 3 (GPLv3) and can be used, developed and passed on to third parties under
- * the same terms.
- *
- * However, Wirecard AG does not provide any guarantee or accept any liability for any errors
- * occurring when used in an enhanced, customized shop system configuration.
- *
- * Operation in an enhanced, customized configuration is at your own risk and requires a
- * comprehensive test phase by the user of the plugin.
- *
- * Customers use the plugins at their own risk. Wirecard AG does not guarantee their full
- * functionality neither does Wirecard AG assume liability for any disadvantages related to
- * the use of the plugins. Additionally, Wirecard AG does not guarantee the full functionality
- * for customized shop systems or installed plugins of other vendors of plugins within the same
- * shop system.
- *
- * Customers are responsible for testing the plugin's functionality before starting productive
- * operation.
- *
- * By installing the plugin into the shop system the customer agrees to these terms of use.
- * Please do not use the plugin if you do not agree to these terms of use!
+ * Shop System Plugins:
+ * - Terms of Use can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/_TERMS_OF_USE
+ * - License can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/LICENSE
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Functional\Components\Payments;
+namespace WirecardElasticEngine\Tests\Functional\Components\Payments;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
@@ -40,8 +18,8 @@ use Symfony\Component\DependencyInjection\Container;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
-use WirecardShopwareElasticEngine\Components\Data\PaymentConfig;
-use WirecardShopwareElasticEngine\Components\Payments\CreditCardPayment;
+use WirecardElasticEngine\Components\Data\PaymentConfig;
+use WirecardElasticEngine\Components\Payments\CreditCardPayment;
 
 class CreditCardPaymentTest extends TestCase
 {
@@ -86,11 +64,11 @@ class CreditCardPaymentTest extends TestCase
 
     public function testGetPaymentOptions()
     {
-        $this->assertEquals('Wirecard Credit Card', $this->payment->getLabel());
+        $this->assertEquals('WirecardCreditCard', $this->payment->getLabel());
         $this->assertEquals('wirecard_elastic_engine_credit_card', $this->payment->getName());
         $this->assertEquals([
             'name'                  => 'wirecard_elastic_engine_credit_card',
-            'description'           => 'Wirecard Credit Card',
+            'description'           => 'WirecardCreditCard',
             'action'                => 'WirecardElasticEnginePayment',
             'active'                => 0,
             'position'              => 0,
@@ -145,6 +123,14 @@ class CreditCardPaymentTest extends TestCase
             '508b8896-b37d-4614-845c-26bf8bf2c948',
             $config->get(CreditCardTransaction::NAME)->getThreeDMerchantAccountId()
         );
+        $this->assertEquals([
+            'headers' => [
+                'shop-system-name'    => 'Shopware',
+                'shop-system-version' => '___VERSION___',
+                'plugin-name'         => 'WirecardElasticEngine',
+                'plugin-version'      => '0.5.0',
+            ],
+        ], $config->getShopHeader());
     }
 
     public function testGetTransactionType()

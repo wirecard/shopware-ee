@@ -1,4 +1,12 @@
-{namespace name="frontend/wirecard_elastic_engine/sepa"}
+{**
+ * Shop System Plugins:
+ * - Terms of Use can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/_TERMS_OF_USE
+ * - License can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/LICENSE
+ *}
+
+{namespace name="frontend/wirecard_elastic_engine/sepa_direct_debit"}
 {block name="wirecard_elastic_engine_sepa_mandate"}
     <style>
         .wirecardee--sepa-mandate table {
@@ -16,8 +24,9 @@
             <tr>
                 <td class="text11justify">
                     <i>{s name="Creditor"}{/s}</i><br/>
-                    {$wirecardFormFields.creditorName} {$wirecardFormFields.creditorAddress} <br/>
-                    {s name="CreditorID"}{/s}: {$wirecardFormFields.creditorId}<br/>
+                    {$wirecardElasticEngineViewAssignments.creditorName}{if $wirecardElasticEngineViewAssignments.creditorName and $wirecardElasticEngineViewAssignments.creditorAddress}, {/if}
+                    {$wirecardElasticEngineViewAssignments.creditorAddress}<br/>
+                    {s name="CreditorID"}{/s}: {$wirecardElasticEngineViewAssignments.creditorId}<br/>
                 </td>
             </tr>
             <tr>
@@ -27,7 +36,7 @@
                     <span class="first_last_name">{literal}${firstName} ${lastName}{/literal}</span><br/>
                     {s name="IBAN"}{/s}:
                     <span class="bank_iban">{literal}${iban}{/literal}</span><br/>
-                    {if $wirecardFormFields.showBic}
+                    {if $wirecardElasticEngineViewAssignments.showBic}
                         {s name="BIC"}{/s}:
                         <span class="bank_bic">{literal}${bic}{/literal}</span>
                         <br/>
@@ -36,6 +45,9 @@
             </tr>
             <tr>
                 <td class="text11justify">
+                    {assign var="wirecardElasticEngineCreditorId" value=$wirecardElasticEngineViewAssignments.creditorId}
+                    {assign var="wirecardElasticEngineCreditorName" value=$wirecardElasticEngineViewAssignments.creditorName}
+                    {assign var="wirecardElasticEngineCreditorAddress" value=$wirecardElasticEngineViewAssignments.creditorAddress}
                     {s name="SepaMandateText"}{/s}
                 </td>
             </tr>
@@ -44,7 +56,8 @@
                     <table border="0" width="100%">
                         <tr>
                             <td class="text11justify">
-                                {$wirecardFormFields.creditorAddress} {$smarty.now|date_format:"d.m.Y"}<br/>
+                                {$wirecardElasticEngineViewAssignments.creditorAddress} {$smarty.now|date_format:"d.m.Y"}
+                                <br/>
                                 <span class="first_last_name"></span>
                             </td>
                         </tr>

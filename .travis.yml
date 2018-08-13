@@ -1,38 +1,31 @@
-sudo: true
+sudo: required
 dist: trusty
 language: php
 
 cache:
   directories:
-    - $HOME/.sonar/cache
     - $HOME/.composer/cache/files
     - node_modules
 
 addons:
-  sonarcloud:
-    organization: "wirecard"
+  browserstack:
+    username: ${BROWSERSTACK_USER}
+    access_key:
+      secure: "gjDGUDlGV9YxemmEXoNJBHWU8QhM5xmdC8N5wOhJlZKoyfu/WR8j5gX+8/s+7XvOKdk88jFV9oEFuIIpz35HJhlqrini9qB4i+9mcJHZKEg6quVr7MvC4/YLcL4tAcD9R6VNFyV2C4XflsCeX5bjowO+gHYp72lrkumIZ7PEklJfjO78LSkQpvMqrdQ6gC2Nwcd9vLO5+zdI+K2D9DeLAt/zDABADKSYmIMEEd9rwQjFbyo/6BK2fq1HGnZDlajaUad1c/7Xa3y4GHvkMN38TYZdWSYGi089H9sNm2NMOABi/vzY/8Z7mqR28zv7e5Be2TFhJA0IMXGyx5q9LzWloDkXDZf04uLOMlfw5H07U4LOoUZsjz7W9jcQGiaFIwSnVzxBaXi+OqdKT3dbkU6od3otirPACb2w/LFWl4RQ3r9qYUxUUIHLHOpUbSw7zfYA6xqBsOsK4aI29XgGOQw6Oog9hKLVu9/Fasx281iWqXj/cjlKjEvmMerbSp+/NWwrv/QKfGPh2UTQRU6b2I6Bt4a99GOXIo372WNJnBzJ/kJftcYRH/udTwsTqKWsaM7UuLTOblk0QL1KxZ4n2j3eLbGxVC0tCvhmWqwL1nbpaBM6lrvSz3G/kmxY/aGfcZUYLRjwI454QunnF6ifE/0R51/osFYbPw44P0QDn5bS4pc="
 
 php:
   - 7.1
   - 7.0
   - 5.6
 
-addons:
-  sonarcloud:
-    organization: "wirecard"
-  chrome: stable
-
 services:
   - mysql
 
 env:
   global:
-    - secure: ${SONAR_TOKEN}
     - COMPOSER_ARGS="--no-interaction"
-    - PLUGIN_NAME=WirecardShopwareElasticEngine
-    - SHOPWARE_ENV=testing
+    - PLUGIN_NAME=WirecardElasticEngine
     - SHOPWARE_DIRECTORY=${HOME}/shopware
-    - WEBSERVER_PORT=8000
     - github_token:
         secure: "gH+IJRS0uQe2G/gg4nL0UgQxh4Tog16vQIBzWgQiFUjmQM/jMvUtw6kW4ixcusOPGR4rqKuLFCd8gbDg/I848VNDb7a+xg+wGm7KvognnbcxbnB0TcxNcPTGZUWXbSqGi3z8YhAaaa1LfrROM3qS4LeU3Bz+B7ZpdbA7xqzkmBRPgEdsv7OLmCwow2e6jreeGcCAqM34q84JavZkWcoHCQbLoknwyNCzilMKUN8fe+Ih46o1O0iuVOv9lAWIOLlAJJNcrX+kamv4RhrtDQwyVWsnDB2OO2Me4Lr4Bkqy9pN+diszgX8OzhOnkFl+ZXYTIUI5NxK3kAkd4lKOO3QgHIoveSmeoaS/mrC5kflNs6vN399Jm8X4gSmxUhkl01hEAfEqL+BiW2o22/Pq8WeMVVaQy3ONUwlSGGBkk/IkckbG/LzpJv5Jjztfi8Xfl9JF1jO/0BABsqodx/pEbDzIKKb3S/U/EHmCXV8zqmD67E/PIii3Y9kxeVaDNdWT5u4O69Pt9sR7csA8OL8YS8th/d825v4BTPswIFxn1vXB1sTKJZGwyO+fu53CE7qcZEMc/+NJnfLZBhIbV9SE1zVRsDPX1AiruPd/sXjYy01AR4SYdCO+RrdyVWoIE65hV/MOGgvu327jI13ZIpFE2PwE1fPj6JqTtrW5YugLCOQUGd0="
 
@@ -44,33 +37,43 @@ install:
   - composer show
 
 before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
+  # install apache
+  - sudo apt-get update
+  - sudo apt-get install apache2 libapache2-mod-fastcgi
+  - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.6" ]]; then sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/www.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/www.conf; fi
+  - sudo a2enmod rewrite actions fastcgi alias
+  - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - sudo sed -i -e "s,www-data,travis,g" /etc/apache2/envvars
+  - sudo chown -R travis:travis /var/lib/apache2/fastcgi
+  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+  - sudo cp -f build/travis-ci-apache /etc/apache2/sites-available/000-default.conf
+  - sudo sed -e "s?%DOCUMENT_ROOT%?${SHOPWARE_DIRECTORY}?g" --in-place /etc/apache2/sites-available/000-default.conf
+  - sudo service apache2 restart
+
+  # install shopware
   - git clone https://github.com/shopware/shopware.git ${SHOPWARE_DIRECTORY} --branch 5.4
   - ant -f ${SHOPWARE_DIRECTORY}/build/build.xml -Dapp.host=localhost:8000 -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-unit
+  - cp ${TRAVIS_BUILD_DIR}/build/travis-shopware-config.php ${SHOPWARE_DIRECTORY}/config.php
   - mv ${TRAVIS_BUILD_DIR} ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:plugin:refresh
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:plugin:install ${PLUGIN_NAME}
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:plugin:activate ${PLUGIN_NAME}
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:cache:clear
-  - php ${SHOPWARE_DIRECTORY}/bin/console sw:theme:initialize
-  - php ${SHOPWARE_DIRECTORY}/bin/console sw:theme:cache:generate
+  - rm -rf ${SHOPWARE_DIRECTORY}/var/cache
   - cd ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
-  - php -S localhost:${WEBSERVER_PORT} server.php &
-  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost:${WEBSERVER_PORT} &
 
 script:
-  - composer test-coverage
-  - sonar-scanner
   - composer cs-check
   - npm run lint
   - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
-  - npm run test:default
-  - npm run test:creditcard
-  - npm run test:creditcard3ds
-  - npm run test:sepa
-  - npm run test:sofort
-  - npm run test:paypal
+#  - npm run test:runner
+  - composer test-coverage
 
 after_script:
   - travis_retry composer upload-coverage
+
+after_failure:
+  - sudo cat /var/log/apache2/error.log
+  - cat ${SHOPWARE_DIRECTORY}/composer.lock
+  - cat ${SHOPWARE_DIRECTORY}/var/log/*.log

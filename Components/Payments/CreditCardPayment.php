@@ -1,35 +1,13 @@
 <?php
 /**
- * Shop System Plugins - Terms of Use
- *
- * The plugins offered are provided free of charge by Wirecard AG and are explicitly not part
- * of the Wirecard AG range of products and services.
- *
- * They have been tested and approved for full functionality in the standard configuration
- * (status on delivery) of the corresponding shop system. They are under General Public
- * License version 3 (GPLv3) and can be used, developed and passed on to third parties under
- * the same terms.
- *
- * However, Wirecard AG does not provide any guarantee or accept any liability for any errors
- * occurring when used in an enhanced, customized shop system configuration.
- *
- * Operation in an enhanced, customized configuration is at your own risk and requires a
- * comprehensive test phase by the user of the plugin.
- *
- * Customers use the plugins at their own risk. Wirecard AG does not guarantee their full
- * functionality neither does Wirecard AG assume liability for any disadvantages related to
- * the use of the plugins. Additionally, Wirecard AG does not guarantee the full functionality
- * for customized shop systems or installed plugins of other vendors of plugins within the same
- * shop system.
- *
- * Customers are responsible for testing the plugin's functionality before starting productive
- * operation.
- *
- * By installing the plugin into the shop system the customer agrees to these terms of use.
- * Please do not use the plugin if you do not agree to these terms of use!
+ * Shop System Plugins:
+ * - Terms of Use can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/_TERMS_OF_USE
+ * - License can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/LICENSE
  */
 
-namespace WirecardShopwareElasticEngine\Components\Payments;
+namespace WirecardElasticEngine\Components\Payments;
 
 use Shopware\Models\Shop\Currency;
 use Shopware\Models\Shop\Shop;
@@ -39,12 +17,19 @@ use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Actions\ViewAction;
-use WirecardShopwareElasticEngine\Components\Data\OrderSummary;
-use WirecardShopwareElasticEngine\Components\Data\CreditCardPaymentConfig;
-use WirecardShopwareElasticEngine\Models\Transaction;
+use WirecardElasticEngine\Components\Actions\ViewAction;
+use WirecardElasticEngine\Components\Data\OrderSummary;
+use WirecardElasticEngine\Components\Data\CreditCardPaymentConfig;
+use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Components\Payments\Contracts\ProcessReturnInterface;
+use WirecardElasticEngine\Models\Transaction;
 
-class CreditCardPayment extends Payment
+/**
+ * @package WirecardElasticEngine\Components\Payments
+ *
+ * @since   1.0.0
+ */
+class CreditCardPayment extends Payment implements ProcessReturnInterface, ProcessPaymentInterface
 {
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_credit_card';
 
@@ -54,15 +39,15 @@ class CreditCardPayment extends Payment
     private $transactionInstance;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getLabel()
     {
-        return 'Wirecard Credit Card';
+        return 'WirecardCreditCard';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getName()
     {
@@ -70,7 +55,7 @@ class CreditCardPayment extends Payment
     }
 
     /**
-     * @return int
+     * {@inheritdoc}
      */
     public function getPosition()
     {
@@ -79,6 +64,8 @@ class CreditCardPayment extends Payment
 
     /**
      * @return CreditCardTransaction
+     *
+     * @since 1.0.0
      */
     public function getTransaction()
     {
@@ -89,7 +76,7 @@ class CreditCardPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag, $selectedCurrency)
     {
@@ -97,34 +84,38 @@ class CreditCardPayment extends Payment
         $paymentConfig     = $this->getPaymentConfig();
         $creditCardConfig  = new CreditCardConfig();
 
-        if ($paymentConfig->getTransactionMAID() && $paymentConfig->getTransactionMAID() !== 'null') {
+        if ($paymentConfig->getTransactionMAID() && strtolower($paymentConfig->getTransactionMAID()) !== 'null') {
             $creditCardConfig->setSSLCredentials(
                 $paymentConfig->getTransactionMAID(),
                 $paymentConfig->getTransactionSecret()
             );
         }
 
-        if ($paymentConfig->getThreeDMAID() && $paymentConfig->getThreeDMAID() !== 'null') {
+        if ($paymentConfig->getThreeDMAID() && strtolower($paymentConfig->getThreeDMAID()) !== 'null') {
             $creditCardConfig->setThreeDCredentials(
                 $paymentConfig->getThreeDMAID(),
                 $paymentConfig->getThreeDSecret()
             );
         }
 
-        $creditCardConfig->addSslMaxLimit(
-            $this->getLimit(
-                $selectedCurrency,
-                $paymentConfig->getSslMaxLimit(),
-                $paymentConfig->getSslMaxLimitCurrency()
-            )
-        );
-        $creditCardConfig->addThreeDMinLimit(
-            $this->getLimit(
-                $selectedCurrency,
-                $paymentConfig->getThreeDMinLimit(),
-                $paymentConfig->getThreeDMinLimitCurrency()
-            )
-        );
+        if (strtolower($paymentConfig->getSslMaxLimit()) !== 'null') {
+            $creditCardConfig->addSslMaxLimit(
+                $this->getLimit(
+                    $selectedCurrency,
+                    $paymentConfig->getSslMaxLimit(),
+                    $paymentConfig->getSslMaxLimitCurrency()
+                )
+            );
+        }
+        if (strtolower($paymentConfig->getThreeDMinLimit()) !== 'null') {
+            $creditCardConfig->addThreeDMinLimit(
+                $this->getLimit(
+                    $selectedCurrency,
+                    $paymentConfig->getThreeDMinLimit(),
+                    $paymentConfig->getThreeDMinLimitCurrency()
+                )
+            );
+        }
 
         $transactionConfig->add($creditCardConfig);
         $this->getTransaction()->setConfig($creditCardConfig);
@@ -139,6 +130,8 @@ class CreditCardPayment extends Payment
      *
      * @return Amount
      * @throws \Enlight_Event_Exception
+     *
+     * @since 1.0.0
      */
     private function getLimit($selectedCurrency, $limitValue, $limitCurrency)
     {
@@ -146,7 +139,7 @@ class CreditCardPayment extends Payment
         $factor = $this->getCurrencyConversionFactor(strtoupper($selectedCurrency), $limit);
 
         $factor = Shopware()->Events()->filter(
-            'WirecardShopwareElasticEngine_CreditCardPayment_getLimitCurrencyConversionFactor',
+            'WirecardElasticEngine_CreditCardPayment_getLimitCurrencyConversionFactor',
             $factor,
             [
                 'subject' => $this,
@@ -165,6 +158,8 @@ class CreditCardPayment extends Payment
      * @param Amount $limit
      *
      * @return float
+     *
+     * @since 1.0.0
      */
     private function getCurrencyConversionFactor($selectedCurrency, Amount $limit)
     {
@@ -200,9 +195,9 @@ class CreditCardPayment extends Payment
     }
 
     /**
-     * Returns payment specific configuration.
-     *
      * @return CreditCardPaymentConfig
+     *
+     * @since 1.0.0
      */
     public function getPaymentConfig()
     {
@@ -229,7 +224,7 @@ class CreditCardPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function processPayment(
         OrderSummary $orderSummary,
@@ -248,11 +243,11 @@ class CreditCardPayment extends Payment
             $shop->getLocale()->getLocale()
         );
 
-        $transaction = new Transaction(Transaction::TYPE_INITIAL_REQUEST);
-        $transaction->setPaymentUniqueId($orderSummary->getPaymentUniqueId());
-        $transaction->setBasketSignature($orderSummary->getBasketMapper()->getSignature());
-        $transaction->setRequest(json_decode($requestData, true));
-        $this->em->persist($transaction);
+        $transactionModel = new Transaction(Transaction::TYPE_INITIAL_REQUEST);
+        $transactionModel->setPaymentUniqueId($orderSummary->getPaymentUniqueId());
+        $transactionModel->setBasketSignature($orderSummary->getBasketMapper()->getSignature());
+        $transactionModel->setRequest(json_decode($requestData, true));
+        $this->em->persist($transactionModel);
         $this->em->flush();
 
         return new ViewAction('credit_card.tpl', [
@@ -266,7 +261,7 @@ class CreditCardPayment extends Payment
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function processReturn(
         TransactionService $transactionService,

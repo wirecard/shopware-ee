@@ -1,35 +1,13 @@
 <?php
 /**
- * Shop System Plugins - Terms of Use
- *
- * The plugins offered are provided free of charge by Wirecard AG and are explicitly not part
- * of the Wirecard AG range of products and services.
- *
- * They have been tested and approved for full functionality in the standard configuration
- * (status on delivery) of the corresponding shop system. They are under General Public
- * License version 3 (GPLv3) and can be used, developed and passed on to third parties under
- * the same terms.
- *
- * However, Wirecard AG does not provide any guarantee or accept any liability for any errors
- * occurring when used in an enhanced, customized shop system configuration.
- *
- * Operation in an enhanced, customized configuration is at your own risk and requires a
- * comprehensive test phase by the user of the plugin.
- *
- * Customers use the plugins at their own risk. Wirecard AG does not guarantee their full
- * functionality neither does Wirecard AG assume liability for any disadvantages related to
- * the use of the plugins. Additionally, Wirecard AG does not guarantee the full functionality
- * for customized shop systems or installed plugins of other vendors of plugins within the same
- * shop system.
- *
- * Customers are responsible for testing the plugin's functionality before starting productive
- * operation.
- *
- * By installing the plugin into the shop system the customer agrees to these terms of use.
- * Please do not use the plugin if you do not agree to these terms of use!
+ * Shop System Plugins:
+ * - Terms of Use can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/_TERMS_OF_USE
+ * - License can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/LICENSE
  */
 
-namespace WirecardShopwareElasticEngine\Tests\Unit\Models;
+namespace WirecardElasticEngine\Tests\Unit\Models;
 
 use Shopware\Models\Order\Status;
 use Wirecard\PaymentSdk\Entity\Amount;
@@ -39,9 +17,9 @@ use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
 use Wirecard\PaymentSdk\TransactionService;
-use WirecardShopwareElasticEngine\Components\Payments\Payment;
-use WirecardShopwareElasticEngine\Models\Transaction;
-use WirecardShopwareElasticEngine\Tests\Unit\ModelTestCase;
+use WirecardElasticEngine\Components\Payments\Payment;
+use WirecardElasticEngine\Models\Transaction;
+use WirecardElasticEngine\Tests\Unit\ModelTestCase;
 
 class TransactionTest extends ModelTestCase
 {
@@ -68,6 +46,7 @@ class TransactionTest extends ModelTestCase
         $this->assertGetterAndSetter('paymentStatus', Status::PAYMENT_STATE_COMPLETELY_PAID);
         $this->assertGetterAndSetter('state', Transaction::STATE_CLOSED, Transaction::STATE_OPEN);
         $this->assertGetterAndSetter('createdAt', new \DateTime(), $this->model->getCreatedAt());
+        $this->assertGetterAndSetter('statusMessage', 'error');
 
         $this->assertEquals([
             'id'                           => null,
@@ -83,10 +62,11 @@ class TransactionTest extends ModelTestCase
             'type'                         => Transaction::TYPE_INITIAL_RESPONSE,
             'amount'                       => null,
             'currency'                     => null,
-            'createdAt'                    => $this->model->getCreatedAt(),
+            'createdAt'                    => $this->model->getCreatedAt()->format(\DateTime::W3C),
             'state'                        => Transaction::STATE_CLOSED,
             'response'                     => null,
             'request'                      => null,
+            'statusMessage'                => 'error',
         ], $this->model->toArray());
     }
 
@@ -106,9 +86,10 @@ class TransactionTest extends ModelTestCase
         $this->assertNull($transaction->getCurrency());
         $this->assertEquals(Transaction::TYPE_INITIAL_RESPONSE, $transaction->getType());
         $this->assertEquals(Transaction::STATE_OPEN, $transaction->getState());
-        $this->assertInstanceOf(\DateTime::class, $transaction->getCreatedAt());
+        $this->assertNotNull($transaction->getCreatedAt());
         $this->assertNull($transaction->getResponse());
         $this->assertTrue($transaction->isInitial());
+        $this->assertNull($transaction->getStatusMessage());
     }
 
     public function testWithResponse()
@@ -145,10 +126,11 @@ class TransactionTest extends ModelTestCase
             'type'                         => Transaction::TYPE_INITIAL_RESPONSE,
             'amount'                       => null,
             'currency'                     => null,
-            'createdAt'                    => $transaction->getCreatedAt(),
+            'createdAt'                    => $transaction->getCreatedAt()->format(\DateTime::W3C),
             'state'                        => Transaction::STATE_OPEN,
             'response'                     => [],
             'request'                      => null,
+            'statusMessage'                => null,
         ], $transaction->toArray());
     }
 
@@ -197,13 +179,14 @@ class TransactionTest extends ModelTestCase
             'type'                         => Transaction::TYPE_RETURN,
             'amount'                       => 1.23,
             'currency'                     => 'USD',
-            'createdAt'                    => $transaction->getCreatedAt(),
+            'createdAt'                    => $transaction->getCreatedAt()->format(\DateTime::W3C),
             'state'                        => Transaction::STATE_OPEN,
             'response'                     => [
                 'transaction-id' => 'trans-id',
                 'request-id'     => 'req-id',
             ],
             'request'                      => null,
+            'statusMessage'                => null,
         ], $transaction->toArray());
     }
 
@@ -243,10 +226,11 @@ class TransactionTest extends ModelTestCase
             'type'                         => Transaction::TYPE_RETURN,
             'amount'                       => null,
             'currency'                     => null,
-            'createdAt'                    => $transaction->getCreatedAt(),
+            'createdAt'                    => $transaction->getCreatedAt()->format(\DateTime::W3C),
             'state'                        => Transaction::STATE_OPEN,
             'response'                     => [],
             'request'                      => null,
+            'statusMessage'                => null,
         ], $transaction->toArray());
     }
 
@@ -285,10 +269,11 @@ class TransactionTest extends ModelTestCase
             'type'                         => Transaction::TYPE_RETURN,
             'amount'                       => null,
             'currency'                     => null,
-            'createdAt'                    => $transaction->getCreatedAt(),
+            'createdAt'                    => $transaction->getCreatedAt()->format(\DateTime::W3C),
             'state'                        => Transaction::STATE_OPEN,
             'response'                     => [],
             'request'                      => null,
+            'statusMessage'                => null,
         ], $transaction->toArray());
     }
 
@@ -324,10 +309,11 @@ class TransactionTest extends ModelTestCase
             'type'                         => Transaction::TYPE_INITIAL_REQUEST,
             'amount'                       => 10.12,
             'currency'                     => 'USD',
-            'createdAt'                    => $transaction->getCreatedAt(),
+            'createdAt'                    => $transaction->getCreatedAt()->format(\DateTime::W3C),
             'state'                        => Transaction::STATE_OPEN,
             'response'                     => null,
             'request'                      => $request,
+            'statusMessage'                => null,
         ], $transaction->toArray());
     }
 }

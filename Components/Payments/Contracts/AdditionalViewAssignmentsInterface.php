@@ -1,0 +1,27 @@
+<?php
+/**
+ * Shop System Plugins:
+ * - Terms of Use can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/_TERMS_OF_USE
+ * - License can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/LICENSE
+ */
+
+namespace WirecardElasticEngine\Components\Payments\Contracts;
+
+/**
+ * @package WirecardElasticEngine\Components\Payments\Interfaces
+ *
+ * @since   1.0.0
+ */
+interface AdditionalViewAssignmentsInterface
+{
+    /**
+     * Some payments (e.g. SEPA) require additional view assignments (e.g. for displaying additional input fields).
+     *
+     * @return array
+     *
+     * @since 1.0.0
+     */
+    public function getAdditionalViewAssignments();
+}

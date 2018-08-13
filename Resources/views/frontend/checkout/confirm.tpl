@@ -1,32 +1,51 @@
+{**
+ * Shop System Plugins:
+ * - Terms of Use can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/_TERMS_OF_USE
+ * - License can be found under:
+ * https://github.com/wirecard/shopware-ee/blob/master/LICENSE
+ *}
+
 {extends file="parent:frontend/checkout/confirm.tpl"}
 
 {block name='frontend_checkout_confirm_information_wrapper'}
     {$smarty.block.parent}
-    {if $wirecardFormFields and $wirecardFormFields.method == 'wirecard_elastic_engine_sepa'}
-        <div class="panel has--border wirecardee--additional-form-fields">
-            <div class="panel--title primary is--underline">
-                {s name="SepaPaymentFormHeader" namespace="frontend/wirecard_elastic_engine/sepa"}{/s}
+    {if $wirecardElasticEngineViewAssignments}
+        {if $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_sepa'}
+            <div class="panel has--border wirecardee--additional-form-fields">
+                <div class="panel--title primary is--underline">
+                    {s name="SepaPaymentFormHeader" namespace="frontend/wirecard_elastic_engine/sepa_direct_debit"}{/s}
+                </div>
+                <div class="panel--body is--wide">
+                    {include file="frontend/plugins/wirecard_elastic_engine/form/sepa.tpl"}
+                </div>
             </div>
-            <div class="panel--body is--wide">
-                {include file="frontend/plugins/wirecard_elastic_engine/form/sepa.tpl"}
+        {elseif $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_ideal'}
+            <div class="panel has--border wirecardee--additional-form-fields">
+                <div class="panel--title primary is--underline">
+                    {s name="IdealPaymentFormHeader" namespace="frontend/wirecard_elastic_engine/ideal"}{/s}
+                </div>
+                <div class="panel--body is--wide">
+                    {include file="frontend/plugins/wirecard_elastic_engine/form/ideal.tpl"}
+                </div>
             </div>
-        </div>
+        {/if}
     {/if}
 
-    {if $includeDeviceFingerprintIFrame}
+    {if $wirecardElasticEngineIncludeDeviceFingerprintIFrame}
         <script type="text/javascript"
-                src="https://h.wirecard.com/fp/tags.js?org_id=6xxznhva&session_id={$deviceFingerprintId}">
+                src="https://h.wirecard.com/fp/tags.js?org_id=6xxznhva&session_id={$wirecardElasticEngineDeviceFingerprintId}">
         </script>
         <noscript>
             <iframe style="width: 100px; height: 100px; border: 0; position: absolute; top: -5000px;"
-                    src="https://h.wirecard.com/tags?org_id=6xxznhva&session_id={$deviceFingerprintId}"></iframe>
+                    src="https://h.wirecard.com/tags?org_id=6xxznhva&session_id={$wirecardElasticEngineDeviceFingerprintId}"></iframe>
         </noscript>
     {/if}
 {/block}
 
 {block name="frontend_index_javascript_async_ready"}
     {$smarty.block.parent}
-    {if $wirecardFormFields and $wirecardFormFields.method == 'wirecard_elastic_engine_sepa'}
+    {if $wirecardElasticEngineViewAssignments and $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_sepa'}
         <div id="wirecardee-sepa--mandate-text" style="display:none;">
             {include file="frontend/plugins/wirecard_elastic_engine/form/sepa_mandate.tpl"}
         </div>
@@ -53,7 +72,7 @@
                     if ($('#wirecardee-sepa--confirm-mandate').val() !== 'confirmed') {
                         event.preventDefault();
                         modalWindow = $.modal.open(getMandateText(), {
-                            title: "{s name="SepaMandateTitle" namespace="frontend/wirecard_elastic_engine/sepa"}{/s}",
+                            title: "{s name="SepaMandateTitle" namespace="frontend/wirecard_elastic_engine/sepa_direct_debit"}{/s}",
                             closeOnOverlay: false,
                             showCloseButton: false
                         });
