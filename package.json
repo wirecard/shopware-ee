@@ -1,6 +1,6 @@
 {
   "name": "@wirecard/shopware-ee",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "scripts": {
     "lint": "node_modules/.bin/eslint -c .eslintrc.json **/*.js **/*.js --ignore-path .eslintignore",
     "test": "node_modules/.bin/mocha Tests/Selenium/**/*Test.js --timeout 150000",
