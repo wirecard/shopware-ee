@@ -84,15 +84,19 @@ class OrderBasketMapper
      */
     private function getShippingItem(Order $order)
     {
-        $amount = new Amount($order->getInvoiceShipping(), $order->getCurrency());
+        $shipping    = $order->getInvoiceShipping();
+        $shippingNet = $order->getInvoiceShippingNet();
+        
+        $amount = new Amount($shipping, $order->getCurrency());
         $item   = new Item('Shipping', $amount, 1);
         $item->setArticleNumber('shipping');
         $item->setDescription($order->getDispatch()->getName());
         $item->setTaxAmount(new Amount(
-            BasketMapper::numberFormat($order->getInvoiceShipping() - $order->getInvoiceShippingNet()),
+            BasketMapper::numberFormat($shipping - $shippingNet),
             $order->getCurrency()
         ));
-        $item->setTaxRate($order->getInvoiceShippingNet() / $order->getInvoiceShipping());
+        $item->setTaxRate(round((($shipping - $shippingNet) / $shippingNet) * 100, 2));
+
         return $item;
     }
 }
