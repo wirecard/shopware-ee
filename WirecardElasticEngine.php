@@ -78,6 +78,7 @@ class WirecardElasticEngine extends Plugin
 
         $this->updatePayments($context->getPlugin());
         $this->updateDatabase();
+        $this->setDefaultConfigValues();
     }
 
     /**
@@ -231,7 +232,7 @@ class WirecardElasticEngine extends Plugin
         foreach ($defaults as $name => $value) {
             /** @var Element $element */
             $element = $em->getRepository(Element::class)->findOneBy(['name' => $name]);
-            if ($element) {
+            if ($element && $element->getValue() === '-') {
                 $element->setValue($value);
                 $em->flush();
             }

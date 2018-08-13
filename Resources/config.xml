@@ -435,7 +435,7 @@ function (button) {
             <name>wirecardElasticEngineRatepayInvoiceAcceptedCurrencies</name>
             <label lang="de">[Wirecard Kauf auf Rechnung mit Zahlungsgarantie] Erlaubte Währungen</label>
             <label lang="en">[Guaranteed Invoice by Wirecard] Allowed currencies</label>
-            <value>1</value>
+            <value>-</value>
             <description lang="de">
                 Wirecard Kauf auf Rechnung mit Zahlungsgarantie wird nur angezeigt, wenn eine der
                 ausgewählten Währungen genutzt wird.
@@ -453,7 +453,7 @@ function (button) {
             <name>wirecardElasticEngineRatepayInvoiceShippingCountries</name>
             <label lang="de">[Wirecard Kauf auf Rechnung mit Zahlungsgarantie] Erlaubte Lieferländer</label>
             <label lang="en">[Guaranteed Invoice by Wirecard] Allowed shipping countries</label>
-            <value>2</value>
+            <value>-</value>
             <description lang="de">
                 Wirecard Kauf auf Rechnung mit Zahlungsgarantie wird dem Endkunden beim Checkout nur
                 angezeigt, wenn die Lieferadresse einem der hier gewählten Länder entspricht.
@@ -473,7 +473,7 @@ function (button) {
             <name>wirecardElasticEngineRatepayInvoiceBillingCountries</name>
             <label lang="de">[Wirecard Kauf auf Rechnung mit Zahlungsgarantie] Erlaubte Rechnungsempfängerländer</label>
             <label lang="en">[Guaranteed Invoice by Wirecard] Allowed billing countries</label>
-            <value>2</value>
+            <value>-</value>
             <description lang="de">
                 Wirecard Kauf auf Rechnung mit Zahlungsgarantie wird dem Endkunden beim Checkout nur
                 angezeigt, wenn die Rechnungsadresse einem der hier gewählten Länder entspricht.
