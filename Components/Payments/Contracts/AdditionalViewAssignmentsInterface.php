@@ -9,6 +9,8 @@
 
 namespace WirecardElasticEngine\Components\Payments\Contracts;
 
+use WirecardElasticEngine\Components\Services\SessionManager;
+
 /**
  * @package WirecardElasticEngine\Components\Payments\Interfaces
  *
@@ -19,9 +21,11 @@ interface AdditionalViewAssignmentsInterface
     /**
      * Some payments (e.g. SEPA) require additional view assignments (e.g. for displaying additional input fields).
      *
+     * @param SessionManager $sessionManager
+     *
      * @return array
      *
      * @since 1.0.0
      */
-    public function getAdditionalViewAssignments();
+    public function getAdditionalViewAssignments(SessionManager $sessionManager);
 }

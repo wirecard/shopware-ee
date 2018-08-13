@@ -49,6 +49,21 @@ class CreditCardPaymentConfig extends PaymentConfig
     protected $sslMaxLimitCurrency;
 
     /**
+     * @var bool
+     */
+    protected $vaultEnabled;
+
+    /**
+     * @var bool
+     */
+    protected $allowAddressChanges;
+
+    /**
+     * @var bool
+     */
+    protected $threeDUsageOnTokens;
+
+    /**
      * @return string If "null", ThreeD credentials are disabled
      *
      * @since 1.0.0
@@ -169,6 +184,54 @@ class CreditCardPaymentConfig extends PaymentConfig
     }
 
     /**
+     * @return bool
+     */
+    public function isVaultEnabled()
+    {
+        return $this->vaultEnabled;
+    }
+
+    /**
+     * @param bool $vaultEnabled
+     */
+    public function setVaultEnabled($vaultEnabled)
+    {
+        $this->vaultEnabled = $vaultEnabled;
+    }
+
+    /**
+     * @return bool
+     */
+    public function allowAddressChanges()
+    {
+        return $this->allowAddressChanges;
+    }
+
+    /**
+     * @param bool $allowAddressChanges
+     */
+    public function setAllowAddressChanges($allowAddressChanges)
+    {
+        $this->allowAddressChanges = $allowAddressChanges;
+    }
+
+    /**
+     * @return bool
+     */
+    public function useThreeDOnTokens()
+    {
+        return $this->threeDUsageOnTokens;
+    }
+
+    /**
+     * @param bool $threeDUsageOnTokens
+     */
+    public function setThreeDUsageOnTokens($threeDUsageOnTokens)
+    {
+        $this->threeDUsageOnTokens = $threeDUsageOnTokens;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function toArray()
@@ -181,6 +244,9 @@ class CreditCardPaymentConfig extends PaymentConfig
                 'threeDMinLimitCurrency' => $this->getThreeDMinLimitCurrency(),
                 'sslMaxLimit'            => $this->getSslMaxLimit(),
                 'sslMaxLimitCurrency'    => $this->getSslMaxLimitCurrency(),
+                'vaultEnabled'           => $this->isVaultEnabled(),
+                'allowAddressChanges'    => $this->allowAddressChanges(),
+                'threeDUsageOnTokens'    => $this->useThreeDOnTokens(),
             ]
         );
     }

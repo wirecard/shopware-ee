@@ -20,6 +20,7 @@ class UserMapperTest extends TestCase
     protected $user = [
         'additional'      => [
             'user'            => [
+                'id'             => '12',
                 'customernumber' => '10001',
                 'firstname'      => 'First Name',
                 'lastname'       => 'Last Name',
@@ -72,6 +73,7 @@ class UserMapperTest extends TestCase
 
     public function testGetWirecardBillingAccountHolderWithAllFields()
     {
+        $this->assertEquals('12', $this->mapper->getUserId());
         $this->assertEquals('10001', $this->mapper->getCustomerNumber());
         $this->assertEquals('First Name', $this->mapper->getFirstName());
         $this->assertEquals('Last Name', $this->mapper->getLastName());

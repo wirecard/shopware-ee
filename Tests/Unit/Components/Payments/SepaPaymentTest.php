@@ -23,6 +23,7 @@ use WirecardElasticEngine\Components\Data\PaymentConfig;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Payments\SepaPayment;
+use WirecardElasticEngine\Components\Services\SessionManager;
 use WirecardElasticEngine\Exception\InsufficientDataException;
 use WirecardElasticEngine\Exception\UnknownTransactionTypeException;
 use WirecardElasticEngine\Tests\Unit\PaymentTestCase;
@@ -235,6 +236,8 @@ class SepaPaymentTest extends PaymentTestCase
 
     public function testGetAdditionalViewAssignments()
     {
+        $sessionManager = $this->createMock(SessionManager::class);
+
         $this->assertInstanceOf(AdditionalViewAssignmentsInterface::class, $this->payment);
         $this->assertEquals([
             'method'          => 'wirecard_elastic_engine_sepa',
@@ -242,6 +245,6 @@ class SepaPaymentTest extends PaymentTestCase
             'creditorId'      => null,
             'creditorName'    => null,
             'creditorAddress' => null,
-        ], $this->payment->getAdditionalViewAssignments());
+        ], $this->payment->getAdditionalViewAssignments($sessionManager));
     }
 }
