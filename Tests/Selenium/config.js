@@ -37,14 +37,6 @@ exports.config = {
             },
             password: 'wirecard'
         },
-        alipay: {
-            label: 'Wirecard Alipay Cross-border',
-            fields: {
-                email: 'alipaytest20091@gmail.com',
-                password: '111111',
-                paymentPasswordDigit: '1'
-            }
-        },
         sepa: {
             label: 'Wirecard SEPA-Lastschrift',
             fields: {
