@@ -90,6 +90,7 @@ class SepaPayment extends Payment implements ProcessPaymentInterface, Additional
      *
      * @return SepaDirectDebitTransaction|SepaCreditTransferTransaction
      *
+     * @since 1.1.0 Added $order and $transactionType
      * @since 1.0.0
      */
     public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType)

@@ -430,7 +430,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     /**
      * Delete credit card token from vault
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function deleteCreditCardTokenAction()
     {

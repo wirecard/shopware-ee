@@ -14,7 +14,7 @@ use WirecardElasticEngine\Models\Transaction;
 /**
  * @package WirecardElasticEngine\Components\Payments\Contracts
  *
- * @since   1.0.0
+ * @since   1.1.0
  */
 interface AdditionalPaymentInformationInterface
 {
@@ -23,7 +23,7 @@ interface AdditionalPaymentInformationInterface
      *
      * @param \Enlight_View_Default $view
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function assignAdditionalPaymentInformation(\Enlight_View_Default $view);
 }

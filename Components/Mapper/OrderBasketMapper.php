@@ -20,7 +20,7 @@ use Wirecard\PaymentSdk\Entity\Item;
  *
  * @package WirecardElasticEngine\Components\Mapper
  *
- * @since   1.0.0
+ * @since   1.1.0
  */
 class OrderBasketMapper
 {
@@ -31,7 +31,7 @@ class OrderBasketMapper
      *
      * @return Basket
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function createBasket(Order $order)
     {
@@ -55,7 +55,7 @@ class OrderBasketMapper
      *
      * @return Item
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     private function getOrderDetailItem(Detail $detail, $currency)
     {
@@ -80,7 +80,7 @@ class OrderBasketMapper
      *
      * @return Item
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     private function getShippingItem(Order $order)
     {

@@ -320,7 +320,7 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
      *
      * @return null|Order
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     private function getOrderByNumber($orderNumber)
     {

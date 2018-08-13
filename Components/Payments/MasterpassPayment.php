@@ -20,7 +20,7 @@ use WirecardElasticEngine\Components\Data\PaymentConfig;
 /**
  * @package WirecardElasticEngine\Components\Payments
  *
- * @since   1.0.0
+ * @since   1.1.0
  */
 class MasterpassPayment extends Payment
 {
@@ -55,11 +55,10 @@ class MasterpassPayment extends Payment
         return 4;
     }
 
-
     /**
      * @return MasterpassTransaction
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getTransaction()
     {
@@ -80,7 +79,7 @@ class MasterpassPayment extends Payment
      *
      * @return MasterpassTransaction|null
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType)
     {

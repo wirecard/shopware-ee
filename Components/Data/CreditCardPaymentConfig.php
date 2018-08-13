@@ -185,6 +185,8 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @return bool
+     *
+     * @since 1.1.0
      */
     public function isVaultEnabled()
     {
@@ -193,6 +195,8 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @param bool $vaultEnabled
+     *
+     * @since 1.1.0
      */
     public function setVaultEnabled($vaultEnabled)
     {
@@ -201,6 +205,8 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @return bool
+     *
+     * @since 1.1.0
      */
     public function allowAddressChanges()
     {
@@ -209,6 +215,8 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @param bool $allowAddressChanges
+     *
+     * @since 1.1.0
      */
     public function setAllowAddressChanges($allowAddressChanges)
     {
@@ -217,6 +225,8 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @return bool
+     *
+     * @since 1.1.0
      */
     public function useThreeDOnTokens()
     {
@@ -225,6 +235,8 @@ class CreditCardPaymentConfig extends PaymentConfig
 
     /**
      * @param bool $threeDUsageOnTokens
+     *
+     * @since 1.1.0
      */
     public function setThreeDUsageOnTokens($threeDUsageOnTokens)
     {

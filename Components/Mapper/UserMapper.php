@@ -167,7 +167,7 @@ class UserMapper extends ArrayMapper
      * @return mixed
      * @throws ArrayKeyNotFoundException
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getUserId()
     {

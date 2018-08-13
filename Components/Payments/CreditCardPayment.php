@@ -33,6 +33,7 @@ use WirecardElasticEngine\Models\Transaction;
 /**
  * @package WirecardElasticEngine\Components\Payments
  *
+ * @since   1.1.0 Implements AdditionalViewAssignmentsInterface; Support for One-Click Checkout
  * @since   1.0.0
  */
 class CreditCardPayment extends Payment implements
@@ -289,7 +290,7 @@ class CreditCardPayment extends Payment implements
      * @return ErrorAction|null
      * @throws \WirecardElasticEngine\Exception\ArrayKeyNotFoundException
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     private function useToken(CreditCardTransaction $transaction, $tokenId, OrderSummary $orderSummary)
     {
@@ -322,7 +323,7 @@ class CreditCardPayment extends Payment implements
     /**
      * @return array
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     private function getComparableAddressKeys()
     {
@@ -342,7 +343,7 @@ class CreditCardPayment extends Payment implements
      *
      * @return string
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     private function createAddressHash(array $address)
     {
@@ -384,7 +385,7 @@ class CreditCardPayment extends Payment implements
      * @param SessionManager     $sessionManager
      * @param array              $params
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     private function saveToken(TransactionService $transactionService, SessionManager $sessionManager, $params)
     {

@@ -20,7 +20,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * The credit card vault model holds credit card tokens for one-click checkout.
  *
- * @since 1.0.0
+ * @since 1.1.0
  */
 class CreditCardVault extends ModelEntity
 {
@@ -87,7 +87,7 @@ class CreditCardVault extends ModelEntity
     private $additionalData;
 
     /**
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function __construct()
     {
@@ -97,7 +97,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @return int|null
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getId()
     {
@@ -107,7 +107,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @return int
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getUserId()
     {
@@ -117,7 +117,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @param int $userId
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function setUserId($userId)
     {
@@ -127,7 +127,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @return string
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getToken()
     {
@@ -137,7 +137,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @param string
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function setToken($token)
     {
@@ -147,7 +147,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @return string
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getMaskedAccountNumber()
     {
@@ -157,7 +157,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @param string $maskedAccountNumber
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function setMaskedAccountNumber($maskedAccountNumber)
     {
@@ -167,7 +167,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @return \DateTime
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getLastUsed()
     {
@@ -177,7 +177,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @param \DateTime $lastUsed
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function setLastUsed(\DateTime $lastUsed)
     {
@@ -187,7 +187,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @return array
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getBindBillingAddress()
     {
@@ -197,7 +197,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @param array $bindBillingAddress
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function setBindBillingAddress(array $bindBillingAddress)
     {
@@ -207,7 +207,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @return string
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getBindBillingAddressHash()
     {
@@ -217,7 +217,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @param string $bindBillingAddressHash
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function setBindBillingAddressHash($bindBillingAddressHash)
     {
@@ -227,7 +227,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @return array
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getBindShippingAddress()
     {
@@ -237,7 +237,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @param array $bindShippingAddress
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function setBindShippingAddress(array $bindShippingAddress)
     {
@@ -247,7 +247,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @return string
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getBindShippingAddressHash()
     {
@@ -257,7 +257,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @param string $bindShippingAddressHash
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function setBindShippingAddressHash($bindShippingAddressHash)
     {
@@ -267,7 +267,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @return array
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getAdditionalData()
     {
@@ -277,7 +277,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @param array $additionalData
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function setAdditionalData(array $additionalData)
     {
@@ -287,7 +287,7 @@ class CreditCardVault extends ModelEntity
     /**
      * @return array
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function toArray()
     {

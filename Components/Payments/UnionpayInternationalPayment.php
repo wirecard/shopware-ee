@@ -26,7 +26,7 @@ use WirecardElasticEngine\Models\Transaction;
 /**
  * @package WirecardElasticEngine\Components\Payments
  *
- * @since   1.0.0
+ * @since   1.1.0
  */
 class UnionpayInternationalPayment extends Payment implements ProcessReturnInterface, ProcessPaymentInterface
 {
@@ -64,7 +64,7 @@ class UnionpayInternationalPayment extends Payment implements ProcessReturnInter
     /**
      * @return UpiTransaction
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getTransaction()
     {

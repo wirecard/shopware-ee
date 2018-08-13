@@ -31,6 +31,7 @@ interface ProcessReturnInterface
      *
      * @return Response|null
      *
+     * @since 1.1.0 Added $sessionManager
      * @since 1.0.0
      */
     public function processReturn(

@@ -25,6 +25,7 @@ interface AdditionalViewAssignmentsInterface
      *
      * @return array
      *
+     * @since 1.1.0 Added $sessionManager
      * @since 1.0.0
      */
     public function getAdditionalViewAssignments(SessionManager $sessionManager);

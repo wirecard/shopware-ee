@@ -257,6 +257,7 @@ class TransactionManager
      *
      * @return Transaction|null
      *
+     * @since 1.1.0 Added $previousTransaction
      * @since 1.0.0
      */
     private function findInitialTransaction($parentTransactionId, $requestId, Transaction $previousTransaction = null)
@@ -280,6 +281,7 @@ class TransactionManager
      *
      * @return Transaction|null
      *
+     * @since 1.1.0 Added $previousTransaction
      * @since 1.0.0
      */
     private function returnInitialTransaction(Transaction $transaction, Transaction $previousTransaction = null)

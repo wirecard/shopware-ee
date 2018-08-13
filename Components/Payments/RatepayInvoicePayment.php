@@ -32,7 +32,7 @@ use WirecardElasticEngine\Exception\ArrayKeyNotFoundException;
 /**
  * @package WirecardElasticEngine\Components\Payments
  *
- * @since   1.0.0
+ * @since   1.1.0
  */
 class RatepayInvoicePayment extends Payment implements
     DisplayRestrictionInterface,
@@ -73,7 +73,7 @@ class RatepayInvoicePayment extends Payment implements
     /**
      * @return RatepayInvoiceTransaction
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getTransaction()
     {
@@ -93,7 +93,7 @@ class RatepayInvoicePayment extends Payment implements
      *
      * @return RatepayInvoiceTransaction
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType)
     {
@@ -178,7 +178,7 @@ class RatepayInvoicePayment extends Payment implements
      *
      * @return ErrorAction|null
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     private function validateConsumerDateOfBirth(OrderSummary $orderSummary, AccountHolder $accountHolder)
     {
@@ -205,18 +205,18 @@ class RatepayInvoicePayment extends Payment implements
     /**
      * @return array
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     private function getComparableAddressKeys()
     {
         return [
-            "firstname",
-            "lastname",
-            "street",
-            "zipcode",
-            "city",
-            "countryId",
-            "stateId",
+            UserMapper::ADDRESS_FIRST_NAME,
+            UserMapper::ADDRESS_LAST_NAME,
+            UserMapper::ADDRESS_STREET,
+            UserMapper::ADDRESS_ZIP,
+            UserMapper::ADDRESS_CITY,
+            UserMapper::ADDRESS_COUNTRY_ID,
+            UserMapper::ADDRESS_STATE_ID,
         ];
     }
 
@@ -226,7 +226,7 @@ class RatepayInvoicePayment extends Payment implements
      *
      * @return bool
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     private function addressEquals(array $srcAddress, array $destAddress)
     {
@@ -310,7 +310,7 @@ class RatepayInvoicePayment extends Payment implements
      *
      * @return bool
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     private function isBelowAgeRestriction(\DateTime $birthDay)
     {
@@ -323,7 +323,7 @@ class RatepayInvoicePayment extends Payment implements
      *
      * @return \DateTime|null
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     private function getDateOfBirthFromPaymentData($paymentData)
     {

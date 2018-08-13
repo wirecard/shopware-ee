@@ -94,7 +94,7 @@ class SessionManager
     /**
      * @return int
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getUserId()
     {
@@ -104,7 +104,7 @@ class SessionManager
     /**
      * @return array
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getUserInfo()
     {
@@ -114,7 +114,7 @@ class SessionManager
     /**
      * @return array
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getOrderVariables()
     {
@@ -124,7 +124,7 @@ class SessionManager
     /**
      * @return array
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getOrderBilldingAddress()
     {
@@ -137,7 +137,7 @@ class SessionManager
     /**
      * @return array
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getOrderShippingAddress()
     {

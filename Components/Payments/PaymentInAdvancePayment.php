@@ -25,7 +25,7 @@ use WirecardElasticEngine\Models\Transaction;
 /**
  * @package WirecardElasticEngine\Components\Payments
  *
- * @since   1.0.0
+ * @since   1.1.0
  */
 class PaymentInAdvancePayment extends Payment implements ProcessPaymentInterface, AdditionalPaymentInformationInterface
 {
@@ -63,7 +63,7 @@ class PaymentInAdvancePayment extends Payment implements ProcessPaymentInterface
     /**
      * @return PoiPiaTransaction
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getTransaction()
     {
@@ -131,7 +131,7 @@ class PaymentInAdvancePayment extends Payment implements ProcessPaymentInterface
      *
      * @param \Enlight_View_Default $view
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function assignAdditionalPaymentInformation(\Enlight_View_Default $view)
     {

@@ -88,6 +88,7 @@ class IdealPayment extends Payment implements ProcessPaymentInterface, Additiona
      *
      * @return IdealTransaction|SepaCreditTransferTransaction
      *
+     * @since 1.1.0 Added $order and $transactionType
      * @since 1.0.0
      */
     public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType)

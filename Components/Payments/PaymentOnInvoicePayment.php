@@ -23,7 +23,7 @@ use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 /**
  * @package WirecardElasticEngine\Components\Payments
  *
- * @since   1.0.0
+ * @since   1.1.0
  */
 class PaymentOnInvoicePayment extends Payment implements ProcessPaymentInterface
 {
@@ -61,7 +61,7 @@ class PaymentOnInvoicePayment extends Payment implements ProcessPaymentInterface
     /**
      * @return PoiPiaTransaction
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getTransaction()
     {

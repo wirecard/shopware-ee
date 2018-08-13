@@ -57,6 +57,7 @@ class FrontendSubscriber implements SubscriberInterface
      * @param PaymentFactory            $paymentFactory
      * @param EntityManagerInterface    $em
      *
+     * @since 1.1.0 Added $em
      * @since 1.0.0
      */
     public function __construct(
@@ -92,7 +93,7 @@ class FrontendSubscriber implements SubscriberInterface
      *
      * @param \Enlight_Event_EventArgs $args
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function onGetPayments(\Enlight_Event_EventArgs $args)
     {
@@ -236,7 +237,8 @@ class FrontendSubscriber implements SubscriberInterface
      * @param \Enlight_View_Default $view
      *
      * @throws \WirecardElasticEngine\Exception\UnknownPaymentException
-     * @since 1.0.0
+     *
+     * @since 1.1.0
      */
     private function assignAdditionalPaymentInformation(\Enlight_View_Default $view)
     {
@@ -288,6 +290,7 @@ class FrontendSubscriber implements SubscriberInterface
      *
      * @throws \WirecardElasticEngine\Exception\UnknownPaymentException
      *
+     * @since 1.1.0 Added $sessionManager
      * @since 1.0.0
      */
     private function assignAdditionalViewAssignments(\Enlight_View_Default $view, SessionManager $sessionManager)

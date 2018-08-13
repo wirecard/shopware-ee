@@ -74,6 +74,7 @@ interface PaymentInterface
      *
      * @return \Wirecard\PaymentSdk\Transaction\Transaction|null
      *
+     * @since 1.1.0 Added $order and $transactionType
      * @since 1.0.0
      */
     public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType);

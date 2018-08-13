@@ -84,6 +84,7 @@ class SofortPayment extends Payment implements ProcessPaymentInterface
      *
      * @return SofortTransaction|SepaCreditTransferTransaction
      *
+     * @since 1.1.0 Added $order and $transactionType
      * @since 1.0.0
      */
     public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType)

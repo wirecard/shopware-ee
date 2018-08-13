@@ -23,7 +23,7 @@ use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 /**
  * @package WirecardElasticEngine\Components\Payments
  *
- * @since   1.0.0
+ * @since   1.1.0
  */
 class AlipayPayment extends Payment implements ProcessPaymentInterface
 {
@@ -61,7 +61,7 @@ class AlipayPayment extends Payment implements ProcessPaymentInterface
     /**
      * @return AlipayCrossborderTransaction
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function getTransaction()
     {

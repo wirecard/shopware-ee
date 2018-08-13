@@ -14,7 +14,7 @@ use WirecardElasticEngine\Components\Mapper\UserMapper;
 /**
  * @package WirecardElasticEngine\Components\Payments\Contracts
  *
- * @since   1.0.0
+ * @since   1.1.0
  */
 interface DisplayRestrictionInterface
 {
@@ -23,7 +23,7 @@ interface DisplayRestrictionInterface
      *
      * @return bool
      *
-     * @since 1.0.0
+     * @since 1.1.0
      */
     public function checkDisplayRestrictions(UserMapper $userMapper);
 }
