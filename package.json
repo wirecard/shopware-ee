@@ -8,10 +8,12 @@
     "test:creditcard": "node_modules/.bin/mocha Tests/Selenium/Payments/CreditCardTest.js --timeout 60000",
     "test:creditcard3ds": "node_modules/.bin/mocha Tests/Selenium/Payments/CreditCardThreeDTest.js --timeout 60000",
     "test:masterpass": "node_modules/.bin/mocha Tests/Selenium/Payments/MasterpassTest.js --timeout 60000",
+    "test:alipay": "node_modules/.bin/mocha Tests/Selenium/Payments/AlipayTest.js --timeout 120000",
     "test:paypal": "node_modules/.bin/mocha Tests/Selenium/Payments/PaypalTest.js --timeout 180000",
     "test:sepa": "node_modules/.bin/mocha Tests/Selenium/Payments/SepaTest.js --timeout 60000",
     "test:sofort": "node_modules/.bin/mocha Tests/Selenium/Payments/SofortTest.js --timeout 60000",
     "test:ideal": "node_modules/.bin/mocha Tests/Selenium/Payments/IdealTest.js --timeout 60000",
+    "test:upi": "node_modules/.bin/mocha Tests/Selenium/Payments/UpiTest.js --timeout 60000",
     "test:runner": "node Tests/Selenium/runner.js"
   },
   "private": true,

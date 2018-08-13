@@ -12,6 +12,7 @@ namespace WirecardElasticEngine\Components\Services;
 use Doctrine\ORM\EntityManagerInterface;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Components\Routing\RouterInterface;
+use WirecardElasticEngine\Components\Payments\AlipayPayment;
 use WirecardElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardElasticEngine\Components\Payments\IdealPayment;
 use WirecardElasticEngine\Components\Payments\Payment;
@@ -20,6 +21,7 @@ use WirecardElasticEngine\Components\Payments\PaypalPayment;
 use WirecardElasticEngine\Components\Payments\MasterpassPayment;
 use WirecardElasticEngine\Components\Payments\SepaPayment;
 use WirecardElasticEngine\Components\Payments\SofortPayment;
+use WirecardElasticEngine\Components\Payments\UnionpayInternationalPayment;
 use WirecardElasticEngine\Exception\UnknownPaymentException;
 use WirecardElasticEngine\WirecardElasticEngine;
 
@@ -135,12 +137,14 @@ class PaymentFactory
     private function getMappedPayments()
     {
         return [
-            CreditCardPayment::PAYMETHOD_IDENTIFIER => CreditCardPayment::class,
-            MasterpassPayment::PAYMETHOD_IDENTIFIER => MasterpassPayment::class,
-            IdealPayment::PAYMETHOD_IDENTIFIER      => IdealPayment::class,
-            PaypalPayment::PAYMETHOD_IDENTIFIER     => PaypalPayment::class,
-            SepaPayment::PAYMETHOD_IDENTIFIER       => SepaPayment::class,
-            SofortPayment::PAYMETHOD_IDENTIFIER     => SofortPayment::class,
+            CreditCardPayment::PAYMETHOD_IDENTIFIER            => CreditCardPayment::class,
+            MasterpassPayment::PAYMETHOD_IDENTIFIER            => MasterpassPayment::class,
+            AlipayPayment::PAYMETHOD_IDENTIFIER                => AlipayPayment::class,
+            IdealPayment::PAYMETHOD_IDENTIFIER                 => IdealPayment::class,
+            PaypalPayment::PAYMETHOD_IDENTIFIER                => PaypalPayment::class,
+            SepaPayment::PAYMETHOD_IDENTIFIER                  => SepaPayment::class,
+            SofortPayment::PAYMETHOD_IDENTIFIER                => SofortPayment::class,
+            UnionpayInternationalPayment::PAYMETHOD_IDENTIFIER => UnionpayInternationalPayment::class,
         ];
     }
 }
