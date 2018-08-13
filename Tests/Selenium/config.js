@@ -14,7 +14,7 @@ exports.config = {
     },
     payments: {
         ratepay: {
-            label: 'Wirecard Garantierter Kauf auf Rechnung'
+            label: 'Wirecard Kauf auf Rechnung mit Zahlungsgarantie'
         },
         paypal: {
             label: 'Wirecard PayPal',
