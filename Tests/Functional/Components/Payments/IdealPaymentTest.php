@@ -129,7 +129,7 @@ class IdealPaymentTest extends TestCase
                 'shop-system-name'    => 'Shopware',
                 'shop-system-version' => '___VERSION___',
                 'plugin-name'         => 'WirecardElasticEngine',
-                'plugin-version'      => '0.5.0',
+                'plugin-version'      => '1.0.0',
             ],
         ], $config->getShopHeader());
     }
