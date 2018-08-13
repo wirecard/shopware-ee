@@ -108,14 +108,6 @@ class MasterpassPaymentTest extends TestCase
         $this->assertInstanceOf(PaymentMethodConfig::class, $paymentMethod);
         $this->assertEquals('8bc8ed6d-81a8-43be-bd7b-75b008f89fa6', $paymentMethod->getMerchantAccountId());
         $this->assertEquals('2d96596b-9d10-4c98-ac47-4d56e22fd878', $paymentMethod->getSecret());
-        $this->assertEquals([
-            'headers' => [
-                'shop-system-name'    => 'Shopware',
-                'shop-system-version' => '___VERSION___',
-                'plugin-name'         => 'WirecardElasticEngine',
-                'plugin-version'      => '0.5.0',
-            ],
-        ], $config->getShopHeader());
     }
 
     public function testGetTransactionType()

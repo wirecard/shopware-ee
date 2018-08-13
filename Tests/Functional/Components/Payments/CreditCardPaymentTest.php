@@ -118,14 +118,15 @@ class CreditCardPaymentTest extends TestCase
         $this->assertEquals('53f2895a-e4de-4e82-a813-0d87a10e55e6', $methodConfig->getMerchantAccountId());
         $this->assertEquals('dbc5a498-9a66-43b9-bf1d-a618dd399684', $methodConfig->getSecret());
         $this->assertEquals('508b8896-b37d-4614-845c-26bf8bf2c948', $methodConfig->getThreeDMerchantAccountId());
+        $shopHeader = $config->getShopHeader();
         $this->assertEquals([
             'headers' => [
                 'shop-system-name'    => 'Shopware',
                 'shop-system-version' => '___VERSION___',
                 'plugin-name'         => 'WirecardElasticEngine',
-                'plugin-version'      => '1.0.0',
+                'plugin-version'      => $shopHeader['headers']['plugin-version'],
             ],
-        ], $config->getShopHeader());
+        ], $shopHeader);
     }
 
     public function testGetTransactionType()

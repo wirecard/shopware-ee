@@ -116,14 +116,6 @@ class RatepayInvoicePaymentTest extends TestCase
         $this->assertInstanceOf(PaymentMethodConfig::class, $paymentMethod);
         $this->assertEquals('fa02d1d4-f518-4e22-b42b-2abab5867a84', $paymentMethod->getMerchantAccountId());
         $this->assertEquals('dbc5a498-9a66-43b9-bf1d-a618dd399684', $paymentMethod->getSecret());
-        $this->assertEquals([
-            'headers' => [
-                'shop-system-name'    => 'Shopware',
-                'shop-system-version' => '___VERSION___',
-                'plugin-name'         => 'WirecardElasticEngine',
-                'plugin-version'      => '0.5.0',
-            ],
-        ], $config->getShopHeader());
     }
 
     public function testGetTransactionType()

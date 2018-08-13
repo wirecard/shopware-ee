@@ -108,14 +108,7 @@ class PaymentOnInvoicePaymentTest extends TestCase
         $this->assertInstanceOf(PaymentMethodConfig::class, $methodConfig);
         $this->assertEquals('105ab3e8-d16b-4fa0-9f1f-18dd9b390c94', $methodConfig->getMerchantAccountId());
         $this->assertEquals('2d96596b-9d10-4c98-ac47-4d56e22fd878', $methodConfig->getSecret());
-        $this->assertEquals([
-            'headers' => [
-                'shop-system-name'    => 'Shopware',
-                'shop-system-version' => '___VERSION___',
-                'plugin-name'         => 'WirecardElasticEngine',
-                'plugin-version'      => '0.5.0',
-            ],
-        ], $config->getShopHeader());
+
     }
 
     public function testGetTransactionType()

@@ -108,14 +108,6 @@ class UnionpayInternationalPaymentTest extends TestCase
         $this->assertInstanceOf(PaymentMethodConfig::class, $methodConfig);
         $this->assertEquals('c6e9331c-5c1f-4fc6-8a08-ef65ce09ddb0', $methodConfig->getMerchantAccountId());
         $this->assertEquals('16d85b73-79e2-4c33-932a-7da99fb04a9c', $methodConfig->getSecret());
-        $this->assertEquals([
-            'headers' => [
-                'shop-system-name'    => 'Shopware',
-                'shop-system-version' => '___VERSION___',
-                'plugin-name'         => 'WirecardElasticEngine',
-                'plugin-version'      => '0.5.0',
-            ],
-        ], $config->getShopHeader());
     }
 
     public function testGetTransactionType()
