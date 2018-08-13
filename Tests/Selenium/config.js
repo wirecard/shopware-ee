@@ -37,6 +37,13 @@ exports.config = {
             },
             password: 'wirecard'
         },
+        masterpass: {
+            label: 'Wirecard Masterpass',
+            fields: {
+                email: 'masterpass@mailadresse.net',
+                password: 'WirecardPass42'
+            }
+        },
         alipay: {
             label: 'Wirecard Alipay Cross-border',
             fields: {

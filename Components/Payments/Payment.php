@@ -165,7 +165,7 @@ abstract class Payment implements PaymentInterface
     /**
      * {@inheritdoc}
      */
-    public function getBackendTransaction($operation, $paymentMethod)
+    public function getBackendTransaction($operation, $paymentMethod, $transactionType)
     {
         return $this->getTransaction();
     }

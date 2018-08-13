@@ -18,6 +18,7 @@ use WirecardElasticEngine\Components\Payments\IdealPayment;
 use WirecardElasticEngine\Components\Payments\Payment;
 use WirecardElasticEngine\Components\Payments\PaymentInterface;
 use WirecardElasticEngine\Components\Payments\PaypalPayment;
+use WirecardElasticEngine\Components\Payments\MasterpassPayment;
 use WirecardElasticEngine\Components\Payments\SepaPayment;
 use WirecardElasticEngine\Components\Payments\SofortPayment;
 use WirecardElasticEngine\Components\Payments\UnionpayInternationalPayment;
@@ -136,8 +137,9 @@ class PaymentFactory
     private function getMappedPayments()
     {
         return [
-            CreditCardPayment::PAYMETHOD_IDENTIFIER => CreditCardPayment::class,
-            AlipayPayment::PAYMETHOD_IDENTIFIER     => AlipayPayment::class,
+            CreditCardPayment::PAYMETHOD_IDENTIFIER            => CreditCardPayment::class,
+            MasterpassPayment::PAYMETHOD_IDENTIFIER            => MasterpassPayment::class,
+            AlipayPayment::PAYMETHOD_IDENTIFIER                => AlipayPayment::class,
             IdealPayment::PAYMETHOD_IDENTIFIER                 => IdealPayment::class,
             PaypalPayment::PAYMETHOD_IDENTIFIER                => PaypalPayment::class,
             SepaPayment::PAYMETHOD_IDENTIFIER                  => SepaPayment::class,
