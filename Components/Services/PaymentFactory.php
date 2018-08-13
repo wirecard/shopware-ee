@@ -12,6 +12,7 @@ namespace WirecardElasticEngine\Components\Services;
 use Doctrine\ORM\EntityManagerInterface;
 use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Components\Routing\RouterInterface;
+use WirecardElasticEngine\Components\Payments\AlipayPayment;
 use WirecardElasticEngine\Components\Payments\CreditCardPayment;
 use WirecardElasticEngine\Components\Payments\IdealPayment;
 use WirecardElasticEngine\Components\Payments\Payment;
@@ -23,6 +24,7 @@ use WirecardElasticEngine\Components\Payments\PaymentOnInvoicePayment;
 use WirecardElasticEngine\Components\Payments\RatepayInvoicePayment;
 use WirecardElasticEngine\Components\Payments\SepaPayment;
 use WirecardElasticEngine\Components\Payments\SofortPayment;
+use WirecardElasticEngine\Components\Payments\UnionpayInternationalPayment;
 use WirecardElasticEngine\Exception\UnknownPaymentException;
 use WirecardElasticEngine\WirecardElasticEngine;
 
@@ -138,15 +140,17 @@ class PaymentFactory
     private function getMappedPayments()
     {
         return [
-            CreditCardPayment::PAYMETHOD_IDENTIFIER       => CreditCardPayment::class,
-            RatepayInvoicePayment::PAYMETHOD_IDENTIFIER   => RatepayInvoicePayment::class,
-            IdealPayment::PAYMETHOD_IDENTIFIER            => IdealPayment::class,
-            MasterpassPayment::PAYMETHOD_IDENTIFIER       => MasterpassPayment::class,
-            PaypalPayment::PAYMETHOD_IDENTIFIER           => PaypalPayment::class,
-            PaymentInAdvancePayment::PAYMETHOD_IDENTIFIER => PaymentInAdvancePayment::class,
-            PaymentOnInvoicePayment::PAYMETHOD_IDENTIFIER => PaymentOnInvoicePayment::class,
-            SepaPayment::PAYMETHOD_IDENTIFIER             => SepaPayment::class,
-            SofortPayment::PAYMETHOD_IDENTIFIER           => SofortPayment::class,
+            CreditCardPayment::PAYMETHOD_IDENTIFIER            => CreditCardPayment::class,
+            AlipayPayment::PAYMETHOD_IDENTIFIER                => AlipayPayment::class,
+            RatepayInvoicePayment::PAYMETHOD_IDENTIFIER        => RatepayInvoicePayment::class,
+            IdealPayment::PAYMETHOD_IDENTIFIER                 => IdealPayment::class,
+            MasterpassPayment::PAYMETHOD_IDENTIFIER            => MasterpassPayment::class,
+            PaypalPayment::PAYMETHOD_IDENTIFIER                => PaypalPayment::class,
+            PaymentInAdvancePayment::PAYMETHOD_IDENTIFIER      => PaymentInAdvancePayment::class,
+            PaymentOnInvoicePayment::PAYMETHOD_IDENTIFIER      => PaymentOnInvoicePayment::class,
+            SepaPayment::PAYMETHOD_IDENTIFIER                  => SepaPayment::class,
+            SofortPayment::PAYMETHOD_IDENTIFIER                => SofortPayment::class,
+            UnionpayInternationalPayment::PAYMETHOD_IDENTIFIER => UnionpayInternationalPayment::class,
         ];
     }
 
