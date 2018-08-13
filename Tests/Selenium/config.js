@@ -40,14 +40,6 @@ exports.config = {
             },
             password: 'wirecard'
         },
-        alipay: {
-            label: 'Wirecard Alipay Cross-border',
-            fields: {
-                email: 'alipaytest20091@gmail.com',
-                password: '111111',
-                paymentPasswordDigit: '1'
-            }
-        },
         masterpass: {
             label: 'Wirecard Masterpass',
             fields: {
@@ -82,13 +74,6 @@ exports.config = {
             label: 'Wirecard iDEAL',
             fields: {
                 bank: 'INGBNL2A'
-            }
-        },
-        upi: {
-            label: 'Wirecard UnionPay International',
-            fields: {
-                last_name: 'Lastname',
-                account_number: '6210943123456786'
             }
         }
     }
