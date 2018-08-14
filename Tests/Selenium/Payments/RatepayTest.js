@@ -8,13 +8,14 @@
 
 /* eslint-env mocha */
 
-const { By } = require('selenium-webdriver');
+const { By, until } = require('selenium-webdriver');
 const { config } = require('../config');
 const {
     loginWithExampleAccount,
     checkConfirmationPage,
     addProductToCartAndGotoCheckout,
     selectPaymentMethod,
+    waitUntilOverlayIsStale,
     getDriver
 } = require('../common');
 
@@ -26,7 +27,17 @@ describe('Guaranteed Invoice by Wirecard test', () => {
     it('should check the ratepay invoice process', async () => {
         await loginWithExampleAccount(driver);
         await addProductToCartAndGotoCheckout(driver, '/genusswelten/tees-und-zubeh/tee-zubehoer/24/glas-teekaennchen');
-        await addProductToCartAndGotoCheckout(driver, '/genusswelten/tees-und-zubeh/tee-zubehoer/24/glas-teekaennchen');
+
+        console.log('change shipping address');
+        await driver.findElement(By.css('.information--panel-item-shipping a[data-address-selection="true"]')).click();
+        await waitUntilOverlayIsStale(driver, By.className('js--overlay'));
+        console.log('wait for .address-manager--selection-form');
+        await driver.wait(until.elementLocated(By.css('.address-manager--selection-form')));
+        await driver.findElement(By.css('.address-manager--selection-form button')).click();
+
+        console.log('wait for .choose-different-address');
+        await driver.wait(until.elementLocated(By.className('choose-different-address')));
+
         await selectPaymentMethod(driver, paymentLabel);
 
         // Select birthday
