@@ -9,5 +9,12 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/3f2976918a9349468eaf1320076d143b)](https://www.codacy.com/app/Wirecard/shopware-ee?utm_source=github.com&utm_medium=referral&utm_content=wirecard/shopware-ee&utm_campaign=Badge_Coverage)
 
 ***
-**This extension is in development. Please do not use yet** 
+## General information 
+Before proceeding, please read [general information](https://github.com/wirecard/shopware-ee/wiki/Wirecard-Shop-Plugins-General-Information), as it provides information on Wirecard shop plugins functionality and features.
+
 ***
+## Shopware documentation - Wiki
+
+[Shopware Wiki](https://github.com/wirecard/shopware-ee/wiki) provides detailed technical documentation.
+It lists all available [payment methods](https://github.com/wirecard/shopware-ee/wiki/Wirecard-Shop-Plugins-General-Information#supported-payment-methods) and post-processing operations.
+Furthermore, it includes extensive instructions how to [install](https://github.com/wirecard/shopware-ee/wiki/Installation) and [configure](https://github.com/wirecard/shopware-ee/wiki/Configuration).
