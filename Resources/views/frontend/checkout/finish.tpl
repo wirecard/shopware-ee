@@ -26,7 +26,7 @@
     {$smarty.block.parent}
 {/block}
 
-{block name='frontend_checkout_finish_information_wrapper'}
+{block name='frontend_checkout_finish_teaser'}
     {if $wirecardElasticEngineBankData}
         <div class="panel has--border wirecardee--bankdata is--rounded finish--teaser">
             <div class="panel--title primary is--underline">
