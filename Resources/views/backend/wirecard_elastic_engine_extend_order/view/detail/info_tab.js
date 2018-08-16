@@ -442,17 +442,18 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
             },
             success: function (response) {
                 var data = Ext.decode(response.responseText);
-                var message = {
-                    title: me.snippets.operations.successTitle,
-                    text: me.snippets.operations.successMessage,
-                    width: 400
-                };
-
-                if (!data.success) {
-                    message.title = me.snippets.operations.errorTitle;
-                    message.text = data.message;
+                if (data.success) {
+                    Shopware.Notification.createGrowlMessage(
+                        me.snippets.operations.successTitle,
+                        me.snippets.operations.successMessage
+                    );
+                } else {
+                    Shopware.Notification.createStickyGrowlMessage({
+                        title: me.snippets.operations.errorTitle,
+                        text: data.message,
+                        width: 400
+                    });
                 }
-                Shopware.Notification.createStickyGrowlMessage(message);
                 me.loadStore();
                 if (Ext.getCmp('wirecardee-transaction-amount-window')) {
                     Ext.getCmp('wirecardee-transaction-amount-window').close();

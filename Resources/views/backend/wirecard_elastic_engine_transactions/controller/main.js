@@ -50,8 +50,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.controller.Main', {
         if (!form.isValid()) {
             Shopware.Notification.createGrowlMessage(
                 '{s name="Title" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}',
-                '{s name="FormValidationError" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}',
-                me.mainWindow.title
+                '{s name="FormValidationError" namespace="backend/wirecard_elastic_engine/support_mail"}{/s}'
             );
             me.mainWindow.setLoading(false);
             return;
