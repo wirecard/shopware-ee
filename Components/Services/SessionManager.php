@@ -73,7 +73,6 @@ class SessionManager
         if (! $this->session->get(self::DEVICE_FINGERPRINT_ID)) {
             $this->session->offsetSet(self::DEVICE_FINGERPRINT_ID, md5($maid . '_' . microtime()));
         }
-
         return $this->session->get(self::DEVICE_FINGERPRINT_ID);
     }
 
@@ -90,5 +89,61 @@ class SessionManager
         if ($this->session->offsetExists(self::DEVICE_FINGERPRINT_ID)) {
             $this->session->offsetUnset(self::DEVICE_FINGERPRINT_ID);
         }
+    }
+
+    /**
+     * @return int
+     *
+     * @since 1.1.0
+     */
+    public function getUserId()
+    {
+        return $this->session->offsetGet('sUserId');
+    }
+
+    /**
+     * @return array
+     *
+     * @since 1.1.0
+     */
+    public function getUserInfo()
+    {
+        return $this->session->offsetGet('userInfo');
+    }
+
+    /**
+     * @return array
+     *
+     * @since 1.1.0
+     */
+    public function getOrderVariables()
+    {
+        return $this->session->offsetGet('sOrderVariables');
+    }
+
+    /**
+     * @return array
+     *
+     * @since 1.1.0
+     */
+    public function getOrderBilldingAddress()
+    {
+        $orderVariables = $this->getOrderVariables();
+        return isset($orderVariables['sUserData']['billingaddress'])
+            ? $orderVariables['sUserData']['billingaddress']
+            : [];
+    }
+
+    /**
+     * @return array
+     *
+     * @since 1.1.0
+     */
+    public function getOrderShippingAddress()
+    {
+        $orderVariables = $this->getOrderVariables();
+        return isset($orderVariables['sUserData']['shippingaddress'])
+            ? $orderVariables['sUserData']['shippingaddress']
+            : [];
     }
 }

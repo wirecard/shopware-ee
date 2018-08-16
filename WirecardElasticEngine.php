@@ -14,6 +14,7 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once(__DIR__ . '/vendor/autoload.php');
 }
 
+use Shopware\Models\Config\Element;
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\ActivateContext;
 use Shopware\Components\Plugin\Context\DeactivateContext;
@@ -23,6 +24,7 @@ use Shopware\Components\Plugin\Context\UpdateContext;
 use Shopware\Models\Payment\Payment;
 use Shopware\Models\Plugin\Plugin as PluginModel;
 use WirecardElasticEngine\Components\Services\PaymentFactory;
+use WirecardElasticEngine\Models\CreditCardVault;
 use WirecardElasticEngine\Models\Transaction;
 use Doctrine\ORM\Tools\SchemaTool;
 
@@ -46,6 +48,7 @@ class WirecardElasticEngine extends Plugin
     {
         $this->registerPayments($context->getPlugin());
         $this->updateDatabase();
+        $this->setDefaultConfigValues();
     }
 
     /**
@@ -75,6 +78,7 @@ class WirecardElasticEngine extends Plugin
 
         $this->updatePayments($context->getPlugin());
         $this->updateDatabase();
+        $this->setDefaultConfigValues();
     }
 
     /**
@@ -115,6 +119,7 @@ class WirecardElasticEngine extends Plugin
         $schemaTool->updateSchema(
             [
                 $entityManager->getClassMetadata(Transaction::class),
+                $entityManager->getClassMetadata(CreditCardVault::class),
             ],
             true
         );
@@ -209,6 +214,29 @@ class WirecardElasticEngine extends Plugin
             $this->container->get('events')
         );
         return $paymentFactory->getSupportedPayments();
+    }
+
+    /**
+     * Set default values for config options (Shopware does not allow to set default values for multiselects)
+     *
+     * @since 1.0.0
+     */
+    private function setDefaultConfigValues()
+    {
+        $em       = $this->container->get('models');
+        $defaults = [
+            'wirecardElasticEngineRatepayInvoiceAcceptedCurrencies' => [1], // EUR
+            'wirecardElasticEngineRatepayInvoiceShippingCountries'  => [2, 23, 26], // DE, AT, CH
+            'wirecardElasticEngineRatepayInvoiceBillingCountries'   => [2, 23, 26], // DE, AT, CH
+        ];
+        foreach ($defaults as $name => $value) {
+            /** @var Element $element */
+            $element = $em->getRepository(Element::class)->findOneBy(['name' => $name]);
+            if ($element && $element->getValue() === '-') {
+                $element->setValue($value);
+                $em->flush();
+            }
+        }
     }
 
     /**

@@ -34,6 +34,7 @@ use WirecardElasticEngine\Exception\BasketException;
 use WirecardElasticEngine\Exception\CouldNotSaveOrderException;
 use WirecardElasticEngine\Exception\UnknownActionException;
 use WirecardElasticEngine\Exception\UnknownPaymentException;
+use WirecardElasticEngine\Models\CreditCardVault;
 use WirecardElasticEngine\Models\Transaction;
 use WirecardElasticEngine\WirecardElasticEngine;
 
@@ -187,7 +188,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                     $this->container->getParameterBag(),
                     $this->getCurrencyShortName()
                 ), $this->getLogger()),
-                $request
+                $request,
+                $this->getSessionManager()
             );
 
             $action = $response instanceof SuccessResponse
@@ -423,6 +425,32 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     public function failureAction()
     {
         return $this->handleError(ErrorAction::FAILURE_RESPONSE, 'Failure response');
+    }
+
+    /**
+     * Delete credit card token from vault
+     *
+     * @since 1.1.0
+     */
+    public function deleteCreditCardTokenAction()
+    {
+        $em      = $this->container->get('models');
+        $userId  = $this->container->get('session')->offsetGet('sUserId');
+        $tokenId = $this->Request()->getParam('token');
+
+        $creditCardVault = $em->getRepository(CreditCardVault::class)->findOneBy([
+            'userId' => $userId,
+            'token'  => $tokenId,
+        ]);
+        if ($creditCardVault) {
+            $em->remove($creditCardVault);
+            $em->flush();
+        }
+
+        return $this->redirect([
+            self::ROUTER_CONTROLLER => 'checkout',
+            self::ROUTER_ACTION     => 'confirm',
+        ]);
     }
 
     /**

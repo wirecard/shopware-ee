@@ -35,6 +35,9 @@ class CreditCardPaymentConfigTest extends TestCase
         $this->assertNull($config->getThreeDMinLimitCurrency());
         $this->assertNull($config->getSslMaxLimit());
         $this->assertNull($config->getSslMaxLimitCurrency());
+        $this->assertNull($config->isVaultEnabled());
+        $this->assertNull($config->allowAddressChanges());
+        $this->assertNull($config->useThreeDOnTokens());
 
         $config->setThreeDMAID('three3d-maid');
         $config->setThreeDSecret('three3d-secret');
@@ -42,6 +45,9 @@ class CreditCardPaymentConfigTest extends TestCase
         $config->setThreeDMinLimitCurrency('EUR');
         $config->setSslMaxLimit(200.0);
         $config->setSslMaxLimitCurrency('USD');
+        $config->setVaultEnabled(true);
+        $config->setAllowAddressChanges(true);
+        $config->setThreeDUsageOnTokens(true);
 
         $this->assertEquals('three3d-maid', $config->getThreeDMAID());
         $this->assertEquals('three3d-secret', $config->getThreeDSecret());
@@ -49,6 +55,9 @@ class CreditCardPaymentConfigTest extends TestCase
         $this->assertEquals('EUR', $config->getThreeDMinLimitCurrency());
         $this->assertEquals(200.0, $config->getSslMaxLimit());
         $this->assertEquals('USD', $config->getSslMaxLimitCurrency());
+        $this->assertTrue($config->isVaultEnabled());
+        $this->assertTrue($config->allowAddressChanges());
+        $this->assertTrue($config->useThreeDOnTokens());
 
         $config->setThreeDMinLimit('500,0');
         $config->setSslMaxLimit('2000,0');
@@ -67,6 +76,9 @@ class CreditCardPaymentConfigTest extends TestCase
             'threeDMinLimitCurrency' => 'EUR',
             'sslMaxLimit'            => '2000,0',
             'sslMaxLimitCurrency'    => 'USD',
+            'vaultEnabled'           => true,
+            'allowAddressChanges'    => true,
+            'threeDUsageOnTokens'    => true,
         ], $config->toArray());
     }
 }

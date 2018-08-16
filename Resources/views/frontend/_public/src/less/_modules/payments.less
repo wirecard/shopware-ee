@@ -11,6 +11,53 @@
         width: 100%;
         .unitize(margin-bottom, 10);
     }
+    .list--radio {
+        .unitize-margin(0, 0, 21, 0);
+        .block-group {
+            border-bottom: 1px solid @border-color;
+            .unitize-padding(15, 0, 10);
+        }
+        .column--radio {
+            width: 10%;
+        }
+        .column--label {
+            width: 70%;
+            .wirecardee--card-info {
+                &::before {
+                    content: "–";
+                    .unitize-margin(0, 5);
+                }
+            }
+        }
+        .column--button {
+            width: 20%;
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+        .wirecardee--disabled-card {
+            .column--label {
+                font-style: italic;
+                text-decoration: line-through;
+
+                .wircardee--disabled-note {
+                    display: inline-block;
+                    font-style: normal;
+                    text-decoration: none;
+                    .unitize(font-size, 12);
+                    .unitize-margin(0, 50);
+                }
+            }
+        }
+    }
+    .title {
+        font-weight: 700;
+        color: @brand-secondary;
+    }
+    .column--label {
+        display: inline-block;
+    }
 }
 
 .wirecardee--payments {
@@ -18,4 +65,8 @@
         .unitize(padding-left, 40);
         .unitize(height, 50);
     }
+}
+
+.wirecardee--error-box {
+    display: none;
 }

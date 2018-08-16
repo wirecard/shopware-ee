@@ -9,6 +9,7 @@
 
 namespace WirecardElasticEngine\Tests\Unit\Components\Payments;
 
+use Shopware\Models\Order\Order;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
@@ -17,12 +18,14 @@ use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\Transaction\SepaDirectDebitTransaction;
+use Wirecard\PaymentSdk\Transaction\Transaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\PaymentConfig;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Payments\SepaPayment;
+use WirecardElasticEngine\Components\Services\SessionManager;
 use WirecardElasticEngine\Exception\InsufficientDataException;
 use WirecardElasticEngine\Exception\UnknownTransactionTypeException;
 use WirecardElasticEngine\Tests\Unit\PaymentTestCase;
@@ -75,21 +78,37 @@ class SepaPaymentTest extends PaymentTestCase
 
     public function testGetBackendTransaction()
     {
-        $transaction = $this->payment->getBackendTransaction(Operation::REFUND, SepaDirectDebitTransaction::NAME);
+        $sepa        = SepaDirectDebitTransaction::NAME;
+        $order       = new Order();
+        $transaction = $this->payment->getBackendTransaction($order, Operation::REFUND, $sepa, null);
         $this->assertInstanceOf(SepaDirectDebitTransaction::class, $transaction);
         $this->assertNotSame($transaction, $this->payment->getTransaction());
         $this->assertNotSame($transaction, $this->payment->getBackendTransaction(
+            new Order(),
             Operation::REFUND,
-            SepaDirectDebitTransaction::NAME
+            $sepa,
+            null
         ));
 
-        $transaction = $this->payment->getBackendTransaction(Operation::CREDIT, SepaDirectDebitTransaction::NAME);
+        $typeCredit  = Transaction::TYPE_CREDIT;
+        $transaction = $this->payment->getBackendTransaction($order, Operation::CREDIT, $sepa, $typeCredit);
+        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
+        $transaction = $this->payment->getBackendTransaction($order, null, $sepa, $typeCredit);
+        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
+        $transaction = $this->payment->getBackendTransaction($order, Operation::CREDIT, $sepa, null);
         $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
 
-        $transaction = $this->payment->getBackendTransaction(Operation::REFUND, SepaCreditTransferTransaction::NAME);
+        $sepacredit  = SepaCreditTransferTransaction::NAME;
+        $transaction = $this->payment->getBackendTransaction($order, Operation::REFUND, $sepacredit, null);
         $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
 
-        $transaction = $this->payment->getBackendTransaction(Operation::CREDIT, SepaCreditTransferTransaction::NAME);
+        $transaction = $this->payment->getBackendTransaction($order, null, $sepacredit, $typeCredit);
+        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
+        $transaction = $this->payment->getBackendTransaction($order, Operation::CREDIT, $sepacredit, $typeCredit);
+        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
+        $transaction = $this->payment->getBackendTransaction($order, null, $sepacredit, null);
+        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
+        $transaction = $this->payment->getBackendTransaction($order, Operation::CREDIT, null, null);
         $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
     }
 
@@ -235,6 +254,8 @@ class SepaPaymentTest extends PaymentTestCase
 
     public function testGetAdditionalViewAssignments()
     {
+        $sessionManager = $this->createMock(SessionManager::class);
+
         $this->assertInstanceOf(AdditionalViewAssignmentsInterface::class, $this->payment);
         $this->assertEquals([
             'method'          => 'wirecard_elastic_engine_sepa',
@@ -242,6 +263,6 @@ class SepaPaymentTest extends PaymentTestCase
             'creditorId'      => null,
             'creditorName'    => null,
             'creditorAddress' => null,
-        ], $this->payment->getAdditionalViewAssignments());
+        ], $this->payment->getAdditionalViewAssignments($sessionManager));
     }
 }

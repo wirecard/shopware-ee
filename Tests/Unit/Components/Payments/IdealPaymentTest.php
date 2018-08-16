@@ -9,6 +9,7 @@
 
 namespace WirecardElasticEngine\Tests\Unit\Components\Payments;
 
+use Shopware\Models\Order\Order;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
@@ -18,12 +19,14 @@ use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\IdealTransaction;
 use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
+use Wirecard\PaymentSdk\Transaction\Transaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\PaymentConfig;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Payments\IdealPayment;
+use WirecardElasticEngine\Components\Services\SessionManager;
 use WirecardElasticEngine\Tests\Unit\PaymentTestCase;
 use WirecardElasticEngine\WirecardElasticEngine;
 
@@ -74,27 +77,35 @@ class IdealPaymentTest extends PaymentTestCase
 
     public function testGetBackendTransaction()
     {
-        $transaction = $this->payment->getBackendTransaction(Operation::REFUND, IdealTransaction::NAME);
+        $order       = new Order();
+        $transaction = $this->payment->getBackendTransaction($order, Operation::REFUND, IdealTransaction::NAME, null);
         $this->assertInstanceOf(IdealTransaction::class, $transaction);
         $this->assertNotSame($transaction, $this->payment->getTransaction());
         $this->assertNotSame($transaction, $this->payment->getBackendTransaction(
+            new Order(),
             Operation::REFUND,
-            IdealTransaction::NAME
+            IdealTransaction::NAME,
+            Transaction::TYPE_DEBIT
         ));
 
-        $transaction = $this->payment->getBackendTransaction(Operation::CREDIT, IdealTransaction::NAME);
+        $ideal       = IdealTransaction::NAME;
+        $typeCredit  = Transaction::TYPE_CREDIT;
+        $transaction = $this->payment->getBackendTransaction($order, null, $ideal, $typeCredit);
+        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
+        $transaction = $this->payment->getBackendTransaction($order, Operation::CREDIT, $ideal, null);
         $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
 
-        $transaction = $this->payment->getBackendTransaction(Operation::CANCEL, IdealTransaction::NAME);
+        $transaction = $this->payment->getBackendTransaction($order, Operation::CANCEL, $ideal, null);
         $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
 
-        $transaction = $this->payment->getBackendTransaction(Operation::REFUND, SepaCreditTransferTransaction::NAME);
+        $sepaCredit  = SepaCreditTransferTransaction::NAME;
+        $transaction = $this->payment->getBackendTransaction($order, Operation::REFUND, $sepaCredit, null);
         $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
 
-        $transaction = $this->payment->getBackendTransaction(Operation::CREDIT, SepaCreditTransferTransaction::NAME);
+        $transaction = $this->payment->getBackendTransaction($order, Operation::CREDIT, $sepaCredit, $typeCredit);
         $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
 
-        $transaction = $this->payment->getBackendTransaction(Operation::CANCEL, SepaCreditTransferTransaction::NAME);
+        $transaction = $this->payment->getBackendTransaction($order, Operation::CANCEL, $sepaCredit, null);
         $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
     }
 
@@ -196,12 +207,14 @@ class IdealPaymentTest extends PaymentTestCase
 
     public function testGetAdditionalViewAssignments()
     {
+        $sessionManager = $this->createMock(SessionManager::class);
+
         $idealBic = new \ReflectionClass(IdealBic::class);
 
         $this->assertInstanceOf(AdditionalViewAssignmentsInterface::class, $this->payment);
         $this->assertEquals([
             'method'     => 'wirecard_elastic_engine_ideal',
             'idealBanks' => $idealBic->getConstants(),
-        ], $this->payment->getAdditionalViewAssignments());
+        ], $this->payment->getAdditionalViewAssignments($sessionManager));
     }
 }

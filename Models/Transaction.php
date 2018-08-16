@@ -20,6 +20,8 @@ use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Services\TransactionManager;
 
 /**
+ * @package WirecardElasticEngine\Models
+ *
  * @ORM\Entity
  * @ORM\Table(name="wirecard_elastic_engine_transactions")
  *
@@ -370,6 +372,12 @@ class Transaction extends ModelEntity
         }
 
         $this->response = $response->getData();
+
+        // provider-transaction-reference-id can also be present in responses besides SuccessResponse, but we dont have
+        // a getter there.
+        if (! $this->providerTransactionReference && isset($this->response['provider-transaction-reference-id'])) {
+            $this->providerTransactionReference = $this->response['provider-transaction-reference-id'];
+        }
     }
 
     /**

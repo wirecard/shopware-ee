@@ -11,9 +11,10 @@ namespace WirecardElasticEngine\Components\Payments\Contracts;
 
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\TransactionService;
+use WirecardElasticEngine\Components\Services\SessionManager;
 
 /**
- * @package WirecardElasticEngine\Components\Payments\Interfaces
+ * @package WirecardElasticEngine\Components\Payments\Contracts
  *
  * @since   1.0.0
  */
@@ -26,11 +27,16 @@ interface ProcessReturnInterface
      *
      * @param TransactionService                  $transactionService
      * @param \Enlight_Controller_Request_Request $request
+     * @param SessionManager                      $sessionManager
      *
      * @return Response|null
+     *
+     * @since 1.1.0 Added $sessionManager
+     * @since 1.0.0
      */
     public function processReturn(
         TransactionService $transactionService,
-        \Enlight_Controller_Request_Request $request
+        \Enlight_Controller_Request_Request $request,
+        SessionManager $sessionManager
     );
 }

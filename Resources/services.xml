@@ -76,6 +76,7 @@
             <argument>%wirecard_elastic_engine.plugin_dir%</argument>
             <argument type="service" id="template"/>
             <argument type="service" id="wirecard_elastic_engine.payment_factory"/>
+            <argument type="service" id="models"/>
             <tag name="shopware.event_subscriber"/>
         </service>
         <service id="wirecard_elastic_engine.subscriber.backend"

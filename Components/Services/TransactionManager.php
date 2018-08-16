@@ -16,6 +16,7 @@ use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
 use Wirecard\PaymentSdk\Response\Response;
 use Wirecard\PaymentSdk\Response\SuccessResponse;
+use Wirecard\PaymentSdk\Transaction\PoiPiaTransaction;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Exception\InitialTransactionNotFoundException;
 use WirecardElasticEngine\Models\Transaction;
@@ -125,6 +126,17 @@ class TransactionManager
         $transaction->setPaymentUniqueId($initialTransaction->getPaymentUniqueId());
         $transaction->setOrderNumber($initialTransaction->getOrderNumber());
         $transaction->setResponse($response);
+
+        // POI/PIA: Set status message, if PTRID of initial transaction and notification transaction do not match
+        $expectReference = $initialTransaction->getProviderTransactionReference();
+        $actualReference = $transaction->getProviderTransactionReference();
+        if ($transaction->getPaymentMethod() === PoiPiaTransaction::NAME && $expectReference !== $actualReference) {
+            $transaction->setStatusMessage(
+                "Provider Transaction Reference ID mismatch: " .
+                ($expectReference ? ("Expected '$expectReference', got '$actualReference'") : "'$actualReference'")
+            );
+        }
+
         $transaction = $this->persist($transaction);
 
         $parentTransaction = $this->em->getRepository(Transaction::class)->findOneBy([
@@ -159,16 +171,14 @@ class TransactionManager
         $transaction->setPaymentUniqueId($initialTransaction->getPaymentUniqueId());
         $transaction->setOrderNumber($initialTransaction->getOrderNumber());
         $transaction->setResponse($response);
-
         $transaction = $this->persist($transaction);
 
-        $repo              = $this->em->getRepository(Transaction::class);
-        $parentTransaction = $repo->findOneBy([
+        $repo               = $this->em->getRepository(Transaction::class);
+        $parentTransactions = $repo->findBy([
             'transactionId' => $transaction->getParentTransactionId(),
             'type'          => Transaction::TYPE_NOTIFY,
         ]);
-
-        if (! $parentTransaction) {
+        if (! count($parentTransactions)) {
             return $transaction;
         }
 
@@ -176,16 +186,15 @@ class TransactionManager
             'parentTransactionId' => $transaction->getParentTransactionId(),
             'transactionType'     => $transaction->getTransactionType(),
         ]);
-
-        $totalAmount = (float)$parentTransaction->getAmount();
-
-        foreach ($childTransactions as $childTransaction) {
-            $totalAmount -= (float)$childTransaction->getAmount();
-        }
-
-        if ($totalAmount <= 0) {
-            $parentTransaction->setState(Transaction::STATE_CLOSED);
-            $this->em->flush();
+        foreach ($parentTransactions as $parentTransaction) {
+            $totalAmount = (float)$parentTransaction->getAmount();
+            foreach ($childTransactions as $childTransaction) {
+                $totalAmount -= (float)$childTransaction->getAmount();
+            }
+            if ($totalAmount <= 0) {
+                $parentTransaction->setState(Transaction::STATE_CLOSED);
+                $this->em->flush();
+            }
         }
         return $transaction;
     }
@@ -242,40 +251,52 @@ class TransactionManager
     }
 
     /**
-     * @param string|null $parentTransactionId
-     * @param string|null $requestId
+     * @param string|null      $parentTransactionId
+     * @param string|null      $requestId
+     * @param Transaction|null $previousTransaction
      *
      * @return Transaction|null
      *
+     * @since 1.1.0 Added $previousTransaction
      * @since 1.0.0
      */
-    private function findInitialTransaction($parentTransactionId, $requestId)
+    private function findInitialTransaction($parentTransactionId, $requestId, Transaction $previousTransaction = null)
     {
         $repo = $this->em->getRepository(Transaction::class);
         if ($parentTransactionId) {
             $transaction = $repo->findOneBy(['transactionId' => $parentTransactionId]);
             if ($transaction) {
-                return $this->returnInitialTransaction($transaction);
+                return $this->returnInitialTransaction($transaction, $previousTransaction);
             }
         }
         if (! $requestId || ! ($transaction = $repo->findOneBy(['requestId' => $requestId]))) {
             return null;
         }
-        return $this->returnInitialTransaction($transaction);
+        return $this->returnInitialTransaction($transaction, $previousTransaction);
     }
 
     /**
-     * @param Transaction $transaction
+     * @param Transaction      $transaction
+     * @param Transaction|null $previousTransaction
      *
      * @return Transaction|null
      *
+     * @since 1.1.0 Added $previousTransaction
      * @since 1.0.0
      */
-    private function returnInitialTransaction(Transaction $transaction)
+    private function returnInitialTransaction(Transaction $transaction, Transaction $previousTransaction = null)
     {
         if (! $transaction->getParentTransactionId() && $transaction->isInitial()) {
             return $transaction;
         }
-        return $this->findInitialTransaction($transaction->getParentTransactionId(), $transaction->getRequestId());
+        // loop detection
+        if ($transaction === $previousTransaction) {
+            return null;
+        }
+        return $this->findInitialTransaction(
+            $transaction->getParentTransactionId(),
+            $transaction->getRequestId(),
+            $transaction
+        );
     }
 }

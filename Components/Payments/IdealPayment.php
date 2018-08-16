@@ -9,6 +9,7 @@
 
 namespace WirecardElasticEngine\Components\Payments;
 
+use Shopware\Models\Order\Order;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
@@ -18,11 +19,13 @@ use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\Transaction\IdealTransaction;
+use Wirecard\PaymentSdk\Transaction\Transaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\IdealPaymentConfig;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Components\Services\SessionManager;
 
 /**
  * @package WirecardElasticEngine\Components\Payments
@@ -78,18 +81,22 @@ class IdealPayment extends Payment implements ProcessPaymentInterface, Additiona
      * If the paymentMethod is 'sepacredit' or a 'credit'/'cancel' operation is requested, we need a
      * SepaCreditTransferTransaction instead of IdealTransaction for this payment method.
      *
+     * @param Order       $order
      * @param string|null $operation
      * @param string|null $paymentMethod
+     * @param string|null $transactionType
      *
      * @return IdealTransaction|SepaCreditTransferTransaction
      *
+     * @since 1.1.0 Added $order and $transactionType
      * @since 1.0.0
      */
-    public function getBackendTransaction($operation, $paymentMethod)
+    public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType)
     {
         if ($paymentMethod === SepaCreditTransferTransaction::NAME
             || $operation === Operation::CREDIT
             || $operation === Operation::CANCEL
+            || $transactionType === Transaction::TYPE_CREDIT
         ) {
             return new SepaCreditTransferTransaction();
         }
@@ -148,7 +155,7 @@ class IdealPayment extends Payment implements ProcessPaymentInterface, Additiona
     /**
      * {@inheritdoc}
      */
-    public function getAdditionalViewAssignments()
+    public function getAdditionalViewAssignments(SessionManager $sessionManager)
     {
         $idealBic = new \ReflectionClass(IdealBic::class);
 

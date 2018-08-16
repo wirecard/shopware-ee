@@ -9,6 +9,7 @@
 
 namespace WirecardElasticEngine\Tests\Unit\Components\Payments;
 
+use Shopware\Models\Order\Order;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
@@ -17,6 +18,7 @@ use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\Transaction\SepaCreditTransferTransaction;
 use Wirecard\PaymentSdk\Transaction\SofortTransaction;
+use Wirecard\PaymentSdk\Transaction\Transaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\PaymentConfig;
@@ -72,27 +74,41 @@ class SofortPaymentTest extends PaymentTestCase
 
     public function testGetBackendTransaction()
     {
-        $transaction = $this->payment->getBackendTransaction(Operation::REFUND, SofortTransaction::NAME);
+        $sofort      = SofortTransaction::NAME;
+        $transaction = $this->payment->getBackendTransaction(new Order(), Operation::REFUND, $sofort, null);
         $this->assertInstanceOf(SofortTransaction::class, $transaction);
         $this->assertNotSame($transaction, $this->payment->getTransaction());
         $this->assertNotSame($transaction, $this->payment->getBackendTransaction(
+            new Order(),
             Operation::REFUND,
-            SofortTransaction::NAME
+            $sofort,
+            null
         ));
 
-        $transaction = $this->payment->getBackendTransaction(Operation::CREDIT, SofortTransaction::NAME);
+        $order = new Order();
+        $transaction = $this->payment->getBackendTransaction($order, null, $sofort, Transaction::TYPE_CREDIT);
+        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
+        $transaction = $this->payment->getBackendTransaction($order, Operation::CREDIT, $sofort, null);
         $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
 
-        $transaction = $this->payment->getBackendTransaction(Operation::CANCEL, SofortTransaction::NAME);
+        $transaction = $this->payment->getBackendTransaction($order, Operation::CANCEL, $sofort, null);
+        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
+        $transaction = $this->payment->getBackendTransaction($order, Operation::CANCEL, null, null);
         $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
 
-        $transaction = $this->payment->getBackendTransaction(Operation::REFUND, SepaCreditTransferTransaction::NAME);
+        $sepacredit  = SepaCreditTransferTransaction::NAME;
+        $transaction = $this->payment->getBackendTransaction($order, Operation::REFUND, $sepacredit, null);
         $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
 
-        $transaction = $this->payment->getBackendTransaction(Operation::CREDIT, SepaCreditTransferTransaction::NAME);
+        $transaction = $this->payment->getBackendTransaction($order, null, $sepacredit, Transaction::TYPE_CREDIT);
         $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
-
-        $transaction = $this->payment->getBackendTransaction(Operation::CANCEL, SepaCreditTransferTransaction::NAME);
+        $transaction = $this->payment->getBackendTransaction($order, Operation::CREDIT, $sepacredit, Transaction::TYPE_CREDIT);
+        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
+        $transaction = $this->payment->getBackendTransaction($order, null, $sepacredit, null);
+        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
+        $transaction = $this->payment->getBackendTransaction($order, Operation::CREDIT, null, null);
+        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
+        $transaction = $this->payment->getBackendTransaction($order, Operation::CANCEL, $sepacredit, null);
         $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
     }
 

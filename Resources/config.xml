@@ -5,7 +5,7 @@
  * https://github.com/wirecard/shopware-ee/blob/master/_TERMS_OF_USE
  * - License can be found under:
  * https://github.com/wirecard/shopware-ee/blob/master/LICENSE
--->
+ -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.4/engine/Shopware/Components/Plugin/schema/config.xsd">
     <elements>
@@ -221,6 +221,42 @@ function (button) {
             <description lang="de">Leer lassen für Standard Shop Währung.</description>
             <description lang="en">Leave blank for default shop currency.</description>
         </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineCreditCardEnableVault</name>
+            <label lang="de">[Kreditkarte] One-click-checkout aktivieren</label>
+            <label lang="en">[Credit Card] Enable One-click-checkout</label>
+            <value>false</value>
+            <description lang="de">
+                Kreditkarten können gespeichert und später wieder verwendet werden.
+            </description>
+            <description lang="en">
+                Credit Cards can be saved for further use without re-entering credit card details.
+            </description>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineCreditCardAllowAddressChanges</name>
+            <label lang="de">[Kreditkarte] One-click-checkout mit anderer Adresse zulassen</label>
+            <label lang="en">[Credit Card] Allow One-click-checkout with different address</label>
+            <value>false</value>
+            <description lang="de">
+                Kreditkarten können wieder verwendet werden, auch wenn die Rechnungs- oder Lieferadresse geändert wurde.
+            </description>
+            <description lang="en">
+                Credit card One-click-checkout is allowed, even if the billing or shipping address has been changed.
+            </description>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineCreditCardThreeDUsageOnTokens</name>
+            <label lang="de">[Kreditkarte] 3-D Secure für One-click-checkout aktivieren</label>
+            <label lang="en">[Credit Card] Enable 3-D Secure for One-click-checkout</label>
+            <value>true</value>
+            <description lang="de">
+                3-D Secure bei One-click-checkout Zahlungen mit Kreditkarte aktivieren.
+            </description>
+            <description lang="en">
+                Enable 3-D Secure for One-click-checkout payments with Credit Card.
+            </description>
+        </element>
         <element type="button" scope="shop">
             <name>wirecardElasticEngineCreditCardTestApi</name>
             <label lang="de">[Kreditkarte] Konfiguration testen</label>
@@ -250,6 +286,252 @@ function (button) {
             </options>
         </element>
         <!-- Credit Card End -->
+        <!-- Alipay -->
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineAlipayServer</name>
+            <label lang="de">[Alipay Cross-border] Base URL</label>
+            <label lang="en">[Alipay Cross-border] Base URL</label>
+            <value>https://api-test.wirecard.com</value>
+            <description lang="de">Wirecard Base URL (z.B. https://api.wirecard.com)</description>
+            <description lang="en">Wirecard Base URL (e.g. https://api.wirecard.com)</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineAlipayHttpUser</name>
+            <label lang="de">[Alipay Cross-border] HTTP Benutzer</label>
+            <label lang="en">[Alipay Cross-border] HTTP User</label>
+            <value>70000-APITEST-AP</value>
+            <description lang="de">Wirecard HTTP Benutzer laut Vertrag mit Wirecard.</description>
+            <description lang="en">HTTP User as provided in your Wirecard contract.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineAlipayHttpPassword</name>
+            <label lang="de">[Alipay Cross-border] HTTP Passwort</label>
+            <label lang="en">[Alipay Cross-border] HTTP Password</label>
+            <value>qD2wzQ_hrc!8</value>
+            <description lang="de">Wirecard HTTP Passwort laut Vertrag mit Wirecard.</description>
+            <description lang="en">HTTP Password as provided in your Wirecard contract.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineAlipayMerchantId</name>
+            <label lang="de">[Alipay Cross-border] Händler-Konto-ID</label>
+            <label lang="en">[Alipay Cross-border] Merchant Account ID</label>
+            <value>7ca48aa0-ab12-4560-ab4a-af1c477cce43</value>
+            <description lang="de">Eindeutige Händler-Konto-ID laut Vertrag mit Wirecard.</description>
+            <description lang="en">Unique identifier assigned to your merchant account.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineAlipaySecret</name>
+            <label lang="de">[Alipay Cross-border] Geheimschlüssel</label>
+            <label lang="en">[Alipay Cross-border] Secret Key</label>
+            <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
+            <description lang="de">
+                Der Geheimschlüssel wird benötigt, um die Digitale Signatur für Zahlungen zu berechnen.
+            </description>
+            <description lang="en">
+                Secret Key is mandatory to calculate the Digital Signature for payments.
+            </description>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineAlipayFraudPrevention</name>
+            <label lang="de">[Alipay Cross-border] Zusätzliche Informationen mitsenden</label>
+            <label lang="en">[Alipay Cross-border] Send additional information</label>
+            <value>true</value>
+            <description lang="de">
+                Zusätzliche Informationen werden für Betrugsschutz gesendet. In diesen Daten sind
+                Rechnungs- / Lieferadresse, Warenkorb und Deskriptor inkludiert.
+            </description>
+            <description lang="en">
+                Additional data will be sent for the purpose of fraud protection. This additional
+                data includes billing/shipping address, shopping basket and descriptor.
+            </description>
+        </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEngineAlipayTestApi</name>
+            <label lang="de">[Alipay Cross-border] Konfiguration testen</label>
+            <label lang="en">[Alipay Cross-border] Test configuration</label><options>
+            <handler>
+                <![CDATA[
+function (button) {
+    wirecardeeTestPaymentCredentials(button, 'Alipay', 'Wirecard Alipay Cross-border Test');
+}
+                    ]]>
+            </handler>
+        </options>
+        </element>
+        <!-- Alipay End -->
+        <!-- Ratepay Invoice -->
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceServer</name>
+            <label lang="de">[Wirecard Kauf auf Rechnung mit Zahlungsgarantie] Base URL</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard] Base URL</label>
+            <value>https://api-test.wirecard.com</value>
+            <description lang="de">Wirecard Base URL (z.B. https://api.wirecard.com)</description>
+            <description lang="en">Wirecard Base URL (e.g. https://api.wirecard.com)</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceHttpUser</name>
+            <label lang="de">[Wirecard Kauf auf Rechnung mit Zahlungsgarantie] HTTP Benutzer</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard] HTTP User</label>
+            <value>70000-APITEST-AP</value>
+            <description lang="de">Wirecard HTTP Benutzer laut Vertrag mit Wirecard.</description>
+            <description lang="en">HTTP User as provided in your Wirecard contract.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceHttpPassword</name>
+            <label lang="de">[Wirecard Kauf auf Rechnung mit Zahlungsgarantie] HTTP Passwort</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard] HTTP Password</label>
+            <value>qD2wzQ_hrc!8</value>
+            <description lang="de">Wirecard HTTP Passwort laut Vertrag mit Wirecard.</description>
+            <description lang="en">HTTP Password as provided in your Wirecard contract.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceMerchantId</name>
+            <label lang="de">[Wirecard Kauf auf Rechnung mit Zahlungsgarantie] Händler-Konto-ID</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard] Merchant Account ID</label>
+            <value>fa02d1d4-f518-4e22-b42b-2abab5867a84</value>
+            <description lang="de">Eindeutige Händler-Konto-ID laut Vertrag mit Wirecard.</description>
+            <description lang="en">Unique identifier assigned to your merchant account.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceSecret</name>
+            <label lang="de">[Wirecard Kauf auf Rechnung mit Zahlungsgarantie] Geheimschlüssel</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard] Secret Key</label>
+            <value>dbc5a498-9a66-43b9-bf1d-a618dd399684</value>
+            <description lang="de">Der Geheimschlüssel wird benötigt, um die Digitale Signatur für Zahlungen zu
+                berechnen.
+            </description>
+            <description lang="en">Secret Key is mandatory to calculate the Digital Signature for payments.
+            </description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceMinAmount</name>
+            <label lang="de">[Wirecard Kauf auf Rechnung mit Zahlungsgarantie] Minimaler Betrag</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard] Minimum Amount</label>
+            <value>20</value>
+            <description lang="de">
+                Wirecard Kauf auf Rechnung mit Zahlungsgarantie wird nur angezeigt, wenn der Bestellbetrag
+                höher ist als der hier definierte Wert (in Standardwährung).
+            </description>
+            <description lang="en">
+                Payment method Guaranteed Invoice will only be displayed if the ordered
+                amount exceeds the amount defined here. Amount in default shop currency.
+            </description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceMaxAmount</name>
+            <label lang="de">[Wirecard Kauf auf Rechnung mit Zahlungsgarantie] Maximaler Betrag</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard] Maximum Amount</label>
+            <value>3500</value>
+            <description lang="de">
+                Wirecard Kauf auf Rechnung mit Zahlungsgarantie wird nur angezeigt, wenn der Bestellbetrag
+                niedriger ist als der hier definierte Wert (in Standardwährung).
+            </description>
+            <description lang="en">
+                Payment method Guaranteed Invoice will only be displayed if the ordered amount
+                is smaller than this defined amount. Amount in default shop currency
+            </description>
+        </element>
+        <element type="combo" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceAcceptedCurrencies</name>
+            <label lang="de">[Wirecard Kauf auf Rechnung mit Zahlungsgarantie] Erlaubte Währungen</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard] Allowed currencies</label>
+            <value>-</value>
+            <description lang="de">
+                Wirecard Kauf auf Rechnung mit Zahlungsgarantie wird nur angezeigt, wenn eine der
+                ausgewählten Währungen genutzt wird.
+            </description>
+            <description lang="en">
+                Payment method Guaranteed Invoice will only be displayed if the active
+                currency is one of these selected currencies.
+            </description>
+            <store>Shopware.apps.Base.store.Currency</store>
+            <options>
+                <multiSelect>true</multiSelect>
+            </options>
+        </element>
+        <element type="combo" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceShippingCountries</name>
+            <label lang="de">[Wirecard Kauf auf Rechnung mit Zahlungsgarantie] Erlaubte Lieferländer</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard] Allowed shipping countries</label>
+            <value>-</value>
+            <description lang="de">
+                Wirecard Kauf auf Rechnung mit Zahlungsgarantie wird dem Endkunden beim Checkout nur
+                angezeigt, wenn die Lieferadresse einem der hier gewählten Länder entspricht.
+                Voreingestelle Auswahl: Deutschland, Österreich und Schweiz.
+            </description>
+            <description lang="en">
+                Payment method Guaranteed Invoice is only displayed if the consumer's
+                shipping country equals one of these selected countries.
+                Default pre-selection: Germany, Austria and Switzerland.
+            </description>
+            <store>Shopware.apps.Base.store.Country</store>
+            <options>
+                <multiSelect>true</multiSelect>
+            </options>
+        </element>
+        <element type="combo" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceBillingCountries</name>
+            <label lang="de">[Wirecard Kauf auf Rechnung mit Zahlungsgarantie] Erlaubte Rechnungsempfängerländer</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard] Allowed billing countries</label>
+            <value>-</value>
+            <description lang="de">
+                Wirecard Kauf auf Rechnung mit Zahlungsgarantie wird dem Endkunden beim Checkout nur
+                angezeigt, wenn die Rechnungsadresse einem der hier gewählten Länder entspricht.
+                Voreingestelle Auswahl: Deutschland, Österreich und Schweiz.
+            </description>
+            <description lang="en">
+                Payment method Guaranteed Invoice is only displayed during checkout if the
+                consumer's billing country is one of the selected countries.
+                Default pre-selection: Germany, Austria and Switzerland.
+            </description>
+            <store>Shopware.apps.Base.store.Country</store>
+            <options>
+                <multiSelect>true</multiSelect>
+            </options>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceBillingShippingMustBeIdentical</name>
+            <label lang="de">[Wirecard Kauf auf Rechnung mit Zahlungsgarantie] Rechnungsadresse und Versandadresse müssen übereinstimmen</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard] Billing/shipping address must be identical</label>
+            <value>true</value>
+            <description lang="de">
+                Bei Aktivierung wird Wirecard Kauf auf Rechnung mit Zahlungsgarantie nur im Zahlungsprozess
+                angezeigt, wenn Rechnungs- und Lieferadresse übereinstimmen.
+            </description>
+            <description lang="en">
+                If activated, payment method Guaranteed Invoice will only be displayed if
+                billing/shipping address are identical.
+            </description>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceFraudPrevention</name>
+            <label lang="de">[Wirecard Kauf auf Rechnung mit Zahlungsgarantie] Zusätzliche Informationen mitsenden</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard] Send additional information</label>
+            <value>true</value>
+            <description lang="de">
+                Zusätzliche Informationen werden für Betrugsschutz gesendet. In diesen Daten sind
+                Rechnungs- / Lieferadresse, Warenkorb und Deskriptor inkludiert.
+            </description>
+            <description lang="en">
+                Additional data will be sent for the purpose of fraud protection. This additional
+                data includes billing/shipping address, shopping basket and descriptor.
+            </description>
+        </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEngineRatepayInvoiceTestApi</name>
+            <label lang="de">[Wirecard Kauf auf Rechnung mit Zahlungsgarantie] Konfiguration testen</label>
+            <label lang="en">[Guaranteed Invoice by Wirecard] Test configuration</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    wirecardeeTestPaymentCredentials(button, 'RatepayInvoice', 'Guaranteed Invoice by Wirecard Test');
+}
+                    ]]>
+                </handler>
+            </options>
+        </element>
+        <!-- Ratepay Invoice End -->
         <!-- iDEAL -->
         <element type="text" scope="shop">
             <name>wirecardElasticEngineIdealServer</name>
@@ -324,6 +606,106 @@ function (button) {
             </options>
         </element>
         <!-- iDEAL End -->
+        <!-- Masterpass -->
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineMasterpassServer</name>
+            <label lang="de">[Masterpass] Base URL</label>
+            <label lang="en">[Masterpass] Base URL</label>
+            <value>https://api-test.wirecard.com</value>
+            <description lang="de">Wirecard Base URL (z.B. https://api.wirecard.com)</description>
+            <description lang="en">Wirecard Base URL (e.g. https://api.wirecard.com)</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineMasterpassHttpUser</name>
+            <label lang="de">[Masterpass] HTTP Benutzer</label>
+            <label lang="en">[Masterpass] HTTP User</label>
+            <value>70000-APITEST-AP</value>
+            <description lang="de">Wirecard HTTP Benutzer laut Vertrag mit Wirecard.</description>
+            <description lang="en">HTTP User as provided in your Wirecard contract.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineMasterpassHttpPassword</name>
+            <label lang="de">[Masterpass] HTTP Passwort</label>
+            <label lang="en">[Masterpass] HTTP Password</label>
+            <value>qD2wzQ_hrc!8</value>
+            <description lang="de">Wirecard HTTP Passwort laut Vertrag mit Wirecard.</description>
+            <description lang="en">HTTP Password as provided in your Wirecard contract.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineMasterpassMerchantId</name>
+            <label lang="de">[Masterpass] Händler-Konto-ID</label>
+            <label lang="en">[Masterpass] Merchant Account ID</label>
+            <value>8bc8ed6d-81a8-43be-bd7b-75b008f89fa6</value>
+            <description lang="de">Eindeutige Händler-Konto-ID laut Vertrag mit Wirecard.</description>
+            <description lang="en">Unique identifier assigned to your merchant account.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineMasterpassSecret</name>
+            <label lang="de">[Masterpass] Geheimschlüssel</label>
+            <label lang="en">[Masterpass] Secret Key</label>
+            <value>2d96596b-9d10-4c98-ac47-4d56e22fd878</value>
+            <description lang="de">
+                Der Geheimschlüssel wird benötigt, um die Digitale Signatur für Zahlungen zu berechnen.
+            </description>
+            <description lang="en">
+                Secret Key is mandatory to calculate the Digital Signature for payments.
+            </description>
+        </element>
+        <element type="select" scope="shop">
+            <name>wirecardElasticEngineMasterpassTransactionType</name>
+            <label lang="de">[Masterpass] Zahlungsaktion</label>
+            <label lang="en">[Masterpass] Payment Action</label>
+            <value>pay</value>
+            <description lang="de">
+                Wählen Sie zwischen "Purchase" um automatisch eine Buchung durchzuführen oder
+                "Authorization" um eine manuelle Buchung zu ermöglichen.
+            </description>
+            <description lang="en">
+                Select between "Purchase" to capture/invoice your order automatically or
+                "Authorization" to capture/invoice manually.
+            </description>
+            <store>
+                <option>
+                    <value>reserve</value>
+                    <label lang="de">Authorization</label>
+                    <label lang="en">Authorization</label>
+                </option>
+                <option>
+                    <value>pay</value>
+                    <label lang="de">Purchase</label>
+                    <label lang="en">Purchase</label>
+                </option>
+            </store>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineMasterpassFraudPrevention</name>
+            <label lang="de">[Masterpass] Zusätzliche Informationen mitsenden</label>
+            <label lang="en">[Masterpass] Send additional information</label>
+            <value>true</value>
+            <description lang="de">
+                Zusätzliche Informationen werden für Betrugsschutz gesendet. In diesen Daten sind
+                Rechnungs- / Lieferadresse, Warenkorb und Deskriptor inkludiert.
+            </description>
+            <description lang="en">
+                Additional data will be sent for the purpose of fraud protection. This additional
+                data includes billing/shipping address, shopping basket and descriptor.
+            </description>
+        </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEngineMasterpassTestApi</name>
+            <label lang="de">[Masterpass] Konfiguration testen</label>
+            <label lang="en">[Masterpass] Test configuration</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    wirecardeeTestPaymentCredentials(button, 'Masterpass', 'Wirecard Masterpass Test');
+}
+                    ]]>
+                </handler>
+            </options>
+        </element>
+        <!-- Masterpass End -->
         <!-- PayPal -->
         <element type="text" scope="shop">
             <name>wirecardElasticEnginePaypalServer</name>
@@ -447,6 +829,80 @@ function (button) {
             </options>
         </element>
         <!-- PayPal End -->
+        <!-- Poi / Pia -->
+        <element type="text" scope="shop">
+            <name>wirecardElasticEnginePoiPiaServer</name>
+            <label lang="de">[Kauf auf Rechnung / Vorauskasse] Base URL</label>
+            <label lang="en">[Payment on Invoice / Payment in Advance] Base URL</label>
+            <value>https://api-test.wirecard.com</value>
+            <description lang="de">Wirecard Base URL (z.B. https://api.wirecard.com)</description>
+            <description lang="en">Wirecard Base URL (e.g. https://api.wirecard.com)</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEnginePoiPiaHttpUser</name>
+            <label lang="de">[Kauf auf Rechnung / Vorauskasse] HTTP Benutzer</label>
+            <label lang="en">[Payment on Invoice / Payment in Advance] HTTP User</label>
+            <value>70000-APITEST-AP</value>
+            <description lang="de">Wirecard HTTP Benutzer laut Vertrag mit Wirecard.</description>
+            <description lang="en">HTTP User as provided in your Wirecard contract.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEnginePoiPiaHttpPassword</name>
+            <label lang="de">[Kauf auf Rechnung / Vorauskasse] HTTP Passwort</label>
+            <label lang="en">[Payment on Invoice / Payment in Advance] HTTP Password</label>
+            <value>qD2wzQ_hrc!8</value>
+            <description lang="de">Wirecard HTTP Passwort laut Vertrag mit Wirecard.</description>
+            <description lang="en">HTTP Password as provided in your Wirecard contract.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEnginePoiPiaMerchantId</name>
+            <label lang="de">[Kauf auf Rechnung / Vorauskasse] Händler-Konto-ID</label>
+            <label lang="en">[Payment on Invoice / Payment in Advance] Merchant Account ID</label>
+            <value>105ab3e8-d16b-4fa0-9f1f-18dd9b390c94</value>
+            <description lang="de">Eindeutige Händler-Konto-ID laut Vertrag mit Wirecard.</description>
+            <description lang="en">Unique identifier assigned to your merchant account.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEnginePoiPiaSecret</name>
+            <label lang="de">[Kauf auf Rechnung / Vorauskasse] Geheimschlüssel</label>
+            <label lang="en">[Payment on Invoice / Payment in Advance] Secret Key</label>
+            <value>2d96596b-9d10-4c98-ac47-4d56e22fd878</value>
+            <description lang="de">
+                Der Geheimschlüssel wird benötigt, um die Digitale Signatur für Zahlungen zu berechnen.
+            </description>
+            <description lang="en">
+                Secret Key is mandatory to calculate the Digital Signature for payments.
+            </description>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEnginePoiPiaFraudPrevention</name>
+            <label lang="de">[Kauf auf Rechnung / Vorauskasse] Zusätzliche Informationen mitsenden</label>
+            <label lang="en">[Payment on Invoice / Payment in Advance] Send additional information</label>
+            <value>true</value>
+            <description lang="de">
+                Zusätzliche Informationen werden für Betrugsschutz gesendet. In diesen Daten sind
+                Rechnungs- / Lieferadresse, Warenkorb und Deskriptor inkludiert.
+            </description>
+            <description lang="en">
+                Additional data will be sent for the purpose of fraud protection. This additional
+                data includes billing/shipping address, shopping basket and descriptor.
+            </description>
+        </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEnginePoiPiaTestApi</name>
+            <label lang="de">[Kauf auf Rechnung / Vorauskasse] Konfiguration testen</label>
+            <label lang="en">[Payment on Invoice / Payment in Advance] Test configuration</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    wirecardeeTestPaymentCredentials(button, 'PoiPia', 'Wirecard Payment on Invoice / Payment in Advance Test');
+}
+                    ]]>
+                </handler>
+            </options>
+        </element>
+        <!-- Poi / Pia End -->
         <!-- SEPA Direct Debit -->
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaServer</name>
@@ -702,5 +1158,104 @@ function (button) {
             </options>
         </element>
         <!-- Sofort. End -->
+        <!-- UnionPay International -->
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineUnionpayInternationalServer</name>
+            <label lang="de">[UnionPay International] Base URL</label>
+            <label lang="en">[UnionPay International] Base URL</label>
+            <value>https://api-test.wirecard.com</value>
+            <description lang="de">Wirecard Base URL (z.B. https://api.wirecard.com)</description>
+            <description lang="en">Wirecard Base URL (e.g. https://api.wirecard.com)</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineUnionpayInternationalHttpUser</name>
+            <label lang="de">[UnionPay International] HTTP Benutzer</label>
+            <label lang="en">[UnionPay International] HTTP User</label>
+            <value>70000-APILUHN-CARD</value>
+            <description lang="de">Wirecard HTTP Benutzer laut Vertrag mit Wirecard.</description>
+            <description lang="en">HTTP User as provided in your Wirecard contract.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineUnionpayInternationalHttpPassword</name>
+            <label lang="de">[UnionPay International] HTTP Passwort</label>
+            <label lang="en">[UnionPay International] HTTP Password</label>
+            <value>8mhwavKVb91T</value>
+            <description lang="de">Wirecard HTTP Passwort laut Vertrag mit Wirecard.</description>
+            <description lang="en">HTTP Password as provided in your Wirecard contract.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineUnionpayInternationalMerchantId</name>
+            <label lang="de">[UnionPay International] Händler-Konto-ID</label>
+            <label lang="en">[UnionPay International] Merchant Account ID</label>
+            <value>c6e9331c-5c1f-4fc6-8a08-ef65ce09ddb0</value>
+            <description lang="de">Eindeutige Händler-Konto-ID laut Vertrag mit Wirecard.</description>
+            <description lang="en">Unique identifier assigned to your merchant account.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineUnionpayInternationalSecret</name>
+            <label lang="de">[UnionPay International] Geheimschlüssel</label>
+            <label lang="en">[UnionPay International] Secret Key</label>
+            <value>16d85b73-79e2-4c33-932a-7da99fb04a9c</value>
+            <description lang="de">Der Geheimschlüssel wird benötigt, um die Digitale Signatur für Zahlungen zu
+                berechnen.
+            </description>
+            <description lang="en">Secret Key is mandatory to calculate the Digital Signature for payments.
+            </description>
+        </element>
+        <element type="select" scope="shop">
+            <name>wirecardElasticEngineUnionpayInternationalTransactionType</name>
+            <label lang="de">[UnionPay International] Zahlungsaktion</label>
+            <label lang="en">[UnionPay International] Payment Action</label>
+            <value>pay</value>
+            <description lang="de">
+                Wählen Sie zwischen "Purchase" um automatisch eine Buchung durchzuführen oder
+                "Authorization" um eine manuelle Buchung zu ermöglichen.
+            </description>
+            <description lang="en">
+                Select between "Purchase" to capture/invoice your order automatically or
+                "Authorization" to capture/invoice manually.
+            </description>
+            <store>
+                <option>
+                    <value>reserve</value>
+                    <label lang="de">Authorization</label>
+                    <label lang="en">Authorization</label>
+                </option>
+                <option>
+                    <value>pay</value>
+                    <label lang="de">Purchase</label>
+                    <label lang="en">Purchase</label>
+                </option>
+            </store>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineUnionpayInternationalFraudPrevention</name>
+            <label lang="de">[UnionPay International] Zusätzliche Informationen mitsenden</label>
+            <label lang="en">[UnionPay International] Send additional information</label>
+            <value>true</value>
+            <description lang="de">
+                Zusätzliche Informationen werden für Betrugsschutz gesendet. In diesen Daten sind
+                Rechnungs- / Lieferadresse, Warenkorb und Deskriptor inkludiert.
+            </description>
+            <description lang="en">
+                Additional data will be sent for the purpose of fraud protection. This additional
+                data includes billing/shipping address, shopping basket and descriptor.
+            </description>
+        </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEngineUnionpayInternationalTestApi</name>
+            <label lang="de">[UnionPay International] Konfiguration testen</label>
+            <label lang="en">[UnionPay International] Test configuration</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    wirecardeeTestPaymentCredentials(button, 'UnionpayInternational', 'Wirecard UnionPay International Test');
+}
+                    ]]>
+                </handler>
+            </options>
+        </element>
+        <!-- UnionPay International End -->
     </elements>
 </config>

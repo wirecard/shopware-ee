@@ -124,14 +124,6 @@ class SofortPaymentTest extends TestCase
             'ecdf5990-0372-47cd-a55d-037dccfe9d25',
             $config->get(SepaCreditTransferTransaction::NAME)->getSecret()
         );
-        $this->assertEquals([
-            'headers' => [
-                'shop-system-name'    => 'Shopware',
-                'shop-system-version' => '___VERSION___',
-                'plugin-name'         => 'WirecardElasticEngine',
-                'plugin-version'      => '1.0.0',
-            ],
-        ], $config->getShopHeader());
     }
 
     public function testGetTransactionType()

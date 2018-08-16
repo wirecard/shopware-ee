@@ -98,6 +98,9 @@ class CreditCardPaymentTest extends TestCase
         $this->assertEquals(100, $config->getThreeDMinLimit());
         $this->assertEmpty($config->getThreeDMinLimitCurrency());
         $this->assertEquals('508b8896-b37d-4614-845c-26bf8bf2c948', $config->getThreeDMAID());
+        $this->assertFalse($config->isVaultEnabled());
+        $this->assertFalse($config->allowAddressChanges());
+        $this->assertTrue($config->useThreeDOnTokens());
     }
 
     public function testGetTransactionConfig()
@@ -110,27 +113,20 @@ class CreditCardPaymentTest extends TestCase
         $this->assertEquals('https://api-test.wirecard.com', $config->getBaseUrl());
         $this->assertEquals('70000-APITEST-AP', $config->getHttpUser());
         $this->assertEquals('qD2wzQ_hrc!8', $config->getHttpPassword());
-        $this->assertInstanceOf(PaymentMethodConfig::class, $config->get(CreditCardTransaction::NAME));
-        $this->assertEquals(
-            '53f2895a-e4de-4e82-a813-0d87a10e55e6',
-            $config->get(CreditCardTransaction::NAME)->getMerchantAccountId()
-        );
-        $this->assertEquals(
-            'dbc5a498-9a66-43b9-bf1d-a618dd399684',
-            $config->get(CreditCardTransaction::NAME)->getSecret()
-        );
-        $this->assertEquals(
-            '508b8896-b37d-4614-845c-26bf8bf2c948',
-            $config->get(CreditCardTransaction::NAME)->getThreeDMerchantAccountId()
-        );
+        $methodConfig = $config->get(CreditCardTransaction::NAME);
+        $this->assertInstanceOf(PaymentMethodConfig::class, $methodConfig);
+        $this->assertEquals('53f2895a-e4de-4e82-a813-0d87a10e55e6', $methodConfig->getMerchantAccountId());
+        $this->assertEquals('dbc5a498-9a66-43b9-bf1d-a618dd399684', $methodConfig->getSecret());
+        $this->assertEquals('508b8896-b37d-4614-845c-26bf8bf2c948', $methodConfig->getThreeDMerchantAccountId());
+        $shopHeader = $config->getShopHeader();
         $this->assertEquals([
             'headers' => [
                 'shop-system-name'    => 'Shopware',
                 'shop-system-version' => '___VERSION___',
                 'plugin-name'         => 'WirecardElasticEngine',
-                'plugin-version'      => '1.0.0',
+                'plugin-version'      => $shopHeader['headers']['plugin-version'],
             ],
-        ], $config->getShopHeader());
+        ], $shopHeader);
     }
 
     public function testGetTransactionType()

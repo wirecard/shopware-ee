@@ -112,14 +112,6 @@ class PaypalPaymentTest extends TestCase
             'dbc5a498-9a66-43b9-bf1d-a618dd399684',
             $config->get(PayPalTransaction::NAME)->getSecret()
         );
-        $this->assertEquals([
-            'headers' => [
-                'shop-system-name'    => 'Shopware',
-                'shop-system-version' => '___VERSION___',
-                'plugin-name'         => 'WirecardElasticEngine',
-                'plugin-version'      => '1.0.0',
-            ],
-        ], $config->getShopHeader());
     }
 
     public function testGetTransactionType()

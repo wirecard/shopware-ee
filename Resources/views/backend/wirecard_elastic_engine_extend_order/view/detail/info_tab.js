@@ -45,6 +45,12 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
             creditRefund: '{s name="CreditRefundButtonText"}{/s}',
             cancelRefund: '{s name="CancelRefundButtonText"}{/s}'
         },
+        bankData: {
+            title: '{s name="BankDataTitle"}{/s}',
+            iban: '{s name="IBAN"}{/s}',
+            bic: '{s name="BIC"}{/s}',
+            reference: '{s name="ProviderTransactionReference" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}'
+        },
         sepaMandate: {
             title: '{s name="SepaMandateTitle" namespace="frontend/wirecard_elastic_engine/sepa_direct_debit"}{/s}',
             creditorId: '{s name="CreditorID" namespace="frontend/wirecard_elastic_engine/sepa_direct_debit"}{/s}',
@@ -318,9 +324,14 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 data.transactions.forEach(function (transaction) {
                     if (transaction.type === 'initial-response' || transaction.type === 'initial-request') {
                         infoPanel.add(me.getInfoPanelItem(transaction));
-                    }
-                    if (transaction.type === 'initial-response' && transaction.paymentMethod === 'sepadirectdebit') {
-                        infoPanel.add(me.getInfoPanelSepaMandateInfoItem(transaction));
+
+                        if (me.record.getPayment().first().get('name') === 'wirecard_elastic_engine_poi') {
+                            infoPanel.add(me.getInfoPanelPoiInfoItem(transaction));
+                        }
+
+                        if (transaction.paymentMethod === 'sepadirectdebit') {
+                            infoPanel.add(me.getInfoPanelSepaMandateInfoItem(transaction));
+                        }
                     }
                 });
 
@@ -349,11 +360,48 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
         };
     },
 
+    /**
+     * Bank data for payment on invoice
+     * @param transaction
+     * @returns { * }
+     */
+    getInfoPanelPoiInfoItem: function (transaction) {
+        var me = this;
+        return {
+            xtype: 'container',
+            renderTpl: new Ext.XTemplate(
+                '{literal}<tpl for=".">',
+                '<p><label class="x-form-item-label">' + me.snippets.bankData.title + ':</label></p>',
+                '<p>' + me.snippets.bankData.iban + ': {iban}</p>',
+                '<tpl if="bic"><p>' + me.snippets.bankData.bic + ': {bic}</p></tpl>',
+                '<p>' + me.snippets.bankData.reference + ': {reference}</p>',
+                '<tpl if="bankName"><p>{bankName}</p></tpl>',
+                '<tpl if="address"><p>{address}<br>{city} {state}</p></tpl>',
+                '</tpl>{/literal}'
+            ),
+            renderData: {
+                'iban': transaction.response['merchant-bank-account.0.iban'],
+                'bic': transaction.response['merchant-bank-account.0.bic'],
+                'reference': transaction.providerTransactionReference,
+                'bankName': transaction.response['merchant-bank-account.0.bank-name'],
+                'address': transaction.response['merchant-bank-account.0.branch-address'],
+                'city': transaction.response['merchant-bank-account.0.branch-city'],
+                'state': transaction.response['merchant-bank-account.0.branch-state']
+            },
+            margin: '0 0 10px'
+        };
+    },
+
+    /**
+     * SEPA mandate information
+     * @param transaction
+     * @returns { * }
+     */
     getInfoPanelSepaMandateInfoItem: function (transaction) {
         var me = this;
         return {
             xtype: 'container',
-            renderTpl: Ext.create('Ext.XTemplate',
+            renderTpl: new Ext.XTemplate(
                 '{literal}<tpl for=".">',
                 '<div class="wirecardee-info-panel-sepa">',
                 '<h3>' + me.snippets.sepaMandate.title + '</h3>',
@@ -388,6 +436,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 operation: operation,
                 payment: me.record.getPayment().first().get('name'),
                 transactionId: transaction.transactionId,
+                orderNumber: transaction.orderNumber,
                 amount: amount,
                 currency: transaction.currency
             },
