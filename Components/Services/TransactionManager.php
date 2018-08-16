@@ -185,6 +185,7 @@ class TransactionManager
         $childTransactions = $repo->findBy([
             'parentTransactionId' => $transaction->getParentTransactionId(),
             'transactionType'     => $transaction->getTransactionType(),
+            'type'                => Transaction::TYPE_BACKEND,
         ]);
         foreach ($parentTransactions as $parentTransaction) {
             $totalAmount = (float)$parentTransaction->getAmount();
