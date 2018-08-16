@@ -201,6 +201,28 @@ class TransactionManager
     }
 
     /**
+     * Calculate remaining amount for backend operations
+     *
+     * @param Transaction $transaction
+     *
+     * @return float
+     *
+     * @since 1.1.0
+     */
+    public function getRemainingAmount(Transaction $transaction)
+    {
+        $totalAmount       = (float)$transaction->getAmount();
+        $childTransactions = $this->em->getRepository(Transaction::class)->findBy([
+            'parentTransactionId' => $transaction->getTransactionId(),
+            'type'                => Transaction::TYPE_BACKEND,
+        ]);
+        foreach ($childTransactions as $childTransaction) {
+            $totalAmount -= (float)$childTransaction->getAmount();
+        }
+        return $totalAmount;
+    }
+
+    /**
      * @param Transaction $transaction
      *
      * @return Transaction

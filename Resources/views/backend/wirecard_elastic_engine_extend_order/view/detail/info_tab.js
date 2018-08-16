@@ -116,6 +116,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 'request',
                 'backendOperations',
                 'isFinal',
+                'remainingAmount',
                 'state',
                 'type',
                 'statusMessage'
@@ -260,7 +261,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 id: 'wirecardee-transaction-amount',
                 xtype: 'numberfield',
                 fieldLabel: me.snippets.amountDialog.fieldLabel,
-                value: transaction.amount
+                value: transaction.remainingAmount
             },
             buttons: [{
                 text: me.snippets.amountDialog.submit,
