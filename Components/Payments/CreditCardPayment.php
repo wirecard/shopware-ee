@@ -296,8 +296,8 @@ class CreditCardPayment extends Payment implements
     {
         $userMapper = $orderSummary->getUserMapper();
         $conditions = [
+            'id'     => $tokenId,
             'userId' => $userMapper->getUserId(),
-            'token'  => $tokenId,
         ];
         if (! $this->getPaymentConfig()->allowAddressChanges()) {
             $conditions['bindBillingAddressHash']  = $this->createAddressHash($userMapper->getBillingAddress());
@@ -316,7 +316,7 @@ class CreditCardPayment extends Payment implements
         $creditCardVault->setLastUsed(new \DateTime());
         $this->em->flush();
 
-        $transaction->setTokenId($tokenId);
+        $transaction->setTokenId($creditCardVault->getToken());
         return null;
     }
 
@@ -411,8 +411,8 @@ class CreditCardPayment extends Payment implements
         );
 
         $creditCardVault = $this->em->getRepository(CreditCardVault::class)->findOneBy([
+            'id'                      => $tokenId,
             'userId'                  => $userId,
-            'token'                   => $tokenId,
             'bindBillingAddressHash'  => $billingAddressHash,
             'bindShippingAddressHash' => $shippingAddressHash,
         ]);
@@ -452,33 +452,33 @@ class CreditCardPayment extends Payment implements
         $formData = [
             'method'       => $this->getName(),
             'vaultEnabled' => $accountMode === Customer::ACCOUNT_MODE_CUSTOMER && $paymentConfig->isVaultEnabled(),
+            'savedCards'   => [],
         ];
+        if (! $paymentConfig->isVaultEnabled()) {
+            return $formData;
+        }
 
-        if ($paymentConfig->isVaultEnabled()) {
-            $billingAddressHash  = $this->createAddressHash($sessionManager->getOrderBilldingAddress());
-            $shippingAddressHash = $this->createAddressHash($sessionManager->getOrderShippingAddress());
+        $billingAddressHash  = $this->createAddressHash($sessionManager->getOrderBilldingAddress());
+        $shippingAddressHash = $this->createAddressHash($sessionManager->getOrderShippingAddress());
 
-            $builder = $this->em->createQueryBuilder();
-            $builder->select('ccv')
-                    ->from(CreditCardVault::class, 'ccv')
-                    ->where('ccv.userId = :userId')
-                    ->setParameter('userId', $sessionManager->getUserId())
-                    ->orderBy('ccv.lastUsed', 'DESC');
-            $savedCards = $builder->getQuery()->getResult();
+        $builder = $this->em->createQueryBuilder();
+        $builder->select('ccv')
+                ->from(CreditCardVault::class, 'ccv')
+                ->where('ccv.userId = :userId')
+                ->setParameter('userId', $sessionManager->getUserId())
+                ->orderBy('ccv.lastUsed', 'DESC');
+        $savedCards = $builder->getQuery()->getResult();
 
-            /** @var CreditCardVault $card */
-            foreach ($savedCards as $card) {
-                $acceptedCriteria = $paymentConfig->allowAddressChanges()
-                                    || ($billingAddressHash === $card->getBindBillingAddressHash()
-                                        && $shippingAddressHash === $card->getBindShippingAddressHash());
-
-                $formData['savedCards'][] = [
-                    'token'               => $card->getToken(),
-                    'maskedAccountNumber' => $card->getMaskedAccountNumber(),
-                    'additionalData'      => $card->getAdditionalData(),
-                    'acceptedCriteria'    => $acceptedCriteria,
-                ];
-            }
+        /** @var CreditCardVault $card */
+        foreach ($savedCards as $card) {
+            $formData['savedCards'][] = [
+                'token'               => $card->getId(),
+                'maskedAccountNumber' => $card->getMaskedAccountNumber(),
+                'additionalData'      => $card->getAdditionalData(),
+                'acceptedCriteria'    => $paymentConfig->allowAddressChanges()
+                                         || ($billingAddressHash === $card->getBindBillingAddressHash()
+                                             && $shippingAddressHash === $card->getBindShippingAddressHash()),
+            ];
         }
 
         return $formData;

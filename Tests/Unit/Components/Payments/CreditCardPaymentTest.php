@@ -19,6 +19,7 @@ use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
+use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Actions\ErrorAction;
 use WirecardElasticEngine\Components\Actions\ViewAction;
@@ -195,7 +196,7 @@ class CreditCardPaymentTest extends PaymentTestCase
     public function testProcessPaymentWithVaultEnabled()
     {
         $orderSummary = $this->createMock(OrderSummary::class);
-        $orderSummary->method('getAdditionalPaymentData')->willReturn(['token' => 'FOOTOKEN123']);
+        $orderSummary->method('getAdditionalPaymentData')->willReturn(['token' => '2']);
         $userMapper = $this->createMock(UserMapper::class);
         $userMapper->expects($this->atLeastOnce())->method('getUserId')->willReturn(1);
         $userMapper->expects($this->atLeastOnce())->method('getBillingAddress')->willReturn([
@@ -212,10 +213,11 @@ class CreditCardPaymentTest extends PaymentTestCase
 
         $repo            = $this->createMock(EntityRepository::class);
         $creditCardVault = new CreditCardVault();
-        $lastUsed        = $creditCardVault->getLastUsed();
+        $creditCardVault->setToken('FOOTOKEN321');
+        $lastUsed = $creditCardVault->getLastUsed();
         $repo->expects($this->once())->method('findOneBy')->with([
             'userId'                  => 1,
-            'token'                   => 'FOOTOKEN123',
+            'id'                      => '2',
             'bindBillingAddressHash'  => '5958eb93c0b510df3961d03ff1bf3975',
             'bindShippingAddressHash' => 'e8269246ec003988d43a212a960f0518',
         ])->willReturn($creditCardVault);
@@ -319,6 +321,7 @@ class CreditCardPaymentTest extends PaymentTestCase
         $this->assertEquals([
             'method'       => CreditCardPayment::PAYMETHOD_IDENTIFIER,
             'vaultEnabled' => true,
+            'savedCards'   => [],
         ], $this->payment->getAdditionalViewAssignments($sessionManager));
 
         $creditCardVault = new CreditCardVault();
@@ -332,7 +335,7 @@ class CreditCardPaymentTest extends PaymentTestCase
             'vaultEnabled' => true,
             'savedCards'   => [
                 [
-                    'token'               => 'FOOTOKER321',
+                    'token'               => null,
                     'maskedAccountNumber' => '4444****8888',
                     'additionalData'      => ['add'],
                     'acceptedCriteria'    => false,
