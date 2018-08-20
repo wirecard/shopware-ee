@@ -104,7 +104,7 @@ class TransactionManager
         $transactions = $this->em->getRepository(Transaction::class)
                                  ->findBy(['paymentUniqueId' => $initialTransaction->getPaymentUniqueId()]);
         foreach ($transactions as $transaction) {
-            if ($transaction->getId() !== $initialTransaction->getId() && $initialTransaction->isInitial()) {
+            if ($transaction->getId() !== $initialTransaction->getId()) {
                 $transaction->setOrderNumber($initialTransaction->getOrderNumber());
             }
         }
