@@ -398,20 +398,21 @@ class CreditCardPayment extends Payment implements
             return;
         }
 
-        $tokenId             = $params['token_id'];
+        $token               = $params['token_id'];
         $userId              = $sessionManager->getUserId();
         $billingAddress      = $sessionManager->getOrderBilldingAddress();
         $shippingAddress     = $sessionManager->getOrderShippingAddress();
         $billingAddressHash  = $this->createAddressHash($billingAddress);
         $shippingAddressHash = $this->createAddressHash($shippingAddress);
 
-        $transactionDetails = $transactionService->getTransactionByTransactionId(
+        $transaction = $transactionService->getTransactionByTransactionId(
             $params['transaction_id'],
             CreditCardTransaction::NAME
         );
+        $cardInfo    = isset($transaction['payment']['card']) ? $transaction['payment']['card'] : [];
 
         $creditCardVault = $this->em->getRepository(CreditCardVault::class)->findOneBy([
-            'id'                      => $tokenId,
+            'token'                   => $token,
             'userId'                  => $userId,
             'bindBillingAddressHash'  => $billingAddressHash,
             'bindShippingAddressHash' => $shippingAddressHash,
@@ -419,7 +420,7 @@ class CreditCardPayment extends Payment implements
 
         if (! $creditCardVault) {
             $creditCardVault = new CreditCardVault();
-            $creditCardVault->setToken($tokenId);
+            $creditCardVault->setToken($token);
             $creditCardVault->setMaskedAccountNumber($params['masked_account_number']);
             $creditCardVault->setUserId($userId);
             $creditCardVault->setBindBillingAddress($billingAddress);
@@ -428,14 +429,13 @@ class CreditCardPayment extends Payment implements
             $creditCardVault->setBindShippingAddressHash($shippingAddressHash);
             $this->em->persist($creditCardVault);
         }
-
         $creditCardVault->setLastUsed(new \DateTime());
         $creditCardVault->setAdditionalData([
             'firstName'       => isset($params['first_name']) ? $params['first_name'] : '',
             'lastName'        => isset($params['last_name']) ? $params['last_name'] : '',
-            'expirationMonth' => $transactionDetails['payment']['card']['expiration-month'],
-            'expirationYear'  => $transactionDetails['payment']['card']['expiration-year'],
-            'cardType'        => $transactionDetails['payment']['card']['card-type'],
+            'expirationMonth' => isset($cardInfo['expiration-month']) ? $cardInfo['expiration-month'] : '',
+            'expirationYear'  => isset($cardInfo['expiration-year']) ? $cardInfo['expiration-year'] : '',
+            'cardType'        => isset($cardInfo['card-type']) ? $cardInfo['card-type'] : '',
         ]);
         $this->em->flush();
     }
