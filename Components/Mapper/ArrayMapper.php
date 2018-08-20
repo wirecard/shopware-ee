@@ -53,7 +53,7 @@ abstract class ArrayMapper
      * Returns a key from an (multidimensional) array. If the key doesn't exist the fallback value is returned.
      *
      * @param string|array $keys Single key or a key chain for multidimensional arrays
-     * @param null $fallback
+     * @param mixed|null   $fallback
      *
      * @return mixed|null
      *

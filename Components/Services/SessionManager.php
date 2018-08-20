@@ -80,7 +80,7 @@ class SessionManager
      * Removes the device fingerprint id from the session. This should only be called in the return action, since the
      * id is valid until the payment is successfully done.
      *
-     * @see \Shopware_Controllers_Frontend_WirecardElasticEnginePayment::returnAction()
+     * @see   \Shopware_Controllers_Frontend_WirecardElasticEnginePayment::returnAction()
      *
      * @since 1.0.0
      */

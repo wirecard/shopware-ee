@@ -86,7 +86,7 @@ class OrderBasketMapper
     {
         $shipping    = $order->getInvoiceShipping();
         $shippingNet = $order->getInvoiceShippingNet();
-        
+
         $amount = new Amount($shipping, $order->getCurrency());
         $item   = new Item('Shipping', $amount, 1);
         $item->setArticleNumber('shipping');

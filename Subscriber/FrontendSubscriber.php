@@ -27,7 +27,7 @@ use WirecardElasticEngine\Exception\UnknownPaymentException;
 /**
  * @package WirecardElasticEngine\Subscriber
  *
- * @since 1.0.0
+ * @since   1.0.0
  */
 class FrontendSubscriber implements SubscriberInterface
 {

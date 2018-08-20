@@ -9,8 +9,6 @@
 
 namespace WirecardElasticEngine\Components\Payments\Contracts;
 
-use WirecardElasticEngine\Models\Transaction;
-
 /**
  * @package WirecardElasticEngine\Components\Payments\Contracts
  *

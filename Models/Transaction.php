@@ -30,9 +30,9 @@ use WirecardElasticEngine\Components\Services\TransactionManager;
  * are shown as "Source" in the browser.
  * Transactions are mainly created respectively updated by the `TransactionManager`.
  *
- * @see TransactionManager
+ * @see     TransactionManager
  *
- * @since 1.0.0
+ * @since   1.0.0
  */
 class Transaction extends ModelEntity
 {

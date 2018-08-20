@@ -114,8 +114,8 @@ class IdealPaymentConfig extends PaymentConfig
         return array_merge(
             parent::toArray(),
             [
-                'backendTransactionMaid'   => $this->getBackendTransactionMAID(),
-                'backendCreditorId'        => $this->getBackendCreditorId()
+                'backendTransactionMaid' => $this->getBackendTransactionMAID(),
+                'backendCreditorId'      => $this->getBackendCreditorId(),
             ]
         );
     }

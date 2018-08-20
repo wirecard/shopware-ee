@@ -14,7 +14,7 @@ use Enlight\Event\SubscriberInterface;
 /**
  * @package WirecardElasticEngine\Subscriber
  *
- * @since 1.0.0
+ * @since   1.0.0
  */
 class BackendSubscriber implements SubscriberInterface
 {
@@ -40,7 +40,7 @@ class BackendSubscriber implements SubscriberInterface
     {
         return [
             'Enlight_Controller_Action_PostDispatchSecure_Backend_Index' => 'onLoadBackendIndex',
-            'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch'
+            'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch',
         ];
     }
 

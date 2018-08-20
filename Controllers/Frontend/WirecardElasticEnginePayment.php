@@ -166,7 +166,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * After paying the user gets redirected to this action, where the `ReturnHandler` takes care about what to do
      * next (e.g. redirecting to the "Thank you" page, rendering templates, ...).
      *
-     * @see ReturnHandler
+     * @see   ReturnHandler
      *
      * @throws UnknownActionException
      * @throws UnknownPaymentException
