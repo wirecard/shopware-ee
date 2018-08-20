@@ -58,6 +58,13 @@ class TransactionManager
         $transaction->setBasketSignature($orderSummary->getBasketMapper()->getSignature());
         $transaction->setResponse($response);
 
+        // It is possible that the notification arrived before the initial transaction has been created
+        $notify = $this->em->getRepository(Transaction::class)
+                           ->findOneBy(['requestId' => $response->getRequestId(), 'type' => Transaction::TYPE_NOTIFY]);
+        if ($notify) {
+            $transaction->setPaymentStatus($notify->getPaymentStatus());
+        }
+
         return $this->persist($transaction);
     }
 
@@ -124,6 +131,7 @@ class TransactionManager
     {
         $transaction = new Transaction(Transaction::TYPE_NOTIFY);
         $transaction->setPaymentUniqueId($initialTransaction->getPaymentUniqueId());
+        $transaction->setPaymentStatus($initialTransaction->getPaymentStatus());
         $transaction->setOrderNumber($initialTransaction->getOrderNumber());
         $transaction->setResponse($response);
 
@@ -185,6 +193,7 @@ class TransactionManager
         $childTransactions = $repo->findBy([
             'parentTransactionId' => $transaction->getParentTransactionId(),
             'transactionType'     => $transaction->getTransactionType(),
+            'type'                => Transaction::TYPE_BACKEND,
         ]);
         foreach ($parentTransactions as $parentTransaction) {
             $totalAmount = (float)$parentTransaction->getAmount();
@@ -200,6 +209,28 @@ class TransactionManager
     }
 
     /**
+     * Calculate remaining amount for backend operations
+     *
+     * @param Transaction $transaction
+     *
+     * @return float
+     *
+     * @since 1.1.0
+     */
+    public function getRemainingAmount(Transaction $transaction)
+    {
+        $totalAmount       = (float)$transaction->getAmount();
+        $childTransactions = $this->em->getRepository(Transaction::class)->findBy([
+            'parentTransactionId' => $transaction->getTransactionId(),
+            'type'                => Transaction::TYPE_BACKEND,
+        ]);
+        foreach ($childTransactions as $childTransaction) {
+            $totalAmount -= (float)$childTransaction->getAmount();
+        }
+        return $totalAmount;
+    }
+
+    /**
      * @param Transaction $transaction
      *
      * @return Transaction
@@ -211,6 +242,24 @@ class TransactionManager
         $this->em->persist($transaction);
         $this->em->flush();
         return $transaction;
+    }
+
+    /**
+     * Try to find notification via paymentUniqueId from initial transaction
+     *
+     * @param Transaction $initialTransaction
+     *
+     * @return Transaction|null
+     *
+     * @since 1.1.0
+     */
+    public function findNotificationTransaction(Transaction $initialTransaction)
+    {
+        return $this->em->getRepository(Transaction::class)
+                        ->findOneBy([
+                            'paymentUniqueId' => $initialTransaction->getPaymentUniqueId(),
+                            'type'            => Transaction::TYPE_NOTIFY,
+                        ]);
     }
 
     /**
@@ -235,14 +284,13 @@ class TransactionManager
         }
 
         if ($paymentUniqueId) {
-            $transaction = $this->em->getRepository(Transaction::class)
-                                    ->findOneBy(['paymentUniqueId' => $paymentUniqueId]);
+            $transaction = $this->findParentTransactionBy('paymentUniqueId', $paymentUniqueId);
             if ($transaction && $transaction->isInitial()) {
                 return $transaction;
             }
         }
 
-        // still no initial transaction found: try to find it recursively via parent-transaction-id and/or requestId
+        // still no initial transaction found: try to find it recursively via parent-transaction-id or requestId
         $transaction = $this->findInitialTransaction($response->getParentTransactionId(), $response->getRequestId());
         if (! $transaction) {
             throw new InitialTransactionNotFoundException($response);
@@ -262,17 +310,30 @@ class TransactionManager
      */
     private function findInitialTransaction($parentTransactionId, $requestId, Transaction $previousTransaction = null)
     {
-        $repo = $this->em->getRepository(Transaction::class);
-        if ($parentTransactionId) {
-            $transaction = $repo->findOneBy(['transactionId' => $parentTransactionId]);
-            if ($transaction) {
-                return $this->returnInitialTransaction($transaction, $previousTransaction);
-            }
+        if ($parentTransactionId
+            && ($transaction = $this->findParentTransactionBy('transactionId', $parentTransactionId))
+        ) {
+            return $this->returnInitialTransaction($transaction, $previousTransaction);
         }
-        if (! $requestId || ! ($transaction = $repo->findOneBy(['requestId' => $requestId]))) {
-            return null;
+        if ($requestId && ($transaction = $this->findParentTransactionBy('requestId', $requestId))) {
+            return $this->returnInitialTransaction($transaction, $previousTransaction);
         }
-        return $this->returnInitialTransaction($transaction, $previousTransaction);
+        return null;
+    }
+
+    /**
+     * @param string $criteria
+     * @param mixed  $value
+     *
+     * @return Transaction|null
+     *
+     * @since 1.1.0
+     */
+    private function findParentTransactionBy($criteria, $value)
+    {
+        $repo        = $this->em->getRepository(Transaction::class);
+        $transaction = $repo->findOneBy([$criteria => $value, 'type' => Transaction::TYPES_INITIAL]);
+        return $transaction ?: $repo->findOneBy([$criteria => $value]);
     }
 
     /**

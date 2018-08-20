@@ -116,6 +116,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 'request',
                 'backendOperations',
                 'isFinal',
+                'remainingAmount',
                 'state',
                 'type',
                 'statusMessage'
@@ -260,7 +261,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 id: 'wirecardee-transaction-amount',
                 xtype: 'numberfield',
                 fieldLabel: me.snippets.amountDialog.fieldLabel,
-                value: transaction.amount
+                value: transaction.remainingAmount
             },
             buttons: [{
                 text: me.snippets.amountDialog.submit,
@@ -442,17 +443,18 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
             },
             success: function (response) {
                 var data = Ext.decode(response.responseText);
-                var message = {
-                    title: me.snippets.operations.successTitle,
-                    text: me.snippets.operations.successMessage,
-                    width: 400
-                };
-
-                if (!data.success) {
-                    message.title = me.snippets.operations.errorTitle;
-                    message.text = data.message;
+                if (data.success) {
+                    Shopware.Notification.createGrowlMessage(
+                        me.snippets.operations.successTitle,
+                        me.snippets.operations.successMessage
+                    );
+                } else {
+                    Shopware.Notification.createStickyGrowlMessage({
+                        title: me.snippets.operations.errorTitle,
+                        text: data.message,
+                        width: 400
+                    });
                 }
-                Shopware.Notification.createStickyGrowlMessage(message);
                 me.loadStore();
                 if (Ext.getCmp('wirecardee-transaction-amount-window')) {
                     Ext.getCmp('wirecardee-transaction-amount-window').close();

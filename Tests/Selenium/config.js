@@ -13,16 +13,6 @@ exports.config = {
         password: 'shopware'
     },
     payments: {
-        ratepay: {
-            label: 'Wirecard Kauf auf Rechnung mit Zahlungsgarantie'
-        },
-        paypal: {
-            label: 'Wirecard PayPal',
-            fields: {
-                email: 'paypal.shopware.buyer@wirecard.com',
-                password: 'Wirecardbuyer'
-            }
-        },
         creditCard: {
             label: 'Wirecard Kreditkarte',
             fields: {
@@ -40,6 +30,10 @@ exports.config = {
             },
             password: 'wirecard'
         },
+        creditCardOneClick: {
+            label: 'Wirecard Kreditkarte',
+            tokenId: '1'
+        },
         alipay: {
             label: 'Wirecard Alipay Cross-border',
             fields: {
@@ -48,12 +42,34 @@ exports.config = {
                 paymentPasswordDigit: '1'
             }
         },
+        ratepay: {
+            label: 'Wirecard Kauf auf Rechnung mit Zahlungsgarantie'
+        },
+        ideal: {
+            label: 'Wirecard iDEAL',
+            fields: {
+                bank: 'INGBNL2A'
+            }
+        },
         masterpass: {
             label: 'Wirecard Masterpass',
             fields: {
                 email: 'masterpass@mailadresse.net',
                 password: 'WirecardPass42'
             }
+        },
+        paypal: {
+            label: 'Wirecard PayPal',
+            fields: {
+                email: 'paypal.shopware.buyer@wirecard.com',
+                password: 'Wirecardbuyer'
+            }
+        },
+        pia: {
+            label: 'Wirecard Vorauskasse'
+        },
+        poi: {
+            label: 'Wirecard Kauf auf Rechnung'
         },
         sepa: {
             label: 'Wirecard SEPA-Lastschrift',
@@ -70,18 +86,6 @@ exports.config = {
                 userId: '1234',
                 password: 'passwd',
                 tan: '12345'
-            }
-        },
-        pia: {
-            label: 'Wirecard Vorauskasse'
-        },
-        poi: {
-            label: 'Wirecard Kauf auf Rechnung'
-        },
-        ideal: {
-            label: 'Wirecard iDEAL',
-            fields: {
-                bank: 'INGBNL2A'
             }
         },
         upi: {
@@ -301,10 +305,6 @@ exports.tests = [
         timeout: 120000
     },
     {
-        file: 'Payments/PaypalTest',
-        timeout: 180000
-    },
-    {
         file: 'Payments/CreditCardTest',
         timeout: 120000
     },
@@ -313,11 +313,43 @@ exports.tests = [
         timeout: 120000
     },
     {
-        file: 'Payments/SepaTest',
+        file: 'Payments/AlipayTest',
         timeout: 120000
     },
     {
+        file: 'Payments/RatepayTest',
+        timeout: 120000
+    },
+    {
+        file: 'Payments/IdealTest',
+        timeout: 120000
+    },
+    {
+        file: 'Payments/MasterpassTest',
+        timeout: 120000
+    },
+    {
+        file: 'Payments/PaypalTest',
+        timeout: 180000
+    },
+    {
+        file: 'Payments/PiaTest',
+        timeout: 90000
+    },
+    {
+        file: 'Payments/PoiTest',
+        timeout: 90000
+    },
+    {
+        file: 'Payments/SepaTest',
+        timeout: 90000
+    },
+    {
         file: 'Payments/SofortTest',
+        timeout: 120000
+    },
+    {
+        file: 'Payments/UpiTest',
         timeout: 120000
     }
 ];

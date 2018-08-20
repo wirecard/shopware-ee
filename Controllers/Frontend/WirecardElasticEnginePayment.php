@@ -232,10 +232,15 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $orderStatus = Status::ORDER_STATE_CLARIFICATION_REQUIRED;
         }
 
-        // check if payment status has already been set by notification (see NotificationHandler)
+        // check if status has been set by notification via initial or notify transaction (see NotificationHandler)
         $paymentStatus = Status::PAYMENT_STATE_OPEN;
         if ($initialTransaction->getPaymentStatus()) {
             $paymentStatus = $initialTransaction->getPaymentStatus();
+        } else {
+            $notifyTransaction = $transactionManager->findNotificationTransaction($initialTransaction);
+            if ($notifyTransaction && $notifyTransaction->getPaymentStatus()) {
+                $paymentStatus = $notifyTransaction->getPaymentStatus();
+            }
         }
 
         $orderNumber = $this->saveOrder(
@@ -264,13 +269,20 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         // check again if payment status has been set by notification and try to update payment status
         if (! $initialTransaction->getPaymentStatus()) {
             $this->getModelManager()->refresh($initialTransaction);
-            if ($initialTransaction->getPaymentStatus()) {
-                $this->getLogger()->debug('Payment status has changed to ' . $initialTransaction->getPaymentStatus());
+            $paymentStatus = $initialTransaction->getPaymentStatus();
+            if (! $paymentStatus) {
+                $notifyTransaction = $transactionManager->findNotificationTransaction($initialTransaction);
+                if ($notifyTransaction && $notifyTransaction->getPaymentStatus()) {
+                    $paymentStatus = $notifyTransaction->getPaymentStatus();
+                }
+            }
+            if ($paymentStatus) {
+                $this->getLogger()->debug('Payment status has changed to ' . $paymentStatus);
                 $this->savePaymentStatus(
                     $response->getTransactionId(),
                     $initialTransaction->getPaymentUniqueId(),
-                    $initialTransaction->getPaymentStatus(),
-                    NotificationHandler::shouldSendStatusMail($initialTransaction->getPaymentStatus())
+                    $paymentStatus,
+                    NotificationHandler::shouldSendStatusMail($paymentStatus)
                 );
             }
         }
@@ -434,13 +446,11 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function deleteCreditCardTokenAction()
     {
-        $em      = $this->container->get('models');
-        $userId  = $this->container->get('session')->offsetGet('sUserId');
-        $tokenId = $this->Request()->getParam('token');
+        $em = $this->getModelManager();
 
         $creditCardVault = $em->getRepository(CreditCardVault::class)->findOneBy([
-            'userId' => $userId,
-            'token'  => $tokenId,
+            'id'     => $this->Request()->getParam('token'),
+            'userId' => $this->getSessionManager()->getUserId(),
         ]);
         if ($creditCardVault) {
             $em->remove($creditCardVault);

@@ -109,14 +109,15 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
             return $this->handleError('No transactions found');
         }
 
-        $shop           = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
-        $config         = $payment->getTransactionConfig(
+        $transactionManager = $this->container->get('wirecard_elastic_engine.transaction_manager');
+        $shop               = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
+        $config             = $payment->getTransactionConfig(
             $shop,
             $this->container->getParameterBag(),
             $shop->getCurrency()->getCurrency()
         );
-        $backendService = new BackendService($config, $this->getLogger());
-        $result         = [
+        $backendService     = new BackendService($config, $this->getLogger());
+        $result             = [
             'transactions' => [],
         ];
 
@@ -138,6 +139,7 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
 
             $result['transactions'][] = array_merge($transaction->toArray(), [
                 'backendOperations' => $backendOperations,
+                'remainingAmount'   => $transactionManager->getRemainingAmount($transaction),
                 'isFinal'           => $backendService->isFinal($transaction->getTransactionType()),
             ]);
         }

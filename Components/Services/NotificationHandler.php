@@ -68,7 +68,6 @@ class NotificationHandler extends Handler
      * @param BackendService  $backendService
      *
      * @return Transaction
-     * @throws \WirecardElasticEngine\Exception\InitialTransactionNotFoundException
      * @since 1.0.0
      */
     protected function handleSuccess(
@@ -88,10 +87,11 @@ class NotificationHandler extends Handler
                     "No matching transaction for " . PoiPiaTransaction::NAME
                     . " payment with PTRID '{$response->getProviderTransactionReference()}' found"
                 );
-                $initialTransaction = new Transaction(Transaction::TYPE_INITIAL_RESPONSE);
-                return $initialTransaction;
             }
-            throw $exception;
+            $initialTransaction = new Transaction(Transaction::TYPE_INITIAL_RESPONSE);
+            $initialTransaction->setPaymentStatus($paymentStatusId);
+            $this->logger->info("Notification arrived before initial transaction");
+            return $initialTransaction;
         }
 
         // POI/PIA: Set payment status "review necessary", if PTRID of initial transaction and notification do not match
