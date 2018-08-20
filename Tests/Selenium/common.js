@@ -85,8 +85,8 @@ exports.selectPaymentMethod = async function (driver, paymentLabel) {
 exports.checkConfirmationPage = async function (driver, paymentLabel) {
     console.log('wait for .teaser--btn-print');
     await driver.wait(until.elementLocated(By.className('teaser--btn-print')), 30000);
-    console.log('expect content .panel--title');
-    const panelTitle = await driver.findElement(By.className('panel--title')).getText();
+    console.log('expect content h2.panel--title');
+    const panelTitle = await driver.findElement(By.css('h2.panel--title')).getText();
     expect(panelTitle).to.include('Vielen Dank');
     console.log('expect content .payment--content');
     const paymentContent = await driver.findElement(By.className('payment--content')).getText();
