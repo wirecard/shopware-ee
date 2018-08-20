@@ -30,6 +30,10 @@ exports.config = {
             },
             password: 'wirecard'
         },
+        creditCardOneClick: {
+            label: 'Wirecard Kreditkarte',
+            tokenId: '1'
+        },
         alipay: {
             label: 'Wirecard Alipay Cross-border',
             fields: {
