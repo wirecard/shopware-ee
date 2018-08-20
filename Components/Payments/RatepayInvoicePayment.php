@@ -337,7 +337,7 @@ class RatepayInvoicePayment extends Payment implements
      */
     private function isAmountInRange($amount, Currency $currency, RatepayInvoicePaymentConfig $paymentConfig)
     {
-        if (! $currency->getDefault()) {
+        if (! $currency->getDefault() && $currency->getFactor()) {
             $amount /= $currency->getFactor();
         }
         $minAmount = floatval($paymentConfig->getMinAmount());

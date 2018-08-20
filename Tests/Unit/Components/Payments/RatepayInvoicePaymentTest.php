@@ -10,11 +10,13 @@
 namespace WirecardElasticEngine\Tests\Unit\Components\Payments;
 
 use Shopware\Models\Order\Order;
+use Shopware\Models\Shop\Currency;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Entity\AccountHolder;
+use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Basket;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\Operation;
@@ -148,6 +150,7 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
         $this->assertInstanceOf(ProcessPaymentInterface::class, $this->payment);
 
         $orderSummary = $this->createMock(OrderSummary::class);
+        $orderSummary->method('getAmount')->willReturn(new Amount(0.0, 'EUR'));
         $orderSummary->method('getAdditionalPaymentData')->willReturn([
             'birthday' => [
                 'year'  => '2000',
@@ -156,14 +159,20 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
             ],
         ]);
         $orderSummary->expects($this->atLeastOnce())->method('getPaymentUniqueId')->willReturn('123test');
-        $userMapper = $this->createMock(UserMapper::class);
-        $userMapper->method('getWirecardBillingAccountHolder')->willReturn(new AccountHolder());
+        $userMapper    = $this->createMock(UserMapper::class);
+        $accountHolder = new AccountHolder();
+        $accountHolder->setPhone('123456');
+        $userMapper->method('getWirecardBillingAccountHolder')->willReturn($accountHolder);
+        $userMapper->method('getWirecardShippingAccountHolder')->willReturn($accountHolder);
         $orderSummary->expects($this->atLeastOnce())->method('getUserMapper')->willReturn($userMapper);
+
+        $shop = $this->createMock(Shop::class);
+        $shop->method('getCurrency')->willReturn(new Currency());
 
         $this->assertNull($this->payment->processPayment(
             $orderSummary,
             $this->createMock(TransactionService::class),
-            $this->createMock(Shop::class),
+            $shop,
             $this->createMock(Redirect::class),
             $this->createMock(\Enlight_Controller_Request_Request::class),
             $this->createMock(\sOrder::class)
@@ -173,6 +182,7 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
         $this->assertEquals('123test', $transaction->getOrderNumber());
         $this->assertEquals([
             'date-of-birth' => '01-01-2000',
+            'phone'         => '123456',
         ], $transaction->getAccountHolder()->mappedProperties());
     }
 
@@ -181,17 +191,23 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
         $this->assertInstanceOf(ProcessPaymentInterface::class, $this->payment);
 
         $orderSummary = $this->createMock(OrderSummary::class);
+        $orderSummary->method('getAmount')->willReturn(new Amount(0.0, 'EUR'));
         $orderSummary->expects($this->atLeastOnce())->method('getPaymentUniqueId')->willReturn('123test');
         $userMapper    = $this->createMock(UserMapper::class);
         $accountHolder = new AccountHolder();
         $accountHolder->setDateOfBirth(new \DateTime('1999-07-31'));
+        $accountHolder->setPhone('123456');
         $userMapper->method('getWirecardBillingAccountHolder')->willReturn($accountHolder);
+        $userMapper->method('getWirecardShippingAccountHolder')->willReturn($accountHolder);
         $orderSummary->expects($this->atLeastOnce())->method('getUserMapper')->willReturn($userMapper);
+
+        $shop = $this->createMock(Shop::class);
+        $shop->method('getCurrency')->willReturn(new Currency());
 
         $this->assertNull($this->payment->processPayment(
             $orderSummary,
             $this->createMock(TransactionService::class),
-            $this->createMock(Shop::class),
+            $shop,
             $this->createMock(Redirect::class),
             $this->createMock(\Enlight_Controller_Request_Request::class),
             $this->createMock(\sOrder::class)
@@ -201,6 +217,7 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
         $this->assertEquals('123test', $transaction->getOrderNumber());
         $this->assertEquals([
             'date-of-birth' => '31-07-1999',
+            'phone'         => '123456',
         ], $transaction->getAccountHolder()->mappedProperties());
     }
 
@@ -209,15 +226,22 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
         $this->assertInstanceOf(ProcessPaymentInterface::class, $this->payment);
 
         $orderSummary = $this->createMock(OrderSummary::class);
+        $orderSummary->method('getAmount')->willReturn(new Amount(0.0, 'EUR'));
         $orderSummary->expects($this->atLeastOnce())->method('getPaymentUniqueId')->willReturn('123test');
-        $userMapper = $this->createMock(UserMapper::class);
-        $userMapper->method('getWirecardBillingAccountHolder')->willReturn(new AccountHolder());
+        $userMapper    = $this->createMock(UserMapper::class);
+        $accountHolder = new AccountHolder();
+        $accountHolder->setPhone('123456');
+        $userMapper->method('getWirecardBillingAccountHolder')->willReturn($accountHolder);
+        $userMapper->method('getWirecardShippingAccountHolder')->willReturn($accountHolder);
         $orderSummary->expects($this->atLeastOnce())->method('getUserMapper')->willReturn($userMapper);
+
+        $shop = $this->createMock(Shop::class);
+        $shop->method('getCurrency')->willReturn(new Currency());
 
         $action = $this->payment->processPayment(
             $orderSummary,
             $this->createMock(TransactionService::class),
-            $this->createMock(Shop::class),
+            $shop,
             $this->createMock(Redirect::class),
             $this->createMock(\Enlight_Controller_Request_Request::class),
             $this->createMock(\sOrder::class)
@@ -226,13 +250,74 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
         $this->assertEquals(ErrorAction::PROCESSING_FAILED_WRONG_AGE, $action->getCode());
     }
 
+    public function testProcessPaymentWithInvalidAmount()
+    {
+        $this->assertInstanceOf(ProcessPaymentInterface::class, $this->payment);
+
+        $orderSummary = $this->createMock(OrderSummary::class);
+        $orderSummary->method('getAmount')->willReturn(new Amount(10.0, 'EUR'));
+        $orderSummary->expects($this->atLeastOnce())->method('getPaymentUniqueId')->willReturn('123test');
+        $userMapper    = $this->createMock(UserMapper::class);
+        $accountHolder = new AccountHolder();
+        $accountHolder->setDateOfBirth(new \DateTime('1999-07-31'));
+        $accountHolder->setPhone('123456');
+        $userMapper->method('getWirecardBillingAccountHolder')->willReturn($accountHolder);
+        $userMapper->method('getWirecardShippingAccountHolder')->willReturn($accountHolder);
+        $orderSummary->expects($this->atLeastOnce())->method('getUserMapper')->willReturn($userMapper);
+
+        $shop = $this->createMock(Shop::class);
+        $shop->method('getCurrency')->willReturn(new Currency());
+
+        $action = $this->payment->processPayment(
+            $orderSummary,
+            $this->createMock(TransactionService::class),
+            $shop,
+            $this->createMock(Redirect::class),
+            $this->createMock(\Enlight_Controller_Request_Request::class),
+            $this->createMock(\sOrder::class)
+        );
+        $this->assertInstanceOf(ErrorAction::class, $action);
+        $this->assertEquals(ErrorAction::PROCESSING_FAILED_INVALID_AMOUNT, $action->getCode());
+    }
+
+    public function testProcessPaymentWithMissingPhone()
+    {
+        $this->assertInstanceOf(ProcessPaymentInterface::class, $this->payment);
+
+        $orderSummary = $this->createMock(OrderSummary::class);
+        $orderSummary->method('getAmount')->willReturn(new Amount(0.0, 'EUR'));
+        $orderSummary->expects($this->atLeastOnce())->method('getPaymentUniqueId')->willReturn('123test');
+        $userMapper    = $this->createMock(UserMapper::class);
+        $accountHolder = new AccountHolder();
+        $accountHolder->setDateOfBirth(new \DateTime('1999-07-31'));
+        $userMapper->method('getWirecardBillingAccountHolder')->willReturn($accountHolder);
+        $userMapper->method('getWirecardShippingAccountHolder')->willReturn($accountHolder);
+        $orderSummary->expects($this->atLeastOnce())->method('getUserMapper')->willReturn($userMapper);
+
+        $shop = $this->createMock(Shop::class);
+        $shop->method('getCurrency')->willReturn(new Currency());
+
+        $action = $this->payment->processPayment(
+            $orderSummary,
+            $this->createMock(TransactionService::class),
+            $shop,
+            $this->createMock(Redirect::class),
+            $this->createMock(\Enlight_Controller_Request_Request::class),
+            $this->createMock(\sOrder::class)
+        );
+        $this->assertInstanceOf(ErrorAction::class, $action);
+        $this->assertEquals(ErrorAction::PROCESSING_FAILED_MISSING_PHONE, $action->getCode());
+    }
+
     public function testCheckDisplayRestrictions()
     {
+        $sessionManager = $this->createMock(SessionManager::class);
+
         $userMapper = $this->createMock(UserMapper::class);
         $userMapper->method('getBillingAddress')->willReturn(['countryId' => 2]);
         $userMapper->method('getShippingAddress')->willReturn(['countryId' => 2]);
         $userMapper->method('getBirthday')->willReturn(new \DateTime('2000-01-01'));
-        $this->assertTrue($this->payment->checkDisplayRestrictions($userMapper));
+        $this->assertTrue($this->payment->checkDisplayRestrictions($userMapper, $sessionManager));
     }
 
     public function testGetAdditionalViewAssignments()
