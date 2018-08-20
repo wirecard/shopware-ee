@@ -10,6 +10,7 @@
 namespace WirecardElasticEngine\Components\Payments\Contracts;
 
 use WirecardElasticEngine\Components\Mapper\UserMapper;
+use WirecardElasticEngine\Components\Services\SessionManager;
 
 /**
  * @package WirecardElasticEngine\Components\Payments\Contracts
@@ -19,11 +20,12 @@ use WirecardElasticEngine\Components\Mapper\UserMapper;
 interface DisplayRestrictionInterface
 {
     /**
-     * @param UserMapper $userMapper
+     * @param UserMapper     $userMapper
+     * @param SessionManager $sessionManager
      *
      * @return bool
      *
      * @since 1.1.0
      */
-    public function checkDisplayRestrictions(UserMapper $userMapper);
+    public function checkDisplayRestrictions(UserMapper $userMapper, SessionManager $sessionManager);
 }
