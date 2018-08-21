@@ -71,11 +71,13 @@ class PaymentOnInvoicePaymentTest extends PaymentTestCase
 
     public function testGetBackendTransaction()
     {
-        $transaction = $this->payment->getBackendTransaction(
-            new Order(),
-            Operation::REFUND,
-            PoiPiaTransaction::NAME,
-            null);
+        $entity        = $this->createMock(\WirecardElasticEngine\Models\Transaction::class);
+        $paymentMethod = $entity->method('getPaymentMethod');
+        $paymentMethod->willReturn(PoiPiaTransaction::NAME);
+        $transactionType = $entity->method('getTransactionType');
+        $transactionType->willReturn(null);
+
+        $transaction = $this->payment->getBackendTransaction(new Order(), Operation::REFUND, $entity);
         $this->assertInstanceOf(PoiPiaTransaction::class, $transaction);
         $this->assertSame($transaction, $this->payment->getTransaction());
     }

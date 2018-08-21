@@ -19,7 +19,6 @@ use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
-use Wirecard\PaymentSdk\Transaction\Operation;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Actions\ErrorAction;
 use WirecardElasticEngine\Components\Actions\ViewAction;

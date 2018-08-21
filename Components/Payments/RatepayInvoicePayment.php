@@ -15,7 +15,6 @@ use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Entity\AccountHolder;
-use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\RatepayInvoiceTransaction;
 use Wirecard\PaymentSdk\TransactionService;
@@ -29,6 +28,7 @@ use WirecardElasticEngine\Components\Payments\Contracts\DisplayRestrictionInterf
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Services\SessionManager;
 use WirecardElasticEngine\Exception\ArrayKeyNotFoundException;
+use WirecardElasticEngine\Models\Transaction;
 
 /**
  * @package WirecardElasticEngine\Components\Payments
@@ -89,21 +89,24 @@ class RatepayInvoicePayment extends Payment implements
      *
      * @param Order       $order
      * @param null|string $operation
-     * @param null|string $paymentMethod
-     * @param string|null $transactionType
+     * @param Transaction $parentTransaction
      *
      * @return RatepayInvoiceTransaction
      *
      * @since 1.1.0
      */
-    public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType)
+    public function getBackendTransaction(Order $order, $operation, Transaction $parentTransaction)
     {
         $transaction = new RatepayInvoiceTransaction();
-        $transaction->setOrderNumber($order->getTemporaryId());
-        $transaction->setAmount(new Amount($order->getInvoiceAmount(), $order->getCurrency()));
+        $transaction->setOrderNumber($parentTransaction->getOrderNumber());
 
-        $mapper = new OrderBasketMapper();
-        $transaction->setBasket($mapper->createBasket($order));
+        if (! empty($parentTransaction->getBasket())) {
+            $mapper = new OrderBasketMapper();
+            $basket = $mapper->createBasketFromOrder($order);
+            $basket = $mapper->updateBasketItems($basket, $parentTransaction->getBasket());
+            $transaction->setBasket($basket);
+            $transaction->setAmount($basket->getTotalAmount());
+        }
         return $transaction;
     }
 

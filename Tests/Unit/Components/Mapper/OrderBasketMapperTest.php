@@ -19,7 +19,7 @@ use WirecardElasticEngine\Components\Mapper\OrderBasketMapper;
 
 class OrderBasketMapperTest extends TestCase
 {
-    public function testCreateBasket()
+    public function testCreateBasketFromOrder()
     {
         $details = new ArrayCollection();
         $detail  = new Detail();
@@ -46,7 +46,7 @@ class OrderBasketMapperTest extends TestCase
         $order->method('getDispatch')->willReturn($dispatch);
 
         $mapper = new OrderBasketMapper();
-        $basket = $mapper->createBasket($order);
+        $basket = $mapper->createBasketFromOrder($order);
 
         $this->assertInstanceOf(Basket::class, $basket);
         $this->assertEquals(40.30 * 2 + 20.10 + 30.30, $basket->getTotalAmount()->getValue());

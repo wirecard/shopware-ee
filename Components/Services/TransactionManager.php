@@ -11,6 +11,7 @@ namespace WirecardElasticEngine\Components\Services;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Wirecard\PaymentSdk\BackendService;
+use Wirecard\PaymentSdk\Entity\Basket;
 use Wirecard\PaymentSdk\Exception\MalformedResponseException;
 use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
@@ -228,6 +229,46 @@ class TransactionManager
             $totalAmount -= (float)$childTransaction->getAmount();
         }
         return $totalAmount;
+    }
+
+    /**
+     * Calculate remaining amount for backend operations
+     *
+     * @param Transaction $transaction
+     * @param Basket|null $basket
+     *
+     * @return array
+     *
+     * @since 1.1.0
+     */
+    public function getRemainingBasket(Transaction $transaction, Basket $basket = null)
+    {
+        if (! $basket) {
+            return null;
+        }
+
+        $remainingBasket = [];
+        /** @var \Wirecard\PaymentSdk\Entity\Item $item */
+        foreach ($basket->getIterator() as $item) {
+            $remainingBasket[$item->getArticleNumber()] = $item->mappedProperties();
+        }
+
+        $childTransactions = $this->em->getRepository(Transaction::class)->findBy([
+            'parentTransactionId' => $transaction->getTransactionId(),
+            'type'                => Transaction::TYPE_BACKEND,
+        ]);
+        foreach ($childTransactions as $childTransaction) {
+            if (empty($childTransaction->getBasket())) {
+                continue;
+            }
+            foreach ($childTransaction->getBasket() as $articleNumber => $item) {
+                if (! isset($remainingBasket[$articleNumber])) {
+                    continue;
+                }
+                $remainingBasket[$articleNumber]['quantity'] -= $item['quantity'];
+            }
+        }
+        return $remainingBasket;
     }
 
     /**

@@ -18,6 +18,7 @@ use Shopware_Components_Config;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
 use WirecardElasticEngine\Exception\UnknownTransactionTypeException;
+use WirecardElasticEngine\Models\Transaction;
 use WirecardElasticEngine\WirecardElasticEngine;
 
 /**
@@ -166,7 +167,7 @@ abstract class Payment implements PaymentInterface
     /**
      * {@inheritdoc}
      */
-    public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType)
+    public function getBackendTransaction(Order $order, $operation, Transaction $parentTransaction)
     {
         return $this->getTransaction();
     }

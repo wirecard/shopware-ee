@@ -9,6 +9,9 @@
 
 namespace WirecardElasticEngine\Tests\Unit\Components\Payments;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Shopware\Models\Dispatch\Dispatch;
+use Shopware\Models\Order\Detail;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Shop\Currency;
 use Shopware\Models\Shop\Shop;
@@ -30,6 +33,7 @@ use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignment
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Payments\RatepayInvoicePayment;
 use WirecardElasticEngine\Components\Services\SessionManager;
+use WirecardElasticEngine\Models\Transaction;
 use WirecardElasticEngine\Tests\Unit\PaymentTestCase;
 use WirecardElasticEngine\WirecardElasticEngine;
 
@@ -82,17 +86,45 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
 
     public function testGetBackendTransaction()
     {
-        $order = new Order();
-        $order->setInvoiceAmount(123.98);
-        $order->setCurrency('USD');
+        $order  = $this->createMock(Order::class);
+        $entity = $this->createMock(Transaction::class);
 
-        $transaction = $this->payment->getBackendTransaction($order, null, RatepayInvoiceTransaction::NAME, null);
+        $transaction = $this->payment->getBackendTransaction($order, null, $entity);
         $this->assertInstanceOf(RatepayInvoiceTransaction::class, $transaction);
         $this->assertNotSame($transaction, $this->payment->getTransaction());
-        $this->assertNotSame($transaction, $this->payment->getBackendTransaction($order, null, null, null));
+        $this->assertNotSame($transaction, $this->payment->getBackendTransaction($order, null, $entity));
+        $this->assertNull($transaction->getAmount());
 
-        $transaction = $this->payment->getBackendTransaction($order, null, null, null);
-        $this->assertEquals(123.98, $transaction->getAmount()->getValue());
+        $details = new ArrayCollection();
+        $detail  = new Detail();
+        $detail->setPrice(40.30);
+        $detail->setQuantity(2);
+        $detail->setTaxRate(20);
+        $detail->setArticleNumber('foo');
+        $details->add($detail);
+
+        $detail = new Detail();
+        $detail->setPrice(20.10);
+        $detail->setQuantity(1);
+        $detail->setTaxRate(20);
+        $detail->setArticleNumber('bar');
+        $details->add($detail);
+
+        $order->method('getDetails')->willReturn($details);
+        $order->method('getCurrency')->willReturn('USD');
+        $order->method('getInvoiceShipping')->willReturn(30.30);
+        $order->method('getInvoiceShippingNet')->willReturn(25.25);
+        $dispatch = new Dispatch();
+        $dispatch->setName('dispatch');
+        $order->method('getDispatch')->willReturn($dispatch);
+
+        $entity->method('getBasket')->willReturn([
+            'foo'      => ['quantity' => 2],
+            'shipping' => ['quantity' => 1],
+        ]);
+
+        $transaction = $this->payment->getBackendTransaction($order, null, $entity);
+        $this->assertEquals(110.9, $transaction->getAmount()->getValue());
         $this->assertEquals('USD', $transaction->getAmount()->getCurrency());
         $basket = $transaction->getBasket();
         $this->assertInstanceOf(Basket::class, $basket);

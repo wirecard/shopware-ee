@@ -26,6 +26,7 @@ use WirecardElasticEngine\Components\Payments\Contracts\AdditionalPaymentInforma
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Payments\PaymentInAdvancePayment;
 use WirecardElasticEngine\Models\Transaction;
+use WirecardElasticEngine\Models\Transaction as TransactionModel;
 use WirecardElasticEngine\Tests\Unit\PaymentTestCase;
 use WirecardElasticEngine\WirecardElasticEngine;
 
@@ -74,12 +75,13 @@ class PaymentInAdvancePaymentTest extends PaymentTestCase
 
     public function testGetBackendTransaction()
     {
-        $transaction = $this->payment->getBackendTransaction(
-            new Order(),
-            Operation::REFUND,
-            PoiPiaTransaction::NAME,
-            null
-        );
+        $entity        = $this->createMock(TransactionModel::class);
+        $paymentMethod = $entity->method('getPaymentMethod');
+        $paymentMethod->willReturn(PoiPiaTransaction::NAME);
+        $transactionType = $entity->method('getTransactionType');
+        $transactionType->willReturn(null);
+
+        $transaction = $this->payment->getBackendTransaction(new Order(), Operation::REFUND, $entity);
         $this->assertInstanceOf(PoiPiaTransaction::class, $transaction);
         $this->assertSame($transaction, $this->payment->getTransaction());
     }

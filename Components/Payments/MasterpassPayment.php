@@ -16,6 +16,7 @@ use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Transaction\MasterpassTransaction;
 use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardElasticEngine\Components\Data\PaymentConfig;
+use WirecardElasticEngine\Models\Transaction as TransactionModel;
 
 /**
  * @package WirecardElasticEngine\Components\Payments
@@ -72,18 +73,18 @@ class MasterpassPayment extends Payment
      * If paymentMethod is 'masterpass' and transaction type is 'debit' or 'authorization',
      * no backend operation is allowed.
      *
-     * @param Order       $order
-     * @param string|null $operation
-     * @param string|null $paymentMethod
-     * @param string|null $transactionType
+     * @param Order            $order
+     * @param string|null      $operation
+     * @param TransactionModel $parentTransaction
      *
      * @return MasterpassTransaction|null
      *
      * @since 1.1.0
      */
-    public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType)
+    public function getBackendTransaction(Order $order, $operation, TransactionModel $parentTransaction)
     {
-        if ($paymentMethod === MasterpassTransaction::NAME
+        $transactionType = $parentTransaction->getTransactionType();
+        if ($parentTransaction->getPaymentMethod() === MasterpassTransaction::NAME
             && ($transactionType === Transaction::TYPE_DEBIT || $transactionType === Transaction::TYPE_AUTHORIZATION)
         ) {
             return null;

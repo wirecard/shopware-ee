@@ -9,7 +9,9 @@
 
 namespace WirecardElasticEngine\Tests\Functional\Controllers\Backend;
 
+use Doctrine\ORM\EntityRepository;
 use Wirecard\PaymentSdk\Transaction\Operation;
+use WirecardElasticEngine\Models\Transaction;
 
 /**
  * @runTestsInSeparateProcesses
@@ -90,7 +92,7 @@ class WirecardElasticEngineTransactionsTest extends \Enlight_Components_Test_Plu
         $this->Request()->setHeader('User-Agent', self::USER_AGENT);
 
         $this->Request()->setParam('payment', 'wirecard_elastic_engine_credit_card');
-        $this->Request()->setParam('orderNumber', '20001');
+        $this->Request()->setParam('orderNumber', '20002');
         $response = $this->dispatch('/backend/WirecardElasticEngineTransactions/details');
 
         $this->assertEquals(200, $response->getHttpResponseCode());
@@ -104,13 +106,23 @@ class WirecardElasticEngineTransactionsTest extends \Enlight_Components_Test_Plu
 
     public function testProcessBackendOperationsActionFails()
     {
+        $em = Shopware()->Container()->get('models');
+        /** @var EntityRepository $repo */
+        $repo        = $em->getRepository(Transaction::class);
+        $transaction = $repo->findOneBy(['orderNumber' => '20001']);
+        if (! $transaction) {
+            $transaction = new Transaction(Transaction::TYPE_INITIAL_RESPONSE);
+            $transaction->setOrderNumber('20001');
+            $em->persist($transaction);
+            $em->flush($transaction);
+        }
+
         $this->Request()->setMethod('GET');
         $this->Request()->setHeader('User-Agent', self::USER_AGENT);
 
         $this->Request()->setParam('payment', 'wirecard_elastic_engine_credit_card');
         $this->Request()->setParam('operation', Operation::CANCEL);
-        $this->Request()->setParam('transactionId', '1');
-        $this->Request()->setParam('orderNumber', '20001');
+        $this->Request()->setParam('id', $transaction->getId());
         $response = $this->dispatch('/backend/WirecardElasticEngineTransactions/processBackendOperations');
 
         $this->assertEquals(200, $response->getHttpResponseCode());

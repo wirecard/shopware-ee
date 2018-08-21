@@ -38,6 +38,10 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
             submit: '{s name="AmountDialogSubmit"}{/s}',
             close: '{s name="detail/cancel" namespace="backend/order/main"}{/s}'
         },
+        basketDialog: {
+            submit: '{s name="AmountDialogSubmit"}{/s}',
+            close: '{s name="detail/cancel" namespace="backend/order/main"}{/s}'
+        },
         buttons: {
             openTransaction: '{s name="OpenTransactionTooltip" namespace="backend/wirecard_elastic_engine/transactions_window"}{/s}',
             payCapture: '{s name="PayCaptureButtonText"}{/s}',
@@ -116,10 +120,11 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 'request',
                 'backendOperations',
                 'isFinal',
-                'remainingAmount',
                 'state',
                 'type',
-                'statusMessage'
+                'statusMessage',
+                'remainingAmount',
+                'basket'
             ],
             data: []
         });
@@ -167,6 +172,10 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                         iconCls: 'sprite-cheque--plus',
                         tooltip: me.snippets.buttons.payCapture,
                         handler: function (view, row, col, item, opts, record) {
+                            if (record.data.basket) {
+                                me.showBasketDialog(me.snippets.buttons.payCapture, record.data, 'pay');
+                                return;
+                            }
                             me.showAmountDialog(me.snippets.buttons.payCapture, record.data, 'pay');
                         },
                         getClass: function (value, meta, record) {
@@ -179,6 +188,10 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                         iconCls: 'sprite-arrow-circle-315',
                         tooltip: me.snippets.buttons.refund,
                         handler: function (view, row, col, item, opts, record) {
+                            if (record.data.basket) {
+                                me.showBasketDialog(me.snippets.buttons.refund, record.data, 'refund');
+                                return;
+                            }
                             me.showAmountDialog(me.snippets.buttons.refund, record.data, 'refund');
                         },
                         getClass: function (value, meta, record) {
@@ -191,6 +204,10 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                         iconCls: 'sprite-arrow-circle-315',
                         tooltip: me.snippets.buttons.creditRefund,
                         handler: function (view, row, col, item, opts, record) {
+                            if (record.data.basket) {
+                                me.showBasketDialog(me.snippets.buttons.creditRefund, record.data, 'credit');
+                                return;
+                            }
                             me.showAmountDialog(me.snippets.buttons.creditRefund, record.data, 'credit');
                         },
                         getClass: function (value, meta, record) {
@@ -203,8 +220,12 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                         iconCls: 'sprite-cross-circle',
                         tooltip: me.snippets.buttons.cancelRefund,
                         handler: function (view, row, col, item, opts, record) {
+                            if (record.data.basket) {
+                                me.showBasketDialog(me.snippets.buttons.cancelRefund, record.data, 'cancel');
+                                return;
+                            }
                             Ext.MessageBox.confirm(me.snippets.buttons.cancelRefund, me.snippets.operations.cancelConfirmation, function (choice) {
-                                if (choice === 'no') {
+                                if (choice !== 'yes') {
                                     return false;
                                 }
                                 if (me.child('[alias=wirecardee-transaction-history]')) {
@@ -270,10 +291,88 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                         me.child('[alias=wirecardee-transaction-history]').disable();
                     }
                     win.mask();
-                    me.processBackendOperation(transaction, operation, Ext.getCmp('wirecardee-transaction-amount').getValue());
+                    me.processBackendOperation(
+                        transaction,
+                        operation,
+                        { amount: Ext.getCmp('wirecardee-transaction-amount').getValue() }
+                    );
                 }
             }, {
                 text: me.snippets.amountDialog.close,
+                handler: function () {
+                    win.close();
+                }
+            }]
+        }).show();
+    },
+
+    /**
+     * Shows a dialog to select order basket items.
+     * @param title
+     * @param transaction
+     * @param operation
+     */
+    showBasketDialog: function (title, transaction, operation) {
+        var me = this;
+        var items = [];
+        Object.keys(transaction.basket).forEach(function (articleNumber) {
+            var item = transaction.basket[articleNumber];
+            items.push({
+                id: 'wirecardee-transaction-basket-' + articleNumber,
+                xtype: 'numberfield',
+                fieldLabel: item.name + ' (' + articleNumber + ') ' + item.amount.value + ' ' + item.amount.currency,
+                labelWidth: 300,
+                maxValue: item.quantity,
+                minValue: 0,
+                value: item.quantity,
+                allowDecimals: false,
+                item: item,
+                articleNumber: articleNumber
+            });
+        });
+        var win = Ext.create('Ext.window.Window', {
+            title: title,
+            id: 'wirecardee-transaction-basket-window',
+            layout: 'fit',
+            width: 500,
+            scrollable: 'vertical',
+            items: [
+                {
+                    xtype: 'container',
+                    flex: 1,
+                    padding: 10,
+                    layout: {
+                        type: 'vbox',
+                        align: 'stretch'
+                    },
+                    items: items
+                }
+            ],
+            buttons: [{
+                text: me.snippets.basketDialog.submit,
+                handler: function () {
+                    if (me.child('[alias=wirecardee-transaction-history]')) {
+                        me.child('[alias=wirecardee-transaction-history]').disable();
+                    }
+                    win.mask();
+                    var basketItems = {};
+                    items.forEach(function (item) {
+                        var quantity = Ext.getCmp(item.id).getValue();
+                        if (!quantity) {
+                            return;
+                        }
+                        basketItems[item.articleNumber] = {
+                            quantity: quantity
+                        };
+                    });
+                    me.processBackendOperation(
+                        transaction,
+                        operation,
+                        { basket: basketItems }
+                    );
+                }
+            }, {
+                text: me.snippets.basketDialog.close,
                 handler: function () {
                     win.close();
                 }
@@ -426,20 +525,18 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
      * Processes a single backend operation.
      * @param transaction
      * @param operation
-     * @param amount
+     * @param details
      * @returns { * }
      */
-    processBackendOperation: function (transaction, operation, amount) {
+    processBackendOperation: function (transaction, operation, details) {
         var me = this;
         return Ext.Ajax.request({
             url: '{url controller="wirecardElasticEngineTransactions" action="processBackendOperations"}',
-            params: {
+            jsonData: {
+                id: transaction.id,
                 operation: operation,
                 payment: me.record.getPayment().first().get('name'),
-                transactionId: transaction.transactionId,
-                orderNumber: transaction.orderNumber,
-                amount: amount,
-                currency: transaction.currency
+                details: details
             },
             success: function (response) {
                 var data = Ext.decode(response.responseText);
@@ -458,6 +555,9 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 me.loadStore();
                 if (Ext.getCmp('wirecardee-transaction-amount-window')) {
                     Ext.getCmp('wirecardee-transaction-amount-window').close();
+                }
+                if (Ext.getCmp('wirecardee-transaction-basket-window')) {
+                    Ext.getCmp('wirecardee-transaction-basket-window').close();
                 }
             }
         });

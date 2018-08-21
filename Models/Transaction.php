@@ -130,6 +130,12 @@ class Transaction extends ModelEntity
     private $request;
 
     /**
+     * @var array
+     * @ORM\Column(name="basket", type="array", nullable=true)
+     */
+    private $basket;
+
+    /**
      * @var string
      * @ORM\Column(name="type", type="string", nullable=true)
      */
@@ -374,6 +380,14 @@ class Transaction extends ModelEntity
 
         $this->response = $response->getData();
 
+        if ($response->getBasket()) {
+            $this->basket = [];
+            /** @var \Wirecard\PaymentSdk\Entity\Item $item */
+            foreach ($response->getBasket()->getIterator() as $item) {
+                $this->basket[$item->getArticleNumber()] = $item->mappedProperties();
+            }
+        }
+
         // provider-transaction-reference-id can also be present in responses besides SuccessResponse, but we dont have
         // a getter there.
         if (! $this->providerTransactionReference && isset($this->response['provider-transaction-reference-id'])) {
@@ -415,6 +429,16 @@ class Transaction extends ModelEntity
         }
 
         $this->request = $request;
+    }
+
+    /**
+     * @return array|null
+     *
+     * @since 1.1.0
+     */
+    public function getBasket()
+    {
+        return $this->basket;
     }
 
     /**

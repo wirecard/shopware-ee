@@ -33,7 +33,7 @@ class OrderBasketMapper
      *
      * @since 1.1.0
      */
-    public function createBasket(Order $order)
+    public function createBasketFromOrder(Order $order)
     {
         $basket   = new Basket();
         $currency = $order->getCurrency();
@@ -98,5 +98,31 @@ class OrderBasketMapper
         $item->setTaxRate(round((($shipping - $shippingNet) / $shippingNet) * 100, 2));
 
         return $item;
+    }
+
+    /**
+     * Update Wirecard Basket object from array of items and return a new Basket object.
+     *
+     * @param Basket $basket
+     * @param array  $items
+     *
+     * @return Basket
+     *
+     * @since 1.1.0
+     */
+    public function updateBasketItems(Basket $basket, $items)
+    {
+        $newBasket = new Basket();
+
+        /** @var Item $basketItem */
+        foreach ($basket->getIterator() as $basketItem) {
+            if (! isset($items[$basketItem->getArticleNumber()])) {
+                continue;
+            }
+            $basketItem->setQuantity($items[$basketItem->getArticleNumber()]['quantity']);
+            $newBasket->add($basketItem);
+        }
+
+        return $newBasket;
     }
 }

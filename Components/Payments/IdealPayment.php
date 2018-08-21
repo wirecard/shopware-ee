@@ -26,6 +26,7 @@ use WirecardElasticEngine\Components\Data\IdealPaymentConfig;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Services\SessionManager;
+use WirecardElasticEngine\Models\Transaction as TransactionModel;
 
 /**
  * @package WirecardElasticEngine\Components\Payments
@@ -81,22 +82,21 @@ class IdealPayment extends Payment implements ProcessPaymentInterface, Additiona
      * If the paymentMethod is 'sepacredit' or a 'credit'/'cancel' operation is requested, we need a
      * SepaCreditTransferTransaction instead of IdealTransaction for this payment method.
      *
-     * @param Order       $order
-     * @param string|null $operation
-     * @param string|null $paymentMethod
-     * @param string|null $transactionType
+     * @param Order            $order
+     * @param string|null      $operation
+     * @param TransactionModel $parentTransaction
      *
      * @return IdealTransaction|SepaCreditTransferTransaction
      *
      * @since 1.1.0 Added $order and $transactionType
      * @since 1.0.0
      */
-    public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType)
+    public function getBackendTransaction(Order $order, $operation, TransactionModel $parentTransaction)
     {
-        if ($paymentMethod === SepaCreditTransferTransaction::NAME
+        if ($parentTransaction->getPaymentMethod() === SepaCreditTransferTransaction::NAME
             || $operation === Operation::CREDIT
             || $operation === Operation::CANCEL
-            || $transactionType === Transaction::TYPE_CREDIT
+            || $parentTransaction->getTransactionType() === Transaction::TYPE_CREDIT
         ) {
             return new SepaCreditTransferTransaction();
         }
