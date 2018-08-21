@@ -126,7 +126,7 @@ class SessionManager
      *
      * @since 1.1.0
      */
-    public function getOrderBilldingAddress()
+    public function getOrderBillingAddress()
     {
         $orderVariables = $this->getOrderVariables();
         return isset($orderVariables['sUserData']['billingaddress'])

@@ -286,10 +286,18 @@ class CreditCardPaymentTest extends PaymentTestCase
         $this->assertInstanceOf(ProcessReturnInterface::class, $this->payment);
 
         $transactionService = $this->createMock(TransactionService::class);
-        $request            = $this->createMock(\Enlight_Controller_Request_Request::class);
-        $sessionManager     = $this->createMock(SessionManager::class);
+        $transactionService->expects($this->once())->method('getTransactionByTransactionId');
+        $transactionService->expects($this->once())->method('processJsResponse');
+        $request = $this->createMock(\Enlight_Controller_Request_Request::class);
+        $request->method('getParams')->willReturn([
+            'jsresponse'            => 1,
+            'token_id'              => 'footoken123',
+            'transaction_id'        => '1',
+            'masked_account_number' => '1234****9876',
+        ]);
+        $sessionManager = $this->createMock(SessionManager::class);
         $sessionManager->expects($this->atLeastOnce())->method('getPaymentData')->willReturn(['saveToken' => true]);
-        $sessionManager->method('getOrderBilldingAddress')->willReturn([]);
+        $sessionManager->method('getOrderBillingAddress')->willReturn([]);
         $sessionManager->method('getOrderShippingAddress')->willReturn([]);
 
         $repo = $this->createMock(EntityRepository::class);
@@ -314,7 +322,7 @@ class CreditCardPaymentTest extends PaymentTestCase
         $this->em->method('createQueryBuilder')->willReturn($qb);
 
         $sessionManager = $this->createMock(SessionManager::class);
-        $sessionManager->method('getOrderBilldingAddress')->willReturn([]);
+        $sessionManager->method('getOrderBillingAddress')->willReturn([]);
         $sessionManager->method('getOrderShippingAddress')->willReturn([]);
 
         $this->assertEquals([

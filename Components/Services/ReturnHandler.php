@@ -142,7 +142,7 @@ class ReturnHandler extends Handler
     protected function handleFailure($response)
     {
         $message = 'Unexpected response';
-        $context = get_class($response);
+        $context = [get_class($response)];
 
         if ($response instanceof FailureResponse) {
             $message = 'Failure response';

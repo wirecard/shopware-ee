@@ -400,7 +400,7 @@ class CreditCardPayment extends Payment implements
 
         $token               = $params['token_id'];
         $userId              = $sessionManager->getUserId();
-        $billingAddress      = $sessionManager->getOrderBilldingAddress();
+        $billingAddress      = $sessionManager->getOrderBillingAddress();
         $shippingAddress     = $sessionManager->getOrderShippingAddress();
         $billingAddressHash  = $this->createAddressHash($billingAddress);
         $shippingAddressHash = $this->createAddressHash($shippingAddress);
@@ -458,7 +458,7 @@ class CreditCardPayment extends Payment implements
             return $formData;
         }
 
-        $billingAddressHash  = $this->createAddressHash($sessionManager->getOrderBilldingAddress());
+        $billingAddressHash  = $this->createAddressHash($sessionManager->getOrderBillingAddress());
         $shippingAddressHash = $this->createAddressHash($sessionManager->getOrderShippingAddress());
 
         $builder = $this->em->createQueryBuilder();
