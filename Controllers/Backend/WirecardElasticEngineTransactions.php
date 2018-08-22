@@ -124,6 +124,14 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
 
         $transactions = $this->addTransactionsByPaymentUniqueId($transactions);
         foreach ($transactions as $transaction) {
+            if ($transaction->getType() !== Transaction::TYPE_NOTIFY
+                || $transaction->getState() === Transaction::STATE_CLOSED
+                || $backendService->isFinal($transaction->getTransactionType())
+            ) {
+                $result['transactions'][] = $transaction->toArray();
+                continue;
+            }
+
             /** @var Transaction $transaction */
             $paymentTransaction = $payment->getBackendTransaction($order, null, $transaction);
 
@@ -138,8 +146,7 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
             $result['transactions'][] = array_merge($transaction->toArray(), [
                 'backendOperations' => $backendOperations,
                 'remainingAmount'   => $transactionManager->getRemainingAmount($transaction),
-                'basket'            => $transactionManager->getRemainingBasket($transaction, $basket),
-                'isFinal'           => $backendService->isFinal($transaction->getTransactionType()),
+                'basket'            => $transactionManager->getRemainingBasket($transaction, $basket)
             ]);
         }
 

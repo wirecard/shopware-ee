@@ -119,7 +119,6 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 'response',
                 'request',
                 'backendOperations',
-                'isFinal',
                 'state',
                 'type',
                 'statusMessage',
@@ -257,11 +256,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
      * @returns { boolean|* }
      */
     hasBackendOperation: function (transaction, operation) {
-        return !transaction.isFinal &&
-            transaction.backendOperations &&
-            transaction.backendOperations[operation] &&
-            transaction.state !== 'closed' &&
-            transaction.type === 'notify';
+        return transaction.backendOperations && transaction.backendOperations[operation];
     },
 
     /**
