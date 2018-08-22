@@ -104,8 +104,7 @@ class RatepayInvoicePayment extends Payment implements
             $mapper = new OrderBasketMapper();
             $basket = $mapper->createBasketFromOrder($order);
             $basket = $mapper->updateBasketItems($basket, $parentTransaction->getBasket());
-            $transaction->setBasket($basket);
-            $transaction->setAmount($basket->getTotalAmount());
+            $mapper->setTransactionBasket($transaction, $basket);
         }
         return $transaction;
     }
