@@ -98,7 +98,7 @@ class RatepayInvoicePayment extends Payment implements
     public function getBackendTransaction(Order $order, $operation, Transaction $parentTransaction)
     {
         $transaction = new RatepayInvoiceTransaction();
-        $transaction->setOrderNumber($parentTransaction->getOrderNumber());
+        $transaction->setOrderNumber($parentTransaction->getPaymentUniqueId());
 
         if (! empty($parentTransaction->getBasket())) {
             $mapper = new OrderBasketMapper();
