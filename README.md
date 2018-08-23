@@ -16,5 +16,5 @@ Before proceeding, please read [general information](https://github.com/wirecard
 ## Shopware documentation - Wiki
 
 [Shopware Wiki](https://github.com/wirecard/shopware-ee/wiki) provides detailed technical documentation.
-It lists all available [payment methods](https://github.com/wirecard/shopware-ee/wiki/Wirecard-Shop-Plugins-General-Information#supported-payment-methods) and post-processing operations.
+It lists all available [payment methods](https://github.com/wirecard/shopware-ee/wiki#supported-payment-methods) and post-processing operations.
 Furthermore, it includes extensive instructions how to [install](https://github.com/wirecard/shopware-ee/wiki/Installation) and [configure](https://github.com/wirecard/shopware-ee/wiki/Configuration).
