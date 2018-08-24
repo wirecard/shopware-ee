@@ -69,29 +69,30 @@ class MasterpassPaymentTest extends PaymentTestCase
 
     public function testGetBackendTransaction()
     {
-        $masterpass  = MasterpassTransaction::NAME;
+        $entity        = $this->createMock(\WirecardElasticEngine\Models\Transaction::class);
+        $paymentMethod = $entity->method('getPaymentMethod');
+        $paymentMethod->willReturn(MasterpassTransaction::NAME);
+        $transactionType = $entity->method('getTransactionType');
+        $transactionType->willReturn(null);
+
         $order       = new Order();
-        $transaction = $this->payment->getBackendTransaction($order, Operation::CANCEL, $masterpass, null);
+        $transaction = $this->payment->getBackendTransaction($order, Operation::CANCEL, $entity);
         $this->assertInstanceOf(MasterpassTransaction::class, $transaction);
         $this->assertNotSame($transaction, $this->payment->getTransaction());
 
-        $this->assertNull($this->payment->getBackendTransaction($order, null, $masterpass, Transaction::TYPE_DEBIT));
-        $this->assertNull($this->payment->getBackendTransaction(
-            $order,
-            null,
-            $masterpass,
-            Transaction::TYPE_AUTHORIZATION
-        ));
+        $transactionType->willReturn(Transaction::TYPE_DEBIT);
+        $this->assertNull($this->payment->getBackendTransaction($order, null, $entity));
 
-        $creditcard  = CreditCardTransaction::NAME;
-        $transaction = $this->payment->getBackendTransaction($order, null, $creditcard, Transaction::TYPE_DEBIT);
+        $transactionType->willReturn(Transaction::TYPE_AUTHORIZATION);
+        $this->assertNull($this->payment->getBackendTransaction($order, null, $entity));
+
+        $paymentMethod->willReturn(CreditCardTransaction::NAME);
+        $transactionType->willReturn(Transaction::TYPE_DEBIT);
+        $transaction = $this->payment->getBackendTransaction($order, null, $entity);
         $this->assertInstanceOf(MasterpassTransaction::class, $transaction);
-        $transaction = $this->payment->getBackendTransaction(
-            $order,
-            null,
-            $creditcard,
-            Transaction::TYPE_AUTHORIZATION
-        );
+
+        $transactionType->willReturn(Transaction::TYPE_AUTHORIZATION);
+        $transaction = $this->payment->getBackendTransaction($order, null, $entity);
         $this->assertInstanceOf(MasterpassTransaction::class, $transaction);
     }
 

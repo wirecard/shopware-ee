@@ -71,22 +71,18 @@ class AlipayPaymentTest extends PaymentTestCase
 
     public function testGetBackendTransaction()
     {
+        $entity        = $this->createMock(\WirecardElasticEngine\Models\Transaction::class);
+        $paymentMethod = $entity->method('getPaymentMethod');
+        $paymentMethod->willReturn(AlipayCrossborderTransaction::NAME);
+        $transactionType = $entity->method('getTransactionType');
+        $transactionType->willReturn(null);
+
         $order       = new Order();
-        $transaction = $this->payment->getBackendTransaction(
-            $order,
-            Operation::REFUND,
-            AlipayCrossborderTransaction::NAME,
-            null
-        );
+        $transaction = $this->payment->getBackendTransaction($order, Operation::REFUND, $entity);
         $this->assertInstanceOf(AlipayCrossborderTransaction::class, $transaction);
         $this->assertSame($transaction, $this->payment->getTransaction());
 
-        $backendTransaction = $this->payment->getBackendTransaction(
-            $order,
-            Operation::CANCEL,
-            AlipayCrossborderTransaction::NAME,
-            null
-        );
+        $backendTransaction = $this->payment->getBackendTransaction($order, Operation::CANCEL, $entity);
         $this->assertSame($transaction, $backendTransaction);
         $this->assertInstanceOf(AlipayCrossborderTransaction::class, $backendTransaction);
     }

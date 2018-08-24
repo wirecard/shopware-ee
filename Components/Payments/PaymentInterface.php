@@ -14,6 +14,7 @@ use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
 use WirecardElasticEngine\Components\Data\PaymentConfig;
+use WirecardElasticEngine\Models\Transaction;
 
 /**
  * Defines the shape of payment implementations.
@@ -69,15 +70,14 @@ interface PaymentInterface
      *
      * @param Order       $order
      * @param string|null $operation
-     * @param string|null $paymentMethod
-     * @param string|null $transactionType
+     * @param Transaction $parentTransaction
      *
      * @return \Wirecard\PaymentSdk\Transaction\Transaction|null
      *
-     * @since 1.1.0 Added $order and $transactionType
+     * @since 1.1.0 Added $order and $transaction
      * @since 1.0.0
      */
-    public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType);
+    public function getBackendTransaction(Order $order, $operation, Transaction $parentTransaction);
 
     /**
      * Returns the transaction type from `getPaymentOptions`.

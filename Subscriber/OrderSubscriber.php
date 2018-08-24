@@ -14,7 +14,7 @@ use Enlight\Event\SubscriberInterface;
 /**
  * @package WirecardElasticEngine\Subscriber
  *
- * @since 1.0.0
+ * @since   1.0.0
  */
 class OrderSubscriber implements SubscriberInterface
 {
@@ -30,6 +30,7 @@ class OrderSubscriber implements SubscriberInterface
 
     /**
      * @param \Enlight_Event_EventArgs $args
+     *
      * @return bool|null
      *
      * @since 1.0.0

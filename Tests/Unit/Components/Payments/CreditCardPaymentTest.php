@@ -195,7 +195,7 @@ class CreditCardPaymentTest extends PaymentTestCase
     public function testProcessPaymentWithVaultEnabled()
     {
         $orderSummary = $this->createMock(OrderSummary::class);
-        $orderSummary->method('getAdditionalPaymentData')->willReturn(['token' => 'FOOTOKEN123']);
+        $orderSummary->method('getAdditionalPaymentData')->willReturn(['token' => '2']);
         $userMapper = $this->createMock(UserMapper::class);
         $userMapper->expects($this->atLeastOnce())->method('getUserId')->willReturn(1);
         $userMapper->expects($this->atLeastOnce())->method('getBillingAddress')->willReturn([
@@ -212,10 +212,11 @@ class CreditCardPaymentTest extends PaymentTestCase
 
         $repo            = $this->createMock(EntityRepository::class);
         $creditCardVault = new CreditCardVault();
-        $lastUsed        = $creditCardVault->getLastUsed();
+        $creditCardVault->setToken('FOOTOKEN321');
+        $lastUsed = $creditCardVault->getLastUsed();
         $repo->expects($this->once())->method('findOneBy')->with([
             'userId'                  => 1,
-            'token'                   => 'FOOTOKEN123',
+            'id'                      => '2',
             'bindBillingAddressHash'  => '5958eb93c0b510df3961d03ff1bf3975',
             'bindShippingAddressHash' => 'e8269246ec003988d43a212a960f0518',
         ])->willReturn($creditCardVault);
@@ -285,10 +286,18 @@ class CreditCardPaymentTest extends PaymentTestCase
         $this->assertInstanceOf(ProcessReturnInterface::class, $this->payment);
 
         $transactionService = $this->createMock(TransactionService::class);
-        $request            = $this->createMock(\Enlight_Controller_Request_Request::class);
-        $sessionManager     = $this->createMock(SessionManager::class);
+        $transactionService->expects($this->once())->method('getTransactionByTransactionId');
+        $transactionService->expects($this->once())->method('processJsResponse');
+        $request = $this->createMock(\Enlight_Controller_Request_Request::class);
+        $request->method('getParams')->willReturn([
+            'jsresponse'            => 1,
+            'token_id'              => 'footoken123',
+            'transaction_id'        => '1',
+            'masked_account_number' => '1234****9876',
+        ]);
+        $sessionManager = $this->createMock(SessionManager::class);
         $sessionManager->expects($this->atLeastOnce())->method('getPaymentData')->willReturn(['saveToken' => true]);
-        $sessionManager->method('getOrderBilldingAddress')->willReturn([]);
+        $sessionManager->method('getOrderBillingAddress')->willReturn([]);
         $sessionManager->method('getOrderShippingAddress')->willReturn([]);
 
         $repo = $this->createMock(EntityRepository::class);
@@ -313,12 +322,13 @@ class CreditCardPaymentTest extends PaymentTestCase
         $this->em->method('createQueryBuilder')->willReturn($qb);
 
         $sessionManager = $this->createMock(SessionManager::class);
-        $sessionManager->method('getOrderBilldingAddress')->willReturn([]);
+        $sessionManager->method('getOrderBillingAddress')->willReturn([]);
         $sessionManager->method('getOrderShippingAddress')->willReturn([]);
 
         $this->assertEquals([
             'method'       => CreditCardPayment::PAYMETHOD_IDENTIFIER,
             'vaultEnabled' => true,
+            'savedCards'   => [],
         ], $this->payment->getAdditionalViewAssignments($sessionManager));
 
         $creditCardVault = new CreditCardVault();
@@ -332,7 +342,7 @@ class CreditCardPaymentTest extends PaymentTestCase
             'vaultEnabled' => true,
             'savedCards'   => [
                 [
-                    'token'               => 'FOOTOKER321',
+                    'token'               => null,
                     'maskedAccountNumber' => '4444****8888',
                     'additionalData'      => ['add'],
                     'acceptedCriteria'    => false,

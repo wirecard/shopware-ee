@@ -23,8 +23,10 @@ use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\PaymentConfig;
 use WirecardElasticEngine\Components\Mapper\BasketMapper;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Components\Payments\Contracts\ProcessReturnInterface;
 use WirecardElasticEngine\Components\Payments\PaypalPayment;
 use WirecardElasticEngine\Components\Payments\UnionpayInternationalPayment;
+use WirecardElasticEngine\Components\Services\SessionManager;
 use WirecardElasticEngine\Tests\Unit\PaymentTestCase;
 use WirecardElasticEngine\WirecardElasticEngine;
 
@@ -174,5 +176,24 @@ class UnionpayInternationalPaymentTest extends PaymentTestCase
             'wirecardRequestData' => $requestData,
             'url'                 => null,
         ], $action->getAssignments());
+    }
+
+    public function testProcessReturn()
+    {
+        $this->assertInstanceOf(ProcessReturnInterface::class, $this->payment);
+
+        $transactionService = $this->createMock(TransactionService::class);
+        $transactionService->expects($this->once())->method('processJsResponse');
+        $request = $this->createMock(\Enlight_Controller_Request_Request::class);
+        $request->method('getParams')->willReturn([
+            'jsresponse' => 1,
+        ]);
+        $sessionManager = $this->createMock(SessionManager::class);
+
+        $repo = $this->createMock(EntityRepository::class);
+        $this->em->method('getRepository')->willReturn($repo);
+
+        $response = $this->payment->processReturn($transactionService, $request, $sessionManager);
+        $this->assertNull($response);
     }
 }

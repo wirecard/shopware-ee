@@ -10,11 +10,11 @@
 namespace WirecardElasticEngine\Components\Payments;
 
 use Shopware\Models\Order\Order;
+use Shopware\Models\Shop\Currency;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Entity\AccountHolder;
-use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\RatepayInvoiceTransaction;
 use Wirecard\PaymentSdk\TransactionService;
@@ -28,6 +28,7 @@ use WirecardElasticEngine\Components\Payments\Contracts\DisplayRestrictionInterf
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Services\SessionManager;
 use WirecardElasticEngine\Exception\ArrayKeyNotFoundException;
+use WirecardElasticEngine\Models\Transaction;
 
 /**
  * @package WirecardElasticEngine\Components\Payments
@@ -88,21 +89,23 @@ class RatepayInvoicePayment extends Payment implements
      *
      * @param Order       $order
      * @param null|string $operation
-     * @param null|string $paymentMethod
-     * @param string|null $transactionType
+     * @param Transaction $parentTransaction
      *
      * @return RatepayInvoiceTransaction
      *
      * @since 1.1.0
      */
-    public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType)
+    public function getBackendTransaction(Order $order, $operation, Transaction $parentTransaction)
     {
         $transaction = new RatepayInvoiceTransaction();
-        $transaction->setOrderNumber($order->getTemporaryId());
-        $transaction->setAmount(new Amount($order->getInvoiceAmount(), $order->getCurrency()));
+        $transaction->setOrderNumber($parentTransaction->getPaymentUniqueId());
 
-        $mapper = new OrderBasketMapper();
-        $transaction->setBasket($mapper->createBasket($order));
+        if (! empty($parentTransaction->getBasket())) {
+            $mapper = new OrderBasketMapper();
+            $basket = $mapper->createBasketFromOrder($order);
+            $basket = $mapper->updateBasketItems($basket, $parentTransaction->getBasket());
+            $mapper->setTransactionBasket($transaction, $basket);
+        }
         return $transaction;
     }
 
@@ -159,9 +162,10 @@ class RatepayInvoicePayment extends Payment implements
         \Enlight_Controller_Request_Request $request,
         \sOrder $shopwareOrder
     ) {
-        $transaction = $this->getTransaction();
+        $transaction   = $this->getTransaction();
+        $paymentConfig = $this->getPaymentConfig();
 
-        if (! $this->getPaymentConfig()->hasFraudPrevention()) {
+        if (! $paymentConfig->hasFraudPrevention()) {
             // Enable Ratepay related fraud prevention
             $transaction->setDevice($orderSummary->getWirecardDevice());
             $transaction->setOrderNumber($orderSummary->getPaymentUniqueId());
@@ -169,7 +173,36 @@ class RatepayInvoicePayment extends Payment implements
             $transaction->setShipping($orderSummary->getUserMapper()->getWirecardShippingAccountHolder());
         }
 
+        if (! $this->hasAccountHolderPhoneProperty($transaction->getAccountHolder())
+            || ! $this->hasAccountHolderPhoneProperty($transaction->getShipping())
+        ) {
+            return new ErrorAction(
+                ErrorAction::PROCESSING_FAILED_MISSING_PHONE,
+                'Phone has not been provided'
+            );
+        }
+
+        if (! $this->isAmountInRange($orderSummary->getAmount()->getValue(), $shop->getCurrency(), $paymentConfig)) {
+            return new ErrorAction(
+                ErrorAction::PROCESSING_FAILED_INVALID_AMOUNT,
+                'Basket total amount not within set range'
+            );
+        }
+
         return $this->validateConsumerDateOfBirth($orderSummary, $transaction->getAccountHolder());
+    }
+
+    /**
+     * @param AccountHolder $accountHolder
+     *
+     * @return bool
+     *
+     * @since 1.1.0
+     */
+    private function hasAccountHolderPhoneProperty(AccountHolder $accountHolder)
+    {
+        $accountHolderProperties = $accountHolder->mappedProperties();
+        return ! empty($accountHolderProperties['phone']);
     }
 
     /**
@@ -190,7 +223,7 @@ class RatepayInvoicePayment extends Payment implements
         }
 
         // Otherwise validate against birthday in payment data from checkout page
-        $birthDay = $this->getDateOfBirthFromPaymentData($orderSummary->getAdditionalPaymentData());
+        $birthDay = $this->getBirthdayFromPaymentData($orderSummary->getAdditionalPaymentData());
         if (! $birthDay || $this->isBelowAgeRestriction($birthDay)) {
             return new ErrorAction(
                 ErrorAction::PROCESSING_FAILED_WRONG_AGE,
@@ -243,7 +276,7 @@ class RatepayInvoicePayment extends Payment implements
     /**
      * {@inheritdoc}
      */
-    public function checkDisplayRestrictions(UserMapper $userMapper)
+    public function checkDisplayRestrictions(UserMapper $userMapper, SessionManager $sessionManager)
     {
         $paymentConfig = $this->getPaymentConfig();
         try {
@@ -261,11 +294,7 @@ class RatepayInvoicePayment extends Payment implements
         }
 
         // Check if consumer age is above 18, either via user data or payment data from checkout page
-        $birthDay = $userMapper->getBirthday();
-        if (! $birthDay && Shopware()->Session()->offsetExists(SessionManager::PAYMENT_DATA)) {
-            $paymentData = Shopware()->Session()->offsetGet(SessionManager::PAYMENT_DATA);
-            $birthDay    = $this->getDateOfBirthFromPaymentData($paymentData);
-        }
+        $birthDay = $userMapper->getBirthday() ?: $this->getBirthdayFromPaymentData($sessionManager->getPaymentData());
         if ($birthDay && $this->isBelowAgeRestriction($birthDay)) {
             return false;
         }
@@ -276,21 +305,13 @@ class RatepayInvoicePayment extends Payment implements
             return false;
         }
 
-        $basket = Shopware()->Modules()->Basket();
-
-        // Check if shopping basket amount is within the set range (allow if amount is 0.0)
-        $amount = $basket->sGetAmount();
-        $amount = empty($amount['totalAmount']) ? 0.0 : floatval($amount['totalAmount']);
-        if (! $currency->getDefault()) {
-            $amount /= $currency->getFactor();
-        }
-        $minAmount = floatval($paymentConfig->getMinAmount());
-        $maxAmount = floatval($paymentConfig->getMaxAmount());
-        if ($amount !== 0.0 && ($amount < $minAmount || $amount > $maxAmount)) {
+        // Check shopping basket amount
+        if (! $this->isAmountInRange(floatval($sessionManager->getBasketTotalAmount()), $currency, $paymentConfig)) {
             return false;
         }
 
         // Check if no digital goods are part of the shopping basket
+        $basket = Shopware()->Modules()->Basket();
         if ($basket->sCheckForESD()) {
             return false;
         }
@@ -303,6 +324,27 @@ class RatepayInvoicePayment extends Payment implements
         }
 
         return true;
+    }
+
+    /**
+     * Check if amount is within the set range (allow if amount is 0.0)
+     *
+     * @param float                       $amount
+     * @param Currency                    $currency
+     * @param RatepayInvoicePaymentConfig $paymentConfig
+     *
+     * @return bool
+     *
+     * @since 1.1.0
+     */
+    private function isAmountInRange($amount, Currency $currency, RatepayInvoicePaymentConfig $paymentConfig)
+    {
+        if (! $currency->getDefault() && $currency->getFactor()) {
+            $amount /= $currency->getFactor();
+        }
+        $minAmount = floatval($paymentConfig->getMinAmount());
+        $maxAmount = floatval($paymentConfig->getMaxAmount());
+        return $amount === 0.0 || ($amount >= $minAmount && $amount <= $maxAmount);
     }
 
     /**
@@ -319,13 +361,13 @@ class RatepayInvoicePayment extends Payment implements
     }
 
     /**
-     * @param array $paymentData
+     * @param array|null $paymentData
      *
      * @return \DateTime|null
      *
      * @since 1.1.0
      */
-    private function getDateOfBirthFromPaymentData($paymentData)
+    private function getBirthdayFromPaymentData($paymentData)
     {
         if (! isset($paymentData['birthday']['year'])
             || ! isset($paymentData['birthday']['month'])

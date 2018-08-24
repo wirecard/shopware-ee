@@ -14,6 +14,7 @@ use Shopware\Models\Order\Order;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Basket;
 use Wirecard\PaymentSdk\Entity\Item;
+use Wirecard\PaymentSdk\Transaction\Transaction;
 
 /**
  * Create Wirecard Basket object from Shopware Order entity.
@@ -33,7 +34,7 @@ class OrderBasketMapper
      *
      * @since 1.1.0
      */
-    public function createBasket(Order $order)
+    public function createBasketFromOrder(Order $order)
     {
         $basket   = new Basket();
         $currency = $order->getCurrency();
@@ -59,7 +60,7 @@ class OrderBasketMapper
      */
     private function getOrderDetailItem(Detail $detail, $currency)
     {
-        $amount = new Amount($detail->getPrice(), $currency);
+        $amount = new Amount(BasketMapper::numberFormat($detail->getPrice()), $currency);
         $item   = new Item($detail->getArticleName(), $amount, $detail->getQuantity());
         $item->setArticleNumber($detail->getArticleNumber());
 
@@ -86,7 +87,7 @@ class OrderBasketMapper
     {
         $shipping    = $order->getInvoiceShipping();
         $shippingNet = $order->getInvoiceShippingNet();
-        
+
         $amount = new Amount($shipping, $order->getCurrency());
         $item   = new Item('Shipping', $amount, 1);
         $item->setArticleNumber('shipping');
@@ -98,5 +99,50 @@ class OrderBasketMapper
         $item->setTaxRate(round((($shipping - $shippingNet) / $shippingNet) * 100, 2));
 
         return $item;
+    }
+
+    /**
+     * Update Wirecard Basket object from array of items and return a new Basket object.
+     *
+     * @param Basket $basket
+     * @param array  $items
+     *
+     * @return Basket
+     *
+     * @since 1.1.0
+     */
+    public function updateBasketItems(Basket $basket, $items)
+    {
+        $newBasket = new Basket();
+
+        /** @var Item $basketItem */
+        foreach ($basket->getIterator() as $basketItem) {
+            if (! isset($items[$basketItem->getArticleNumber()])) {
+                continue;
+            }
+            $basketItem->setQuantity($items[$basketItem->getArticleNumber()]['quantity']);
+            $newBasket->add($basketItem);
+        }
+
+        return $newBasket;
+    }
+
+    /**
+     * Add basket to transaction.
+     *
+     * @param Transaction $transaction
+     * @param Basket $basket
+     *
+     * @since 1.1.0
+     */
+    public function setTransactionBasket(Transaction $transaction, Basket $basket)
+    {
+        $transaction->setBasket($basket);
+        $transaction->setAmount(
+            new Amount(
+                BasketMapper::numberFormat($basket->getTotalAmount()->getValue()),
+                $basket->getTotalAmount()->getCurrency()
+            )
+        );
     }
 }

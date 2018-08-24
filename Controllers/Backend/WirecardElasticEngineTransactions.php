@@ -17,6 +17,7 @@ use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Actions\Action;
 use WirecardElasticEngine\Components\Actions\ErrorAction;
 use WirecardElasticEngine\Components\Actions\ViewAction;
+use WirecardElasticEngine\Components\Mapper\OrderBasketMapper;
 use WirecardElasticEngine\Components\Services\BackendOperationHandler;
 use WirecardElasticEngine\Components\Services\PaymentFactory;
 use WirecardElasticEngine\Exception\UnknownActionException;
@@ -109,36 +110,43 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
             return $this->handleError('No transactions found');
         }
 
-        $shop           = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
-        $config         = $payment->getTransactionConfig(
+        $transactionManager = $this->container->get('wirecard_elastic_engine.transaction_manager');
+        $shop               = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
+        $config             = $payment->getTransactionConfig(
             $shop,
             $this->container->getParameterBag(),
             $shop->getCurrency()->getCurrency()
         );
-        $backendService = new BackendService($config, $this->getLogger());
-        $result         = [
+        $backendService     = new BackendService($config, $this->getLogger());
+        $result             = [
             'transactions' => [],
         ];
 
         $transactions = $this->addTransactionsByPaymentUniqueId($transactions);
         foreach ($transactions as $transaction) {
+            if ($transaction->getType() !== Transaction::TYPE_NOTIFY
+                || $transaction->getState() === Transaction::STATE_CLOSED
+                || $backendService->isFinal($transaction->getTransactionType())
+            ) {
+                $result['transactions'][] = $transaction->toArray();
+                continue;
+            }
+
             /** @var Transaction $transaction */
-            $paymentTransaction = $payment->getBackendTransaction(
-                $order,
-                null,
-                $transaction->getPaymentMethod(),
-                $transaction->getTransactionType()
-            );
+            $paymentTransaction = $payment->getBackendTransaction($order, null, $transaction);
 
             $backendOperations = [];
+            $basket            = null;
             if ($paymentTransaction) {
                 $paymentTransaction->setParentTransactionId($transaction->getTransactionId());
+                $basket            = $paymentTransaction->getBasket();
                 $backendOperations = $backendService->retrieveBackendOperations($paymentTransaction, true);
             }
 
             $result['transactions'][] = array_merge($transaction->toArray(), [
                 'backendOperations' => $backendOperations,
-                'isFinal'           => $backendService->isFinal($transaction->getTransactionType()),
+                'remainingAmount'   => $transactionManager->getRemainingAmount($transaction),
+                'basket'            => $transactionManager->getRemainingBasket($transaction, $basket)
             ]);
         }
 
@@ -188,13 +196,12 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
      */
     public function processBackendOperationsAction()
     {
-        $operation     = $this->Request()->getParam('operation');
-        $transactionId = $this->Request()->getParam('transactionId');
-        $orderNumber   = $this->Request()->getParam('orderNumber');
-        $amount        = $this->Request()->getParam('amount');
-        $currency      = $this->Request()->getParam('currency');
+        $id        = $this->Request()->getParam('id');
+        $operation = $this->Request()->getParam('operation');
+        $details   = $this->Request()->getParam('details');
 
-        if (! $operation || ! $orderNumber || ! $transactionId || ! ($order = $this->getOrderByNumber($orderNumber))) {
+        $transaction = $this->getModelManager()->getRepository(Transaction::class)->find($id);
+        if (! $operation || ! $transaction || ! ($order = $this->getOrderByNumber($transaction->getOrderNumber()))) {
             $this->handleError('BackendOperationFailed');
             return;
         }
@@ -210,21 +217,26 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
         );
         $backendService = new BackendService($config, $this->getLogger());
 
-        $transaction = $payment->getBackendTransaction($order, $operation, null, null);
-        if (! $transaction) {
+        $backendTransaction = $payment->getBackendTransaction($order, $operation, $transaction);
+        if (! $backendTransaction) {
             $this->handleError('BackendOperationFailed');
             return;
         }
-        $transaction->setParentTransactionId($transactionId);
+        $backendTransaction->setParentTransactionId($transaction->getTransactionId());
 
-        if ($amount) {
-            $transaction->setAmount(new Amount($amount, $currency));
+        if (isset($details['basket'])) {
+            $mapper = new OrderBasketMapper();
+            $basket = $mapper->updateBasketItems($backendTransaction->getBasket(), $details['basket']);
+            $mapper->setTransactionBasket($backendTransaction, $basket);
+        }
+        if (isset($details['amount'])) {
+            $backendTransaction->setAmount(new Amount($details['amount'], $transaction->getCurrency()));
         }
 
         /** @var BackendOperationHandler $backendOperationHandler */
         $backendOperationHandler = $this->get('wirecard_elastic_engine.backend_operation_handler');
         $action                  = $backendOperationHandler->execute(
-            $transaction,
+            $backendTransaction,
             $backendService,
             $operation
         );

@@ -42,13 +42,14 @@
                         text += '<span style="color:green;font-weight:bold;">';
                         text += '{s name="TestCredentialsSuccessful" namespace="backend/wirecard_elastic_engine/common"}{/s}';
                         text += '</span>';
-                    } else {
-                        text += '<span style="color:red;font-weight:bold;">';
-                        text += '{s name="TestCredentialsFailed" namespace="backend/wirecard_elastic_engine/common"}{/s}';
-                        text += '</span>';
-                        if (data.msg) {
-                            text += '<br>' + data.msg;
-                        }
+                        Shopware.Notification.createGrowlMessage(title, text);
+                        return;
+                    }
+                    text += '<span style="color:red;font-weight:bold;">';
+                    text += '{s name="TestCredentialsFailed" namespace="backend/wirecard_elastic_engine/common"}{/s}';
+                    text += '</span>';
+                    if (data.msg) {
+                        text += '<br>' + data.msg;
                     }
                     Shopware.Notification.createStickyGrowlMessage({
                         title: title,

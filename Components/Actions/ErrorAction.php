@@ -44,6 +44,16 @@ class ErrorAction implements Action
     const PROCESSING_FAILED_WRONG_AGE = 5;
 
     /**
+     * Payment processing failed due to wrong basket total amount
+     */
+    const PROCESSING_FAILED_INVALID_AMOUNT = 6;
+
+    /**
+     * Payment processing failed due to missing phone property
+     */
+    const PROCESSING_FAILED_MISSING_PHONE = 7;
+
+    /**
      * @var int
      */
     protected $code;

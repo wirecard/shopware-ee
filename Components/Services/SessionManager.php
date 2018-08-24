@@ -80,7 +80,7 @@ class SessionManager
      * Removes the device fingerprint id from the session. This should only be called in the return action, since the
      * id is valid until the payment is successfully done.
      *
-     * @see \Shopware_Controllers_Frontend_WirecardElasticEnginePayment::returnAction()
+     * @see   \Shopware_Controllers_Frontend_WirecardElasticEnginePayment::returnAction()
      *
      * @since 1.0.0
      */
@@ -126,7 +126,7 @@ class SessionManager
      *
      * @since 1.1.0
      */
-    public function getOrderBilldingAddress()
+    public function getOrderBillingAddress()
     {
         $orderVariables = $this->getOrderVariables();
         return isset($orderVariables['sUserData']['billingaddress'])
@@ -145,5 +145,24 @@ class SessionManager
         return isset($orderVariables['sUserData']['shippingaddress'])
             ? $orderVariables['sUserData']['shippingaddress']
             : [];
+    }
+
+    /**
+     * @return float
+     *
+     * @since 1.1.0
+     */
+    public function getBasketTotalAmount()
+    {
+        $orderVariables = $this->getOrderVariables();
+        $user           = ! empty($orderVariables['sUserData']) ? $orderVariables['sUserData'] : null;
+        $basket         = ! empty($orderVariables['sBasket']) ? $orderVariables['sBasket'] : null;
+        if (! empty($user['additional']['charge_vat'])) {
+            if (! empty($basket['AmountWithTaxNumeric'])) {
+                return $basket['AmountWithTaxNumeric'];
+            }
+            return isset($basket['AmountNumeric']) ? $basket['AmountNumeric'] : 0.0;
+        }
+        return isset($basket['AmountNetNumeric']) ? $basket['AmountNetNumeric'] : 0.0;
     }
 }

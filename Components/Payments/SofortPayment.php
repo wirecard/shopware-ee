@@ -23,6 +23,7 @@ use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\SofortPaymentConfig;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use WirecardElasticEngine\Models\Transaction as TransactionModel;
 
 /**
  * @package WirecardElasticEngine\Components\Payments
@@ -77,22 +78,21 @@ class SofortPayment extends Payment implements ProcessPaymentInterface
      * If the paymentMethod is 'sepacredit' or a 'credit'/'cancel' operation is requested, we need a
      * SepaCreditTransferTransaction instead of SofortTransaction for this payment method.
      *
-     * @param Order       $order
-     * @param string|null $operation
-     * @param string|null $paymentMethod
-     * @param string|null $transactionType
+     * @param Order            $order
+     * @param string|null      $operation
+     * @param TransactionModel $parentTransaction
      *
      * @return SofortTransaction|SepaCreditTransferTransaction
      *
      * @since 1.1.0 Added $order and $transactionType
      * @since 1.0.0
      */
-    public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType)
+    public function getBackendTransaction(Order $order, $operation, TransactionModel $parentTransaction)
     {
-        if ($paymentMethod === SepaCreditTransferTransaction::NAME
+        if ($parentTransaction->getPaymentMethod() === SepaCreditTransferTransaction::NAME
             || $operation === Operation::CREDIT
             || $operation === Operation::CANCEL
-            || $transactionType === Transaction::TYPE_CREDIT
+            || $parentTransaction->getTransactionType() === Transaction::TYPE_CREDIT
         ) {
             return new SepaCreditTransferTransaction();
         }

@@ -30,14 +30,15 @@ use WirecardElasticEngine\Components\Services\TransactionManager;
  * are shown as "Source" in the browser.
  * Transactions are mainly created respectively updated by the `TransactionManager`.
  *
- * @see TransactionManager
+ * @see     TransactionManager
  *
- * @since 1.0.0
+ * @since   1.0.0
  */
 class Transaction extends ModelEntity
 {
     const TYPE_INITIAL_RESPONSE = 'initial-response';
     const TYPE_INITIAL_REQUEST = 'initial-request';
+    const TYPES_INITIAL = ['initial-response', 'initial-request'];
     const TYPE_BACKEND = 'backend';
     const TYPE_RETURN = 'return';
     const TYPE_INTERACTION = 'interaction';
@@ -127,6 +128,12 @@ class Transaction extends ModelEntity
      * @ORM\Column(name="request", type="array", nullable=true)
      */
     private $request;
+
+    /**
+     * @var array
+     * @ORM\Column(name="basket", type="array", nullable=true)
+     */
+    private $basket;
 
     /**
      * @var string
@@ -373,6 +380,14 @@ class Transaction extends ModelEntity
 
         $this->response = $response->getData();
 
+        if ($response->getBasket()) {
+            $this->basket = [];
+            /** @var \Wirecard\PaymentSdk\Entity\Item $item */
+            foreach ($response->getBasket()->getIterator() as $item) {
+                $this->basket[$item->getArticleNumber()] = $item->mappedProperties();
+            }
+        }
+
         // provider-transaction-reference-id can also be present in responses besides SuccessResponse, but we dont have
         // a getter there.
         if (! $this->providerTransactionReference && isset($this->response['provider-transaction-reference-id'])) {
@@ -414,6 +429,16 @@ class Transaction extends ModelEntity
         }
 
         $this->request = $request;
+    }
+
+    /**
+     * @return array|null
+     *
+     * @since 1.1.0
+     */
+    public function getBasket()
+    {
+        return $this->basket;
     }
 
     /**

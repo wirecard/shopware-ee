@@ -27,7 +27,7 @@ use WirecardElasticEngine\Exception\UnknownPaymentException;
 /**
  * @package WirecardElasticEngine\Subscriber
  *
- * @since 1.0.0
+ * @since   1.0.0
  */
 class FrontendSubscriber implements SubscriberInterface
 {
@@ -98,16 +98,17 @@ class FrontendSubscriber implements SubscriberInterface
     public function onGetPayments(\Enlight_Event_EventArgs $args)
     {
         /** @var \sAdmin $admin */
-        $admin      = $args->get('subject');
-        $userData   = $admin->sGetUserData();
-        $userMapper = new UserMapper($userData, '', '');
+        $admin          = $args->get('subject');
+        $userData       = $admin->sGetUserData();
+        $userMapper     = new UserMapper($userData, '', '');
+        $sessionManager = new SessionManager(\Shopware()->Session());
 
         $paymentMeans = $args->getReturn();
         foreach ($paymentMeans as $key => $paymentData) {
             try {
                 $payment = $this->paymentFactory->create($paymentData['name']);
                 if ($payment instanceof DisplayRestrictionInterface) {
-                    if (! $payment->checkDisplayRestrictions($userMapper)) {
+                    if (! $payment->checkDisplayRestrictions($userMapper, $sessionManager)) {
                         unset($paymentMeans[$key]);
                     }
                 }

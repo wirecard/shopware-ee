@@ -235,12 +235,12 @@ class PaymentConfig
     public function toArray()
     {
         return [
-            'baseUrl'                   => $this->getBaseUrl(),
-            'transactionMAID'           => $this->getTransactionMAID(),
-            'transactionOperation'      => $this->getTransactionOperation(),
-            'sendBasket'                => $this->sendBasket(),
-            'fraudPrevention'           => $this->hasFraudPrevention(),
-            'sendDescriptor'            => $this->sendDescriptor()
+            'baseUrl'              => $this->getBaseUrl(),
+            'transactionMAID'      => $this->getTransactionMAID(),
+            'transactionOperation' => $this->getTransactionOperation(),
+            'sendBasket'           => $this->sendBasket(),
+            'fraudPrevention'      => $this->hasFraudPrevention(),
+            'sendDescriptor'       => $this->sendDescriptor(),
         ];
     }
 }

@@ -11,6 +11,8 @@ namespace WirecardElasticEngine\Tests\Unit\Models;
 
 use Shopware\Models\Order\Status;
 use Wirecard\PaymentSdk\Entity\Amount;
+use Wirecard\PaymentSdk\Entity\Basket;
+use Wirecard\PaymentSdk\Entity\Item;
 use Wirecard\PaymentSdk\Exception\MalformedResponseException;
 use Wirecard\PaymentSdk\Response\FormInteractionResponse;
 use Wirecard\PaymentSdk\Response\InteractionResponse;
@@ -88,6 +90,8 @@ class TransactionTest extends ModelTestCase
         $this->assertEquals(Transaction::STATE_OPEN, $transaction->getState());
         $this->assertNotNull($transaction->getCreatedAt());
         $this->assertNull($transaction->getResponse());
+        $this->assertNull($transaction->getRequest());
+        $this->assertNull($transaction->getBasket());
         $this->assertTrue($transaction->isInitial());
         $this->assertNull($transaction->getStatusMessage());
     }
@@ -104,6 +108,17 @@ class TransactionTest extends ModelTestCase
         $response->expects($this->atLeastOnce())->method('getRequestId')->willReturn('req-id');
         $response->expects($this->atLeastOnce())->method('getTransactionType')->willReturn('trans-type');
         $response->expects($this->atLeastOnce())->method('getRequestedAmount')->willReturn(null);
+        $basket = new Basket();
+        $item   = new Item('Foo', new Amount(9.81, 'USD'), 2);
+        $item->setArticleNumber('foo1');
+        $basket->add($item);
+        $item = new Item('Bar', new Amount(19, 'USD'), 1);
+        $item->setArticleNumber('bar1');
+        $basket->add($item);
+        $item = new Item('Shipping', new Amount(1, 'USD'), 1);
+        $item->setArticleNumber('shipping');
+        $basket->add($item);
+        $response->expects($this->atLeastOnce())->method('getBasket')->willReturn($basket);
         $response->expects($this->atLeastOnce())->method('getData')->willReturn([]);
         $transaction->setResponse($response);
         $this->assertEquals([], $transaction->getResponse());
@@ -111,6 +126,26 @@ class TransactionTest extends ModelTestCase
         $this->assertNull($transaction->getPaymentUniqueId());
         $transaction->setPaymentUniqueId('payunique-id');
         $this->assertEquals('payunique-id', $transaction->getPaymentUniqueId());
+        $this->assertEquals([
+            'foo1'     => [
+                'name'           => 'Foo',
+                'quantity'       => 2,
+                'amount'         => ['value' => 9.81, 'currency' => 'USD'],
+                'article-number' => 'foo1',
+            ],
+            'bar1'     => [
+                'name'           => 'Bar',
+                'quantity'       => 1,
+                'amount'         => ['value' => 19, 'currency' => 'USD'],
+                'article-number' => 'bar1',
+            ],
+            'shipping' => [
+                'name'           => 'Shipping',
+                'quantity'       => 1,
+                'amount'         => ['value' => 1, 'currency' => 'USD'],
+                'article-number' => 'shipping',
+            ],
+        ], $transaction->getBasket());
 
         $this->assertEquals([
             'id'                           => null,
@@ -163,6 +198,8 @@ class TransactionTest extends ModelTestCase
             'request-id'     => 'req-id',
         ], $transaction->getResponse());
 
+        $this->assertEquals(null, $transaction->getBasket());
+
         $transaction->setOrderNumber(1337);
 
         $this->assertEquals([
@@ -207,10 +244,16 @@ class TransactionTest extends ModelTestCase
         $response->expects($this->atLeastOnce())->method('getTransactionType')->willReturn('trans-type');
         $response->expects($this->atLeastOnce())->method('getTransactionId')->willReturn('trans-id');
         $response->expects($this->atLeastOnce())->method('getRequestedAmount')->willReturn(null);
+        $response->expects($this->atLeastOnce())->method('getBasket')->willReturn(new Basket());
         $response->expects($this->never())->method('findElement')->willReturn('order-num');
-        $response->expects($this->atLeastOnce())->method('getData')->willReturn([]);
+        $response->expects($this->atLeastOnce())->method('getData')->willReturn([
+            'provider-transaction-reference-id' => 'prov-ref'
+        ]);
         $transaction->setResponse($response);
-        $this->assertEquals([], $transaction->getResponse());
+        $this->assertEquals([
+            'provider-transaction-reference-id' => 'prov-ref'
+        ], $transaction->getResponse());
+        $this->assertEquals([], $transaction->getBasket());
 
         $this->assertEquals([
             'id'                           => null,
@@ -221,14 +264,16 @@ class TransactionTest extends ModelTestCase
             'transactionId'                => 'trans-id',
             'parentTransactionId'          => null,
             'providerTransactionId'        => null,
-            'providerTransactionReference' => null,
+            'providerTransactionReference' => 'prov-ref',
             'requestId'                    => 'req-id',
             'type'                         => Transaction::TYPE_RETURN,
             'amount'                       => null,
             'currency'                     => null,
             'createdAt'                    => $transaction->getCreatedAt()->format(\DateTime::W3C),
             'state'                        => Transaction::STATE_OPEN,
-            'response'                     => [],
+            'response'                     => [
+                'provider-transaction-reference-id' => 'prov-ref'
+            ],
             'request'                      => null,
             'statusMessage'                => null,
         ], $transaction->toArray());

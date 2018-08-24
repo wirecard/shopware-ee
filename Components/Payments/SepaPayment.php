@@ -27,6 +27,7 @@ use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignment
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Services\SessionManager;
 use WirecardElasticEngine\Exception\InsufficientDataException;
+use WirecardElasticEngine\Models\Transaction as TransactionModel;
 
 /**
  * @package WirecardElasticEngine\Components\Payments
@@ -83,21 +84,20 @@ class SepaPayment extends Payment implements ProcessPaymentInterface, Additional
      * If the paymentMethod is 'sepacredit' or a 'credit' operation is requested, we need a
      * SepaCreditTransferTransaction instead of SepaDirectDebitTransaction for this payment method.
      *
-     * @param Order       $order
-     * @param string|null $operation
-     * @param string|null $paymentMethod
-     * @param string|null $transactionType
+     * @param Order            $order
+     * @param string|null      $operation
+     * @param TransactionModel $parentTransaction
      *
      * @return SepaDirectDebitTransaction|SepaCreditTransferTransaction
      *
      * @since 1.1.0 Added $order and $transactionType
      * @since 1.0.0
      */
-    public function getBackendTransaction(Order $order, $operation, $paymentMethod, $transactionType)
+    public function getBackendTransaction(Order $order, $operation, TransactionModel $parentTransaction)
     {
-        if ($paymentMethod === SepaCreditTransferTransaction::NAME
+        if ($parentTransaction->getPaymentMethod() === SepaCreditTransferTransaction::NAME
             || $operation === Operation::CREDIT
-            || $transactionType === Transaction::TYPE_CREDIT
+            || $parentTransaction->getTransactionType() === Transaction::TYPE_CREDIT
         ) {
             return new SepaCreditTransferTransaction();
         }

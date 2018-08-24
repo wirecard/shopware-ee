@@ -20,7 +20,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * The credit card vault model holds credit card tokens for one-click checkout.
  *
- * @since 1.1.0
+ * @since   1.1.0
  */
 class CreditCardVault extends ModelEntity
 {
