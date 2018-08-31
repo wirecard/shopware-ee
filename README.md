@@ -10,7 +10,7 @@
 
 ***
 ## General information 
-Before proceeding, please read [general information](https://github.com/wirecard/shopware-ee/wiki/Wirecard-Shop-Plugins-General-Information), as it provides information on Wirecard shop plugins functionality and features.
+Before proceeding, please read [general information](https://github.com/wirecard/shopware-ee/wiki/Wirecard-Shop-Plugins-General-Information), as it provides information on Wirecard shop extensions functionality and features.
 
 ***
 ## Shopware documentation - Wiki
