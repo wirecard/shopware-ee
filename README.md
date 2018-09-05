@@ -7,6 +7,7 @@
 [![Shopware v5.4.6](https://img.shields.io/badge/Shopware-v5.4.6-green.svg)](https://www.shopware.com/)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/3f2976918a9349468eaf1320076d143b)](https://www.codacy.com/app/Wirecard/shopware-ee?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=wirecard/shopware-ee&amp;utm_campaign=Badge_Grade)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/3f2976918a9349468eaf1320076d143b)](https://www.codacy.com/app/Wirecard/shopware-ee?utm_source=github.com&utm_medium=referral&utm_content=wirecard/shopware-ee&utm_campaign=Badge_Coverage)
+[![Build Status](https://travis-ci.org/wirecard/shopware-ee.svg?branch=master)](https://travis-ci.org/wirecard/shopware-ee)
 
 ***
 ## General information 
