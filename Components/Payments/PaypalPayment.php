@@ -67,6 +67,7 @@ class PaypalPayment extends Payment implements ProcessPaymentInterface
         if (! $this->transactionInstance) {
             $this->transactionInstance = new PayPalTransaction();
         }
+
         return $this->transactionInstance;
     }
 
@@ -119,6 +120,7 @@ class PaypalPayment extends Payment implements ProcessPaymentInterface
         \sOrder $shopwareOrder
     ) {
         $transaction = $this->getTransaction();
+        $transaction->setAccountHolder($orderSummary->getUserMapper()->getWirecardBillingAccountHolder());
 
         $transaction->setOrderDetail(sprintf(
             '%s - %.2f %s',

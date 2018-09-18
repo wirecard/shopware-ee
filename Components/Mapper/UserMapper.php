@@ -45,6 +45,10 @@ class UserMapper extends ArrayMapper
     const ADDITIONAL_COUNTRY_ISO = 'countryiso';
     const ADDITIONAL_COUNTRY_SHIPPING = 'countryShipping';
     const ADDITIONAL_COUNTRY_SHIPPING_COUNTRY_ISO = 'countryiso';
+    const ADDITIONAL_STATE = 'state';
+    const ADDITIONAL_STATE_ISO = 'shortcode';
+    const ADDITIONAL_STATE_SHIPPING = 'stateShipping';
+    const ADDITIONAL_STATE_SHIPPING_ISO = 'shortcode';
 
     /**
      * @var string
@@ -139,6 +143,7 @@ class UserMapper extends ArrayMapper
         );
         $billingAddress->setPostalCode($this->getBillingAddressZip());
         $billingAddress->setStreet2($this->getBillingAddressAdditional());
+        $billingAddress->setState($this->getStateIso());
 
         return $billingAddress;
     }
@@ -159,6 +164,7 @@ class UserMapper extends ArrayMapper
         );
         $shippingAddress->setPostalCode($this->getShippingAddressZip());
         $shippingAddress->setStreet2($this->getShippingAddressAdditional());
+        $shippingAddress->setState($this->getShippingAddressStateIso());
 
         return $shippingAddress;
     }
@@ -257,6 +263,16 @@ class UserMapper extends ArrayMapper
     public function getCountryIso()
     {
         return $this->getOptional([self::ADDITIONAL, self::ADDITIONAL_COUNTRY, self::ADDITIONAL_COUNTRY_ISO]);
+    }
+
+    /**
+     * @return string|null
+     *
+     * @since 1.0.0
+     */
+    public function getStateIso()
+    {
+        return $this->getOptional([self::ADDITIONAL, self::ADDITIONAL_STATE, self::ADDITIONAL_STATE_ISO]);
     }
 
     /**
@@ -364,6 +380,20 @@ class UserMapper extends ArrayMapper
     /**
      * @return string|null
      *
+     * @since 1.2.0
+     */
+    public function getShippingAddressStateIso()
+    {
+        return $this->getOptional([
+            self::ADDITIONAL,
+            self::ADDITIONAL_STATE_SHIPPING,
+            self::ADDITIONAL_STATE_SHIPPING_ISO,
+        ]);
+    }
+
+    /**
+     * @return string|null
+     *
      * @since 1.0.0
      */
     public function getShippingAddressCity()
@@ -437,6 +467,7 @@ class UserMapper extends ArrayMapper
             'birthday'                  => $this->getBirthday(),
             'phone'                     => $this->getPhone(),
             'countryIso'                => $this->getCountryIso(),
+            'stateIso'                  => $this->getStateIso(),
             'billingAddressCity'        => $this->getBillingAddressCity(),
             'billingAddressStreet'      => $this->getBillingAddressStreet(),
             'billingAddressZip'         => $this->getBillingAddressZip(),
