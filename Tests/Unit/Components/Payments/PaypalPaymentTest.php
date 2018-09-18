@@ -13,6 +13,8 @@ use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
+use Wirecard\PaymentSdk\Entity\AccountHolder;
+use Wirecard\PaymentSdk\Entity\Address;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\Operation;
@@ -20,6 +22,7 @@ use Wirecard\PaymentSdk\Transaction\PayPalTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\PaymentConfig;
+use WirecardElasticEngine\Components\Mapper\UserMapper;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Payments\PaypalPayment;
 use WirecardElasticEngine\Exception\UnknownTransactionTypeException;
@@ -141,9 +144,20 @@ class PaypalPaymentTest extends PaymentTestCase
     {
         $this->assertInstanceOf(ProcessPaymentInterface::class, $this->payment);
 
+        $address = new Address('US', 'Portland', '1 Main St');
+        $address->setState('OR');
+
+        $accountHolder = new AccountHolder();
+        $accountHolder->setAddress($address);
+
+        $userMapper = $this->createMock(UserMapper::class);
+        $userMapper->method('getWirecardBillingAccountHolder')->willReturn($accountHolder);
+
         $orderSummary = $this->createMock(OrderSummary::class);
         $orderSummary->method('getPaymentUniqueId')->willReturn('1532501234exxxf');
         $orderSummary->method('getAmount')->willReturn(new Amount(50, 'EUR'));
+        $orderSummary->method('getUserMapper')->willReturn($userMapper);
+
         $transactionService = $this->createMock(TransactionService::class);
         $shop               = $this->createMock(Shop::class);
         $redirect           = $this->createMock(Redirect::class);

@@ -476,6 +476,7 @@ class UserMapper extends ArrayMapper
             'shippingLastName'          => $this->getShippingLastName(),
             'shippingPhone'             => $this->getShippingPhone(),
             'shippingCountryIso'        => $this->getShippingAddressCountryIso(),
+            'shippingStateIso'          => $this->getShippingAddressStateIso(),
             'shippingAddressCity'       => $this->getShippingAddressCity(),
             'shippingAddressStreet'     => $this->getShippingAddressStreet(),
             'shippingAddressZip'        => $this->getShippingAddressZip(),
