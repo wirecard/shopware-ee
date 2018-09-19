@@ -221,7 +221,6 @@ class UserMapperTest extends TestCase
                 'street1' => null,
                 'city'    => null,
                 'country' => null,
-                'state'   => null,
             ],
         ], $account->mappedProperties());
     }
