@@ -143,7 +143,10 @@ class UserMapper extends ArrayMapper
         );
         $billingAddress->setPostalCode($this->getBillingAddressZip());
         $billingAddress->setStreet2($this->getBillingAddressAdditional());
-        $billingAddress->setState($this->getStateIso());
+
+        if (strlen($this->getStateIso())) {
+            $billingAddress->setState($this->getStateIso());
+        }
 
         return $billingAddress;
     }
@@ -164,7 +167,10 @@ class UserMapper extends ArrayMapper
         );
         $shippingAddress->setPostalCode($this->getShippingAddressZip());
         $shippingAddress->setStreet2($this->getShippingAddressAdditional());
-        $shippingAddress->setState($this->getShippingAddressStateIso());
+
+        if (strlen($this->getShippingAddressStateIso())) {
+            $shippingAddress->setState($this->getShippingAddressStateIso());
+        }
 
         return $shippingAddress;
     }
