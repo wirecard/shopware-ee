@@ -274,7 +274,7 @@ class UserMapper extends ArrayMapper
     /**
      * @return string|null
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     public function getStateIso()
     {
