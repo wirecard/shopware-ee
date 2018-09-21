@@ -33,6 +33,12 @@ class UserMapperTest extends TestCase
             'country'         => [
                 'countryiso' => 'AT',
             ],
+            'state' => [
+                'shortcode' => 'OR',
+            ],
+            'stateShipping' => [
+                'shortcode' => 'OR',
+            ]
         ],
         'billingaddress'  => [
             'phone'                  => '+43123456789',
@@ -95,6 +101,7 @@ class UserMapperTest extends TestCase
                 'country'     => 'AT',
                 'postal-code' => 1337,
                 'street2'     => 'Hodor',
+                'state'       => 'OR',
             ],
         ], $account->mappedProperties());
     }
@@ -110,6 +117,9 @@ class UserMapperTest extends TestCase
                 ],
                 'country' => [
                     'countryiso' => 'AT',
+                ],
+                'state' => [
+                    'shortcode' => 'OR',
                 ],
             ],
             'billingaddress' => [
@@ -127,6 +137,7 @@ class UserMapperTest extends TestCase
                 'street1' => 'Barstreet',
                 'city'    => 'Footown',
                 'country' => 'AT',
+                'state'   => 'OR',
             ],
         ], $account->mappedProperties());
     }
@@ -141,6 +152,7 @@ class UserMapperTest extends TestCase
             'country'     => 'AT',
             'postal-code' => 1337,
             'street2'     => 'Hodor',
+            'state'       => 'OR',
         ], $address->mappedProperties());
     }
 
@@ -162,6 +174,7 @@ class UserMapperTest extends TestCase
                 'country'     => 'DE',
                 'postal-code' => 2710,
                 'street2'     => 'Shodorpping',
+                'state'       => 'OR',
             ],
         ], $account->mappedProperties());
     }
@@ -172,6 +185,9 @@ class UserMapperTest extends TestCase
             'additional'      => [
                 'countryShipping' => [
                     'countryiso' => 'DE',
+                ],
+                'stateShipping' => [
+                    'shortcode' => 'OR',
                 ],
             ],
             'shippingaddress' => [
@@ -190,6 +206,7 @@ class UserMapperTest extends TestCase
                 'street1' => 'Shippingbarstreet',
                 'city'    => 'Shippingfootown',
                 'country' => 'DE',
+                'state'   => 'OR',
             ],
         ], $account->mappedProperties());
     }
@@ -218,6 +235,7 @@ class UserMapperTest extends TestCase
             'country'     => 'DE',
             'postal-code' => 2710,
             'street2'     => 'Shodorpping',
+            'state'       => 'OR',
         ], $address->mappedProperties());
     }
 
@@ -272,6 +290,11 @@ class UserMapperTest extends TestCase
         $this->assertEquals($this->user['additional']['country']['countryiso'], $this->mapper->getCountryIso());
     }
 
+    public function testGetStateIso()
+    {
+        $this->assertEquals($this->user['additional']['state']['shortcode'], $this->mapper->getStateIso());
+    }
+
     public function testGetShippingAddress()
     {
         $this->assertEquals($this->user['shippingaddress'], $this->mapper->getShippingAddress());
@@ -282,6 +305,8 @@ class UserMapperTest extends TestCase
             $this->mapper->getShippingAddressAdditional());
         $this->assertEquals($this->user['additional']['countryShipping']['countryiso'],
             $this->mapper->getShippingAddressCountryIso());
+        $this->assertEquals($this->user['additional']['stateShipping']['shortcode'],
+            $this->mapper->getShippingAddressStateIso());
     }
 
     public function testGetClientIp()
@@ -304,6 +329,7 @@ class UserMapperTest extends TestCase
             'birthday'                  => new \DateTime('1990-01-01'),
             'phone'                     => '+43123456789',
             'countryIso'                => 'AT',
+            'stateIso'                  => 'OR',
             'billingAddressCity'        => 'Footown',
             'billingAddressStreet'      => 'Barstreet',
             'billingAddressZip'         => 1337,
@@ -312,6 +338,7 @@ class UserMapperTest extends TestCase
             'shippingLastName'          => 'Last Shipping',
             'shippingPhone'             => '+43987654321',
             'shippingCountryIso'        => 'DE',
+            'shippingStateIso'          => 'OR',
             'shippingAddressCity'       => 'Shippingfootown',
             'shippingAddressStreet'     => 'Shippingbarstreet',
             'shippingAddressZip'        => 2710,
@@ -327,11 +354,13 @@ class UserMapperTest extends TestCase
         $this->assertNull($mapper->getCustomerNumber());
         $this->assertNull($mapper->getBirthday());
         $this->assertNull($mapper->getCountryIso());
+        $this->assertNull($mapper->getStateIso());
         $this->assertNull($mapper->getShippingAddressCity());
         $this->assertNull($mapper->getShippingAddressStreet());
         $this->assertNull($mapper->getShippingAddressZip());
         $this->assertNull($mapper->getShippingAddressAdditional());
         $this->assertNull($mapper->getShippingAddressCountryIso());
+        $this->assertNull($mapper->getShippingAddressStateIso());
 
         $mapper = new UserMapper([
             'billingaddress'  => [],
@@ -343,16 +372,20 @@ class UserMapperTest extends TestCase
         $this->assertNull($mapper->getBillingAddressZip());
         $this->assertNull($mapper->getBillingAddressAdditional());
         $this->assertNull($mapper->getCountryIso());
+        $this->assertNull($mapper->getStateIso());
         $this->assertNull($mapper->getShippingAddressCity());
         $this->assertNull($mapper->getShippingAddressStreet());
         $this->assertNull($mapper->getShippingAddressZip());
         $this->assertNull($mapper->getShippingAddressAdditional());
         $this->assertNull($mapper->getShippingAddressCountryIso());
+        $this->assertNull($mapper->getShippingAddressStateIso());
 
         $mapper = new UserMapper([
-            'additional' => ['countryShipping' => [], 'country' => []],
+            'additional' => ['countryShipping' => [], 'country' => [], 'stateShipping' => [], 'state' => []],
         ], '', '');
         $this->assertNull($mapper->getCountryIso());
         $this->assertNull($mapper->getShippingAddressCountryIso());
+        $this->assertNull($mapper->getStateIso());
+        $this->assertNull($mapper->getShippingAddressStateIso());
     }
 }
