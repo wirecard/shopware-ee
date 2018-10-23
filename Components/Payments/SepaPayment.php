@@ -217,9 +217,8 @@ class SepaPayment extends Payment implements ProcessPaymentInterface, Additional
     }
 
     /**
-     * Generate sepa mandate id: Format "[creditorId]-[orderNumber]-[timestamp]"
-     * [timestamp] is already part of the paymentUniqueId (first 10 characters). The remaining 5 characters of
-     * paymentUniqueId can be used as [orderNumber], which has a max length of 5 anyway.
+     * Generate sepa mandate id: Format "[creditorId]-[timestamp]"
+     * [timestamp] is already part of the paymentUniqueId (first 10 characters).
      *
      * @param OrderSummary $orderSummary
      *
@@ -230,7 +229,6 @@ class SepaPayment extends Payment implements ProcessPaymentInterface, Additional
     private function generateMandateId(OrderSummary $orderSummary)
     {
         return $this->getPluginConfig('SepaCreditorId') . '-' .
-               substr($orderSummary->getPaymentUniqueId(), 10, 5) . '-' .
                substr($orderSummary->getPaymentUniqueId(), 0, 10);
     }
 }
