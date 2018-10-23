@@ -14,12 +14,16 @@
   "require-dev": {
     "phpunit/phpunit": "5.4.3",
     "squizlabs/php_codesniffer": "^2.7",
-    "codacy/coverage": "1.4.2"
+    "codacy/coverage": "1.4.2",
+    "symfony/yaml": "^3"
   },
   "type": "shopware-plugin",
   "scripts": {
+    "make-readme-badge": "@php .bin/version-helper.php -r",
+    "make-wiki-notes": "@php .bin/version-helper.php -w",
+    "make-release-notes": "@php .bin/version-helper.php",
     "upload-coverage": "codacycoverage clover build/coverage.xml",
-    "cs-check": "phpcs --standard=phpcs.xml --ignore=*/vendor/*,*/Tests/*,*/node_modules/*,*/Resources/* -s",
+    "cs-check": "phpcs --standard=phpcs.xml --ignore=*/vendor/*,*/Tests/*,*/node_modules/*,*/Resources/*,*/.bin/* -s",
     "cs-fix": "phpcbf --standard=phpcs.xml",
     "test-coverage": "phpunit --colors=always --coverage-clover build/coverage.xml"
   }

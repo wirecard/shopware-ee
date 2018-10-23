@@ -1,0 +1,40 @@
+[
+    {
+        "release": "1.2.0",
+        "shopsystem": "Shopware",
+        "tested": "5.5.1",
+        "compatibility": "5.4.5",
+        "changelog": [
+            "Update paymentSDK version",
+            "Add PayPal state variable",
+            "Ensure compatibility with Shopware 5.5.1"
+        ]
+    },
+    {
+        "release": "1.1.0",
+        "shopsystem": "Shopware",
+        "tested": "5.4.6",
+        "compatibility": "5.4.5",
+        "changelog": [
+            "Alipay Cross-border",
+            "Guaranteed Invoice",
+            "Masterpass",
+            "Payment In Advance",
+            "Payment On Invoice",
+            "UnionPay International"
+        ]
+    },
+    {
+        "release": "1.0.0",
+        "shopsystem": "Shopware",
+        "tested": "5.4.5",
+        "compatibility": "5.4.5",
+        "changelog": [
+            "Credit card",
+            "iDEAL",
+            "PayPal",
+            "SEPA",
+            "Sofort."
+        ]
+    }
+]
