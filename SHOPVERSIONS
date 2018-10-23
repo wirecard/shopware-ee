@@ -1,5 +1,14 @@
 [
     {
+        "release": "1.2.1",
+        "shopsystem": "Shopware",
+        "tested": "5.5.1",
+        "compatibility": "5.4.5",
+        "changelog": [
+            "Update handling of SEPA Mandate ID"
+        ]
+    },
+    {
         "release": "1.2.0",
         "shopsystem": "Shopware",
         "tested": "5.5.1",
