@@ -18,7 +18,17 @@
                 <handler>
                     <![CDATA[
 function (button) {
-    Ext.create('Shopware.apps.WirecardElasticEngineExtendOrder.view.GeneralInformationWindow').show();
+    var message = Ext.userLanguage == "de"
+        ? "Um diese Funktion zu verwenden muss das Plugin aktiviert und die Seite einmalig aktualisiert werden. Jetzt aktualisieren?"
+        : "To use this functionality the plugin must be activated and the page needs to be refreshed once. Refresh now?"
+
+    if (Shopware.apps.WirecardElasticEngineExtendOrder) {
+        Ext.create('Shopware.apps.WirecardElasticEngineExtendOrder.view.GeneralInformationWindow').show();
+    } else {
+        if (confirm(message)) {
+            window.location.reload();
+        }
+    }
 }
                     ]]>
                 </handler>
@@ -32,7 +42,17 @@ function (button) {
                 <handler>
                     <![CDATA[
 function (button) {
-    wirecardeeChatOpen();
+    var message = Ext.userLanguage == "de"
+        ? "Um diese Funktion zu verwenden muss das Plugin aktiviert und die Seite einmalig aktualisiert werden. Jetzt aktualisieren?"
+        : "To use this functionality the plugin must be activated and the page needs to be refreshed once. Refresh now?"
+
+    if (typeof wirecardeeChatOpen !== "undefined") {
+        wirecardeeChatOpen();
+    } else {
+        if (confirm(message)) {
+            window.location.reload();
+        }
+    }
 }
                     ]]>
                 </handler>
@@ -265,7 +285,17 @@ function (button) {
                 <handler>
                     <![CDATA[
 function (button) {
-    wirecardeeTestPaymentCredentials(button, 'CreditCard', 'Wirecard Credit Card Test');
+    var message = Ext.userLanguage == "de"
+        ? "Um diese Funktion zu verwenden muss das Plugin aktiviert und die Seite einmalig aktualisiert werden. Jetzt aktualisieren?"
+        : "To use this functionality the plugin must be activated and the page needs to be refreshed once. Refresh now?"
+
+    if (typeof wirecardeeTestPaymentCredentials !== "undefined") {
+        wirecardeeTestPaymentCredentials(button, 'CreditCard', 'Wirecard Credit Card Test');
+    } else {
+        if (confirm(message)) {
+            window.location.reload();
+        }
+    }
 }
                     ]]>
                 </handler>
@@ -352,7 +382,17 @@ function (button) {
             <handler>
                 <![CDATA[
 function (button) {
-    wirecardeeTestPaymentCredentials(button, 'Alipay', 'Wirecard Alipay Cross-border Test');
+    var message = Ext.userLanguage == "de"
+        ? "Um diese Funktion zu verwenden muss das Plugin aktiviert und die Seite einmalig aktualisiert werden. Jetzt aktualisieren?"
+        : "To use this functionality the plugin must be activated and the page needs to be refreshed once. Refresh now?"
+
+    if (typeof wirecardeeTestPaymentCredentials !== "undefined") {
+        wirecardeeTestPaymentCredentials(button, 'Alipay', 'Wirecard Alipay Cross-border Test');
+    } else {
+        if (confirm(message)) {
+            window.location.reload();
+        }
+    }
 }
                     ]]>
             </handler>
@@ -525,7 +565,17 @@ function (button) {
                 <handler>
                     <![CDATA[
 function (button) {
-    wirecardeeTestPaymentCredentials(button, 'RatepayInvoice', 'Guaranteed Invoice by Wirecard Test');
+    var message = Ext.userLanguage == "de"
+        ? "Um diese Funktion zu verwenden muss das Plugin aktiviert und die Seite einmalig aktualisiert werden. Jetzt aktualisieren?"
+        : "To use this functionality the plugin must be activated and the page needs to be refreshed once. Refresh now?"
+
+    if (typeof wirecardeeTestPaymentCredentials !== "undefined") {
+        wirecardeeTestPaymentCredentials(button, 'RatepayInvoice', 'Guaranteed Invoice by Wirecard Test');
+    } else {
+        if (confirm(message)) {
+            window.location.reload();
+        }
+    }
 }
                     ]]>
                 </handler>
@@ -599,7 +649,17 @@ function (button) {
                 <handler>
                     <![CDATA[
 function (button) {
-    wirecardeeTestPaymentCredentials(button, 'Ideal', 'Wirecard iDEAL Test');
+    var message = Ext.userLanguage == "de"
+        ? "Um diese Funktion zu verwenden muss das Plugin aktiviert und die Seite einmalig aktualisiert werden. Jetzt aktualisieren?"
+        : "To use this functionality the plugin must be activated and the page needs to be refreshed once. Refresh now?"
+
+    if (typeof wirecardeeTestPaymentCredentials !== "undefined") {
+        wirecardeeTestPaymentCredentials(button, 'Ideal', 'Wirecard iDEAL Test');
+    } else {
+        if (confirm(message)) {
+            window.location.reload();
+        }
+    }
 }
                     ]]>
                 </handler>
@@ -699,7 +759,17 @@ function (button) {
                 <handler>
                     <![CDATA[
 function (button) {
-    wirecardeeTestPaymentCredentials(button, 'Masterpass', 'Wirecard Masterpass Test');
+    var message = Ext.userLanguage == "de"
+        ? "Um diese Funktion zu verwenden muss das Plugin aktiviert und die Seite einmalig aktualisiert werden. Jetzt aktualisieren?"
+        : "To use this functionality the plugin must be activated and the page needs to be refreshed once. Refresh now?"
+
+    if (typeof wirecardeeTestPaymentCredentials !== "undefined") {
+        wirecardeeTestPaymentCredentials(button, 'Masterpass', 'Wirecard Masterpass Test');
+    } else {
+        if (confirm(message)) {
+            window.location.reload();
+        }
+    }
 }
                     ]]>
                 </handler>
@@ -822,7 +892,17 @@ function (button) {
                 <handler>
                     <![CDATA[
 function (button) {
-    wirecardeeTestPaymentCredentials(button, 'Paypal', 'Wirecard PayPal Test');
+    var message = Ext.userLanguage == "de"
+        ? "Um diese Funktion zu verwenden muss das Plugin aktiviert und die Seite einmalig aktualisiert werden. Jetzt aktualisieren?"
+        : "To use this functionality the plugin must be activated and the page needs to be refreshed once. Refresh now?"
+
+    if (typeof wirecardeeTestPaymentCredentials !== "undefined") {
+        wirecardeeTestPaymentCredentials(button, 'Paypal', 'Wirecard PayPal Test');
+    } else {
+        if (confirm(message)) {
+            window.location.reload();
+        }
+    }
 }
                     ]]>
                 </handler>
@@ -896,7 +976,17 @@ function (button) {
                 <handler>
                     <![CDATA[
 function (button) {
-    wirecardeeTestPaymentCredentials(button, 'PoiPia', 'Wirecard Payment on Invoice / Payment in Advance Test');
+    var message = Ext.userLanguage == "de"
+        ? "Um diese Funktion zu verwenden muss das Plugin aktiviert und die Seite einmalig aktualisiert werden. Jetzt aktualisieren?"
+        : "To use this functionality the plugin must be activated and the page needs to be refreshed once. Refresh now?"
+
+    if (typeof wirecardeeTestPaymentCredentials !== "undefined") {
+        wirecardeeTestPaymentCredentials(button, 'PoiPia', 'Wirecard Payment on Invoice / Payment in Advance Test');
+    } else {
+        if (confirm(message)) {
+            window.location.reload();
+        }
+    }
 }
                     ]]>
                 </handler>
@@ -1041,7 +1131,17 @@ function (button) {
                 <handler>
                     <![CDATA[
 function (button) {
-    wirecardeeTestPaymentCredentials(button, 'Sepa', 'Wirecard SEPA Direct Debit Test');
+    var message = Ext.userLanguage == "de"
+        ? "Um diese Funktion zu verwenden muss das Plugin aktiviert und die Seite einmalig aktualisiert werden. Jetzt aktualisieren?"
+        : "To use this functionality the plugin must be activated and the page needs to be refreshed once. Refresh now?"
+
+    if (typeof wirecardeeTestPaymentCredentials !== "undefined") {
+        wirecardeeTestPaymentCredentials(button, 'Sepa', 'Wirecard SEPA Direct Debit Test');
+    } else {
+        if (confirm(message)) {
+            window.location.reload();
+        }
+    }
 }
                     ]]>
                 </handler>
@@ -1151,7 +1251,17 @@ function (button) {
                 <handler>
                     <![CDATA[
 function (button) {
-    wirecardeeTestPaymentCredentials(button, 'Sofort', 'Wirecard Sofort. Test');
+    var message = Ext.userLanguage == "de"
+        ? "Um diese Funktion zu verwenden muss das Plugin aktiviert und die Seite einmalig aktualisiert werden. Jetzt aktualisieren?"
+        : "To use this functionality the plugin must be activated and the page needs to be refreshed once. Refresh now?"
+
+    if (typeof wirecardeeTestPaymentCredentials !== "undefined") {
+        wirecardeeTestPaymentCredentials(button, 'Sofort', 'Wirecard Sofort. Test');
+    } else {
+        if (confirm(message)) {
+            window.location.reload();
+        }
+    }
 }
                     ]]>
                 </handler>
@@ -1250,7 +1360,17 @@ function (button) {
                 <handler>
                     <![CDATA[
 function (button) {
-    wirecardeeTestPaymentCredentials(button, 'UnionpayInternational', 'Wirecard UnionPay International Test');
+    var message = Ext.userLanguage == "de"
+        ? "Um diese Funktion zu verwenden muss das Plugin aktiviert und die Seite einmalig aktualisiert werden. Jetzt aktualisieren?"
+        : "To use this functionality the plugin must be activated and the page needs to be refreshed once. Refresh now?"
+
+    if (typeof wirecardeeTestPaymentCredentials !== "undefined") {
+        wirecardeeTestPaymentCredentials(button, 'UnionpayInternational', 'Wirecard UnionPay International Test');
+    } else {
+        if (confirm(message)) {
+            window.location.reload();
+        }
+    }
 }
                     ]]>
                 </handler>
