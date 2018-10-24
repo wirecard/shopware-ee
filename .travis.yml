@@ -78,6 +78,10 @@ after_failure:
 - cat ${SHOPWARE_DIRECTORY}/composer.lock
 - cat ${SHOPWARE_DIRECTORY}/var/log/*.log
 before_deploy:
+  - export REPO_NAME=`echo $TRAVIS_REPO_SLUG | awk -F'/' '{print $2}'`
+  - export RELEASE_NOTES=$(composer make-release-notes)
+  - bash .bin/generate-wiki-notes.sh
+  - bash .bin/generate-readme-badge.sh
   - bash .bin/generate-release-package.sh $TRAVIS_TAG
 deploy:
   provider: releases
