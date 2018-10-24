@@ -228,7 +228,7 @@ class SepaPaymentTest extends PaymentTestCase
                 'iban' => 'I-B-A-N',
             ],
             'mandate'          => [
-                'mandate-id'  => '-exxxf-1532501234',
+                'mandate-id'  => '-1532501234',
                 'signed-date' => date('Y-m-d'),
             ],
         ], $transaction->mappedProperties());
