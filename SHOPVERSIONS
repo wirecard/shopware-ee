@@ -1,5 +1,14 @@
 [
     {
+        "release": "1.2.2",
+        "shopsystem": "Shopware",
+        "tested": "5.5.2",
+        "compatibility": "5.4.5",
+        "changelog": [
+            "Add notice for JavaScript functionality being used directly after installing"
+        ]
+    },
+    {
         "release": "1.2.1",
         "shopsystem": "Shopware",
         "tested": "5.5.1",
