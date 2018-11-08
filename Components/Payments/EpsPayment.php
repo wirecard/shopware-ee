@@ -23,6 +23,7 @@ use Wirecard\PaymentSdk\Transaction\Transaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\EpsPaymentConfig;
+use WirecardElasticEngine\Components\Data\PaymentConfig;
 use WirecardElasticEngine\Components\Payments\Contracts\AdditionalViewAssignmentsInterface;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
 use WirecardElasticEngine\Components\Services\SessionManager;
@@ -71,37 +72,10 @@ class EpsPayment extends Payment implements ProcessPaymentInterface, AdditionalV
 
     public function getTransaction()
     {
-        if ( ! $this->transactionInstance)
-        {
+        if (! $this->transactionInstance) {
             $this->transactionInstance = new EpsTransaction();
         }
         return $this->transactionInstance;
-    }
-
-    /**
-     * If the paymentMethod is 'sepacredit' or a 'credit'/'cancel' operation is requested, we need a
-     * SepaCreditTransferTransaction instead of EpsTransaction for this payment method.
-     *
-     * @param Order $order
-     * @param string|null $operation
-     * @param TransactionModel $parentTransaction
-     *
-     * @return EpsTransaction|SepaCreditTransferTransaction
-     *
-     * @since 1.1.0 Added $order and $transactionType
-     * @since 1.0.0
-     */
-    public function getBackendTransaction(Order $order, $operation, TransactionModel $parentTransaction)
-    {
-        if ($parentTransaction->getPaymentMethod() === SepaCreditTransferTransaction::NAME
-            || $operation === Operation::CREDIT
-            || $operation === Operation::CANCEL
-            || $parentTransaction->getTransactionType() === Transaction::TYPE_CREDIT
-        )
-        {
-            return new SepaCreditTransferTransaction();
-        }
-        return new EpsTransaction();
     }
 
     /**
@@ -116,25 +90,17 @@ class EpsPayment extends Payment implements ProcessPaymentInterface, AdditionalV
             $this->getPaymentConfig()->getTransactionSecret()
         ));
 
-        $sepaCreditTransferConfig = new SepaConfig(
-            SepaCreditTransferTransaction::NAME,
-            $this->getPaymentConfig()->getBackendTransactionMAID(),
-            $this->getPaymentConfig()->getBackendTransactionSecret()
-        );
-        $sepaCreditTransferConfig->setCreditorId($this->getPaymentConfig()->getBackendCreditorId());
-        $config->add($sepaCreditTransferConfig);
-
         return $config;
     }
 
     /**
-     * @return EpsPaymentConfig
+     * @return PaymentConfig
      *
      * @since 1.0.0
      */
     public function getPaymentConfig()
     {
-        $paymentConfig = new EpsPaymentConfig(
+        $paymentConfig = new PaymentConfig(
             $this->getPluginConfig('EpsServer'),
             $this->getPluginConfig('EpsHttpUser'),
             $this->getPluginConfig('EpsHttpPassword')
@@ -143,10 +109,7 @@ class EpsPayment extends Payment implements ProcessPaymentInterface, AdditionalV
         $paymentConfig->setTransactionMAID($this->getPluginConfig('EpsMerchantId'));
         $paymentConfig->setTransactionSecret($this->getPluginConfig('EpsSecret'));
         $paymentConfig->setTransactionOperation(parent::TRANSACTION_OPERATION_PAY);
-        $paymentConfig->setSendDescriptor(TRUE);
-        $paymentConfig->setBackendTransactionMAID($this->getPluginConfig('SepaBackendMerchantId'));
-        $paymentConfig->setBackendTransactionSecret($this->getPluginConfig('SepaBackendSecret'));
-        $paymentConfig->setBackendCreditorId($this->getPluginConfig('SepaBackendCreditorId'));
+        $paymentConfig->setSendDescriptor(true);
 
         $paymentConfig->setFraudPrevention($this->getPluginConfig('EpsFraudPrevention'));
 
