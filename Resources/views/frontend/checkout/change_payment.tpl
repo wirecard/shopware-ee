@@ -31,6 +31,11 @@
                 <img title="{$payment_mean.description}" alt="{$payment_mean.description}"
                      src="{s name="iDEALLogo" namespace="frontend/wirecard_elastic_engine/payments"}{/s}" />
             </div>
+        {elseif $payment_mean.name == "wirecard_elastic_engine_eps"}
+            <div class="wirecardee--payments">
+                <img title="{$payment_mean.description}" alt="{$payment_mean.description}"
+                     src="{s name="EPSLogo" namespace="frontend/wirecard_elastic_engine/payments"}{/s}" />
+            </div>
         {elseif $payment_mean.name == "wirecard_elastic_engine_masterpass"}
             <div class="wirecardee--payments">
                 <img title="{$payment_mean.description}" alt="{$payment_mean.description}"
