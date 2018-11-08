@@ -666,6 +666,90 @@ function (button) {
             </options>
         </element>
         <!-- iDEAL End -->
+        <!-- EPS -->
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineEpsServer</name>
+            <label lang="de">[EPS] Base URL</label>
+            <label lang="en">[EPS] Base URL</label>
+            <value>https://api-test.wirecard.com</value>
+            <description lang="de">Wirecard Base URL (z.B. https://api.wirecard.com)</description>
+            <description lang="en">Wirecard Base URL (e.g. https://api.wirecard.com)</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineEpsHttpUser</name>
+            <label lang="de">[EPS] HTTP Benutzer</label>
+            <label lang="en">[EPS] HTTP User</label>
+            <value>16390-testing</value>
+            <description lang="de">Wirecard HTTP Benutzer laut Vertrag mit Wirecard.</description>
+            <description lang="en">HTTP User as provided in your Wirecard contract.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineEpsHttpPassword</name>
+            <label lang="de">[EPS] HTTP Passwort</label>
+            <label lang="en">[EPS] HTTP Password</label>
+            <value>3!3013=D3fD8X7</value>
+            <description lang="de">Wirecard HTTP Passwort laut Vertrag mit Wirecard.</description>
+            <description lang="en">HTTP Password as provided in your Wirecard contract.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineEpsMerchantId</name>
+            <label lang="de">[EPS] Händler-Konto-ID</label>
+            <label lang="en">[EPS] Merchant Account ID</label>
+            <value>1f629760-1a66-4f83-a6b4-6a35620b4a6d</value>
+            <description lang="de">Eindeutige Händler-Konto-ID laut Vertrag mit Wirecard.</description>
+            <description lang="en">Unique identifier assigned to your merchant account.</description>
+        </element>
+        <element type="text" scope="shop">
+            <name>wirecardElasticEngineEpsSecret</name>
+            <label lang="de">[EPS] Geheimschlüssel</label>
+            <label lang="en">[EPS] Secret Key</label>
+            <value>20c6a95c-e39b-4e6a-971f-52cfb347d359</value>
+            <description lang="de">
+                Der Geheimschlüssel wird benötigt, um die Digitale Signatur für Zahlungen zu berechnen.
+            </description>
+            <description lang="en">
+                Secret Key is mandatory to calculate the Digital Signature for payments.
+            </description>
+        </element>
+        <element type="boolean" scope="shop">
+            <name>wirecardElasticEngineEpsFraudPrevention</name>
+            <label lang="de">[EPS] Zusätzliche Informationen mitsenden</label>
+            <label lang="en">[EPS] Send additional information</label>
+            <value>true</value>
+            <description lang="de">
+                Zusätzliche Informationen werden für Betrugsschutz gesendet. In diesen Daten sind
+                Rechnungs- / Lieferadresse, Warenkorb und Deskriptor inkludiert.
+            </description>
+            <description lang="en">
+                Additional data will be sent for the purpose of fraud protection. This additional
+                data includes billing/shipping address, shopping basket and descriptor.
+            </description>
+        </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEngineEpsTestApi</name>
+            <label lang="de">[EPS] Konfiguration testen</label>
+            <label lang="en">[EPS] Test configuration</label>
+            <options>
+                <handler>
+                    <![CDATA[
+function (button) {
+    var message = Ext.userLanguage == "de"
+        ? "Um diese Funktion zu verwenden muss das Plugin aktiviert und die Seite einmalig aktualisiert werden. Jetzt aktualisieren?"
+        : "To use this functionality the plugin must be activated and the page needs to be refreshed once. Refresh now?"
+
+    if (typeof wirecardeeTestPaymentCredentials !== "undefined") {
+        wirecardeeTestPaymentCredentials(button, 'Eps', 'Wirecard EPS Test');
+    } else {
+        if (confirm(message)) {
+            window.location.reload();
+        }
+    }
+}
+                    ]]>
+                </handler>
+            </options>
+        </element>
+        <!-- EPS End -->
         <!-- Masterpass -->
         <element type="text" scope="shop">
             <name>wirecardElasticEngineMasterpassServer</name>
