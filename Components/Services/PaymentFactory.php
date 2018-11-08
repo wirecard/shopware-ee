@@ -14,6 +14,7 @@ use Shopware\Bundle\PluginInstallerBundle\Service\InstallerService;
 use Shopware\Components\Routing\RouterInterface;
 use WirecardElasticEngine\Components\Payments\AlipayPayment;
 use WirecardElasticEngine\Components\Payments\CreditCardPayment;
+use WirecardElasticEngine\Components\Payments\EpsPayment;
 use WirecardElasticEngine\Components\Payments\IdealPayment;
 use WirecardElasticEngine\Components\Payments\Payment;
 use WirecardElasticEngine\Components\Payments\PaymentInterface;
@@ -144,6 +145,7 @@ class PaymentFactory
             AlipayPayment::PAYMETHOD_IDENTIFIER                => AlipayPayment::class,
             RatepayInvoicePayment::PAYMETHOD_IDENTIFIER        => RatepayInvoicePayment::class,
             IdealPayment::PAYMETHOD_IDENTIFIER                 => IdealPayment::class,
+            EpsPayment::PAYMETHOD_IDENTIFIER                   => EpsPayment::class,
             MasterpassPayment::PAYMETHOD_IDENTIFIER            => MasterpassPayment::class,
             PaypalPayment::PAYMETHOD_IDENTIFIER                => PaypalPayment::class,
             PaymentInAdvancePayment::PAYMETHOD_IDENTIFIER      => PaymentInAdvancePayment::class,
