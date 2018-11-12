@@ -74,44 +74,6 @@ class EpsPaymentTest extends PaymentTestCase
         $this->assertSame($transaction, $this->payment->getTransaction());
     }
 
-    public function testGetBackendTransaction()
-    {
-        $entity        = $this->createMock(\WirecardElasticEngine\Models\Transaction::class);
-        $paymentMethod = $entity->method('getPaymentMethod');
-        $paymentMethod->willReturn(EpsPayment::NAME);
-        $transactionType = $entity->method('getTransactionType');
-        $transactionType->willReturn(null);
-
-        $order       = new Order();
-        $transaction = $this->payment->getBackendTransaction($order, Operation::REFUND, $entity);
-        $this->assertInstanceOf(EpsPayment::class, $transaction);
-        $this->assertNotSame($transaction, $this->payment->getTransaction());
-        $transactionType->willReturn(null);
-        $this->assertNotSame($transaction, $this->payment->getBackendTransaction($order, Operation::REFUND, $entity));
-
-        $transactionType->willReturn(Transaction::TYPE_CREDIT);
-        $transaction = $this->payment->getBackendTransaction($order, null, $entity);
-        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
-        $transactionType->willReturn(null);
-        $transaction = $this->payment->getBackendTransaction($order, Operation::CREDIT, $entity);
-        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
-
-        $transaction = $this->payment->getBackendTransaction($order, Operation::CANCEL, $entity);
-        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
-
-        $paymentMethod->willReturn(SepaCreditTransferTransaction::NAME);
-        $transaction = $this->payment->getBackendTransaction($order, Operation::REFUND, $entity);
-        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
-
-        $transactionType->willReturn(Transaction::TYPE_CREDIT);
-        $transaction = $this->payment->getBackendTransaction($order, Operation::CREDIT, $entity);
-        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
-
-        $transactionType->willReturn(null);
-        $transaction = $this->payment->getBackendTransaction($order, Operation::CANCEL, $entity);
-        $this->assertInstanceOf(SepaCreditTransferTransaction::class, $transaction);
-    }
-
     public function testGetPaymentConfig()
     {
         $config = $this->payment->getPaymentConfig();
