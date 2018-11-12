@@ -24,6 +24,7 @@
   "license": "GPL-3.0",
   "devDependencies": {
     "chai": "^4.1.2",
+    "ajv": "^5.0.0",
     "chromedriver": "2.38.3",
     "geckodriver": "^1.11.0",
     "eslint": "^4.19.1",

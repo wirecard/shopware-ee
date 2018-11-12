@@ -29,6 +29,15 @@
                     {include file="frontend/plugins/wirecard_elastic_engine/form/ideal.tpl"}
                 </div>
             </div>
+        {elseif $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_eps'}
+            <div class="panel has--border wirecardee--additional-form-fields">
+                <div class="panel--title primary is--underline">
+                    {s name="EpsPaymentFormHeader" namespace="frontend/wirecard_elastic_engine/eps"}{/s}
+                </div>
+                <div class="panel--body is--wide">
+                    {include file="frontend/plugins/wirecard_elastic_engine/form/eps.tpl"}
+                </div>
+            </div>
         {elseif $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_ratepay_invoice'}
             {if $wirecardElasticEngineViewAssignments.showForm}
                 <div class="panel has--border wirecardee--additional-form-fields">
