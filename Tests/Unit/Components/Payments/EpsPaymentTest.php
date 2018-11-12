@@ -70,7 +70,7 @@ class EpsPaymentTest extends PaymentTestCase
     public function testGetTransaction()
     {
         $transaction = $this->payment->getTransaction();
-        $this->assertInstanceOf(EpsPayment::class, $transaction);
+        $this->assertInstanceOf(EpsTransaction::class, $transaction);
         $this->assertSame($transaction, $this->payment->getTransaction());
     }
 
