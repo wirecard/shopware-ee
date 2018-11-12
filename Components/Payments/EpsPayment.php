@@ -32,7 +32,7 @@ use WirecardElasticEngine\Models\Transaction as TransactionModel;
 /**
  * @package WirecardElasticEngine\Components\Payments
  *
- * @since   1.0.0
+ * @since   1.3.0
  */
 class EpsPayment extends Payment implements ProcessPaymentInterface, AdditionalViewAssignmentsInterface
 {
@@ -97,7 +97,7 @@ class EpsPayment extends Payment implements ProcessPaymentInterface, AdditionalV
     /**
      * @return PaymentConfig
      *
-     * @since 1.0.0
+     * @since 1.3.0
      */
     public function getPaymentConfig()
     {
@@ -146,8 +146,7 @@ class EpsPayment extends Payment implements ProcessPaymentInterface, AdditionalV
      *
      * @return array
      *
-     * @since 1.1.0 Added $sessionManager
-     * @since 1.0.0
+     * @since 1.3.0
      */
     public function getAdditionalViewAssignments(SessionManager $sessionManager)
     {
