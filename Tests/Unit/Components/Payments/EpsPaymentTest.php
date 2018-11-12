@@ -39,10 +39,8 @@ class EpsPaymentTest extends PaymentTestCase
         parent::setUp();
 
         $this->config->method('getByNamespace')->willReturnMap([
-            [WirecardElasticEngine::NAME, 'wirecardElasticEngineIdealMerchantId', null, 'MAID'],
-            [WirecardElasticEngine::NAME, 'wirecardElasticEngineIdealSecret', null, 'Secret'],
-            [WirecardElasticEngine::NAME, 'wirecardElasticEngineSepaBackendMerchantId', null, 'CT-MAID'],
-            [WirecardElasticEngine::NAME, 'wirecardElasticEngineSepaBackendSecret', null, 'CT-Secret'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineEpsMerchantId', null, 'MAID'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineEpsSecret', null, 'Secret']
         ]);
 
         $this->payment = new EpsPayment(
