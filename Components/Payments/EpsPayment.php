@@ -34,7 +34,8 @@ use WirecardElasticEngine\Models\Transaction as TransactionModel;
  *
  * @since   1.0.0
  */
-class EpsPayment extends Payment implements ProcessPaymentInterface, AdditionalViewAssignmentsInterface {
+class EpsPayment extends Payment implements ProcessPaymentInterface, AdditionalViewAssignmentsInterface
+{
     const PAYMETHOD_IDENTIFIER = 'wirecard_elastic_engine_eps';
 
     /**
