@@ -1,5 +1,14 @@
 [
     {
+        "release": "1.3.0",
+        "shopsystem": "Shopware",
+        "tested": "5.5.3",
+        "compatibility": "5.4.5",
+        "changelog": [
+            "Add eps-Überweisung payment method"
+        ]
+    },
+    {
         "release": "1.2.2",
         "shopsystem": "Shopware",
         "tested": "5.5.2",
