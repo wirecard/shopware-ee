@@ -6,7 +6,7 @@
  * https://github.com/wirecard/shopware-ee/blob/master/LICENSE
  *}
 
-{extends file="parent:frontend/checkout/confirm.tpl"}
+{extends file="frontend/wirecard_elastic_engine_payment/confirm.tpl"}
 
 {block name='frontend_index_header'}
     {include file="frontend/wirecard_elastic_engine_payment/header.tpl"}
