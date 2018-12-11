@@ -5,7 +5,7 @@
         "tested": "5.5.3",
         "compatibility": "5.5.0",
         "changelog": [
-            "Fix styling issues with navigation header"
+            "Update navigation header"
         ]
     },
     {
