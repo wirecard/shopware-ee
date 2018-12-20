@@ -49,6 +49,20 @@
                     </div>
                 </div>
             {/if}
+            <div class="tos--panel panel has--border">
+                <div class="panel--body is--wide">
+                    <ul class="list--checkbox list--unstyled">
+                        <li class="block-group row--tos">
+                            <span class="block column--checkbox">
+                                <input id="wirecardee--tac" type="checkbox" name="wirecardElasticEngine[tac]" required="required" aria-required="true" data-invalid-tos-jump="true" />
+                            </span>
+                            <span class="block column--label">
+                                <label for="wirecardElasticEngine[tac]" data-modalbox="true" data-height="500" data-width="750">{s name="RatepayTAC" namespace="frontend/wirecard_elastic_engine/ratepay_invoice"}{/s}</label>
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
             <script language="JavaScript">
                 var di = { t: "{$wirecardElasticEngineDeviceFingerprintId}", v: "WDWL", l: "Checkout" };
             </script>

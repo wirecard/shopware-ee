@@ -217,7 +217,7 @@ class RatepayInvoicePayment extends Payment implements
     {
         $accountHolderProperties = $accountHolder->mappedProperties();
 
-        // Date of bith is part of consumer data: check has already been done via checkDisplayRestrictions method
+        // Date of birth is part of consumer data: check has already been done via checkDisplayRestrictions method
         if (! empty($accountHolderProperties['date-of-birth'])) {
             return null;
         }
@@ -296,6 +296,12 @@ class RatepayInvoicePayment extends Payment implements
         // Check if consumer age is above 18, either via user data or payment data from checkout page
         $birthDay = $userMapper->getBirthday() ?: $this->getBirthdayFromPaymentData($sessionManager->getPaymentData());
         if ($birthDay && $this->isBelowAgeRestriction($birthDay)) {
+            return false;
+        }
+
+        // Check if consumer accepted TAC
+        $confirmedTAC = $this->getConfirmedTAC($sessionManager->getPaymentData());
+        if (!is_null($confirmedTAC) && !$this->getConfirmedTAC($sessionManager->getPaymentData())) {
             return false;
         }
 
@@ -382,6 +388,26 @@ class RatepayInvoicePayment extends Payment implements
             intval($paymentData['birthday']['day'])
         );
         return $birthDay;
+    }
+
+    /**
+     * @param array|null $paymentData
+     *
+     * @return bool
+     *
+     * @since 1.3.3
+     */
+    private function getConfirmedTAC($paymentData)
+    {
+        if (! isset($paymentData['tac'])) {
+            return null;
+        }
+
+        if ($paymentData['tac'] == "on") {
+            return true;
+        }
+
+        return false;
     }
 
     /**
