@@ -26,7 +26,7 @@
                     <i>{s name="Creditor"}{/s}</i><br/>
                     {$wirecardElasticEngineViewAssignments.creditorName}{if $wirecardElasticEngineViewAssignments.creditorName and $wirecardElasticEngineViewAssignments.creditorAddress}, {/if}
                     {$wirecardElasticEngineViewAssignments.creditorAddress}<br/>
-                    {s name="CreditorID"}{/s}: {$wirecardElasticEngineViewAssignments.creditorId}<br/>
+                    {s name="CreditorIBAN"}{/s}: {$wirecardElasticEngineViewAssignments.creditorId}<br/>
                 </td>
             </tr>
             <tr>
