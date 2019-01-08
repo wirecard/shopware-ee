@@ -1198,13 +1198,13 @@ function (button) {
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineSepaCreditorAddress</name>
-            <label lang="de">[SEPA-Lastschrift] Creditor Adresse</label>
-            <label lang="en">[SEPA Direct Debit] Creditor Address</label>
+            <label lang="de">[SEPA-Lastschrift] Creditor Stadt</label>
+            <label lang="en">[SEPA Direct Debit] Creditor City</label>
             <value></value>
-            <description lang="de">Für das SEPA-Lastschrift-Mandat wird die Adresse des Zahlungsempfängers (Creditor)
+            <description lang="de">Für das SEPA-Lastschrift-Mandat wird die Stadt des Zahlungsempfängers (Creditor)
                 benötigt.
             </description>
-            <description lang="en">SEPA requires a Creditor Address for display on the SEPA Direct Debit Mandate page.
+            <description lang="en">SEPA Direct Debit requires a Creditor City for the SEPA Direct Debit Mandate page.
             </description>
         </element>
         <element type="button" scope="shop">
