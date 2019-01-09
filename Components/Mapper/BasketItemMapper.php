@@ -33,6 +33,7 @@ class BasketItemMapper extends ArrayMapper
     const TAX_RATE = 'tax_rate';
     const QUANTITY = 'quantity';
     const PRICE = 'price';
+    const PRICE_NUMERIC = 'priceNumeric';
 
     /**
      * @var Item
@@ -167,10 +168,13 @@ class BasketItemMapper extends ArrayMapper
                     return $prices[0][self::DETAILS_PRICES_PRICE_NUMERIC];
                 }
             }
-            if (isset($details[self::DETAILS_PRICES_PRICE_NUMERIC])) {
-                return $details[self::DETAILS_PRICES_PRICE_NUMERIC];
-            }
         }
+
+        $priceNumeric = $this->getOptional(self::PRICE_NUMERIC);
+        if (!is_null($priceNumeric)) {
+            return $priceNumeric;
+        }
+
         return $price;
     }
 
