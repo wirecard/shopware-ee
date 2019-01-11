@@ -14,16 +14,16 @@
                 {s name="UseSavedCard"}{/s}
             </p>
             <ul class="list--radio list--unstyled">
-                {assign var=cardFaultOptionSelected value=false}
+                {assign var=cardVaultOptionSelected value=false}
                 {foreach from=$wirecardElasticEngineViewAssignments.savedCards item='card'}
                     {if $card.acceptedCriteria}
                         <li class="block-group">
                             <div class="block column--radio">
                                 <input type="radio" name="wirecardElasticEngine[token]"
                                        id="wirecardee--token-{$card.token}" value="{$card.token}"
-                                       {if !$cardFaultOptionSelected}
+                                       {if !$cardVaultOptionSelected}
                                             checked="checked"
-                                            {$cardFaultOptionSelected=true}
+                                            {$cardVaultOptionSelected=true}
                                        {/if}
                                 />
                             </div>
@@ -75,9 +75,9 @@
                 <li class="block-group">
                     <div class="block column--radio">
                         <input type="radio" name="wirecardElasticEngine[token]" id="wirecardee--token-no-card" value=""
-                            {if !$cardFaultOptionSelected}
+                            {if !$cardVaultOptionSelected}
                                 checked="checked"
-                                {$cardFaultOptionSelected=true}
+                                {$cardVaultOptionSelected=true}
                             {/if}
                         />
                     </div>
