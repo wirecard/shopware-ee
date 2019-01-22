@@ -319,7 +319,8 @@ function (button) {
             <name>wirecardElasticEngineAlipayTestApi</name>
             <label lang="de">[Alipay Cross-border] Konfiguration testen</label>
             <label lang="en">[Alipay Cross-border] Test Configuration</label>
-            <handler>
+            <options>
+                <handler>
                 <![CDATA[
 function (button) {
     var message = Ext.userLanguage == "de"
@@ -336,6 +337,7 @@ function (button) {
 }
                     ]]>
             </handler>
+            </options>
         </element>
         <!-- Alipay End -->
         <!-- Ratepay Invoice -->
