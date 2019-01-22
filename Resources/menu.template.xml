@@ -11,23 +11,26 @@
     <entries>
         <entry>
             <name>Wirecard</name>
-            <label lang="de">Wirecard</label>
-            <label lang="en">Wirecard</label>
+            @forlang
+            <label lang="{{ lang }}">{{ strings.heading_title }}</label>
+            @endforlang
             <class>sprite--wirecard</class>
             <parent identifiedBy="controller">Payments</parent>
             <children>
                 <entry>
                     <name>WirecardElasticEngineTransactions</name>
-                    <label lang="de">Transaktionen</label>
-                    <label lang="en">Transactions</label>
+                    @forlang
+                    <label lang="{{ lang }}">{{ strings.text_list }}</label>
+                    @endforlang
                     <controller>WirecardElasticEngineTransactions</controller>
                     <action>index</action>
                     <class>sprite-money</class>
                 </entry>
                 <entry>
                     <name>WirecardElasticEngineLiveChat</name>
-                    <label lang="de">LiveChat mit Support</label>
-                    <label lang="en">LiveChat with support</label>
+                    @forlang
+                    <label lang="{{ lang }}">{{ strings.text_support_chat }}</label>
+                    @endforlang
                     <controller>WirecardElasticEngineTransactions</controller>
                     <action>livechat</action>
                     <class>sprite-balloons-box</class>
@@ -39,8 +42,9 @@
                 </entry>
                 <entry>
                     <name>WirecardElasticEngineEmailSupport</name>
-                    <label lang="de">Wirecard Support</label>
-                    <label lang="en">Wirecard Support</label>
+                    @forlang
+                    <label lang="{{ lang }}">{{ strings.heading_title_support }}</label>
+                    @endforlang
                     <controller>WirecardElasticEngineTransactions</controller>
                     <action>mailSupport</action>
                     <class>sprite-mail-send</class>
