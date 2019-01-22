@@ -368,7 +368,8 @@ function (button) {
             @forlang
             <label lang="{{ lang }}">[{{ strings.alipay_crossborder }}] {{ strings.test_config }}</label>
             @endforlang
-            <handler>
+            <options>
+                <handler>
                 <![CDATA[
 function (button) {
     var message = Ext.userLanguage == "de"
@@ -384,8 +385,8 @@ function (button) {
     }
 }
                     ]]>
-            </handler>
-        </options>
+                </handler>
+            </options>
         </element>
         <!-- Alipay End -->
         <!-- Ratepay Invoice -->
