@@ -336,7 +336,6 @@ function (button) {
 }
                     ]]>
             </handler>
-        </options>
         </element>
         <!-- Alipay End -->
         <!-- Ratepay Invoice -->
