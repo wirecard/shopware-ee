@@ -65,7 +65,7 @@ class WdPhraseApp
     end
 
     @log.info('Building languages from template files...'.cyan.bright)
-    script_output = `%x[composer run build-languages]`
+    script_output = `composer run build-languages`
     script_output.each_line do |line|
       @log.info(line.chomp)
     end

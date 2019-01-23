@@ -37,8 +37,8 @@ class WdProject
     translations_object = JSON.parse(File.read(@translations_path))
     translations_new_object = JSON.parse(File.read(@translations_new_path))
 
-    existing_keys = translations_object.map { |key| key }
-    new_keys = translations_new_object.map { |key| key }
+    existing_keys = translations_object.map { |key, value| key }
+    new_keys = translations_new_object.map { |key, value| key }
 
     @log.info("Number of keys in the existing translations file: #{existing_keys.length}")
     @log.info("Number of keys in the new translations file: #{new_keys.length}")
@@ -61,7 +61,7 @@ class WdProject
   # Parses all template files for keys and returns them in an array.
   def get_keys
     keys = []
-    template_file_patterns = @template_folders.map { |folder| "#{folder}/**/*.#{@template_suffix}.*" }
+    template_file_patterns = @template_folders.map { |folder| "#{folder}/**/*.*.#{@template_suffix}" }
     template_file_paths = Dir.glob(template_file_patterns)
 
     template_file_paths.each do |file_path|

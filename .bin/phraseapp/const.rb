@@ -16,7 +16,7 @@ module Const
   PLUGIN_I18N_DIR = File.join('Resources', 'languages').freeze
 
   # template settings
-  TEMPLATE_SUFFIX = 'template'.freeze
+  TEMPLATE_SUFFIX = 'tpl'.freeze
   TEMPLATE_FOLDERS = [
     'Commands',
     'Components',
