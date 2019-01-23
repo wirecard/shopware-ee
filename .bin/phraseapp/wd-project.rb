@@ -4,7 +4,6 @@ require_relative 'const.rb'
 require_relative 'env.rb'
 require_relative 'wd-git.rb'
 require_relative 'wd-github.rb'
-require_relative 'translation-builder.rb'
 
 using Rainbow
 
@@ -34,75 +33,56 @@ class WdProject
 
   # Compares the keys from source and PhraseApp and returns true if they have any difference in keys, false otherwise.
   def has_key_changes?
-    source_keys = TranslationBuilder.get_all_keys()
-    file_name = "#{@locale_specific_map[@phraseapp_fallback_locale.to_sym] || @phraseapp_fallback_locale}.json"
-    translated_keys = TranslationBuilder.get_translated_keys(@translations_path)
+    translations_object = JSON.parse(File.read(@translations_path))
+    translations_new_object = JSON.parse(File.read(@translations_new_path))
 
-    @log.info("Number of unique keys in source: #{source_keys.length}")
-    @log.info("Number of keys on PhraseApp: #{translated_keys.length}")
+    existing_keys = translations_object.map { |key,value| key }
+    new_keys = translations_new_object.map { |key,value| key }
 
-    has_key_changes = false
-    source_keys.each do |key|
-      if !translated_keys.index(key)
-        @log.warn("Change to translatable key has been detected in the working tree. key: #{key[0]}".yellow.bright)
-        has_key_changes = true
-      end
-    end
+    @log.info("Number of keys in the existing translations file: #{existing_keys.length}")
+    @log.info("Number of keys in the new translations file: #{new_keys.length}")
 
-    if has_key_changes || source_keys.length != translated_keys.length
+    @log.info("Removed keys: #{existing_keys - new_keys}")
+    @log.info("Added keys: #{new_keys - existing_keys}")
+
+    # keys are unique; we use the intersection to detect differences
+    has_key_changes = (new_keys.length != existing_keys.length) || (new_keys & existing_keys != new_keys)
+
+    if has_key_changes
       @log.warn('Changes to translatable keys have been detected in the working tree.'.yellow.bright)
-      return true
+    else
+      @log.info('No changes to translatable keys have been detected in the working tree.'.green.bright)
     end
 
-    @log.info('No changes to translatable keys have been detected in the working tree.'.green.bright)
-    return false
+    has_key_changes
   end
 
   # Parses all template files for keys and returns them in an array.
   def get_keys
-    @log.info('Parsing template files for keys...')
-
     keys = []
     template_file_patterns = @template_folders.map { |folder| "#{folder}/**/*.#{@template_suffix}.*" }
     template_file_paths = Dir.glob(template_file_patterns)
 
     template_file_paths.each do |file_path|
-      file = File.open(file_path, 'r')
-      file_contents = file.read
-      file.close
-
+      file_contents = File.read(file_path)
       keys += file_contents.scan(@template_key_pattern).map { |key| key[0] }
     end
 
     keys.uniq
   end
 
-  # Generates a new json file with all keys and the available en translations.
+  # Generates a new translations file from the current keys.
   def json_generate
-    @log.info('Generate new translations json file for PhraseApp upload')
+    @log.info('Generating new translations file...')
 
-    source_keys = TranslationBuilder.get_all_keys()
+    translations_object = JSON.parse(File.read(@translations_path))
+    translations_new_object = {}
 
-    translations_file = File.open(translations_path, 'r')
-    translations_object = JSON.parse(translations_file.read)
-    translations_file.close
-
-    key_value_object = {}
-
-    source_keys.each do |source_key|
-      if translations_object.has_key?(source_key[0])
-        key_value_object[source_key[0]] = translations_object[source_key[0]]
-      else
-        @log.warn("New Key found: #{source_key[0]}".yellow.bright)
-        key_value_object[source_key[0]] = ''
-      end
+    get_keys.each do |key|
+      translations_new_object[key] = translations_object[key] || ''
     end
 
-    new_file = File.open(translations_new_path, 'w')
-    new_file.puts JSON.pretty_generate(key_value_object)
-    new_file.close
-
-    true
+    File.write(@translations_new_path, JSON.pretty_generate(translations_new_object))
   end
 
   # Adds, commits, pushes to remote any modified/untracked files in the i18n dir. Then creates a PR.
