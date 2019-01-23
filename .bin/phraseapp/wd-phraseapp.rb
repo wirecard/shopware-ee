@@ -33,7 +33,8 @@ class WdPhraseApp
 
   # Returns true if PhraseApp keys are in sync with the project, false otherwise.
   def is_in_sync?
-    pull_locale("#{@locale_specific_map[@phraseapp_fallback_locale] || @phraseapp_fallback_locale}") && !WdProject.new.worktree_has_key_changes?
+    pull_locale("#{@locale_specific_map[@phraseapp_fallback_locale] || @phraseapp_fallback_locale}") &&
+      !WdProject.new.worktree_has_key_changes?
   end
 
   # Returns an array of locale ids available on the PhraseApp project.
@@ -64,7 +65,7 @@ class WdPhraseApp
     end
 
     @log.info('Building languages from template files...'.cyan.bright)
-    script_output = %x[composer run build-languages]
+    script_output = `%x[composer run build-languages]`
     script_output.each_line do |line|
       @log.info(line.chomp)
     end

@@ -19,7 +19,8 @@ class WdProject
 
     @phraseapp_fallback_locale = Const::PHRASEAPP_FALLBACK_LOCALE
     @locale_specific_map = Const::LOCALE_SPECIFIC_MAP
-    @translations_path = File.join(Const::PLUGIN_I18N_DIR, "#{@locale_specific_map[@phraseapp_fallback_locale.to_sym] || @phraseapp_fallback_locale}.json")
+    @translations_path = File.join(Const::PLUGIN_I18N_DIR, "#{@locale_specific_map[@phraseapp_fallback_locale.to_sym] ||
+      @phraseapp_fallback_locale}.json")
     @translations_new_path = @translations_path + '.new'
     @template_suffix = Const::TEMPLATE_SUFFIX
     @template_folders = Const::TEMPLATE_FOLDERS
@@ -36,8 +37,8 @@ class WdProject
     translations_object = JSON.parse(File.read(@translations_path))
     translations_new_object = JSON.parse(File.read(@translations_new_path))
 
-    existing_keys = translations_object.map { |key,value| key }
-    new_keys = translations_new_object.map { |key,value| key }
+    existing_keys = translations_object.map { |key| key }
+    new_keys = translations_new_object.map { |key| key }
 
     @log.info("Number of keys in the existing translations file: #{existing_keys.length}")
     @log.info("Number of keys in the new translations file: #{new_keys.length}")
