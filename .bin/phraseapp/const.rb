@@ -7,19 +7,10 @@ module Const
   PHRASEAPP_FALLBACK_LOCALE = 'en_US'.freeze
 
   # project-specific mappings for locales to filenames
-  PHRASEAPP_TAG = 'prestashop'.freeze
-  LOCALE_SPECIFIC_MAP = {
-    'en_US': 'en',
-    'de_DE': 'de',
-    'id_ID': 'id',
-    'ja_JP': 'ja',
-    'ko_KR': 'ko',
-    'pl_PL': 'pl',
-    'zh_TW': 'tw',
-    'zh_CN': 'zh'
-  }.freeze
+  PHRASEAPP_TAG = 'opencart'.freeze # TODO
+  LOCALE_SPECIFIC_MAP = {}.freeze
+  LOCALE_LIST = ['en_US', 'de_DE'].freeze
 
   # paths relative to project root
-  PLUGIN_DIR = 'wirecardpaymentgateway'.freeze
-  PLUGIN_I18N_DIR = File.join(PLUGIN_DIR, 'translations').freeze
+  PLUGIN_I18N_DIR = File.join('Resources', 'languages').freeze
 end

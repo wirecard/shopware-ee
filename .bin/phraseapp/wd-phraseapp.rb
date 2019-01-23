@@ -8,7 +8,6 @@ require_relative 'env.rb'
 require_relative 'wd-git.rb'
 require_relative 'wd-github.rb'
 require_relative 'wd-project.rb'
-require_relative 'translation-builder.rb'
 
 using Rainbow
 
@@ -23,6 +22,7 @@ class WdPhraseApp
     @phraseapp_fallback_locale = Const::PHRASEAPP_FALLBACK_LOCALE
     @phraseapp_tag             = Const::PHRASEAPP_TAG
     @locale_specific_map       = Const::LOCALE_SPECIFIC_MAP
+    @locale_list               = Const::LOCALE_LIST
     @plugin_i18n_dir           = File.expand_path(Const::PLUGIN_I18N_DIR, Dir.pwd)
   end
 
@@ -42,6 +42,9 @@ class WdPhraseApp
     locales, err = @phraseapp.locales_list(@phraseapp_id, 1, 100, OpenStruct.new)
     if err.nil?
       locales = locales.map { |l| l.name }
+      if !@locale_list.empty?
+        locales = @locale_list & locales
+      end
       @log.info('Retrieved list of locales.')
       @log.info(locales)
       return locales
@@ -58,7 +61,12 @@ class WdPhraseApp
 
     get_locale_ids.each do |id|
       pull_locale(id)
-      TranslationBuilder.build("#{@locale_specific_map[id.to_sym] || id}")
+    end
+
+    @log.info('Building languages from template files...'.cyan.bright)
+    script_output = %x[composer run build-languages]
+    script_output.each_line do |line|
+      @log.info(line.chomp)
     end
   end
 
