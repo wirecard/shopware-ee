@@ -12,5 +12,19 @@ module Const
   LOCALE_LIST = ['en_US', 'de_DE'].freeze
 
   # paths relative to project root
+  PLUGIN_DIR = ''.freeze
   PLUGIN_I18N_DIR = File.join('Resources', 'languages').freeze
+
+  # template settings
+  TEMPLATE_SUFFIX = 'template'.freeze
+  TEMPLATE_FOLDERS = [
+      'Commands',
+      'Components',
+      'Controllers',
+      'Exception',
+      'Models',
+      'Resources',
+      'Subscriber',
+  ].freeze
+  TEMPLATE_KEY_PATTERN = /{{\s*strings\.(\w+)\s*}}/.freeze
 end

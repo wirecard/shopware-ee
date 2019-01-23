@@ -22,6 +22,9 @@ class WdProject
     @locale_specific_map = Const::LOCALE_SPECIFIC_MAP
     @translations_path = File.join(Const::PLUGIN_I18N_DIR, "#{@locale_specific_map[@phraseapp_fallback_locale.to_sym] || @phraseapp_fallback_locale}.json")
     @translations_new_path = @translations_path + '.new'
+    @template_suffix = Const::TEMPLATE_SUFFIX
+    @template_folders = Const::TEMPLATE_FOLDERS
+    @template_key_pattern = Const::TEMPLATE_KEY_PATTERN
   end
 
   # Returns true if source code has modified keys compared to the downloaded locale file of the fallback locale id
@@ -53,6 +56,25 @@ class WdProject
 
     @log.info('No changes to translatable keys have been detected in the working tree.'.green.bright)
     return false
+  end
+
+  # Parses all template files for keys and returns them in an array.
+  def get_keys
+    @log.info('Parsing template files for keys...')
+
+    keys = []
+    template_file_patterns = @template_folders.map { |folder| "#{folder}/**/*.#{@template_suffix}.*" }
+    template_file_paths = Dir.glob(template_file_patterns)
+
+    template_file_paths.each do |file_path|
+      file = File.open(file_path, 'r')
+      file_contents = file.read
+      file.close
+
+      keys += file_contents.scan(@template_key_pattern).map { |key| key[0] }
+    end
+
+    keys.uniq
   end
 
   # Generates a new json file with all keys and the available en translations.
