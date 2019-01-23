@@ -8,7 +8,7 @@ use RecursiveDirectoryIterator;
 /**
  * This class creates files from template files by substituting control
  * structures and template tags for language information. Template files must be
- * named [filename].template.[extension]
+ * named [filename].[extension].tpl
  *
  * EXAMPLE
  *
@@ -32,7 +32,7 @@ use RecursiveDirectoryIterator;
 class LanguageHelper
 {
     public const DEFAULT_LOCALE = 'en_US';
-    public const TEMPLATE_SUFFIX = 'template';
+    public const TEMPLATE_SUFFIX = 'tpl';
     public const TEMPLATE_FOLDERS = [
         './Commands',
         './Components',
@@ -97,9 +97,7 @@ class LanguageHelper
                 }
 
                 // filter templates
-                $fileName = $file->getBasename(".{$file->getExtension()}");
-
-                if (substr($fileName, -strlen(self::TEMPLATE_SUFFIX)) === self::TEMPLATE_SUFFIX) {
+                if ($file->getExtension() === self::TEMPLATE_SUFFIX && strpos($file->getBasename(".{$file->getExtension()}"), '.') !== false) {
                     $templateFiles[] = $file->getPathname();
                 }
             }
