@@ -7,7 +7,7 @@ module Const
   PHRASEAPP_FALLBACK_LOCALE = 'en_US'.freeze
 
   # project-specific mappings for locales to filenames
-  PHRASEAPP_TAG = 'opencart'.freeze # TODO
+  PHRASEAPP_TAG = 'shopware'.freeze
   LOCALE_SPECIFIC_MAP = {}.freeze
   LOCALE_LIST = ['en_US', 'de_DE'].freeze
 
