@@ -12,7 +12,6 @@ module Const
   LOCALE_LIST = ['en_US', 'de_DE'].freeze
 
   # paths relative to project root
-  PLUGIN_DIR = ''.freeze
   PLUGIN_I18N_DIR = File.join('Resources', 'languages').freeze
 
   # template settings
