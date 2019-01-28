@@ -37,7 +37,6 @@ GEM
     sawyer (0.8.1)
       addressable (>= 2.3.5, < 2.6)
       faraday (~> 0.8, < 1.0)
-    simple_po_parser (1.1.5)
     unicode-display_width (1.4.1)
 
 PLATFORMS
@@ -52,7 +51,6 @@ DEPENDENCIES
   rainbow (~> 3.0)
   rake (~> 12.3)
   rubocop-airbnb (~> 2.0)
-  simple_po_parser (~> 1.1)
 
 BUNDLED WITH
    1.17.3

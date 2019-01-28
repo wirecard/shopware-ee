@@ -9,3 +9,6 @@ npm-debug.log
 
 clover.xml
 build/coverage.xml
+.bin/*
+!.bin/phraseapp
+!.bin/*.*
