@@ -13,12 +13,6 @@ addons:
     access_key:
       secure: "gjDGUDlGV9YxemmEXoNJBHWU8QhM5xmdC8N5wOhJlZKoyfu/WR8j5gX+8/s+7XvOKdk88jFV9oEFuIIpz35HJhlqrini9qB4i+9mcJHZKEg6quVr7MvC4/YLcL4tAcD9R6VNFyV2C4XflsCeX5bjowO+gHYp72lrkumIZ7PEklJfjO78LSkQpvMqrdQ6gC2Nwcd9vLO5+zdI+K2D9DeLAt/zDABADKSYmIMEEd9rwQjFbyo/6BK2fq1HGnZDlajaUad1c/7Xa3y4GHvkMN38TYZdWSYGi089H9sNm2NMOABi/vzY/8Z7mqR28zv7e5Be2TFhJA0IMXGyx5q9LzWloDkXDZf04uLOMlfw5H07U4LOoUZsjz7W9jcQGiaFIwSnVzxBaXi+OqdKT3dbkU6od3otirPACb2w/LFWl4RQ3r9qYUxUUIHLHOpUbSw7zfYA6xqBsOsK4aI29XgGOQw6Oog9hKLVu9/Fasx281iWqXj/cjlKjEvmMerbSp+/NWwrv/QKfGPh2UTQRU6b2I6Bt4a99GOXIo372WNJnBzJ/kJftcYRH/udTwsTqKWsaM7UuLTOblk0QL1KxZ4n2j3eLbGxVC0tCvhmWqwL1nbpaBM6lrvSz3G/kmxY/aGfcZUYLRjwI454QunnF6ifE/0R51/osFYbPw44P0QDn5bS4pc="
 
-php:
-  - 7.2
-  - 7.1
-  - 7.0
-  - 5.6
-
 services:
   - mysql
 
@@ -32,7 +26,13 @@ env:
 
 matrix:
   include:
+    - php: 5.6
+      if: env(PHRASEAPP_PULL) != '1'
     - php: 7.0
+      if: env(PHRASEAPP_PULL) != '1'
+    - php: 7.1
+      if: env(PHRASEAPP_PULL) != '1'
+    - php: 7.2
       if: env(PHRASEAPP_PULL) != '1'
 
     - stage: phraseapp-pull
@@ -43,6 +43,7 @@ matrix:
       install:
         - travis_retry gem install bundler -v '~> 1.17'
         - travis_retry bundle install
+      before_script: skip
       script:
         - .bin/rake phraseapp:ci_update
       after_script: skip
@@ -55,6 +56,7 @@ matrix:
       install:
         - travis_retry gem install bundler -v '~> 1.17'
         - travis_retry bundle install
+      before_script: skip
       script:
         - .bin/rake phraseapp:ci_check_if_in_sync
       after_script: skip
