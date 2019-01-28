@@ -34,8 +34,8 @@ class WdProject
 
   # Compares the keys from source and PhraseApp and returns true if they have any difference in keys, false otherwise.
   def has_key_changes?
-    translations_object = JSON.parse(File.read(@translations_path))
-    translations_new_object = JSON.parse(File.read(@translations_new_path))
+    translations_object = JSON.parse(File.read(@translations_path, :encoding => 'utf-8'))
+    translations_new_object = JSON.parse(File.read(@translations_new_path, :encoding => 'utf-8'))
 
     existing_keys = translations_object.map { |key, value| key }
     new_keys = translations_new_object.map { |key, value| key }
@@ -65,7 +65,7 @@ class WdProject
     template_file_paths = Dir.glob(template_file_patterns)
 
     template_file_paths.each do |file_path|
-      file_contents = File.read(file_path)
+      file_contents = File.read(file_path, :encoding => 'utf-8')
       keys += file_contents.scan(@template_key_pattern).map { |key| key[0] }
     end
 
@@ -76,7 +76,7 @@ class WdProject
   def json_generate
     @log.info('Generating new translations file...')
 
-    translations_object = JSON.parse(File.read(@translations_path))
+    translations_object = JSON.parse(File.read(@translations_path, :encoding => 'utf-8'))
     translations_new_object = {}
 
     get_keys.each do |key|
