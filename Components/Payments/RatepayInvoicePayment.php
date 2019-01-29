@@ -300,8 +300,7 @@ class RatepayInvoicePayment extends Payment implements
         }
 
         // Check if consumer accepted TAC
-        $confirmedTAC = $this->getConfirmedTAC($sessionManager->getPaymentData());
-        if (!is_null($confirmedTAC) && !$this->getConfirmedTAC($sessionManager->getPaymentData())) {
+        if (! $this->getConfirmedTAC($sessionManager->getPaymentData())) {
             return false;
         }
 
@@ -399,15 +398,7 @@ class RatepayInvoicePayment extends Payment implements
      */
     private function getConfirmedTAC($paymentData)
     {
-        if (! isset($paymentData['tac'])) {
-            return null;
-        }
-
-        if ($paymentData['tac'] == "on") {
-            return true;
-        }
-
-        return false;
+        return isset($paymentData['tac']) && $paymentData['tac'] === 'on';
     }
 
     /**
