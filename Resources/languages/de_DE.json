@@ -136,6 +136,7 @@
   "ptrid": "Provider Transaction Reference ID",
   "ratepayinvoice": "Garantierter Kauf auf Rechnung",
   "ratepayinvoice_fields_error": "Für die Nutzung dieses Zahlungmittels müssen Sie mindestens 18 Jahre alt sein.",
+  "ratepayinvoice_tac": "Hiermit bestätige ich, dass ich die <a href='https://www.wirecardbank.de/privacy-documents/datenschutzhinweis-fur-die-wirecard-zahlarten/' target='_blank'>Datenschutzhinweise</a> und zusätzliche <a href='https://www.wirecardbank.de/privacy-documents/zusatzliche-geschaftsbedingungen-fur-wirecard-zahlarten/' target='_blank'>Geschäftsbedingungen</a> für Wirecard-Zahlarten zur Kenntnis genommen habe und mit deren Geltung einverstanden bin.",
   "redirect_text": "Sie werden weitergeleitet. Bitte warten.",
   "requestId": "Request ID",
   "response_type": "Source",
