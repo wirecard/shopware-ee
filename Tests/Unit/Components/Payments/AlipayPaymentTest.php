@@ -14,6 +14,7 @@ use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
+use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\AlipayCrossborderTransaction;
 use Wirecard\PaymentSdk\Transaction\Operation;
@@ -72,6 +73,8 @@ class AlipayPaymentTest extends PaymentTestCase
     public function testGetBackendTransaction()
     {
         $entity        = $this->createMock(\WirecardElasticEngine\Models\Transaction::class);
+        $entity->method('getAmount')->willReturn(100);
+        $entity->method('getCurrency')->willReturn('EUR');
         $paymentMethod = $entity->method('getPaymentMethod');
         $paymentMethod->willReturn(AlipayCrossborderTransaction::NAME);
         $transactionType = $entity->method('getTransactionType');

@@ -13,12 +13,15 @@ use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Entity\AccountHolder;
+use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\AlipayCrossborderTransaction;
 use Wirecard\PaymentSdk\TransactionService;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\PaymentConfig;
 use WirecardElasticEngine\Components\Payments\Contracts\ProcessPaymentInterface;
+use Shopware\Models\Order\Order;
+use WirecardElasticEngine\Models\Transaction;
 
 /**
  * @package WirecardElasticEngine\Components\Payments
@@ -122,5 +125,16 @@ class AlipayPayment extends Payment implements ProcessPaymentInterface
             $accountHolder->setFirstName($orderSummary->getUserMapper()->getFirstName());
             $this->getTransaction()->setAccountHolder($accountHolder);
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getBackendTransaction(Order $order, $operation, Transaction $parentTransaction)
+    {
+        $transaction = $this->getTransaction();
+        $transaction->setAmount(new Amount($parentTransaction->getAmount(), $parentTransaction->getCurrency()));
+
+        return $transaction;
     }
 }
