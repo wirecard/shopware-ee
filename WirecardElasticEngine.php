@@ -78,7 +78,6 @@ class WirecardElasticEngine extends Plugin
 
         $this->updatePayments($context->getPlugin());
         $this->updateDatabase();
-        $this->setDefaultConfigValues();
     }
 
     /**
