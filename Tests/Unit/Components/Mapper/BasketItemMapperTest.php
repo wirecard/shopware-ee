@@ -55,6 +55,7 @@ class BasketItemMapperTest extends TestCase
 
     public function testBasketPrices()
     {
+        // default behaviour
         $itemArray = [
             'articlename' => 'foo',
             'ordernumber' => 10,
@@ -75,9 +76,23 @@ class BasketItemMapperTest extends TestCase
             'tax-rate'       => 20,
         ], $mapper->getWirecardItem()->mappedProperties());
 
+        // if the numeric price defined, use it
+        $itemArray['priceNumeric'] = 1000.51;
+        $mapper = new BasketItemMapper($itemArray, 'EUR');
+        $this->assertEquals(1000.51, $mapper->getPrice());
+        $this->assertEquals([
+            'name'           => 'foo',
+            'quantity'       => 1,
+            'amount'         => ['currency' => 'EUR', 'value' => 1000.51],
+            'description'    => '',
+            'article-number' => 10,
+            'tax-rate'       => 20,
+        ], $mapper->getWirecardItem()->mappedProperties());
+
+        // DON'T use THIS price, in case of bulk prices here stands the wrong price
         $itemArray['additional_details'] = [
             'description'   => 'foobar',
-            'price_numeric' => 1000.51,
+            'price_numeric' => 1000.52,
         ];
 
         $mapper = new BasketItemMapper($itemArray, 'EUR');
@@ -91,14 +106,28 @@ class BasketItemMapperTest extends TestCase
             'tax-rate'       => 20,
         ], $mapper->getWirecardItem()->mappedProperties());
 
-        $itemArray['additional_details']['prices'] = [['price_numeric' => 1000.52]];
+        // ONE detail price: take it
+        $itemArray['additional_details']['prices'] = [['price_numeric' => 1000.53]];
 
         $mapper = new BasketItemMapper($itemArray, 'USD');
-        $this->assertEquals(1000.52, $mapper->getPrice());
+        $this->assertEquals(1000.53, $mapper->getPrice());
         $this->assertEquals([
             'name'           => 'foo',
             'quantity'       => 1,
-            'amount'         => ['currency' => 'USD', 'value' => 1000.52],
+            'amount'         => ['currency' => 'USD', 'value' => 1000.53],
+            'description'    => 'foobar',
+            'article-number' => 10,
+            'tax-rate'       => 20,
+        ], $mapper->getWirecardItem()->mappedProperties());
+
+        // MORE detail prices (bulk prices): ignore ALL because it is not clear which one is the right one
+        $itemArray['additional_details']['prices'][] = ['price_numeric' => 1000.54];
+        $mapper = new BasketItemMapper($itemArray, 'USD');
+        $this->assertEquals(1000.51, $mapper->getPrice());
+        $this->assertEquals([
+            'name'           => 'foo',
+            'quantity'       => 1,
+            'amount'         => ['currency' => 'USD', 'value' => 1000.51],
             'description'    => 'foobar',
             'article-number' => 10,
             'tax-rate'       => 20,

@@ -14,23 +14,18 @@
                 {s name="UseSavedCard"}{/s}
             </p>
             <ul class="list--radio list--unstyled">
-                <li class="block-group">
-                    <div class="block column--radio">
-                        <input type="radio" name="wirecardElasticEngine[token]" id="wirecardee--token-no-card" value=""
-                               checked="checked"/>
-                    </div>
-                    <div class="block column--label">
-                        <label for="wirecardee--token-no-card">
-                            {s name="NewCard"}{/s}
-                        </label>
-                    </div>
-                </li>
+                {assign var=cardVaultOptionSelected value=false}
                 {foreach from=$wirecardElasticEngineViewAssignments.savedCards item='card'}
                     {if $card.acceptedCriteria}
                         <li class="block-group">
                             <div class="block column--radio">
                                 <input type="radio" name="wirecardElasticEngine[token]"
-                                       id="wirecardee--token-{$card.token}" value="{$card.token}"/>
+                                       id="wirecardee--token-{$card.token}" value="{$card.token}"
+                                       {if !$cardVaultOptionSelected}
+                                            checked="checked"
+                                            {$cardVaultOptionSelected=true}
+                                       {/if}
+                                />
                             </div>
                             <div class="block column--label">
                                 <label for="wirecardee--token-{$card.token}">
@@ -77,6 +72,21 @@
                         </li>
                     {/if}
                 {/foreach}
+                <li class="block-group">
+                    <div class="block column--radio">
+                        <input type="radio" name="wirecardElasticEngine[token]" id="wirecardee--token-no-card" value=""
+                            {if !$cardVaultOptionSelected}
+                                checked="checked"
+                                {$cardVaultOptionSelected=true}
+                            {/if}
+                        />
+                    </div>
+                    <div class="block column--label">
+                        <label for="wirecardee--token-no-card">
+                            {s name="NewCard"}{/s}
+                        </label>
+                    </div>
+                </li>
             </ul>
         {/if}
         <p class="title">
