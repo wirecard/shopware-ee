@@ -78,7 +78,6 @@ class WirecardElasticEngine extends Plugin
 
         $this->updatePayments($context->getPlugin());
         $this->updateDatabase();
-        $this->setDefaultConfigValues();
     }
 
     /**
@@ -165,7 +164,6 @@ class WirecardElasticEngine extends Plugin
             $payments[$payment->getName()] = $payment;
         }
 
-        $payments = [];
         foreach ($this->getSupportedPayments() as $payment) {
             if (isset($payments[$payment->getName()])) {
                 continue;
