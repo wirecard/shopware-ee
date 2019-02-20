@@ -47,16 +47,18 @@
                     {if $wirecardElasticEngineViewAssignments.showBirthdayForm}
                         {include file="frontend/plugins/wirecard_elastic_engine/form/ratepay_invoice.tpl"}
                     {/if}
+                </div>
+            </div>
 
+            <div class="tos--panel panel has--border">
+                <div class="panel--body is--wide">
                     <ul class="list--checkbox list--unstyled">
                         <li class="block-group row--tos">
                             <span class="block column--checkbox">
                                 <input id="wirecardee--tac" type="checkbox" name="wirecardElasticEngine[tac]" required="required" aria-required="true" data-invalid-tos-jump="true" />
                             </span>
                             <span class="block column--label">
-                                <label for="wirecardElasticEngine[tac]" data-modalbox="true" data-height="500" data-width="750">
-                                    {s name="RatepayInvoiceTAC" namespace="frontend/wirecard_elastic_engine/ratepay_invoice"}{/s}
-                                </label>
+                                <label for="wirecardElasticEngine[tac]" data-modalbox="true" data-height="500" data-width="750">{s name="RatepayInvoiceTAC" namespace="frontend/wirecard_elastic_engine/ratepay_invoice"}{/s}</label>
                             </span>
                         </li>
                     </ul>
