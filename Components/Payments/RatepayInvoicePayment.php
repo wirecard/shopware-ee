@@ -299,11 +299,6 @@ class RatepayInvoicePayment extends Payment implements
             return false;
         }
 
-        // Check if consumer accepted TAC
-        if (! $this->getConfirmedTAC($sessionManager->getPaymentData())) {
-            return false;
-        }
-
         // Check if currency is accepted
         $currency = Shopware()->Shop()->getCurrency();
         if (! in_array($currency->getId(), $paymentConfig->getAcceptedCurrencies())) {
