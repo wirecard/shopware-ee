@@ -39,30 +39,30 @@
                 </div>
             </div>
         {elseif $wirecardElasticEngineViewAssignments.method == 'wirecard_elastic_engine_ratepay_invoice'}
-            {if $wirecardElasticEngineViewAssignments.showForm}
-                <div class="panel has--border wirecardee--additional-form-fields">
-                    <div class="panel--title primary is--underline">
-                        {s name="RatepayInvoiceFormHeader" namespace="frontend/wirecard_elastic_engine/ratepay_invoice"}{/s}
-                    </div>
-                    <div class="panel--body is--wide">
-                        {include file="frontend/plugins/wirecard_elastic_engine/form/ratepay_invoice.tpl"}
-                    </div>
+            <div class="panel has--border wirecardee--additional-form-fields">
+                <div class="panel--title primary is--underline">
+                    {s name="RatepayInvoiceFormHeader" namespace="frontend/wirecard_elastic_engine/ratepay_invoice"}{/s}
                 </div>
-            {/if}
-            <div class="tos--panel panel has--border">
                 <div class="panel--body is--wide">
+                    {if $wirecardElasticEngineViewAssignments.showBirthdayForm}
+                        {include file="frontend/plugins/wirecard_elastic_engine/form/ratepay_invoice.tpl"}
+                    {/if}
+
                     <ul class="list--checkbox list--unstyled">
                         <li class="block-group row--tos">
                             <span class="block column--checkbox">
                                 <input id="wirecardee--tac" type="checkbox" name="wirecardElasticEngine[tac]" required="required" aria-required="true" data-invalid-tos-jump="true" />
                             </span>
                             <span class="block column--label">
-                                <label for="wirecardElasticEngine[tac]" data-modalbox="true" data-height="500" data-width="750">{s name="RatepayInvoiceTAC" namespace="frontend/wirecard_elastic_engine/ratepay_invoice"}{/s}</label>
+                                <label for="wirecardElasticEngine[tac]" data-modalbox="true" data-height="500" data-width="750">
+                                    {s name="RatepayInvoiceTAC" namespace="frontend/wirecard_elastic_engine/ratepay_invoice"}{/s}
+                                </label>
                             </span>
                         </li>
                     </ul>
                 </div>
             </div>
+
             <script language="JavaScript">
                 var di = { t: "{$wirecardElasticEngineDeviceFingerprintId}", v: "WDWL", l: "Checkout" };
             </script>

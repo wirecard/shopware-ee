@@ -371,7 +371,7 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
         $this->assertInstanceOf(AdditionalViewAssignmentsInterface::class, $this->payment);
         $this->assertEquals([
             'method'   => 'wirecard_elastic_engine_ratepay_invoice',
-            'showForm' => true,
+            'showBirthdayForm' => true,
         ], $this->payment->getAdditionalViewAssignments($sessionManager));
     }
 }

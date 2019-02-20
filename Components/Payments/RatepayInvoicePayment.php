@@ -406,7 +406,7 @@ class RatepayInvoicePayment extends Payment implements
         $userMapper     = new UserMapper($userData, '', '');
         return [
             'method'   => $this->getName(),
-            'showForm' => ! $userMapper->getBirthday(),
+            'showBirthdayForm' => ! $userMapper->getBirthday(),
         ];
     }
 }
