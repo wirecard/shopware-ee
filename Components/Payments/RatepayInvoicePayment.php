@@ -385,18 +385,6 @@ class RatepayInvoicePayment extends Payment implements
     }
 
     /**
-     * @param array|null $paymentData
-     *
-     * @return bool
-     *
-     * @since 1.3.3
-     */
-    private function getConfirmedTAC($paymentData)
-    {
-        return isset($paymentData['tac']) && $paymentData['tac'] === 'on';
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function getAdditionalViewAssignments(SessionManager $sessionManager)
