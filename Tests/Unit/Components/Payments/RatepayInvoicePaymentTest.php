@@ -343,25 +343,12 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
     public function testCheckDisplayRestrictions()
     {
         $sessionManager = $this->createMock(SessionManager::class);
-        $sessionManager->method('getPaymentData')->willReturn(['tac' => 'on']);
 
         $userMapper = $this->createMock(UserMapper::class);
         $userMapper->method('getBillingAddress')->willReturn(['countryId' => 2]);
         $userMapper->method('getShippingAddress')->willReturn(['countryId' => 2]);
         $userMapper->method('getBirthday')->willReturn(new \DateTime('2000-01-01'));
         $this->assertTrue($this->payment->checkDisplayRestrictions($userMapper, $sessionManager));
-    }
-
-    public function testCheckDisplayRestrictionsWithoutTAC()
-    {
-        $sessionManager = $this->createMock(SessionManager::class);
-        $sessionManager->method('getPaymentData')->willReturn(['tac' => 'off']);
-
-        $userMapper = $this->createMock(UserMapper::class);
-        $userMapper->method('getBillingAddress')->willReturn(['countryId' => 2]);
-        $userMapper->method('getShippingAddress')->willReturn(['countryId' => 2]);
-        $userMapper->method('getBirthday')->willReturn(new \DateTime('2000-01-01'));
-        $this->assertFalse($this->payment->checkDisplayRestrictions($userMapper, $sessionManager));
     }
 
     public function testGetAdditionalViewAssignments()
