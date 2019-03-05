@@ -397,4 +397,14 @@ class RatepayInvoicePayment extends Payment implements
             'showForm' => ! $userMapper->getBirthday(),
         ];
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function validateActivation(array $requestBody)
+    {
+        if ($requestBody['active'] && ! $this->shopwareConfig->get('showphonenumberfield')) {
+            throw new \Exception('This payment method requires the phone number field to be activated for customer registration. You can activate it in the Basic Settings.');
+        }
+    }
 }
