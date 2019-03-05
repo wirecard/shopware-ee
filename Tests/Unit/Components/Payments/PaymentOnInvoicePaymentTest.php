@@ -45,7 +45,8 @@ class PaymentOnInvoicePaymentTest extends PaymentTestCase
             $this->config,
             $this->installer,
             $this->router,
-            $this->eventManager
+            $this->eventManager,
+            $this->snippetManager
         );
     }
 
@@ -141,7 +142,8 @@ class PaymentOnInvoicePaymentTest extends PaymentTestCase
             $config,
             $this->installer,
             $this->router,
-            $this->eventManager
+            $this->eventManager,
+            $this->snippetManager
         );
         $this->assertEquals('authorization', $payment->getTransactionType());
     }

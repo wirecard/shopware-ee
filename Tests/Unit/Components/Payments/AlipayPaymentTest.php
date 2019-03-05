@@ -46,7 +46,8 @@ class AlipayPaymentTest extends PaymentTestCase
             $this->config,
             $this->installer,
             $this->router,
-            $this->eventManager
+            $this->eventManager,
+            $this->snippetManager
         );
     }
 
@@ -147,10 +148,24 @@ class AlipayPaymentTest extends PaymentTestCase
         $config->method('getByNamespace')->willReturnMap([
             [WirecardElasticEngine::NAME, 'wirecardElasticEngineAlipayTransactionType', null, 'pay'],
         ]);
-        $payment = new AlipayPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
+        $payment = new AlipayPayment(
+            $this->em,
+            $config,
+            $this->installer,
+            $this->router,
+            $this->eventManager,
+            $this->snippetManager
+        );
         $this->assertEquals('purchase', $payment->getTransactionType());
 
-        $payment = new AlipayPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
+        $payment = new AlipayPayment(
+            $this->em,
+            $config,
+            $this->installer,
+            $this->router,
+            $this->eventManager,
+            $this->snippetManager
+        );
         $this->assertEquals('purchase', $payment->getTransactionType());
     }
 

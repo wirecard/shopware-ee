@@ -48,7 +48,8 @@ class SofortPaymentTest extends PaymentTestCase
             $this->config,
             $this->installer,
             $this->router,
-            $this->eventManager
+            $this->eventManager,
+            $this->snippetManager
         );
     }
 
@@ -181,10 +182,24 @@ class SofortPaymentTest extends PaymentTestCase
         $config->method('getByNamespace')->willReturnMap([
             [WirecardElasticEngine::NAME, 'wirecardElasticEngineSofortTransactionType', null, 'pay'],
         ]);
-        $payment = new SofortPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
+        $payment = new SofortPayment(
+            $this->em,
+            $config,
+            $this->installer,
+            $this->router,
+            $this->eventManager,
+            $this->snippetManager
+        );
         $this->assertEquals('purchase', $payment->getTransactionType());
 
-        $payment = new SofortPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
+        $payment = new SofortPayment(
+            $this->em,
+            $config,
+            $this->installer,
+            $this->router,
+            $this->eventManager,
+            $this->snippetManager
+        );
         $this->assertEquals('purchase', $payment->getTransactionType());
     }
 

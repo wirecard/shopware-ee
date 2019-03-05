@@ -32,14 +32,18 @@ abstract class PaymentTestCase extends \PHPUnit_Framework_TestCase
     /** @var \Enlight_Event_EventManager|\PHPUnit_Framework_MockObject_MockObject */
     protected $eventManager;
 
+    /** @var \Shopware_Components_Snippet_Manager|\PHPUnit_Framework_MockObject_MockObject */
+    protected $snippetManager;
+
     public function setUp()
     {
         parent::setUp();
-        $this->em           = $this->createMock(EntityManagerInterface::class);
-        $this->config       = $this->createMock(\Shopware_Components_Config::class);
-        $this->installer    = $this->createMock(InstallerService::class);
-        $this->router       = $this->createMock(RouterInterface::class);
-        $this->eventManager = $this->createMock(\Enlight_Event_EventManager::class);
+        $this->em             = $this->createMock(EntityManagerInterface::class);
+        $this->config         = $this->createMock(\Shopware_Components_Config::class);
+        $this->installer      = $this->createMock(InstallerService::class);
+        $this->router         = $this->createMock(RouterInterface::class);
+        $this->eventManager   = $this->createMock(\Enlight_Event_EventManager::class);
+        $this->snippetManager = $this->createMock(\Shopware_Components_Snippet_Manager::class);
 
         $plugin = $this->createMock(Plugin::class);
         $plugin->method('getName')->willReturn(WirecardElasticEngine::NAME);

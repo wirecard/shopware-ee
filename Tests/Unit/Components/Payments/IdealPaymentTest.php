@@ -51,7 +51,8 @@ class IdealPaymentTest extends PaymentTestCase
             $this->config,
             $this->installer,
             $this->router,
-            $this->eventManager
+            $this->eventManager,
+            $this->snippetManager
         );
     }
 
@@ -175,10 +176,24 @@ class IdealPaymentTest extends PaymentTestCase
         $config->method('getByNamespace')->willReturnMap([
             [WirecardElasticEngine::NAME, 'wirecardElasticEngineIdealTransactionType', null, 'pay'],
         ]);
-        $payment = new IdealPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
+        $payment = new IdealPayment(
+            $this->em,
+            $config,
+            $this->installer,
+            $this->router,
+            $this->eventManager,
+            $this->snippetManager
+        );
         $this->assertEquals('purchase', $payment->getTransactionType());
 
-        $payment = new IdealPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
+        $payment = new IdealPayment(
+            $this->em,
+            $config,
+            $this->installer,
+            $this->router,
+            $this->eventManager,
+            $this->snippetManager
+        );
         $this->assertEquals('purchase', $payment->getTransactionType());
     }
 

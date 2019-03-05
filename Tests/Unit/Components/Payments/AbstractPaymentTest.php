@@ -28,6 +28,7 @@ class AbstractPaymentTest extends PaymentTestCase
             $this->installer,
             $this->router,
             $this->eventManager,
+            $this->snippetManager,
         ], 'FooPayment');
     }
 

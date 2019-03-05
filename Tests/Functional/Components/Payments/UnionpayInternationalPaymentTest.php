@@ -41,24 +41,29 @@ class UnionpayInternationalPaymentTest extends TestCase
     /** @var \Enlight_Event_EventManager $config */
     private $eventManager;
 
+    /** @var \Shopware_Components_Snippet_Manager $config */
+    private $snippetManager;
+
     /** @var UnionpayInternationalPayment */
     protected $payment;
 
     public function setUp()
     {
-        $this->container    = \Shopware()->Container();
-        $this->em           = $this->container->get('models');
-        $this->config       = $this->container->get('config');
-        $this->installer    = $this->container->get('shopware_plugininstaller.plugin_manager');
-        $this->router       = $this->container->get('router');
-        $this->eventManager = $this->container->get('events');
+        $this->container      = \Shopware()->Container();
+        $this->em             = $this->container->get('models');
+        $this->config         = $this->container->get('config');
+        $this->installer      = $this->container->get('shopware_plugininstaller.plugin_manager');
+        $this->router         = $this->container->get('router');
+        $this->eventManager   = $this->container->get('events');
+        $this->snippetManager = $this->container->get('snippets');
 
         $this->payment = new UnionpayInternationalPayment(
             $this->em,
             $this->config,
             $this->installer,
             $this->router,
-            $this->eventManager
+            $this->eventManager,
+            $this->snippetManager
         );
     }
 

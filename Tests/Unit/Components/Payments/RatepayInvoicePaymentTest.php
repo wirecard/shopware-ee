@@ -60,7 +60,8 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
             $this->config,
             $this->installer,
             $this->router,
-            $this->eventManager
+            $this->eventManager,
+            $this->snippetManager
         );
     }
 

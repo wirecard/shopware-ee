@@ -50,7 +50,8 @@ class UnionpayInternationalPaymentTest extends PaymentTestCase
             $this->config,
             $this->installer,
             $this->router,
-            $this->eventManager
+            $this->eventManager,
+            $this->snippetManager
         );
     }
 
@@ -132,14 +133,28 @@ class UnionpayInternationalPaymentTest extends PaymentTestCase
         $config->method('getByNamespace')->willReturnMap([
             [WirecardElasticEngine::NAME, 'wirecardElasticEnginePaypalTransactionType', null, 'pay'],
         ]);
-        $payment = new PaypalPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
+        $payment = new PaypalPayment(
+            $this->em,
+            $config,
+            $this->installer,
+            $this->router,
+            $this->eventManager,
+            $this->snippetManager
+        );
         $this->assertEquals('purchase', $payment->getTransactionType());
 
         $config = $this->createMock(\Shopware_Components_Config::class);
         $config->method('getByNamespace')->willReturnMap([
             [WirecardElasticEngine::NAME, 'wirecardElasticEnginePaypalTransactionType', null, 'reserve'],
         ]);
-        $payment = new PaypalPayment($this->em, $config, $this->installer, $this->router, $this->eventManager);
+        $payment = new PaypalPayment(
+            $this->em,
+            $config,
+            $this->installer,
+            $this->router,
+            $this->eventManager,
+            $this->snippetManager
+        );
         $this->assertEquals('authorization', $payment->getTransactionType());
     }
 
