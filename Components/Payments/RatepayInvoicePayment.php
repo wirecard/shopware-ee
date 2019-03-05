@@ -408,7 +408,8 @@ class RatepayInvoicePayment extends Payment implements
 
             throw new \Exception($snippets->get(
                 'PaymentMethodRequiresPhoneNumber',
-                'This payment method requires the phone number field to be activated for Login / Registration. You can activate it in the Basic Settings.'
+                'This payment method requires the phone number field to be activated for Login / Registration. ' .
+                'You can activate it in the Basic Settings.'
             ));
         }
     }
