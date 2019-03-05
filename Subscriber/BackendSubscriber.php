@@ -41,6 +41,7 @@ class BackendSubscriber implements SubscriberInterface
         return [
             'Enlight_Controller_Action_PostDispatchSecure_Backend_Index' => 'onLoadBackendIndex',
             'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch',
+            'Enlight_Controller_Action_Backend_Payment_UpdatePayments'   => 'onUpdatePayments',
         ];
     }
 
@@ -77,6 +78,33 @@ class BackendSubscriber implements SubscriberInterface
 
         if ($request->getActionName() === 'load') {
             $view->extendsTemplate('backend/wirecard_elastic_engine_extend_order/view/detail/window.js');
+        }
+    }
+
+    /**
+     * @param \Enlight_Event_EventArgs $args
+     *
+     * @since 1.3.4
+     */
+    public function onUpdatePayments(\Enlight_Event_EventArgs $args)
+    {
+        $payment        = $args->getSubject();
+        $paymentFactory = $payment->get('wirecard_elastic_engine.payment_factory');
+        $request        = $payment->Request();
+        $requestBody    = json_decode($request->getRawBody(), true);
+
+        if ($paymentFactory->isSupportedPayment($requestBody['name'])) {
+            $paymentInstance = $paymentFactory->create($requestBody['name']);
+
+            try {
+                $paymentInstance->validateActivation($requestBody);
+            } catch (\Exception $e) {
+                $payment->View()->assign([
+                    'success'  => false,
+                    'errorMsg' => $e->getMessage(),
+                ]);
+                return false;
+            }
         }
     }
 }

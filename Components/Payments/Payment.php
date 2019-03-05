@@ -184,4 +184,13 @@ abstract class Payment implements PaymentInterface
     {
         return $this->shopwareConfig->getByNamespace(WirecardElasticEngine::NAME, $prefix . $name);
     }
+
+    /**
+     * @param array $requestBody
+     *
+     * @since 1.3.4
+     */
+    public function validateActivation(array $requestBody)
+    {
+    }
 }
