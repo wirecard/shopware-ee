@@ -64,11 +64,17 @@ class PaymentFactory
     protected $eventManager;
 
     /**
-     * @param EntityManagerInterface      $em
-     * @param \Shopware_Components_Config $shopwareConfig
-     * @param InstallerService            $installerService
-     * @param RouterInterface             $router
-     * @param \Enlight_Event_EventManager $eventManager
+     * @var \Shopware_Components_Snippet_Manager
+     */
+    protected $snippetManager;
+
+    /**
+     * @param EntityManagerInterface               $em
+     * @param \Shopware_Components_Config          $shopwareConfig
+     * @param InstallerService                     $installerService
+     * @param RouterInterface                      $router
+     * @param \Enlight_Event_EventManager          $eventManager
+     * @param \Shopware_Components_Snippet_Manager $snippetManager
      *
      * @since 1.0.0
      */
@@ -77,13 +83,15 @@ class PaymentFactory
         \Shopware_Components_Config $shopwareConfig,
         InstallerService $installerService,
         RouterInterface $router,
-        \Enlight_Event_EventManager $eventManager
+        \Enlight_Event_EventManager $eventManager,
+        \Shopware_Components_Snippet_Manager $snippetManager
     ) {
         $this->em               = $em;
         $this->shopwareConfig   = $shopwareConfig;
         $this->installerService = $installerService;
         $this->router           = $router;
         $this->eventManager     = $eventManager;
+        $this->snippetManager   = $snippetManager;
     }
 
     /**
@@ -106,7 +114,8 @@ class PaymentFactory
             $this->shopwareConfig,
             $this->installerService,
             $this->router,
-            $this->eventManager
+            $this->eventManager,
+            $this->snippetManager
         );
     }
 

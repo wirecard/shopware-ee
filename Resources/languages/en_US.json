@@ -135,6 +135,7 @@
   "poi_pia": "Payment On Invoice / Payment In Advance",
   "ptrid": "Provider Transaction Reference ID",
   "ratepayinvoice": "Guaranteed Invoice",
+  "ratepayinvoice_fields_phone_error": "This payment method requires the phone number field to be activated for Login / Registration. You can activate it in the Basic Settings.",
   "ratepayinvoice_fields_error": "Minimum age to pay with Guaranteed Invoice: 18.",
   "redirect_text": "You are being redirected. Please wait.",
   "requestId": "Request ID",

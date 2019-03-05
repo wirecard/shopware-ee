@@ -209,7 +209,8 @@ class WirecardElasticEngine extends Plugin
             $this->container->get('config'),
             $this->container->get('shopware_plugininstaller.plugin_manager'),
             $this->container->get('router'),
-            $this->container->get('events')
+            $this->container->get('events'),
+            $this->container->get('snippets')
         );
         return $paymentFactory->getSupportedPayments();
     }

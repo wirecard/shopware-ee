@@ -18,6 +18,7 @@
             <argument type="service" id="shopware_plugininstaller.plugin_manager"/>
             <argument type="service" id="router"/>
             <argument type="service" id="events"/>
+            <argument type="service" id="snippets"/>
         </service>
         <service id="wirecard_elastic_engine.transaction_manager"
                  class="WirecardElasticEngine\Components\Services\TransactionManager">

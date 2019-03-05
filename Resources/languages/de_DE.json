@@ -80,6 +80,7 @@
   "error_credentials": "Test fehlgeschlagen. Überprüfen Sie Ihre Zugangsdaten.",
   "error_email": "E-Mail-Versand fehlgeschlagen.",
   "error_no_transaction": "Es wurde keine Transaktion gefunden.",
+  "ratepayinvoice_fields_phone_error": "Für diese Zahlungsart muss das Telefonnummer-Feld im Bereich Anmeldung / Registrierung aktiviert sein. Sie können es in den Grundeinstellungen aktivieren.",
   "fill_out_fields_error": "Bitte füllen Sie alle rot markierten Felder aus.",
   "first_name_input": "Vorname",
   "heading_title": "Wirecard",

@@ -15,6 +15,7 @@ use Shopware\Components\Routing\RouterInterface;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Shop\Shop;
 use Shopware_Components_Config;
+use Shopware_Components_Snippet_Manager;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
 use WirecardElasticEngine\Exception\UnknownTransactionTypeException;
@@ -65,11 +66,17 @@ abstract class Payment implements PaymentInterface
     protected $eventManager;
 
     /**
-     * @param EntityManagerInterface      $em
-     * @param Shopware_Components_Config  $shopwareConfig
-     * @param InstallerService            $installerService
-     * @param RouterInterface             $router
-     * @param \Enlight_Event_EventManager $eventManager
+     * @var Shopware_Components_Snippet_Manager
+     */
+    protected $snippetManager;
+
+    /**
+     * @param EntityManagerInterface               $em
+     * @param Shopware_Components_Config           $shopwareConfig
+     * @param InstallerService                     $installerService
+     * @param RouterInterface                      $router
+     * @param \Enlight_Event_EventManager          $eventManager
+     * @param Shopware_Components_Snippet_Manager  $snippetManager
      *
      * @since 1.0.0
      */
@@ -78,13 +85,15 @@ abstract class Payment implements PaymentInterface
         Shopware_Components_Config $shopwareConfig,
         InstallerService $installerService,
         RouterInterface $router,
-        \Enlight_Event_EventManager $eventManager
+        \Enlight_Event_EventManager $eventManager,
+        Shopware_Components_Snippet_Manager $snippetManager
     ) {
         $this->em               = $em;
         $this->shopwareConfig   = $shopwareConfig;
         $this->installerService = $installerService;
         $this->router           = $router;
         $this->eventManager     = $eventManager;
+        $this->snippetManager   = $snippetManager;
     }
 
     /**

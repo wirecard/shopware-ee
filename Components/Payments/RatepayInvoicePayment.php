@@ -404,7 +404,12 @@ class RatepayInvoicePayment extends Payment implements
     public function validateActivation(array $requestBody)
     {
         if ($requestBody['active'] && ! $this->shopwareConfig->get('showphonenumberfield')) {
-            throw new \Exception('This payment method requires the phone number field to be activated for customer registration. You can activate it in the Basic Settings.');
+            $snippets = $this->snippetManager->getNamespace('backend/wirecard_elastic_engine/common');
+
+            throw new \Exception($snippets->get(
+                'PaymentMethodRequiresPhoneNumber',
+                'This payment method requires the phone number field to be activated for Login / Registration. You can activate it in the Basic Settings.'
+            ));
         }
     }
 }
