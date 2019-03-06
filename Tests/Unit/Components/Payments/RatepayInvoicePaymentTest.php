@@ -363,4 +363,19 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
             'showForm' => true,
         ], $this->payment->getAdditionalViewAssignments($sessionManager));
     }
+
+    public function testValidateActivation()
+    {
+        $this->expectException(\Exception::class);
+
+        $snippets = $this->createMock(\Enlight_Components_Snippet_Namespace::class);
+
+        $this->config->method('get')->with('showphonenumberfield')->willReturn(false);
+        $this->snippetManager->method('getNamespace')->willReturn($snippets);
+
+        $this->payment->validateActivation([
+            'name'   => 'wirecard_elastic_engine_ratepay_invoice',
+            'active' => true,
+        ]);
+    }
 }
