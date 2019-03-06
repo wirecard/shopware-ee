@@ -199,7 +199,7 @@ abstract class Payment implements PaymentInterface
      *
      * @since 1.3.4
      */
-    public function validateActivation(array $requestBody)
+    public function validateUpdate(array $requestBody)
     {
     }
 }

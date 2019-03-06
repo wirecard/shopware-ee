@@ -401,7 +401,7 @@ class RatepayInvoicePayment extends Payment implements
     /**
      * {@inheritdoc}
      */
-    public function validateActivation(array $requestBody)
+    public function validateUpdate(array $requestBody)
     {
         if ($requestBody['active'] && ! $this->shopwareConfig->get('showphonenumberfield')) {
             $snippets = $this->snippetManager->getNamespace('backend/wirecard_elastic_engine/common');

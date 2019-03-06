@@ -364,7 +364,7 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
         ], $this->payment->getAdditionalViewAssignments($sessionManager));
     }
 
-    public function testValidateActivation()
+    public function testValidateUpdate()
     {
         $this->expectException(\Exception::class);
 
@@ -373,7 +373,7 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
         $this->config->method('get')->with('showphonenumberfield')->willReturn(false);
         $this->snippetManager->method('getNamespace')->willReturn($snippets);
 
-        $this->payment->validateActivation([
+        $this->payment->validateUpdate([
             'name'   => 'wirecard_elastic_engine_ratepay_invoice',
             'active' => true,
         ]);

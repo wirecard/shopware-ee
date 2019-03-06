@@ -98,7 +98,7 @@ class BackendSubscriberTest extends TestCase
         ]));
 
         $paymentInstance = $this->createMock(RatepayInvoicePayment::class);
-        $paymentInstance->expects($this->once())->method('validateActivation')->willThrowException(new \Exception());
+        $paymentInstance->expects($this->once())->method('validateUpdate')->willThrowException(new \Exception());
 
         $paymentFactory = $this->createMock(PaymentFactory::class);
         $paymentFactory->expects($this->once())->method('isSupportedPayment')->willReturn(true);

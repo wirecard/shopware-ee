@@ -97,7 +97,7 @@ class BackendSubscriber implements SubscriberInterface
             $paymentInstance = $paymentFactory->create($requestBody['name']);
 
             try {
-                $paymentInstance->validateActivation($requestBody);
+                $paymentInstance->validateUpdate($requestBody);
             } catch (\Exception $e) {
                 $payment->View()->assign([
                     'success'  => false,
