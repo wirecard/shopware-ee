@@ -136,15 +136,25 @@ class CreditCardPayment extends Payment implements
     /**
      * @param string       $selectedCurrency
      * @param float|string $limitValue
-     * @param string       $limitCurrency
+     * @param mixed        $limitCurrencyId
      *
      * @return Amount
      * @throws \Enlight_Event_Exception
      *
      * @since 1.0.0
      */
-    private function getLimit($selectedCurrency, $limitValue, $limitCurrency)
+    private function getLimit($selectedCurrency, $limitValue, $limitCurrencyId)
     {
+        $repo = $this->em->getRepository(Currency::class);
+        $limitCurrency = '';
+        if (is_numeric($limitCurrencyId)) {
+            /** @var \Shopware\Models\Shop\Currency $limitCurrencyEntity */
+            $limitCurrencyEntity = $repo->find($limitCurrencyId);
+            if ($limitCurrencyEntity !== null) {
+                $limitCurrency = $limitCurrencyEntity->getCurrency();
+            }
+        }
+
         $limit  = new Amount($limitValue, strtoupper($limitCurrency));
         $factor = $this->getCurrencyConversionFactor(strtoupper($selectedCurrency), $limit);
 

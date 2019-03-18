@@ -201,7 +201,7 @@ function (button) {
             <description lang="{{ lang }}">{{ strings.config_ssl_max_limit_desc }}</description>
             @endforlang
         </element>
-        <element type="text" scope="shop">
+        <element type="combo" scope="shop">
             <name>wirecardElasticEngineCreditCardSslMaxLimitCurrency</name>
             @forlang
             <label lang="{{ lang }}">[{{ strings.creditcard }}] {{ strings.config_ssl_max_limit_currency }}</label>
@@ -210,6 +210,7 @@ function (button) {
             @forlang
             <description lang="{{ lang }}">{{ strings.config_currency_default }}</description>
             @endforlang
+            <store>Shopware.apps.Base.store.Currency</store>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardThreeDMinLimit</name>
@@ -221,7 +222,7 @@ function (button) {
             <description lang="{{ lang }}">{{ strings.config_three_d_min_limit_desc }}</description>
             @endforlang
         </element>
-        <element type="text" scope="shop">
+        <element type="combo" scope="shop">
             <name>wirecardElasticEngineCreditCardThreeDMinLimitCurrency</name>
             @forlang
             <label lang="{{ lang }}">[{{ strings.creditcard }}] {{ strings.config_three_d_min_limit_currency }}</label>
@@ -230,6 +231,7 @@ function (button) {
             @forlang
             <description lang="{{ lang }}">{{ strings.config_currency_default }}</description>
             @endforlang
+            <store>Shopware.apps.Base.store.Currency</store>
         </element>
         <element type="boolean" scope="shop">
             <name>wirecardElasticEngineCreditCardEnableVault</name>
