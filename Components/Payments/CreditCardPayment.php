@@ -146,7 +146,7 @@ class CreditCardPayment extends Payment implements
     private function getLimit($selectedCurrency, $limitValue, $limitCurrencyId)
     {
         $repo = $this->em->getRepository(Currency::class);
-        $limitCurrency = '';
+        $limitCurrency = $limitCurrencyId;
         if (is_numeric($limitCurrencyId)) {
             /** @var \Shopware\Models\Shop\Currency $limitCurrencyEntity */
             $limitCurrencyEntity = $repo->find($limitCurrencyId);
