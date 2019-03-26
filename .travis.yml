@@ -48,7 +48,10 @@ matrix:
         - composer show
       script: npm run test:runner
       after_failure:
-        - bash .bin/send-notify.sh
+#        - bash .bin/send-notify.sh
+        - sudo cat /var/log/apache2/error.log
+        - cat ${SHOPWARE_DIRECTORY}/composer.lock
+        - cat ${SHOPWARE_DIRECTORY}/var/log/*.log
 
 install:
   - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
