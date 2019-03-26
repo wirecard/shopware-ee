@@ -52,6 +52,24 @@ matrix:
         - cat ${SHOPWARE_DIRECTORY}/composer.lock
         - cat ${SHOPWARE_DIRECTORY}/var/log/*.log
 
+    - stage: coverage-test
+  #    if: type = cron
+      php: 7.2
+      install:
+        - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
+        - travis_retry composer install $COMPOSER_ARGS
+        - travis_retry npm install
+        - npm list --depth=0
+        - composer show
+      script:
+        - composer cs-check
+        - npm run lint
+        - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
+        - composer test-coverage
+      after_script:
+        - travis_retry composer upload-coverage
+        - bash .bin/generate-tag.sh
+
 before_script:
   # install apache
   - sudo apt-get update
