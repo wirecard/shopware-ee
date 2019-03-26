@@ -59,12 +59,6 @@ install:
   - npm list --depth=0
   - composer show
 
-script:
-  - composer cs-check
-  - npm run lint
-  - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
-  - composer test-coverage
-
 before_script:
   # install apache
   - sudo apt-get update
@@ -91,6 +85,12 @@ before_script:
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:cache:clear
   - rm -rf ${SHOPWARE_DIRECTORY}/var/cache
   - cd ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
+
+script:
+  - composer cs-check
+  - npm run lint
+  - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
+  - composer test-coverage
 
 after_script:
   - travis_retry composer upload-coverage
