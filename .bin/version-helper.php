@@ -1,14 +1,14 @@
 <?php
 
-define ("REPO", getenv("TRAVIS_REPO_SLUG"));
-define ("REPO_NAME", explode("/", REPO)[1]);
-define ("SCRIPT_DIR", __DIR__);
-define ("WIKI_DIR", SCRIPT_DIR . "/../" . REPO_NAME . ".wiki");
-define ("WIKI_FILE", WIKI_DIR . "/Home.md");
-define ("README_FILE", SCRIPT_DIR . "/../README.md");
-define ("VERSION_FILE", SCRIPT_DIR . "/../SHOPVERSIONS");
-define ("TRAVIS_FILE", SCRIPT_DIR . "/../.travis.yml");
-define ("CHANGELOG_FILE", SCRIPT_DIR . "/../CHANGELOG.md");
+define("REPO", getenv("TRAVIS_REPO_SLUG"));
+define("REPO_NAME", explode("/", REPO)[1]);
+define("SCRIPT_DIR", __DIR__);
+define("WIKI_DIR", SCRIPT_DIR . "/../" . REPO_NAME . ".wiki");
+define("WIKI_FILE", WIKI_DIR . "/Home.md");
+define("README_FILE", SCRIPT_DIR . "/../README.md");
+define("VERSION_FILE", SCRIPT_DIR . "/../SHOPVERSIONS");
+define("TRAVIS_FILE", SCRIPT_DIR . "/../.travis.yml");
+define("CHANGELOG_FILE", SCRIPT_DIR . "/../CHANGELOG.md");
 
 // Update this if you're using a different shop system.
 require SCRIPT_DIR . "/../vendor/autoload.php";
@@ -21,7 +21,8 @@ use Symfony\Component\Yaml\Yaml;
  * @param $version
  * @return string
  */
-function prefixWithPhp($version) {
+function prefixWithPhp($version)
+{
     return "PHP " . number_format($version, 1);
 }
 
@@ -33,7 +34,8 @@ function prefixWithPhp($version) {
  * @param string $conjunction
  * @return string
  */
-function naturalLanguageJoin($list, $conjunction = 'and') {
+function naturalLanguageJoin($list, $conjunction = 'and')
+{
     $last = array_pop($list);
 
     if ($list) {
@@ -49,7 +51,8 @@ function naturalLanguageJoin($list, $conjunction = 'and') {
  * @param $change
  * @return string
  */
-function generateChangelogLine($change) {
+function generateChangelogLine($change)
+{
     return "<li>{$change}</li>";
 }
 
@@ -60,7 +63,8 @@ function generateChangelogLine($change) {
  * @param $phpVersions
  * @return array
  */
-function makeTextVersions($shopVersions, $phpVersions) {
+function makeTextVersions($shopVersions, $phpVersions)
+{
     $versionRange = $shopVersions["tested"];
     $phpVersions = array_map("prefixWithPhp", $phpVersions);
     $phpVersionString = naturalLanguageJoin($phpVersions);
@@ -83,7 +87,8 @@ function makeTextVersions($shopVersions, $phpVersions) {
  * @param $phpVersions
  * @return string
  */
-function generateReleaseVersions($shopVersions, $phpVersions) {
+function generateReleaseVersions($shopVersions, $phpVersions)
+{
     $releaseVersions = makeTextVersions($shopVersions, $phpVersions);
 
     $releaseNotes  = "<ul>" . join("", array_map("generateChangelogLine", $shopVersions['changelog'])) . "</ul>";
@@ -100,8 +105,9 @@ function generateReleaseVersions($shopVersions, $phpVersions) {
  * @param $shopVersions
  * @param $phpVersions
  */
-function generateWikiRelease($shopVersions, $phpVersions) {
-    if (!file_exists(WIKI_FILE )) {
+function generateWikiRelease($shopVersions, $phpVersions)
+{
+    if (!file_exists(WIKI_FILE)) {
         fwrite(STDERR, "ERROR: Wiki files do not exist." . PHP_EOL);
         exit(1);
     }
@@ -133,8 +139,9 @@ function generateWikiRelease($shopVersions, $phpVersions) {
  *
  * @param $shopVersions
  */
-function generateReadmeReleaseBadge($shopVersions) {
-    if (!file_exists(README_FILE )) {
+function generateReadmeReleaseBadge($shopVersions)
+{
+    if (!file_exists(README_FILE)) {
         fwrite(STDERR, "ERROR: README file does not exist." . PHP_EOL);
         exit(1);
     }
@@ -160,7 +167,8 @@ function generateReadmeReleaseBadge($shopVersions) {
  * @return array
  */
 
-function parseVersionsFile($filePath) {
+function parseVersionsFile($filePath)
+{
     // Bail out if we don"t have defined shop versions and throw a loud error.
     if (!file_exists($filePath)) {
         fwrite(STDERR, "ERROR: No shop version file exists" . PHP_EOL);
@@ -173,7 +181,7 @@ function parseVersionsFile($filePath) {
     );
 
     // compare release versions
-    $cmp = function($a, $b) {
+    $cmp = function ($a, $b) {
         return version_compare($a->release, $b->release);
     };
 

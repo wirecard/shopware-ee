@@ -65,7 +65,8 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.TransactionDetai
     createDetailsTemplate: function () {
         var me = this;
 
-        return Ext.create('Ext.XTemplate',
+        return Ext.create(
+            'Ext.XTemplate',
             '{literal}<tpl for=".">',
             '<div class="wirecardee-transaction-details-entry-pnl">',
             '<p><label class="x-form-item-label">' + me.snippets.CreatedAt + ':</label> {[this.dateFormat(values.createdAt)]}</p>',
@@ -86,7 +87,8 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.TransactionDetai
             '<p><label class="x-form-item-label">' + me.snippets.Request + ':</label></p>',
             '<div><pre>{[this.asJson(values.request)]}</pre></div>',
             '</div>',
-            '</tpl>{/literal}', {
+            '</tpl>{/literal}',
+            {
                 dateFormat: function (value) {
                     if (value === Ext.undefined) {
                         return value;

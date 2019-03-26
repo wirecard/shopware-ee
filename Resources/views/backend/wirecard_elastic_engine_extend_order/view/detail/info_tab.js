@@ -145,7 +145,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                         return (value === Ext.undefined) ? value
                             : (Ext.util.Format.date(value) + ' ' + Ext.util.Format.date(value, 'H:i:s'));
                     }
-                },
+            },
                 { header: me.snippets.transactionsTable.type, dataIndex: 'type', flex: 1 },
                 { header: me.snippets.transactionsTable.transactionId, dataIndex: 'transactionId', flex: 1 },
                 { header: me.snippets.transactionsTable.transactionType, dataIndex: 'transactionType', flex: 1 },
@@ -154,7 +154,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                     dataIndex: 'amount',
                     flex: 1,
                     renderer: Ext.util.Format.numberRenderer('0.00')
-                },
+            },
                 { header: me.snippets.transactionsTable.currency, dataIndex: 'currency', flex: 1 },
                 {
                     xtype: 'actioncolumn',
@@ -240,7 +240,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                             }
                         }
                     }]
-                }
+            }
             ],
             bodyPadding: 0,
             margin: '10 0',
@@ -341,7 +341,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                         align: 'stretch'
                     },
                     items: items
-                }
+            }
             ],
             buttons: [{
                 text: me.snippets.basketDialog.submit,
@@ -450,8 +450,8 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 '</div>',
                 '</tpl>{/literal}'
             ),
-            renderData: transaction,
-            margin: '0 0 10px'
+        renderData: transaction,
+        margin: '0 0 10px'
         };
     },
 
@@ -474,14 +474,14 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 '<tpl if="address"><p>{address}<br>{city} {state}</p></tpl>',
                 '</tpl>{/literal}'
             ),
-            renderData: {
-                'iban': transaction.response['merchant-bank-account.0.iban'],
-                'bic': transaction.response['merchant-bank-account.0.bic'],
-                'reference': transaction.providerTransactionReference,
-                'bankName': transaction.response['merchant-bank-account.0.bank-name'],
-                'address': transaction.response['merchant-bank-account.0.branch-address'],
-                'city': transaction.response['merchant-bank-account.0.branch-city'],
-                'state': transaction.response['merchant-bank-account.0.branch-state']
+        renderData: {
+            'iban': transaction.response['merchant-bank-account.0.iban'],
+            'bic': transaction.response['merchant-bank-account.0.bic'],
+            'reference': transaction.providerTransactionReference,
+            'bankName': transaction.response['merchant-bank-account.0.bank-name'],
+            'address': transaction.response['merchant-bank-account.0.branch-address'],
+            'city': transaction.response['merchant-bank-account.0.branch-city'],
+            'state': transaction.response['merchant-bank-account.0.branch-state']
             },
             margin: '0 0 10px'
         };
@@ -507,11 +507,11 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                 '</div>',
                 '</tpl>{/literal}'
             ),
-            renderData: {
-                creditorId: transaction.response['creditor-id'],
-                dueDate: transaction.response['due-date'],
-                mandateId: transaction.response['mandate.0.mandate-id'],
-                mandateSignedDate: transaction.response['mandate.0.signed-date']
+        renderData: {
+            creditorId: transaction.response['creditor-id'],
+            dueDate: transaction.response['due-date'],
+            mandateId: transaction.response['mandate.0.mandate-id'],
+            mandateSignedDate: transaction.response['mandate.0.signed-date']
             }
         };
     },
