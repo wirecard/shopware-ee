@@ -29,13 +29,13 @@ matrix:
     - stage: acceptance-test
   include:
     - php: 5.6
-      if: type !=cron
+      if: type = cron
     - php: 7.0
-      if: type !=cron
+      if: type = cron
     - php: 7.1
-      if: type !=cron
+      if: type = cron
     - php: 7.2
-      if: type !=cron
+      if: type = cron
 
     - stage: acceptance-test
 #      if: type = cron
@@ -51,6 +51,23 @@ matrix:
         - sudo cat /var/log/apache2/error.log
         - cat ${SHOPWARE_DIRECTORY}/composer.lock
         - cat ${SHOPWARE_DIRECTORY}/var/log/*.log
+  - stage: test-coverage
+    if: type = cron
+    php: 7.2
+    install:
+      - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
+      - travis_retry composer install $COMPOSER_ARGS
+      - travis_retry npm install
+      - npm list --depth=0
+      - composer show
+    script:
+      - composer cs-check
+      - npm run lint
+      - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
+      - composer test-coverage
+    after_script:
+      - travis_retry composer upload-coverage
+      - bash .bin/generate-tag.sh
 
 before_script:
   # install apache
@@ -78,16 +95,6 @@ before_script:
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:cache:clear
   - rm -rf ${SHOPWARE_DIRECTORY}/var/cache
   - cd ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
-
-script:
-  - composer cs-check
-  - npm run lint
-  - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
-  - composer test-coverage
-
-after_script:
-  - travis_retry composer upload-coverage
-  - bash .bin/generate-tag.sh
 
 before_deploy:
   - export REPO_NAME=`echo $TRAVIS_REPO_SLUG | awk -F'/' '{print $2}'`
