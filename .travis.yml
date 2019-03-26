@@ -37,7 +37,8 @@ matrix:
     - php: 7.2
       if: type != cron
 
-    - stage: acceptance-test
+    - &acceptance-test
+      stage: acceptance-test
 #      if: type = cron
       php: 7.2
       install:
@@ -49,6 +50,14 @@ matrix:
       script: npm run test:runner
       after_failure:
         - bash .bin/send-notify.sh
+    - <<: *acceptance-test
+      env: GATEWAY=API-WDCEE-TEST
+    - <<: *acceptance-test
+      env: GATEWAY=NOVA
+    - <<: *acceptance-test
+      env: GATEWAY=SECURE-TEST-SG
+    - <<: *acceptance-test
+      env: GATEWAY=TEST-SG
 
 install:
   - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
