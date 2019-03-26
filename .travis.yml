@@ -29,28 +29,29 @@ matrix:
 #    - stage: acceptance-test
   include:
     - php: 5.6
-      if: type = cron
+      if: type != cron
     - php: 7.0
-      if: type = cron
+      if: type != cron
     - php: 7.1
-      if: type = cron
+      if: type != cron
     - php: 7.2
       if: type != cron
 
-#    - stage: acceptance-test
-##      if: type = cron
-#      php: 7.2
-#      install:
-#        - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
-#        - travis_retry composer install $COMPOSER_ARGS
-#        - travis_retry npm install
-#        - npm list --depth=0
-#        - composer show
-#      script: npm run test:runner
-#      after_failure:
-#        - sudo cat /var/log/apache2/error.log
-#        - cat ${SHOPWARE_DIRECTORY}/composer.lock
-#        - cat ${SHOPWARE_DIRECTORY}/var/log/*.log
+    - stage: acceptance-test
+#      if: type = cron
+      php: 7.2
+      install:
+        - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
+        - travis_retry composer install $COMPOSER_ARGS
+        - travis_retry npm install
+        - npm list --depth=0
+        - composer show
+      script: npm run test:runner
+      after_failure:
+        - sudo cat /var/log/apache2/error.log
+        - cat ${SHOPWARE_DIRECTORY}/composer.lock
+        - cat ${SHOPWARE_DIRECTORY}/var/log/*.log
+
   - stage: test-coverage
 #    if: type = cron
     php: 7.2
