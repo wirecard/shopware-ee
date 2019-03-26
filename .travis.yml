@@ -25,8 +25,8 @@ env:
         secure: "gH+IJRS0uQe2G/gg4nL0UgQxh4Tog16vQIBzWgQiFUjmQM/jMvUtw6kW4ixcusOPGR4rqKuLFCd8gbDg/I848VNDb7a+xg+wGm7KvognnbcxbnB0TcxNcPTGZUWXbSqGi3z8YhAaaa1LfrROM3qS4LeU3Bz+B7ZpdbA7xqzkmBRPgEdsv7OLmCwow2e6jreeGcCAqM34q84JavZkWcoHCQbLoknwyNCzilMKUN8fe+Ih46o1O0iuVOv9lAWIOLlAJJNcrX+kamv4RhrtDQwyVWsnDB2OO2Me4Lr4Bkqy9pN+diszgX8OzhOnkFl+ZXYTIUI5NxK3kAkd4lKOO3QgHIoveSmeoaS/mrC5kflNs6vN399Jm8X4gSmxUhkl01hEAfEqL+BiW2o22/Pq8WeMVVaQy3ONUwlSGGBkk/IkckbG/LzpJv5Jjztfi8Xfl9JF1jO/0BABsqodx/pEbDzIKKb3S/U/EHmCXV8zqmD67E/PIii3Y9kxeVaDNdWT5u4O69Pt9sR7csA8OL8YS8th/d825v4BTPswIFxn1vXB1sTKJZGwyO+fu53CE7qcZEMc/+NJnfLZBhIbV9SE1zVRsDPX1AiruPd/sXjYy01AR4SYdCO+RrdyVWoIE65hV/MOGgvu327jI13ZIpFE2PwE1fPj6JqTtrW5YugLCOQUGd0="
 
 matrix:
-  allow_failures:
-    - stage: acceptance-test
+#  allow_failures:
+#    - stage: acceptance-test
   include:
     - php: 5.6
       if: type = cron
@@ -37,20 +37,20 @@ matrix:
     - php: 7.2
       if: type = cron
 
-    - stage: acceptance-test
-#      if: type = cron
-      php: 7.2
-      install:
-        - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
-        - travis_retry composer install $COMPOSER_ARGS
-        - travis_retry npm install
-        - npm list --depth=0
-        - composer show
-      script: npm run test:runner
-      after_failure:
-        - sudo cat /var/log/apache2/error.log
-        - cat ${SHOPWARE_DIRECTORY}/composer.lock
-        - cat ${SHOPWARE_DIRECTORY}/var/log/*.log
+#    - stage: acceptance-test
+##      if: type = cron
+#      php: 7.2
+#      install:
+#        - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
+#        - travis_retry composer install $COMPOSER_ARGS
+#        - travis_retry npm install
+#        - npm list --depth=0
+#        - composer show
+#      script: npm run test:runner
+#      after_failure:
+#        - sudo cat /var/log/apache2/error.log
+#        - cat ${SHOPWARE_DIRECTORY}/composer.lock
+#        - cat ${SHOPWARE_DIRECTORY}/var/log/*.log
   - stage: test-coverage
 #    if: type = cron
     php: 7.2
