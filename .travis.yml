@@ -35,7 +35,7 @@ matrix:
     - php: 7.1
       if: type = cron
     - php: 7.2
-      if: type = cron
+      if: type != cron
 
 #    - stage: acceptance-test
 ##      if: type = cron
@@ -52,7 +52,7 @@ matrix:
 #        - cat ${SHOPWARE_DIRECTORY}/composer.lock
 #        - cat ${SHOPWARE_DIRECTORY}/var/log/*.log
   - stage: test-coverage
-    if: type != cron
+#    if: type = cron
     php: 7.2
     install:
       - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
