@@ -13,12 +13,6 @@ addons:
     access_key:
       secure: "X5rYWmTBajo7zuJ88WBcE1C0avNwChG26wuOyRqoi2ibGRVM64pTF+eTn60Y12g3dUfoV20XtTSpIiRmwzK827mk4Zh0csn1oTd1UhZm01MYtnxCXbB8xphVWRTgnyJbZM+KDldlRZZyClY5RLW3qH/I+TTifuWcT+ptsijLIcu6vMNQ6Iqc0E5vUFflY3XrE20va9jnJkRe8E7HroR3c9SP7lN2dG8GnzOi6ode4WTIrkXlZ4T/k5dVUwD+h0VZPTwXagorsYrBAaV8jNt5M5cWSBd4KvK4Q2F8NKX2eOebLiQ47NdhPJXG7SLxPF88l7mtJVODKqxTXUFy6apU+vf9w3OY0fX967u74WEO2CQorYJ1HgC3yxbc5zUtlzjtLpKRCFkI2kPbz3gA5EKX6XydYAyGIBFr7ZqPtjLUF/3qZNP5lA2phVyO49Mc3sUBfZ0hzGy6uepgTx1PcRBCqDT4QXuNJJKMJ8Cmm0Sq8XZrzPFK9Y84lLgbGGbZhaulHhSXF8O2DlvIIFwWOU7PbV52KiUw4oO9G//qxWU1BKnLk5wne23j1uAmT20ueR8Rg1WsPqc1wPT8uFGg5ueiVrYgdizGxV5zsEwRiOto+nwQ6IJf77HUi0CxkRZOatYhRRH5zXnhBNCm+ZcUdpr806Q+vuyriBPNug04Fa6KaaY="
 
-php:
-  - 7.2
-  - 7.1
-  - 7.0
-  - 5.6
-
 services:
   - mysql
 
@@ -30,12 +24,33 @@ env:
     - github_token:
         secure: "gH+IJRS0uQe2G/gg4nL0UgQxh4Tog16vQIBzWgQiFUjmQM/jMvUtw6kW4ixcusOPGR4rqKuLFCd8gbDg/I848VNDb7a+xg+wGm7KvognnbcxbnB0TcxNcPTGZUWXbSqGi3z8YhAaaa1LfrROM3qS4LeU3Bz+B7ZpdbA7xqzkmBRPgEdsv7OLmCwow2e6jreeGcCAqM34q84JavZkWcoHCQbLoknwyNCzilMKUN8fe+Ih46o1O0iuVOv9lAWIOLlAJJNcrX+kamv4RhrtDQwyVWsnDB2OO2Me4Lr4Bkqy9pN+diszgX8OzhOnkFl+ZXYTIUI5NxK3kAkd4lKOO3QgHIoveSmeoaS/mrC5kflNs6vN399Jm8X4gSmxUhkl01hEAfEqL+BiW2o22/Pq8WeMVVaQy3ONUwlSGGBkk/IkckbG/LzpJv5Jjztfi8Xfl9JF1jO/0BABsqodx/pEbDzIKKb3S/U/EHmCXV8zqmD67E/PIii3Y9kxeVaDNdWT5u4O69Pt9sR7csA8OL8YS8th/d825v4BTPswIFxn1vXB1sTKJZGwyO+fu53CE7qcZEMc/+NJnfLZBhIbV9SE1zVRsDPX1AiruPd/sXjYy01AR4SYdCO+RrdyVWoIE65hV/MOGgvu327jI13ZIpFE2PwE1fPj6JqTtrW5YugLCOQUGd0="
 
-install:
-  - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
-  - travis_retry composer install $COMPOSER_ARGS
-  - travis_retry npm install
-  - npm list --depth=0
-  - composer show
+matrix:
+  allow_failures:
+    - stage: acceptance-test
+  include:
+    - php: 5.6
+      if: type !=cron
+    - php: 7.0
+      if: type !=cron
+    - php: 7.1
+      if: type !=cron
+    - php: 7.2
+      if: type !=cron
+
+    - stage: acceptance-test
+#      if: type = cron
+      php: 7.2
+      install:
+        - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
+        - travis_retry composer install $COMPOSER_ARGS
+        - travis_retry npm install
+        - npm list --depth=0
+        - composer show
+      script: npm run test:runner
+      after_failure:
+        - sudo cat /var/log/apache2/error.log
+        - cat ${SHOPWARE_DIRECTORY}/composer.lock
+        - cat ${SHOPWARE_DIRECTORY}/var/log/*.log
 
 before_script:
   # install apache
@@ -68,22 +83,19 @@ script:
   - composer cs-check
   - npm run lint
   - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
-  - npm run test:runner
   - composer test-coverage
 
 after_script:
   - travis_retry composer upload-coverage
   - bash .bin/generate-tag.sh
-after_failure:
-- sudo cat /var/log/apache2/error.log
-- cat ${SHOPWARE_DIRECTORY}/composer.lock
-- cat ${SHOPWARE_DIRECTORY}/var/log/*.log
+
 before_deploy:
   - export REPO_NAME=`echo $TRAVIS_REPO_SLUG | awk -F'/' '{print $2}'`
   - export RELEASE_NOTES=$(composer make-release-notes)
   - bash .bin/generate-wiki-notes.sh
   - bash .bin/generate-readme-badge.sh
   - bash .bin/generate-release-package.sh $TRAVIS_TAG
+
 deploy:
   provider: releases
   api_key:
