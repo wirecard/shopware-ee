@@ -46,19 +46,20 @@ const run = async () => {
 
                 mocha.addFile(`./Tests/Selenium/${testCase.file}.js`);
 
-                // mocha.run()
-                //     .on('fail', test => {
-                //         console.log(test);
-                //         reject(new Error(`Selenium test (${test.title}) failed.`));
-                //     })
-                //     .on('end', () => {
-                //         resolve();
-                //     })
-                // ;
+                mocha.run()
+                    .on('fail', test => {
+                        console.log(test);
+                        reject(new Error(`Selenium test (${test.title}) failed.`));
+                    })
+                    .on('end', () => {
+                        resolve();
+                        process.exitCode = 1;
+                    })
+                ;
 
-                mocha.run(function (failures) {
-                    process.exitCode = failures ? 1 : 0;
-                });
+                // mocha.run(function (failures) {
+                //     process.exitCode = failures ? 1 : 0;
+                // });
             });
         });
     });
