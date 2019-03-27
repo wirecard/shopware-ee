@@ -47,6 +47,7 @@ matrix:
         - npm list --depth=0
         - composer show
       script: npm run test:runner
+      after_script: skip
       after_failure:
       - sudo cat /var/log/apache2/error.log
       - cat ${SHOPWARE_DIRECTORY}/composer.lock
