@@ -23,8 +23,14 @@
     "make-wiki-notes": "@php .bin/version-helper.php -w",
     "make-release-notes": "@php .bin/version-helper.php",
     "upload-coverage": "codacycoverage clover build/coverage.xml",
-    "cs-check": "phpcs --standard=phpcs.xml --ignore=*/vendor/*,*/Tests/*,*/node_modules/*,*/Resources/*,*/.bin/* -s",
-    "cs-fix": "phpcbf --standard=phpcs.xml",
+    "cs-check": [
+      "phpcs --standard=phpcs.xml --ignore=*/vendor/*,*/Tests/*,*/node_modules/*,*/Resources/*,*/.bin/* -s ",
+      "eslint -c .eslintrc.json **/*.js **/*.js --ignore-path .eslintignore"
+    ],
+    "cs-fix": [
+      "phpcbf --standard=phpcs.xml ",
+      "eslint -c .eslintrc.json **/*.js **/*.js --ignore-path .eslintignore --fix"
+    ],
     "test-coverage": "phpunit --colors=always --coverage-clover build/coverage.xml",
     "build-languages": "php .bin/language-helper.php"
   }
