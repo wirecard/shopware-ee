@@ -53,13 +53,9 @@ const run = async () => {
                     })
                     .on('end', () => {
                         resolve();
-                        process.exitCode = 1;
+                        process.exitCode = 2;
                     })
                 ;
-
-                // mocha.run(function (failures) {
-                //     process.exitCode = failures ? 1 : 0;
-                // });
             });
         });
     });
