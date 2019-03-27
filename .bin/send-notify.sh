@@ -8,17 +8,6 @@ curl -X POST -H 'Content-type: application/json' \
     Build Number: ${TRAVIS_BUILD_NUMBER}\n
     Branch: ${TRAVIS_BRANCH}', 'channel': '${CHANNEL}'}" ${SLACK_ROOMS}
 
-# send link to the report into slack chat room
-curl -X POST -H 'Content-type: application/json' --data "{
-    'attachments': [
-        {
-            'fallback': 'Failed test data',
-            'color': '#764FA5'
-        }
-    ], 'channel': '${CHANNEL}'
-}"  ${SLACK_ROOMS};
-
-
 
 
 
