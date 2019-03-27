@@ -46,7 +46,7 @@ matrix:
         - travis_retry npm install
         - npm list --depth=0
         - composer show
-      script: npm run test:runner -b
+      script: npm run test:runner
       after_script: skip
       after_failure:
       - sudo cat /var/log/apache2/error.log
