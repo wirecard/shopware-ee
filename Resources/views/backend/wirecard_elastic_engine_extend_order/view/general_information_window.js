@@ -48,7 +48,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.GeneralInformati
                 '<p>{GeneralInformation}</p>',
                 '</tpl>{/literal}'
             ),
-        renderData: me.snippets
+            renderData: me.snippets
         }];
     }
 });
