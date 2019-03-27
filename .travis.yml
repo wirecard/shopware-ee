@@ -29,26 +29,26 @@ matrix:
     - stage: acceptance-test
   include:
     - php: 5.6
-      if: type != cron
+      if: type = cron
     - php: 7.0
-      if: type != cron
+      if: type = cron
     - php: 7.1
-      if: type != cron
+      if: type = cron
     - php: 7.2
-      if: type != cron
+      if: type = cron
 
-    - stage: acceptance-test
+  - stage: acceptance-test
 #      if: type = cron
-      php: 7.2
-      install:
-        - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
-        - travis_retry composer install $COMPOSER_ARGS
-        - travis_retry npm install
-        - npm list --depth=0
-        - composer show
-      script: npm run test:runner
-      after_failure:
-      - bash .bin/upload-logs-and-notify.sh fail
+    php: 7.2
+    install:
+      - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
+      - travis_retry composer install $COMPOSER_ARGS
+      - travis_retry npm install
+      - npm list --depth=0
+      - composer show
+    script: npm run test:runner
+    after_failure:
+      - bash .bin/send-notify.sh
 
 install:
   - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
