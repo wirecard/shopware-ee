@@ -8,6 +8,7 @@
     <file>.</file>
     <exclude-pattern>./vendor/*</exclude-pattern>
     <exclude-pattern>./test/*</exclude-pattern>
+    <exclude-pattern>./node_modules/*</exclude-pattern>
 
     <rule ref="PSR1.Files.SideEffects">
         <exclude-pattern>WirecardElasticEngine.php</exclude-pattern>
