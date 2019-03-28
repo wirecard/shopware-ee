@@ -47,16 +47,16 @@ const run = async () => {
 
                 mocha.addFile(`./Tests/Selenium/${testCase.file}.js`);
 
-                mocha.run()
-                    .on('fail', test => {
-                        console.log(test);
-                        shell.exec('.bin/send-notify.sh');
-                        reject(new Error(`Selenium test (${test.title}) failed.`));
-                    })
-                    .on('end', () => {
-                        resolve();
-                    })
-                ;
+                // mocha.run()
+                //     .on('fail', test => {
+                //         console.log(test);
+                //         shell.exec('.bin/send-notify.sh');
+                //         reject(new Error(`Selenium test (${test.title}) failed.`));
+                //     })
+                //     .on('end', () => {
+                //         resolve();
+                //     })
+                // ;
             });
         });
     });
