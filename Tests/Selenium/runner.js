@@ -50,7 +50,7 @@ const run = async () => {
                 mocha.run()
                     .on('fail', test => {
                         console.log(test);
-                        shell.exec('.bin/send-notify.sh');
+                        // shell.exec('.bin/send-notify.sh');
                         // reject(new Error(`Selenium test (${test.title}) failed.`));
                     })
                     .on('end', () => {
