@@ -54,8 +54,7 @@ const run = async () => {
                         // reject(new Error(`Selenium test (${test.title}) failed.`));
                     })
                     .on('end', () => {
-                        reject(new Error(`Selenium test (${test.title}) failed.`));
-                        // resolve();
+                        throw new Error(`Selenium test (${test.title}) failed.`);
                     })
                 ;
             });
