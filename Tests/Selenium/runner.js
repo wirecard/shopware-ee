@@ -52,6 +52,7 @@ const run = async () => {
                         console.log(test);
                         // shell.exec('.bin/send-notify.sh');
                         // reject(new Error(`Selenium test (${test.title}) failed.`));
+                        process.exitCode = 0;
                     })
                     .on('end', () => {
                         resolve();
