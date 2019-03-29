@@ -48,16 +48,13 @@ const run = async () => {
                 mocha.addFile(`./Tests/Selenium/${testCase.file}.js`);
 
                 mocha.run()
-                    .on('fail', test => {
-                        console.log(test);
+                    .on('fail', testCase => {
+                        console.log(testCase);
                         // shell.exec('.bin/send-notify.sh');
                         // reject(new Error(`Selenium test (${test.title}) failed.`));
                     })
-                    // .on('end', () => {
-                    //
-                    // })
-                    .after(function () {
-                        process.exitCode = 0;
+                    .on('end', () => {
+                        resolve();
                     })
                 ;
             });
