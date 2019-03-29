@@ -53,8 +53,11 @@ const run = async () => {
                         // shell.exec('.bin/send-notify.sh');
                         // reject(new Error(`Selenium test (${test.title}) failed.`));
                     })
-                    .on('end', () => {
-                        throw new Error(`Selenium test (${test.title}) failed.`);
+                    // .on('end', () => {
+                    //
+                    // })
+                    .after(function () {
+                        process.exitCode = 0;
                     })
                 ;
             });
