@@ -52,11 +52,10 @@ const run = async () => {
                         console.log(test);
                         // shell.exec('.bin/send-notify.sh');
                         // reject(new Error(`Selenium test (${test.title}) failed.`));
-
                     })
-                    .then(reject(new Error(`Selenium test (${test.title}) failed.`)))
                     .on('end', () => {
-                        resolve();
+                        reject(new Error(`Selenium test (${test.title}) failed.`));
+                        // resolve();
                     })
                 ;
             });
