@@ -52,6 +52,7 @@ const run = async () => {
                     .on('fail', test => {
                         fail = true;
                         console.log(test);
+                        resolve();
                     })
                     .on('end', () => {
                         resolve();
