@@ -62,12 +62,10 @@ const run = async () => {
     });
 };
 
-run(() => { new Error(`Selenium test (${test.title}) failed.`)});
-
-// (async function () {
-//     await run();
-//     if (fail) {
-//         console.log('Some tests failed in the test suite');
-//         process.exitCode = 1;
-//     }
-// })();
+(async function() {
+    await run();
+    if (fail) {
+        console.log('Some tests failed in the test suite');
+        process.exitCode = 1;
+    }
+})();
