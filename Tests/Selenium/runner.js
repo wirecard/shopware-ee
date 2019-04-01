@@ -52,7 +52,6 @@ const run = async () => {
                     .on('fail', test => {
                         fail = true;
                         console.log(test);
-                        resolve();
                     })
                     .on('end', () => {
                         resolve();
@@ -66,7 +65,7 @@ const run = async () => {
 (async function() {
     await run();
     if (fail) {
-        console.log('Some tests failed in the test suite')
+        console.log('Some tests failed in the test suite');
         process.exit(1);
     }
-})()
+})();
