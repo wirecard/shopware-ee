@@ -49,7 +49,7 @@ matrix:
         - travis_retry npm install shelljs
         - npm list --depth=0
         - composer show
-      script: npm run test:runner
+      script: travis_wait npm run test:runner
       after_script: skip
       after_failure:
       - bash .bin/send-notify.sh
