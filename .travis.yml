@@ -40,13 +40,10 @@ matrix:
     - stage: acceptance-test
       if: type != cron
       php: 7.2
-      before_install:
-        - chmod +x .bin/send-notify.sh
       install:
         - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
         - travis_retry composer install $COMPOSER_ARGS
         - travis_retry npm install
-        - travis_retry npm install shelljs
         - npm list --depth=0
         - composer show
       script: travis_wait npm run test:runner
