@@ -37,12 +37,15 @@ describe('PayPal test', () => {
 
         try {
             // Log in to PayPal
-            console.log('wait for #loginSection');
-            await driver.wait(until.elementLocated(By.id('loginSection')), 30000);
-            await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
-            console.log('click #loginSection .btn');
-            await driver.wait(driver.findElement(By.css('#loginSection .btn')).click(), 10000);
-            await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
+            console.log('wait for .maskable');
+            await driver.findElement(By.id('login_emaildiv')).sendKeys(formFields.email);
+            await driver.findElement(By.id('login_passworddiv')).sendKeys(formFields.password);
+            await driver.findElement(By.css('btnLogin')).click();
+            // await driver.wait(until.elementLocated(By.css('proceed maskable')), 30000);
+            // await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
+            // console.log('click #loginSection .btn');
+            // await driver.wait(driver.findElement(By.css('#loginSection .btn')).click(), 10000);
+            // await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
         } catch (e) {
             console.log('PayPal skipped loginSection, proceed with credentials');
         }
