@@ -48,7 +48,7 @@ matrix:
         - composer show
       script:
         - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
-        - travis_wait npm run test:runner
+        - npm run test:runner
       after_script: skip
       after_failure:
       - bash .bin/send-notify.sh
