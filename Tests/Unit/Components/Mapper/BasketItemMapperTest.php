@@ -26,7 +26,7 @@ class BasketItemMapperTest extends TestCase
             'quantity'           => 1,
             'price'              => 1000,
             'additional_details' => [
-                'description' => 'foobar',
+                'description' => 'foobar ✅',
             ],
         ];
         $mapper    = new BasketItemMapper($itemArray, 'EUR');

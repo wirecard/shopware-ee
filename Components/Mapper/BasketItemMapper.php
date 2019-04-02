@@ -147,7 +147,7 @@ class BasketItemMapper extends ArrayMapper
      */
     public function getDescription()
     {
-        return $this->getOptional([self::DETAILS, self::DETAILS_DESCRIPTION], '');
+        return $this->filterCharset($this->getOptional([self::DETAILS, self::DETAILS_DESCRIPTION], ''));
     }
 
     /**
@@ -227,5 +227,23 @@ class BasketItemMapper extends ArrayMapper
         )) {
             throw new InvalidBasketItemException();
         }
+    }
+
+    /**
+     * filter some special UTF8 char ranges
+     *
+     * @see https://jrgraphix.net/research/unicode_blocks.php
+     *
+     * @param $text
+     *
+     * @return string
+     */
+    protected function filterCharset($text)
+    {
+        $ranges = [
+            '\x{2700}-\x{27bf}' // dingbats
+        ];
+
+        return trim(preg_replace('/[' . implode('', $ranges) . ']/u', '', $text));
     }
 }
