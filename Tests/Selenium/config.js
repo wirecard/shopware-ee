@@ -43,7 +43,7 @@ exports.config = {
             }
         },
         ratepay: {
-            label: 'Wirecard Kauf auf Rechnung mit Zahlungsgarantie'
+            label: 'Wirecard Garantierter Kauf auf Rechnung'
         },
         ideal: {
             label: 'Wirecard iDEAL',
