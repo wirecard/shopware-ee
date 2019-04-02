@@ -66,7 +66,7 @@ exports.config = {
             }
         },
         pia: {
-            label: 'Wirecard Vorauskasse'
+            label: 'Wirecard Vorkasse'
         },
         poi: {
             label: 'Wirecard Kauf auf Rechnung'
