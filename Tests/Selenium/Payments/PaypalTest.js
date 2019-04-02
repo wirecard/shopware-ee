@@ -37,7 +37,7 @@ describe('PayPal test', () => {
 
         try {
             // Log in to PayPal
-            console.log('wait for .maskable');
+            // console.log('wait for .maskable');
             await driver.findElement(By.id('login_emaildiv')).sendKeys(formFields.email);
             await driver.findElement(By.id('login_passworddiv')).sendKeys(formFields.password);
             await driver.findElement(By.css('btnLogin')).click();
