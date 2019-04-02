@@ -46,7 +46,9 @@ matrix:
         - travis_retry npm install
         - npm list --depth=0
         - composer show
-      script: travis_wait npm run test:runner
+      script:
+        - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
+        - travis_wait npm run test:runner
       after_script: skip
       after_failure:
       - bash .bin/send-notify.sh
