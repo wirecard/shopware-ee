@@ -51,7 +51,7 @@ describe('PayPal test', () => {
             console.log('PayPal skipped loginSection, proceed with credentials');
         }
 
-        Enter PayPal credentials
+        //Enter PayPal credentials
         console.log('wait for #btnNext');
         await driver.wait(until.elementLocated(By.id('btnNext')), 10000);
         console.log('wait for #email');
