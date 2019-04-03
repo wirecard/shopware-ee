@@ -45,7 +45,7 @@ describe('PayPal test', () => {
             console.log('wait for #confirmButtonTop');
             await driver.wait(until.elementLocated(By.id('confirmButtonTop')));
             console.log('#confirmButtonTop located');
-            await driver.findElement(By.css('confirmButtonTop')).click();
+            await driver.findElement(By.id('confirmButtonTop')).click();
             console.log('#confirmButtonTop clicked');
         } catch (e) {
             console.log('PayPal skipped loginSection, proceed with credentials');
