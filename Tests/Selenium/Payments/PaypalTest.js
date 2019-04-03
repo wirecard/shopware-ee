@@ -37,16 +37,19 @@ describe('PayPal test', () => {
 
         try {
             // Log in to PayPal
-            // console.log('wait for .maskable');
             console.log('wait for #email');
             await driver.wait(until.elementLocated(By.id('email')), 10000);
             await driver.findElement(By.id('email')).sendKeys(formFields.email, Key.ENTER);
             console.log('wait for #password');
             await driver.wait(until.elementLocated(By.id('password')), 10000);
             await driver.findElement(By.id('password')).sendKeys(formFields.password, Key.ENTER);
+            console.log('wait for #btnLogin');
             await driver.findElement(By.css('btnLogin')).click();
             console.log('wait for #confirmButtonTop');
             await driver.wait(driver.findElement(By.id('confirmButtonTop')).click(), 10000);
+            // await waitForAlert(driver, 25000);
+            //
+            // await checkConfirmationPage(driver, paymentLabel);
             // await driver.wait(until.elementLocated(By.css('proceed maskable')), 30000);
             // await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
             // console.log('click #loginSection .btn');
