@@ -45,10 +45,12 @@ describe('PayPal test', () => {
             await driver.findElement(By.id('password')).sendKeys(formFields.password, Key.ENTER);
             console.log('wait for #btnLogin');
             await driver.findElement(By.css('btnLogin')).click();
+            await waitUntilOverlayIsNotVisible(driver, By.className('spinnerWithLockIcon'));
             console.log('wait for #confirmButtonTop');
             await driver.wait(driver.findElement(By.id('confirmButtonTop')).click(), 10000);
+            await waitUntilOverlayIsNotVisible(driver, By.className('processing-box-title'));
             // await waitForAlert(driver, 25000);
-            //
+            // processing-box-title
             // await checkConfirmationPage(driver, paymentLabel);
             // await driver.wait(until.elementLocated(By.css('proceed maskable')), 30000);
             // await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
