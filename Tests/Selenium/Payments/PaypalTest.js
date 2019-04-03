@@ -45,6 +45,8 @@ describe('PayPal test', () => {
             await driver.wait(until.elementLocated(By.id('password')), 10000);
             await driver.findElement(By.id('password')).sendKeys(formFields.password, Key.ENTER);
             await driver.findElement(By.css('btnLogin')).click();
+            console.log('wait for #confirmButtonTop');
+            await driver.wait(driver.findElement(By.id('confirmButtonTop')).click(), 10000);
             // await driver.wait(until.elementLocated(By.css('proceed maskable')), 30000);
             // await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
             // console.log('click #loginSection .btn');
