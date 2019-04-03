@@ -38,7 +38,7 @@ matrix:
       if: type != cron
 
     - stage: acceptance-test
-      if: type != cron
+      if: type = cron
       php: 7.2
       install:
         - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
@@ -50,8 +50,8 @@ matrix:
         - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
         - npm run test:runner
       after_script: skip
-#      after_failure:
-#      - bash .bin/send-notify.sh
+      after_failure:
+      - bash .bin/send-notify.sh
 
 install:
   - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
