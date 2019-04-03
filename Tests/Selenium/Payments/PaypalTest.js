@@ -47,7 +47,7 @@ describe('PayPal test', () => {
             await driver.findElement(By.css('btnLogin')).click();
             await waitUntilOverlayIsNotVisible(driver, By.className('spinnerWithLockIcon'));
             console.log('wait for #confirmButtonTop');
-            await driver.wait(driver.findElement(By.id('confirmButtonTop')).click(), 10000);
+            await driver.findElement(By.css('confirmButtonTop')).click();
             await waitUntilOverlayIsNotVisible(driver, By.className('processing-box-title'));
             // await waitForAlert(driver, 25000);
             // processing-box-title
