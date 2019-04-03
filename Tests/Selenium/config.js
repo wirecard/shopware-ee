@@ -324,14 +324,14 @@ exports.tests = [
     //     file: 'Payments/IdealTest',
     //     timeout: 120000
     // },
-    // {
-    //     file: 'Payments/MasterpassTest',
-    //     timeout: 120000
-    // },
     {
-        file: 'Payments/PaypalTest',
-        timeout: 180000
+        file: 'Payments/MasterpassTest',
+        timeout: 120000
     }
+    // {
+    //     file: 'Payments/PaypalTest',
+    //     timeout: 180000
+    // },
     // {
     //     file: 'Payments/PiaTest',
     //     timeout: 90000

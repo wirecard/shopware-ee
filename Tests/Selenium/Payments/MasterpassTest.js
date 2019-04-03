@@ -33,9 +33,9 @@ describe('Masterpass test', () => {
         console.log('click button confirm--form');
         await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
 
-        // Wait for Maserpass page, change wallet and fill out forms
+        // Wait for Masterpass page, change wallet and fill out forms
 
-        console.log('wait for #MasterPass_frame'); //do tu dodje
+        console.log('wait for #MasterPass_frame');
         await driver.wait(until.elementLocated(By.id('MasterPass_frame')), 20000);
         console.log('switch to iframe #MasterPass_frame');
         await driver.wait(until.ableToSwitchToFrame(By.id('MasterPass_frame')));
