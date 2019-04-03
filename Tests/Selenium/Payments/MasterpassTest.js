@@ -45,7 +45,7 @@ describe('Masterpass test', () => {
         console.log('wait for .container-wallet-collision.visible-sm-inline-block .link');
         await driver.wait(until.elementLocated(By.css('.container-wallet-collision.visible-sm-inline-block .link')), 20000);
         console.log('.container-wallet-collision.visible-sm-inline-block .link located'); //do tu dodje
-        await driver.findElement(By.className('container-wallet-collision')).click();
+        await driver.findElement(By.css('container-wallet-collision')).click();
         // await driver.findElement(By.css('.container-wallet-collision.visible-sm-inline-block .link')).click();
         console.log('.container-wallet-collision.visible-sm-inline-block .link clicked');
         await driver.sleep(1000);
