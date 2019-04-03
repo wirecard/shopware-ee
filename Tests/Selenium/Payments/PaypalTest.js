@@ -36,7 +36,6 @@ describe('PayPal test', () => {
         await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
 
         try {
-            // Log in to PayPal
             console.log('wait for #email');
             await driver.wait(until.elementLocated(By.id('email')), 10000);
             await driver.findElement(By.id('email')).sendKeys(formFields.email);
@@ -44,8 +43,10 @@ describe('PayPal test', () => {
             await driver.wait(until.elementLocated(By.id('password')), 10000);
             await driver.findElement(By.id('password')).sendKeys(formFields.password, Key.ENTER);
             console.log('wait for #confirmButtonTop');
-            await driver.wait(until.elementLocated(By.id('confirmButtonTop')), 100000);
+            await driver.wait(until.elementLocated(By.id('confirmButtonTop')));
+            console.log('#confirmButtonTop located');
             await driver.findElement(By.css('confirmButtonTop')).click();
+            console.log('#confirmButtonTop clicked');
         } catch (e) {
             console.log('PayPal skipped loginSection, proceed with credentials');
         }

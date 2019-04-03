@@ -35,7 +35,7 @@ describe('Masterpass test', () => {
 
         // Wait for Maserpass page, change wallet and fill out forms
 
-        console.log('wait for #MasterPass_frame');
+        console.log('wait for #MasterPass_frame'); //do tu dodje
         await driver.wait(until.elementLocated(By.id('MasterPass_frame')), 20000);
         console.log('switch to iframe #MasterPass_frame');
         await driver.wait(until.ableToSwitchToFrame(By.id('MasterPass_frame')));
