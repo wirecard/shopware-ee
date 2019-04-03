@@ -35,23 +35,22 @@ describe('PayPal test', () => {
         console.log('click button confirm--form');
         await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
 
-        // try {
-        console.log('wait for #email');
-        await driver.wait(until.elementLocated(By.id('email')), 10000);
-        await driver.findElement(By.id('email')).sendKeys(formFields.email, Key.ENTER);
-        console.log('wait for #password');
-        await driver.wait(until.elementLocated(By.id('password')), 10000);
-        await driver.findElement(By.id('password')).sendKeys(formFields.password, Key.ENTER);
-        console.log('wait for #btnLogin');
-        await driver.findElement(By.css('btnLogin')).click();
-        console.log('wait for input[class="btn full confirmButton continueButton"]');
-        await driver.findElement(By.css('input[class="btn full confirmButton continueButton"]')).click();
-        // await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
-        // console.log('click #confirmButtonTop');
-        // await driver.wait(driver.findElement(By.id('confirmButtonTop')).click(), 10000);
-        // } catch (e) {
-        //     console.log('PayPal skipped loginSection, proceed with credentials');
-        // }
+        try {
+            // Log in to PayPal
+            console.log('wait for #email');
+            await driver.wait(until.elementLocated(By.id('email')), 10000);
+            await driver.findElement(By.id('email')).sendKeys(formFields.email, Key.ENTER);
+            console.log('wait for #password');
+            await driver.wait(until.elementLocated(By.id('password')), 10000);
+            await driver.findElement(By.id('password')).sendKeys(formFields.password, Key.ENTER);
+            console.log('wait for #btnLogin');
+            await driver.findElement(By.css('btnLogin')).click();
+            await waitUntilOverlayIsNotVisible(driver, By.className('spinnerWithLockIcon'));
+            console.log('wait for #confirmButtonTop');
+            await driver.findElement(By.css('confirmButtonTop')).click();
+        } catch (e) {
+            console.log('PayPal skipped loginSection, proceed with credentials');
+        }
 
         // Enter PayPal credentials
         // console.log('wait for #btnNext');
