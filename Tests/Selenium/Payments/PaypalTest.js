@@ -45,8 +45,8 @@ describe('PayPal test', () => {
             await driver.findElement(By.id('password')).sendKeys(formFields.password, Key.ENTER);
             console.log('wait for #btnLogin');
             await driver.findElement(By.css('btnLogin')).click();
-            await waitUntilOverlayIsNotVisible(driver, By.className('spinnerWithLockIcon'));
             console.log('wait for #confirmButtonTop');
+            await driver.wait(until.elementLocated(By.id('confirmButtonTop')), 25000);
             await driver.findElement(By.css('confirmButtonTop')).click();
         } catch (e) {
             console.log('PayPal skipped loginSection, proceed with credentials');
