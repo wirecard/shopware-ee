@@ -39,7 +39,7 @@ describe('Masterpass test', () => {
         await driver.wait(until.elementLocated(By.id('MasterPass_frame')), 20000);
         console.log('switch to iframe #MasterPass_frame');
         await driver.wait(until.ableToSwitchToFrame(By.id('MasterPass_frame')));
-        // await driver.sleep(1000);
+        await driver.sleep(1000);
 
         // will fail for mobile!
         console.log('wait for .container-wallet-collision.visible-sm-inline-block .link');
@@ -47,7 +47,7 @@ describe('Masterpass test', () => {
         console.log('.container-wallet-collision.visible-sm-inline-block .link located');
         await driver.findElement(By.css('.container-wallet-collision.visible-sm-inline-block .link')).click();
         console.log('.container-wallet-collision.visible-sm-inline-block .link clicked');
-        // await driver.sleep(1000);
+        await driver.sleep(1000);
 
         // will fail for mobile!
         console.log('wait for .locale-selector.visible-sm-inline-block .locale-selector-current');
