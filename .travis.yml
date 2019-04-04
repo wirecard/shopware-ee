@@ -38,7 +38,7 @@ matrix:
       if: type != cron
 
     - stage: acceptance-test
-      if: type != cron
+      if: type = cron
       php: 7.2
       install:
         - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
