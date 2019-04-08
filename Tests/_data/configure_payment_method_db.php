@@ -107,7 +107,9 @@ function buildConfigByPaymentMethod($paymentMethod, $gateway)
     $config = $GLOBALS['defaultConfig'][$paymentMethod];
 
     $jsonFile = GATEWAY_CONFIG_PATH . DIRECTORY_SEPARATOR . $paymentMethod . '.json';
+    print_r($jsonFile);
     if (file_exists($jsonFile)) {
+        print_r("CONFIG FILE EXISTS");
         $jsonData = json_decode(file_get_contents($jsonFile));
         if (!empty($jsonData) && !empty($jsonData->$gateway)) {
             foreach (get_object_vars($jsonData->$gateway) as $key => $data) {
@@ -140,11 +142,11 @@ function updateShopwareEeDbConfig($db_config, $payment_method)
 
     $tableName = 's_core_config_elements';
 
-    $mysqli = new mysqli($dbHost, $dbUser, $dbPass, $dbName);
-    if ($mysqli->connect_errno) {
-        echo "Can't connect DB $dbName on host $dbHost as user $dbUser \n";
-        return false;
-    }
+//    $mysqli = new mysqli($dbHost, $dbUser, $dbPass, $dbName);
+//    if ($mysqli->connect_errno) {
+//        echo "Can't connect DB $dbName on host $dbHost as user $dbUser \n";
+//        return false;
+//    }
 
     foreach ($db_config as $name => $value) {
         $gateway = getenv('GATEWAY');
