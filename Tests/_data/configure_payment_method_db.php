@@ -148,6 +148,8 @@ function updateShopwareEeDbConfig($db_config, $payment_method)
 
     foreach ($db_config as $name => $value) {
         if ('base_url' === $name) {
+            $gateway = getenv('GATEWAY');
+            echo "Moj trenutni GATEWAY: " . $gateway . "\n" . $value;
             $baseUrl = serialize($value);
             $mysqli->query("UPDATE $tableName SET value = '$baseUrl' WHERE name = 'wirecardElasticEngineCreditCardHttpUser'");
         }
