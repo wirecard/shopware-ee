@@ -10,7 +10,8 @@ const { Builder } = require('selenium-webdriver');
 const { browsers, tests } = require('./config');
 const { asyncForEach } = require('./common');
 const Mocha = require('mocha');
-const shell = require('shelljs');
+
+let fail = false;
 
 const run = async () => {
     await asyncForEach(browsers, async browser => {
@@ -49,9 +50,9 @@ const run = async () => {
 
                 mocha.run()
                     .on('fail', test => {
+                        fail = true;
                         console.log(test);
-                        shell.exec('.bin/send-notify.sh');
-                        reject(new Error(`Selenium test (${test.title}) failed.`));
+                        resolve();
                     })
                     .on('end', () => {
                         resolve();
@@ -62,4 +63,10 @@ const run = async () => {
     });
 };
 
-run();
+(async function() {
+    await run();
+    if (fail) {
+        console.log('Some tests failed in the test suite');
+        process.exitCode = 1;
+    }
+})();
