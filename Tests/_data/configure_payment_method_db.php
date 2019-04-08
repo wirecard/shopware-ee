@@ -180,5 +180,14 @@ function updateShopwareEeDbConfig($db_config, $payment_method)
             $mysqli->query("UPDATE $tableName SET value = '$secret' WHERE name = 'wirecardElasticEngineCreditCardSecret'");
         }
     }
+
+    echo "New Database rows!\n";
+    $stmtInsert = "SELECT * FROM $tableName";
+    $result = $mysqli->query($stmtInsert);
+    if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            echo $row['name'] . " " . $row['value'] . "\n";
+        }
+    }
     return true;
 }
