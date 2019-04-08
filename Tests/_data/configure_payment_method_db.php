@@ -147,7 +147,7 @@ function updateShopwareEeDbConfig($db_config, $payment_method)
         if ('base_url' === $name) {
             $baseUrl = serialize($value);
             echo $baseUrl . "\n";
-            $mysqli->query("UPDATE $tableName SET value = '$baseUrl' WHERE name = 'wirecardElasticEngineCreditCardHttpUser'");
+            $mysqli->query("UPDATE $tableName SET value = '$baseUrl' WHERE name = 'wirecardElasticEngineCreditCardServer'");
         }
         if ('http_user' === $name) {
             $httpUser = serialize($value);
