@@ -38,7 +38,7 @@ define('GATEWAY_CONFIG_PATH', 'gateway_configs');
 
 $gateway = getenv('GATEWAY');
 if (!$gateway) {
-    $gateway = 'NOVA';
+    $gateway = 'API-TEST';
 }
 
 // the default config defines valid keys for each payment method and is prefilled with API-TEST setup by default
@@ -109,13 +109,11 @@ function buildConfigByPaymentMethod($paymentMethod, $gateway)
     $jsonFile = GATEWAY_CONFIG_PATH . DIRECTORY_SEPARATOR . $paymentMethod . '.json';
     print_r($jsonFile);
     if (file_exists($jsonFile)) {
-        print_r("CONFIG FILE EXISTS");
         $jsonData = json_decode(file_get_contents($jsonFile));
         if (!empty($jsonData) && !empty($jsonData->$gateway)) {
             foreach (get_object_vars($jsonData->$gateway) as $key => $data) {
                 // only replace values from json if the key is defined in defaultDbValues
                 if (array_key_exists($key, $config)) {
-                    print_r("Debug data: key: " . $key . " data: " . $data);
                     $config[$key] = $data;
                 }
             }
@@ -142,47 +140,41 @@ function updateShopwareEeDbConfig($db_config, $payment_method)
 
     $tableName = 's_core_config_elements';
 
-//    $mysqli = new mysqli($dbHost, $dbUser, $dbPass, $dbName);
-//    if ($mysqli->connect_errno) {
-//        echo "Can't connect DB $dbName on host $dbHost as user $dbUser \n";
-//        return false;
-//    }
+    $mysqli = new mysqli($dbHost, $dbUser, $dbPass, $dbName);
+    if ($mysqli->connect_errno) {
+        echo "Can't connect DB $dbName on host $dbHost as user $dbUser \n";
+        return false;
+    }
 
     foreach ($db_config as $name => $value) {
-        $gateway = getenv('GATEWAY');
-        echo $gateway . "\n";
-        echo $name . "\n";
-        echo $value . "\n";
-//        if ('base_url' === $name) {
-//            $gateway = getenv('GATEWAY');
-//            echo "Moj trenutni GATEWAY: " . $gateway . "\n" . $value;
-//            $baseUrl = serialize($value);
-//            $mysqli->query("UPDATE $tableName SET value = '$baseUrl' WHERE name = 'wirecardElasticEngineCreditCardHttpUser'");
-//        }
-//        if ('http_user' === $name) {
-//            $httpUser = serialize($value);
-//            $mysqli->query("UPDATE $tableName SET value = '$httpUser' WHERE name = 'wirecardElasticEngineCreditCardHttpUser'");
-//        }
-//        if ('http_pass' === $name) {
-//            $httpPass = serialize($value);
-//            $mysqli->query("UPDATE $tableName SET value = '$httpPass' WHERE name = 'wirecardElasticEngineCreditCardHttpPassword'");
-//        }
-//        if ('three_d_merchant_account_id' === $name) {
-//            $threeDMerchantAccountId = serialize($value);
-//            $mysqli->query("UPDATE $tableName SET value = '$threeDMerchantAccountId' WHERE name = 'wirecardElasticEngineCreditCardThreeDMAID'");
-//        }
-//        if ('three_d_secret' === $name) {
-//            $threeDSecret = serialize($value);
-//            $mysqli->query("UPDATE $tableName SET value = '$threeDSecret' WHERE name = 'wirecardElasticEngineCreditCardThreeDSecret'");
-//        }
-//        if ('merchant_account_id' === $name) {
-//            $merchantAccountId = serialize($value);
-//            $mysqli->query("UPDATE $tableName SET value = '$merchantAccountId' WHERE name = 'wirecardElasticEngineCreditCardMerchantId'");
-//        }
-//        if ('secret' === $name) {
-//            $secret = serialize($value);
-//            $mysqli->query("UPDATE $tableName SET value = '$secret' WHERE name = 'wirecardElasticEngineCreditCardSecret'");
-//        }
+        if ('base_url' === $name) {
+            $baseUrl = serialize($value);
+            $mysqli->query("UPDATE $tableName SET value = '$baseUrl' WHERE name = 'wirecardElasticEngineCreditCardHttpUser'");
+        }
+        if ('http_user' === $name) {
+            $httpUser = serialize($value);
+            $mysqli->query("UPDATE $tableName SET value = '$httpUser' WHERE name = 'wirecardElasticEngineCreditCardHttpUser'");
+        }
+        if ('http_pass' === $name) {
+            $httpPass = serialize($value);
+            $mysqli->query("UPDATE $tableName SET value = '$httpPass' WHERE name = 'wirecardElasticEngineCreditCardHttpPassword'");
+        }
+        if ('three_d_merchant_account_id' === $name) {
+            $threeDMerchantAccountId = serialize($value);
+            $mysqli->query("UPDATE $tableName SET value = '$threeDMerchantAccountId' WHERE name = 'wirecardElasticEngineCreditCardThreeDMAID'");
+        }
+        if ('three_d_secret' === $name) {
+            $threeDSecret = serialize($value);
+            $mysqli->query("UPDATE $tableName SET value = '$threeDSecret' WHERE name = 'wirecardElasticEngineCreditCardThreeDSecret'");
+        }
+        if ('merchant_account_id' === $name) {
+            $merchantAccountId = serialize($value);
+            $mysqli->query("UPDATE $tableName SET value = '$merchantAccountId' WHERE name = 'wirecardElasticEngineCreditCardMerchantId'");
+        }
+        if ('secret' === $name) {
+            $secret = serialize($value);
+            $mysqli->query("UPDATE $tableName SET value = '$secret' WHERE name = 'wirecardElasticEngineCreditCardSecret'");
+        }
     }
     return true;
 }
