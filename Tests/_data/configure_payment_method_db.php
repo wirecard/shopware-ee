@@ -109,15 +109,11 @@ function buildConfigByPaymentMethod($paymentMethod, $gateway)
     $jsonFile = GATEWAY_CONFIG_PATH . DIRECTORY_SEPARATOR . $paymentMethod . '.json';
     if (file_exists($jsonFile)) {
         $jsonData = json_decode(file_get_contents($jsonFile));
-        echo "JSON DATA: " . $jsonData;
         if (!empty($jsonData) && !empty($jsonData->$gateway)) {
             foreach (get_object_vars($jsonData->$gateway) as $key => $data) {
-                echo "KEY DATA: " . $key . " " . $data;
                 // only replace values from json if the key is defined in defaultDbValues
                 if (array_key_exists($key, $config)) {
                     $config[$key] = $data;
-                    echo "CONFIG: " . $config;
-                    echo "CONFIG[KEY]: " . $config[$key];
                 }
             }
         }
@@ -151,7 +147,9 @@ function updateShopwareEeDbConfig($db_config, $payment_method)
 
     foreach ($db_config as $name => $value) {
         $gateway = getenv('GATEWAY');
-        echo "Moj trenutni GATEWAY: " . $gateway . "\n";
+        echo $gateway . "\n";
+        echo $name . "\n";
+        echo $value . "\n";
 //        if ('base_url' === $name) {
 //            $gateway = getenv('GATEWAY');
 //            echo "Moj trenutni GATEWAY: " . $gateway . "\n" . $value;

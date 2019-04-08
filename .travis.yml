@@ -90,7 +90,7 @@ before_script:
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:cache:clear
   - rm -rf ${SHOPWARE_DIRECTORY}/var/cache
   - cd ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
-  - php Tests/_data/configure_payment_method_db.php ${GATEWAY}
+  - php Tests/_data/configure_payment_method_db.php creditcard
 
 script:
   - composer cs-check
