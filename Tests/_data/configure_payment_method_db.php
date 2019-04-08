@@ -38,7 +38,7 @@ define('GATEWAY_CONFIG_PATH', 'gateway_configs');
 
 $gateway = getenv('GATEWAY');
 if (!$gateway) {
-    $gateway = 'API-TEST';
+    $gateway = 'NOVA';
 }
 
 // the default config defines valid keys for each payment method and is prefilled with API-TEST setup by default
