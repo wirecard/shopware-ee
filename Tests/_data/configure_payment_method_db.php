@@ -146,37 +146,30 @@ function updateShopwareEeDbConfig($db_config, $payment_method)
     foreach ($db_config as $name => $value) {
         if ('base_url' === $name) {
             $baseUrl = serialize($value);
-            echo $baseUrl . "\n";
             $mysqli->query("UPDATE $tableName SET value = '$baseUrl' WHERE name = 'wirecardElasticEngineCreditCardServer'");
         }
         if ('http_user' === $name) {
             $httpUser = serialize($value);
-            echo $httpUser . "\n";
             $mysqli->query("UPDATE $tableName SET value = '$httpUser' WHERE name = 'wirecardElasticEngineCreditCardHttpUser'");
         }
         if ('http_pass' === $name) {
             $httpPass = serialize($value);
-            echo $httpPass . "\n";
             $mysqli->query("UPDATE $tableName SET value = '$httpPass' WHERE name = 'wirecardElasticEngineCreditCardHttpPassword'");
         }
         if ('three_d_merchant_account_id' === $name) {
             $threeDMerchantAccountId = serialize($value);
-            echo $threeDMerchantAccountId . "\n";
             $mysqli->query("UPDATE $tableName SET value = '$threeDMerchantAccountId' WHERE name = 'wirecardElasticEngineCreditCardThreeDMAID'");
         }
         if ('three_d_secret' === $name) {
             $threeDSecret = serialize($value);
-            echo $threeDSecret . "\n";
             $mysqli->query("UPDATE $tableName SET value = '$threeDSecret' WHERE name = 'wirecardElasticEngineCreditCardThreeDSecret'");
         }
         if ('merchant_account_id' === $name) {
             $merchantAccountId = serialize($value);
-            echo $merchantAccountId . "\n";
             $mysqli->query("UPDATE $tableName SET value = '$merchantAccountId' WHERE name = 'wirecardElasticEngineCreditCardMerchantId'");
         }
         if ('secret' === $name) {
             $secret = serialize($value);
-            echo $secret . "\n";
             $mysqli->query("UPDATE $tableName SET value = '$secret' WHERE name = 'wirecardElasticEngineCreditCardSecret'");
         }
     }
