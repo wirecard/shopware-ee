@@ -113,6 +113,7 @@ function buildConfigByPaymentMethod($paymentMethod, $gateway)
             foreach (get_object_vars($jsonData->$gateway) as $key => $data) {
                 // only replace values from json if the key is defined in defaultDbValues
                 if (array_key_exists($key, $config)) {
+                    print_r("Debug data: key: " . $key . " data: " . $data);
                     $config[$key] = $data;
                 }
             }
