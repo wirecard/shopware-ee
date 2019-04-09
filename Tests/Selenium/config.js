@@ -300,56 +300,56 @@ exports.browsers = [
  * List of tests to be executed. All tests must be located in `./Tests/Selenium`.
  */
 exports.tests = [
-    // {
-    //     file: 'Payments/DefaultTest',
-    //     timeout: 120000
-    // },
-    // {
-    //     file: 'Payments/CreditCardTest',
-    //     timeout: 120000
-    // },
+    {
+        file: 'Payments/DefaultTest',
+        timeout: 120000
+    },
+    {
+        file: 'Payments/CreditCardTest',
+        timeout: 120000
+    },
     {
         file: 'Payments/CreditCardThreeDTest',
         timeout: 120000
+    },
+    {
+        file: 'Payments/AlipayTest',
+        timeout: 120000
+    },
+    {
+        file: 'Payments/RatepayTest',
+        timeout: 120000
+    },
+    {
+        file: 'Payments/IdealTest',
+        timeout: 120000
+    },
+    {
+        file: 'Payments/MasterpassTest',
+        timeout: 120000
+    },
+    {
+        file: 'Payments/PaypalTest',
+        timeout: 180000
+    },
+    {
+        file: 'Payments/PiaTest',
+        timeout: 90000
+    },
+    {
+        file: 'Payments/PoiTest',
+        timeout: 90000
+    },
+    {
+        file: 'Payments/SepaTest',
+        timeout: 90000
+    },
+    {
+        file: 'Payments/SofortTest',
+        timeout: 120000
+    },
+    {
+        file: 'Payments/UpiTest',
+        timeout: 120000
     }
-    // {
-    //     file: 'Payments/AlipayTest',
-    //     timeout: 120000
-    // },
-    // {
-    //     file: 'Payments/RatepayTest',
-    //     timeout: 120000
-    // },
-    // {
-    //     file: 'Payments/IdealTest',
-    //     timeout: 120000
-    // },
-    // {
-    //     file: 'Payments/MasterpassTest',
-    //     timeout: 120000
-    // },
-    // {
-    //     file: 'Payments/PaypalTest',
-    //     timeout: 180000
-    // },
-    // {
-    //     file: 'Payments/PiaTest',
-    //     timeout: 90000
-    // },
-    // {
-    //     file: 'Payments/PoiTest',
-    //     timeout: 90000
-    // },
-    // {
-    //     file: 'Payments/SepaTest',
-    //     timeout: 90000
-    // },
-    // {
-    //     file: 'Payments/SofortTest',
-    //     timeout: 120000
-    // },
-    // {
-    //     file: 'Payments/UpiTest',
-    //     timeout: 120000
-    // }
 ];
