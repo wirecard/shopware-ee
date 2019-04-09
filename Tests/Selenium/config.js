@@ -299,7 +299,7 @@ exports.browsers = [
 /**
  * List of tests to be executed. All tests must be located in `./Tests/Selenium`.
  */
-exports.apitests = [
+exports.apiTests = [
     {
         file: 'Payments/DefaultTest',
         timeout: 120000
@@ -354,7 +354,7 @@ exports.apitests = [
     }
 ];
 
-exports.novatests = [
+exports.novaTests = [
     {
         file: 'Payments/CreditCardThreeDTest',
         timeout: 120000
