@@ -37,25 +37,25 @@ matrix:
     - php: 7.2
       if: type != cron
 
-    - &acceptance-test
-      stage: acceptance-test
-      if: type = cron
-      php: 7.2
-      env: GATEWAY=API-TEST
-      install:
-        - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
-        - travis_retry composer install $COMPOSER_ARGS
-        - travis_retry npm install
-        - npm list --depth=0
-        - composer show
-      script:
-        - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
-        - npm run test:runner
-      after_script: skip
-        after_failure:
-        - bash .bin/send-notify.sh
-    - <<: *acceptance-test
-      env: GATEWAY=NOVA
+  - &acceptance-test
+    stage: acceptance-test
+    if: type = cron
+    php: 7.2
+    env: GATEWAY=API-TEST
+    install:
+      - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
+      - travis_retry composer install $COMPOSER_ARGS
+      - travis_retry npm install
+      - npm list --depth=0
+      - composer show
+    script:
+      - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
+      - npm run test:runner
+    after_script: skip
+      after_failure:
+      - bash .bin/send-notify.sh
+  - <<: *acceptance-test
+    env: GATEWAY=NOVA
 
 install:
   - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
