@@ -24,7 +24,6 @@ const run = async () => {
         }, browser);
 
         gateway = process.env.GATEWAY
-        console.log(gateway);
 
         if (gateway === 'API-TEST') {
             await asyncForEach(apitests, async testCase => {
