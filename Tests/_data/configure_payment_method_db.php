@@ -104,7 +104,6 @@ function buildConfigByPaymentMethod($paymentMethod, $gateway)
     $config = $GLOBALS['defaultConfig'][$paymentMethod];
 
     $jsonFile = GATEWAY_CONFIG_PATH . DIRECTORY_SEPARATOR . $paymentMethod . '.json';
-    print_r($jsonFile);
     if (file_exists($jsonFile)) {
         $jsonData = json_decode(file_get_contents($jsonFile));
         if (!empty($jsonData) && !empty($jsonData->$gateway)) {
@@ -174,13 +173,13 @@ function updateShopwareEeDbConfig($db_config, $payment_method)
         }
     }
 
-//    echo "New Database rows!\n";
-//    $stmtInsert = "SELECT * FROM $tableName";
-//    $result = $mysqli->query($stmtInsert);
-//    if ($result->num_rows > 0) {
-//        while($row = $result->fetch_assoc()) {
-//            echo $row['name'] . " " . $row['value'] . "\n";
-//        }
-//    }
+    echo "New Database rows!\n";
+    $stmtInsert = "SELECT * FROM $tableName";
+    $result = $mysqli->query($stmtInsert);
+    if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            echo $row['name'] . " " . $row['value'] . "\n";
+        }
+    }
     return true;
 }
