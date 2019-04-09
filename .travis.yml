@@ -52,8 +52,8 @@ matrix:
     - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
     - npm run test:runner
     after_script: skip
-    after_failure:
-    - bash .bin/send-notify.sh
+#    after_failure:
+#    - bash .bin/send-notify.sh
   - <<: *acceptance-test
     env: GATEWAY=NOVA
 
