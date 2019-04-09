@@ -23,7 +23,7 @@ const run = async () => {
             'browserstack.localIdentifier': process.env.BROWSERSTACK_LOCAL_IDENTIFIER
         }, browser);
 
-        gateway = process.env.GATEWAY
+        gateway = process.env.GATEWAY;
 
         if (gateway === 'API-TEST') {
             await asyncForEach(apitests, async testCase => {
