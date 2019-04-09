@@ -28,14 +28,14 @@ matrix:
   allow_failures:
     - stage: acceptance-test
   include:
-    - php: 5.6
-      if: type != cron
-    - php: 7.0
-      if: type != cron
-    - php: 7.1
-      if: type != cron
-    - php: 7.2
-      if: type != cron
+  - php: 5.6
+    if: type != cron
+  - php: 7.0
+    if: type != cron
+  - php: 7.1
+    if: type != cron
+  - php: 7.2
+    if: type != cron
 
   - &acceptance-test
     stage: acceptance-test
