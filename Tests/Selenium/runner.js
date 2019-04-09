@@ -7,11 +7,12 @@
  */
 
 const { Builder } = require('selenium-webdriver');
-const { browsers, tests } = require('./config');
+const { browsers, apitests, novatests } = require('./config');
 const { asyncForEach } = require('./common');
 const Mocha = require('mocha');
 
 let fail = false;
+let gateway = '';
 
 const run = async () => {
     await asyncForEach(browsers, async browser => {
@@ -22,44 +23,89 @@ const run = async () => {
             'browserstack.localIdentifier': process.env.BROWSERSTACK_LOCAL_IDENTIFIER
         }, browser);
 
-        await asyncForEach(tests, async testCase => {
-            // Driver used by the Selenium tests.
-            global.driver = await new Builder()
-                .usingServer('http://hub-cloud.browserstack.com/wd/hub')
-                .withCapabilities(Object.assign({
-                    name: testCase.file,
-                    build: process.env.TRAVIS ? `${process.env.TRAVIS_JOB_NUMBER}` : 'local',
-                    project: 'Shopware:WirecardElasticEngine'
-                }, bsConfig))
-                .build();
+        gateway = process.env.GATEWAY
+        console.log(gateway);
 
-            const mocha = new Mocha({
-                timeout: testCase.timeout
-            });
+        if (gateway === 'API-TEST') {
+            await asyncForEach(apitests, async testCase => {
+                // Driver used by the Selenium tests.
+                global.driver = await new Builder()
+                    .usingServer('http://hub-cloud.browserstack.com/wd/hub')
+                    .withCapabilities(Object.assign({
+                        name: testCase.file,
+                        build: process.env.TRAVIS ? `${process.env.TRAVIS_JOB_NUMBER}` : 'local',
+                        project: 'Shopware:WirecardElasticEngine'
+                    }, bsConfig))
+                    .build();
 
-            return new Promise((resolve, reject) => {
-                // `require` (used by Mocha#addFile) caches files by default, making it impossible to run tests
-                // multiple times. To fix this we clear the cache on every test.
-                mocha.suite.on('require', function (global, file) {
-                    delete require.cache[file];
+                const mocha = new Mocha({
+                    timeout: testCase.timeout
                 });
 
-                console.log(`Running ${testCase.file} against ${browser.browserName} (v${browser.browser_version}) on ${browser.os} (${browser.os_version})`);
+                return new Promise((resolve, reject) => {
+                    // `require` (used by Mocha#addFile) caches files by default, making it impossible to run tests
+                    // multiple times. To fix this we clear the cache on every test.
+                    mocha.suite.on('require', function (global, file) {
+                        delete require.cache[file];
+                    });
 
-                mocha.addFile(`./Tests/Selenium/${testCase.file}.js`);
+                    console.log(`Running ${testCase.file} against ${browser.browserName} (v${browser.browser_version}) on ${browser.os} (${browser.os_version})`);
 
-                mocha.run()
-                    .on('fail', test => {
-                        fail = true;
-                        console.log(test);
-                        resolve();
-                    })
-                    .on('end', () => {
-                        resolve();
-                    })
-                ;
+                    mocha.addFile(`./Tests/Selenium/${testCase.file}.js`);
+
+                    mocha.run()
+                        .on('fail', test => {
+                            fail = true;
+                            console.log(test);
+                            resolve();
+                        })
+                        .on('end', () => {
+                            resolve();
+                        })
+                    ;
+                });
             });
-        });
+        }
+        if (gateway === 'NOVA') {
+            await asyncForEach(novatests, async testCase => {
+                // Driver used by the Selenium tests.
+                global.driver = await new Builder()
+                    .usingServer('http://hub-cloud.browserstack.com/wd/hub')
+                    .withCapabilities(Object.assign({
+                        name: testCase.file,
+                        build: process.env.TRAVIS ? `${process.env.TRAVIS_JOB_NUMBER}` : 'local',
+                        project: 'Shopware:WirecardElasticEngine'
+                    }, bsConfig))
+                    .build();
+
+                const mocha = new Mocha({
+                    timeout: testCase.timeout
+                });
+
+                return new Promise((resolve, reject) => {
+                    // `require` (used by Mocha#addFile) caches files by default, making it impossible to run tests
+                    // multiple times. To fix this we clear the cache on every test.
+                    mocha.suite.on('require', function (global, file) {
+                        delete require.cache[file];
+                    });
+
+                    console.log(`Running ${testCase.file} against ${browser.browserName} (v${browser.browser_version}) on ${browser.os} (${browser.os_version})`);
+
+                    mocha.addFile(`./Tests/Selenium/${testCase.file}.js`);
+
+                    mocha.run()
+                        .on('fail', test => {
+                            fail = true;
+                            console.log(test);
+                            resolve();
+                        })
+                        .on('end', () => {
+                            resolve();
+                        })
+                    ;
+                });
+            });
+        }
     });
 };
 
