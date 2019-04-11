@@ -111,7 +111,7 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
         }
 
         $transactionManager = $this->container->get('wirecard_elastic_engine.transaction_manager');
-        $shop               = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
+        $shop               =  Shopware()->Shop();
         $config             = $payment->getTransactionConfig(
             $shop,
             $this->container->getParameterBag(),
@@ -209,7 +209,7 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
         $paymentFactory = $this->getPaymentFactory();
         $payment        = $paymentFactory->create($this->Request()->getParam('payment'));
 
-        $shop           = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
+        $shop           =  Shopware()->Shop();
         $config         = $payment->getTransactionConfig(
             $shop,
             $this->container->getParameterBag(),

@@ -69,7 +69,7 @@ class PaymentHandler extends Handler
                 $action = $payment->processPayment(
                     $orderSummary,
                     $transactionService,
-                    $this->em->getRepository(Shop::class)->getActiveDefault(),
+                    Shopware()->Shop(),
                     $redirect,
                     $request,
                     $shopwareOrder

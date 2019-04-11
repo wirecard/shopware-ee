@@ -18,19 +18,19 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.MailToolbar', {
     width: '100%',
     dock: 'bottom',
 
-    initComponent: function() {
+    initComponent: function () {
         var me = this;
         me.items = me.createItems();
         me.registerEvents();
         me.callParent(arguments);
     },
 
-    registerEvents: function() {
+    registerEvents: function () {
         var me = this;
         me.addEvents('submitMail');
     },
 
-    createItems: function() {
+    createItems: function () {
         var me = this;
         return [
             '->', // aligns the button to the right
@@ -38,7 +38,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.MailToolbar', {
         ];
     },
 
-    createSubmitButton: function() {
+    createSubmitButton: function () {
         var me = this;
         return Ext.create('Shopware.apps.Base.view.element.Button', {
             text: '{s name="Submit"}{/s}',
@@ -47,7 +47,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.MailToolbar', {
         });
     },
 
-    onSubmitButtonClick: function() {
+    onSubmitButtonClick: function () {
         var me = this;
         me.fireEvent('submitMail');
     }
