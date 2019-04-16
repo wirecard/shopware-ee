@@ -1,6 +1,10 @@
 #!/bin/bash
 
-CHANNEL='shs-ui-api-test'
+if [[ ${GATEWAY} = "NOVA" ]]; then
+  CHANNEL='shs-ui-nova'
+elif [[  ${GATEWAY} = "API-TEST" ]]; then
+   CHANNEL='shs-ui-api-test'
+fi
 
 #send information about the build
 curl -X POST -H 'Content-type: application/json' \

@@ -7,11 +7,13 @@
  */
 
 const { Builder } = require('selenium-webdriver');
-const { browsers, tests } = require('./config');
+const { browsers, apiTests, novaTests } = require('./config');
 const { asyncForEach } = require('./common');
 const Mocha = require('mocha');
 
 let fail = false;
+let gateway = '';
+let gatewayTests = '';
 
 const run = async () => {
     await asyncForEach(browsers, async browser => {
@@ -22,7 +24,15 @@ const run = async () => {
             'browserstack.localIdentifier': process.env.BROWSERSTACK_LOCAL_IDENTIFIER
         }, browser);
 
-        await asyncForEach(tests, async testCase => {
+        gateway = process.env.GATEWAY;
+
+        if (gateway === 'API-TEST') {
+            gatewayTests = apiTests;
+        } else {
+            gatewayTests = novaTests;
+        }
+
+        await asyncForEach(gatewayTests, async testCase => {
             // Driver used by the Selenium tests.
             global.driver = await new Builder()
                 .usingServer('http://hub-cloud.browserstack.com/wd/hub')
@@ -37,7 +47,7 @@ const run = async () => {
                 timeout: testCase.timeout
             });
 
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 // `require` (used by Mocha#addFile) caches files by default, making it impossible to run tests
                 // multiple times. To fix this we clear the cache on every test.
                 mocha.suite.on('require', function (global, file) {
