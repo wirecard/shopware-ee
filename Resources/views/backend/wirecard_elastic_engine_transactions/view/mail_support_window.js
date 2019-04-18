@@ -16,7 +16,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.MailSupportWind
 
     toolbar: null,
 
-    initComponent: function() {
+    initComponent: function () {
         var me = this;
         me.dockedItems = [me.createToolbar()];
         me.items = [me.createForm()];
@@ -27,7 +27,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.MailSupportWind
      * Creates the toolbar for the mail support window.
      * @returns { null|* }
      */
-    createToolbar: function() {
+    createToolbar: function () {
         var me = this;
         me.toolbar = Ext.create('Shopware.apps.WirecardElasticEngineTransactions.view.MailToolbar');
         return me.toolbar;
@@ -37,7 +37,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.MailSupportWind
      * Creates the form for the mail support window.
      * @returns { Shopware.apps.WirecardElasticEngineTransactions.view.MailSupportForm }
      */
-    createForm: function() {
+    createForm: function () {
         return Ext.create('Shopware.apps.WirecardElasticEngineTransactions.view.MailSupportForm');
     }
 });

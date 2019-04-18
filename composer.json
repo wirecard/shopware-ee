@@ -7,7 +7,7 @@
   "require": {
     "php": ">=5.6",
     "symfony/options-resolver": "^3",
-    "wirecard/payment-sdk-php": "3.4.2",
+    "wirecard/payment-sdk-php": "3.6.1",
     "php-http/guzzle5-adapter": ">=1.0.1",
     "guzzlehttp/psr7": ">=1.4.2"
   },
@@ -23,8 +23,10 @@
     "make-wiki-notes": "@php .bin/version-helper.php -w",
     "make-release-notes": "@php .bin/version-helper.php",
     "upload-coverage": "codacycoverage clover build/coverage.xml",
-    "cs-check": "phpcs --standard=phpcs.xml --ignore=*/vendor/*,*/Tests/*,*/node_modules/*,*/Resources/*,*/.bin/* -s",
+    "cs-check": "phpcs --standard=phpcs.xml --ignore=*/vendor/*,*/Tests/*,*/node_modules/*,*/Resources/*,*/.bin/* -s ",
     "cs-fix": "phpcbf --standard=phpcs.xml",
+    "js-check": "eslint -c .eslintrc.json **/*.js **/*.js --ignore-path .eslintignore",
+    "js-fix": "eslint -c .eslintrc.json **/*.js **/*.js --ignore-path .eslintignore --fix",
     "test-coverage": "phpunit --colors=always --coverage-clover build/coverage.xml",
     "build-languages": "php .bin/language-helper.php"
   }

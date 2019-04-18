@@ -42,7 +42,8 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.GeneralInformati
 
         return [{
             xtype: 'container',
-            renderTpl: Ext.create('Ext.XTemplate',
+            renderTpl: Ext.create(
+                'Ext.XTemplate',
                 '{literal}<tpl for=".">',
                 '<p>{GeneralInformation}</p>',
                 '</tpl>{/literal}'

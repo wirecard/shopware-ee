@@ -11,7 +11,6 @@
 {block name="frontend_index_header"}
     {include file="frontend/wirecard_elastic_engine_payment/header.tpl"}
 {/block}
-
 {block name="frontend_index_content"}
     <div class="wirecardee-credit-card" style="padding-top: 50px;">
         <div class="wirecardee-credit-card-error-message" style="display: none; margin-bottom: 20px;">
@@ -62,8 +61,13 @@
                     $formSubmit.prop('disabled', false);
                     $formSubmitIcon.attr('class', 'icon--arrow-right');
                     if (response.transaction_state === 'failed') {
-                        $('.wirecardee-credit-card-error-message .alert--content').html(response.status_description_1);
+                        var $reloadMessage = '<p><b>The page will reload in 5 seconds</b></p>';
+                        $('.wirecardee-credit-card-error-message .alert--content').html(
+                            $reloadMessage + response.status_description_1
+                        );
                         $('.wirecardee-credit-card-error-message').show();
+
+                        setTimeout(function(){ location.reload(); }, 5 * 1000);
                     }
                 };
 

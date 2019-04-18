@@ -19,7 +19,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.Window', 
      * Adds the Wirecard Info tab to the order details.
      * @returns { * }
      */
-    getTabs: function() {
+    getTabs: function () {
         var me = this,
             result = me.callParent();
 
@@ -32,7 +32,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.Window', 
      * Creates the Wirecard Info Tab - just for Wirecard payments!
      * @returns { * }
      */
-    createTabPanel: function() {
+    createTabPanel: function () {
         var me = this,
             result = me.callParent(),
             payment = me.record.getPayment().first();
