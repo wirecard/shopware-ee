@@ -146,23 +146,23 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                             : (Ext.util.Format.date(value) + ' ' + Ext.util.Format.date(value, 'H:i:s'));
                     }
                 },
-                {header: me.snippets.transactionsTable.type, dataIndex: 'type', flex: 1},
-                {header: me.snippets.transactionsTable.transactionId, dataIndex: 'transactionId', flex: 1},
-                {header: me.snippets.transactionsTable.transactionType, dataIndex: 'transactionType', flex: 1},
+                { header: me.snippets.transactionsTable.type, dataIndex: 'type', flex: 1 },
+                { header: me.snippets.transactionsTable.transactionId, dataIndex: 'transactionId', flex: 1 },
+                { header: me.snippets.transactionsTable.transactionType, dataIndex: 'transactionType', flex: 1 },
                 {
                     header: me.snippets.transactionsTable.amount,
                     dataIndex: 'amount',
                     flex: 1,
                     renderer: Ext.util.Format.numberRenderer('0.00')
                 },
-                {header: me.snippets.transactionsTable.currency, dataIndex: 'currency', flex: 1},
+                { header: me.snippets.transactionsTable.currency, dataIndex: 'currency', flex: 1 },
                 {
                     xtype: 'actioncolumn',
                     width: 150,
                     items: [{
                         tooltip: me.snippets.buttons.openTransaction,
                         handler: function (view, rowIndex, colIndex, item, opts, record) {
-                            Ext.create('Shopware.apps.WirecardElasticEngineExtendOrder.view.TransactionDetailsWindow', {record: record}).show();
+                            Ext.create('Shopware.apps.WirecardElasticEngineExtendOrder.view.TransactionDetailsWindow', { record: record }).show();
                         },
                         getClass: function (value, meta, record) {
                             return record.data.statusMessage ? 'sprite-exclamation' : 'sprite-magnifier-medium';
@@ -289,7 +289,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                     me.processBackendOperation(
                         transaction,
                         operation,
-                        {amount: Ext.getCmp('wirecardee-transaction-amount').getValue()}
+                        { amount: Ext.getCmp('wirecardee-transaction-amount').getValue() }
                     );
                 }
             }, {
@@ -363,7 +363,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineExtendOrder.view.detail.InfoTab',
                     me.processBackendOperation(
                         transaction,
                         operation,
-                        {basket: basketItems}
+                        { basket: basketItems }
                     );
                 }
             }, {
