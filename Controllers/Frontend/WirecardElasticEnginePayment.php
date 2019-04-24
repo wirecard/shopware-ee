@@ -66,15 +66,13 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         /** @var PaymentHandler $handler */
         $handler = $this->get('wirecard_elastic_engine.payment_handler');
         $payment = $this->getPaymentFactory()->create($this->getPaymentShortName());
-
+        $shop = Shopware()->Shop();
         try {
             $currency     = $this->getCurrencyShortName();
             $userMapper   = new UserMapper(
                 $this->getUser(),
                 $this->Request()->getClientIp(),
-                $this->getModelManager()->getRepository(Shop::class)
-                     ->getActiveDefault()
-                     ->getLocale()
+                $shop->getLocale()
                      ->getLocale()
             );
             $basketMapper = new BasketMapper(
@@ -108,7 +106,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             ),
             new TransactionService(
                 $payment->getTransactionConfig(
-                    $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
+                    $shop,
                     $this->container->getParameterBag(),
                     $currency
                 ),
@@ -184,7 +182,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $response = $returnHandler->handleRequest(
                 $payment,
                 new TransactionService($payment->getTransactionConfig(
-                    $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
+                    Shopware()->Shop(),
                     $this->container->getParameterBag(),
                     $this->getCurrencyShortName()
                 ), $this->getLogger()),
@@ -347,7 +345,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         try {
             $backendService = new BackendService($payment->getTransactionConfig(
-                $this->getModelManager()->getRepository(Shop::class)->getActiveDefault(),
+                Shopware()->Shop(),
                 $this->container->getParameterBag(),
                 $this->getCurrencyShortName()
             ));
