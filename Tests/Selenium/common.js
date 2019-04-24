@@ -67,7 +67,7 @@ exports.addProductToCartAndGotoCheckout = async function (driver, url) {
 
 exports.selectPaymentMethod = async function (driver, paymentLabel) {
     // Go to payment selection page, check if wirecard payments are present and select credit card
-    await driver.findElement(By.className('btn--change-payment')).click();
+    await driver.findElement(By.className('btn is--small btn--change-payment')).click();
     console.log('click "' + paymentLabel + '"');
     await driver.findElement(By.xpath("//*[contains(text(), '" + paymentLabel + "')]")).click();
 

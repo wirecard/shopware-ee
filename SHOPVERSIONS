@@ -1,5 +1,32 @@
 [
     {
+        "release": "1.3.7",
+        "shopsystem": "Shopware",
+        "tested": "5.5.7",
+        "compatibility": "5.5.0",
+        "changelog": [
+            "Change formatting of Smarty templates"
+        ]
+    },
+    {
+        "release": "1.3.6",
+        "shopsystem": "Shopware",
+        "tested": "5.5.7",
+        "compatibility": "5.5.0",
+        "changelog": [
+            "Update language on Credit Card form"
+        ]
+    },
+    {
+        "release": "1.3.5",
+        "shopsystem": "Shopware",
+        "tested": "5.5.7",
+        "compatibility": "5.5.0",
+        "changelog": [
+            "Refresh credit card form on failed transaction"
+        ]
+    },
+    {
         "release": "1.3.4",
         "shopsystem": "Shopware",
         "tested": "5.5.6",

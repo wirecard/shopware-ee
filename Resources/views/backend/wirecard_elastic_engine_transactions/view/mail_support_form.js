@@ -25,7 +25,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.MailSupportForm
         labelWidth: 180
     },
 
-    initComponent: function() {
+    initComponent: function () {
         var me = this;
         me.items = me.createItems();
         me.callParent(arguments);
@@ -35,7 +35,7 @@ Ext.define('Shopware.apps.WirecardElasticEngineTransactions.view.MailSupportForm
      * Returns fields for the support mail form.
      * @returns { *[] }
      */
-    createItems: function() {
+    createItems: function () {
         return [{
             xtype: 'textfield',
             name: 'address',
