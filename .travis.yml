@@ -29,33 +29,42 @@ matrix:
     - stage: acceptance-test
   include:
   - php: 5.6
-    if: type != cron
+    if: type = cron
   - php: 7.0
-    if: type != cron
+    if: type = cron
   - php: 7.1
-    if: type != cron
+    if: type = cron
   - php: 7.2
-    if: type != cron
+    if: type = cron
 
+  - stage: get-shopware-versions
+    if: type != cron
+    php: 7.2
+    install: skip
+    before_script: skip
+    script: bash .bin/get-shopware-versions.sh
+    after_script: skip
+    after_failure: skip
   - &acceptance-test
     stage: acceptance-test
-    if: type = cron
+    if: type != cron
     php: 7.2
     env: GATEWAY=API-TEST
-    install:
-    - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
-    - travis_retry composer install $COMPOSER_ARGS
-    - travis_retry npm install
-    - npm list --depth=0
-    - composer show
-    script:
-    - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
-    - npm run test:runner
+    install: skip
+#    - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
+#    - travis_retry composer install $COMPOSER_ARGS
+#    - travis_retry npm install
+#    - npm list --depth=0
+#    - composer show
+    before_script: skip
+    script: cat .bin/shop-releases.txt
+#    - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
+#    - npm run test:runner
     after_script: skip
-    after_failure:
-    - bash .bin/send-notify.sh
-  - <<: *acceptance-test
-    env: GATEWAY=NOVA
+    after_failure: skip
+#    - bash .bin/send-notify.sh
+#  - <<: *acceptance-test
+#    env: GATEWAY=NOVA
 
 install:
   - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
@@ -91,6 +100,7 @@ before_script:
   - rm -rf ${SHOPWARE_DIRECTORY}/var/cache
   - cd  Tests/_data/ && php configure_payment_method_db.php creditcard
   - cd ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
+
 
 script:
   - composer cs-check
