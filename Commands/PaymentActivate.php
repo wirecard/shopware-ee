@@ -26,6 +26,9 @@ use WirecardElasticEngine\WirecardElasticEngine;
  */
 class PaymentActivate extends ShopwareCommand
 {
+
+    protected static $defaultName = 'wirecardelasticengine:payment:activate';
+
     /**
      * {@inheritdoc}
      */
