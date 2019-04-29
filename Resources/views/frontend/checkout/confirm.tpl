@@ -55,7 +55,7 @@
                                     <input id="wirecardee--tac" type="checkbox" name="wirecardElasticEngine[tac]" required="required" aria-required="true" data-invalid-tos-jump="true" />
                                 </span>
                                 <span class="block column--label">
-                                    <label for="wirecardElasticEngine[tac]" data-modalbox="true" data-height="500" data-width="750">
+                                    <label for="wirecardee--tac" data-width="750">
                                         {s name="RatepayInvoiceTAC" namespace="frontend/wirecard_elastic_engine/ratepay_invoice"}{/s}
                                     </label>
                                 </span>
