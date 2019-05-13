@@ -54,10 +54,10 @@ matrix:
     - GATEWAY=API-TEST
 #    shopware latest version
     - SHOP_RELEASE=$(awk 'NR==1 {print; exit}' ${SHOPWARE_RELEASES_FILE})
-    before install: echo "Testing with Shopware version ${SHOP_RELEASE}"
     install:
+    - echo "Testing with Shopware version ${SHOP_RELEASE}"
     - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
-    - travis_retry composer install $COMPOSER_ARGS
+    - travis_retry composer install --no-dev $COMPOSER_ARGS
     - travis_retry npm install
     - npm list --depth=0
     - composer show
@@ -65,30 +65,31 @@ matrix:
     - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
     - npm run test:runner
     after_script: skip
-    after_failure: skip
+    after_success: echo "Tests on ${SHOP_RELEASE} passed"
+    after_failure:
+    - echo "Tests on ${SHOP_RELEASE} failed"
 #    - bash .bin/send-notify.sh
-#  - <<: *acceptance-test
-#    env: GATEWAY=NOVA
   - <<: *acceptance-test
     env:
     - GATEWAY=API-TEST
     - SHOP_RELEASE=$(awk 'NR==2 {print; exit}' ${SHOPWARE_RELEASES_FILE})
-#  - <<: *acceptance-test
-#    env:
-#    - GATEWAY=API-TEST
-#    - SHOP_RELEASE=$(awk 'NR==3 {print; exit}' ${SHOPWARE_RELEASES_FILE})
-#  - <<: *acceptance-test
-#    env:
-#    - GATEWAY=API-TEST
-#    - SHOP_RELEASE='v5.4.6'
-#  - <<: *acceptance-test
-#    env:
-#    - GATEWAY=API-TEST
-#    - SHOP_RELEASE='v5.5.0'
-#  - <<: *acceptance-test
-#    env:
-#    - GATEWAY=API-TEST
-#    - SHOP_RELEASE='v5.4.0'
+  - <<: *acceptance-test
+    env:
+    - GATEWAY=API-TEST
+    - SHOP_RELEASE=$(awk 'NR==3 {print; exit}' ${SHOPWARE_RELEASES_FILE})
+  - <<: *acceptance-test
+    env:
+    - GATEWAY=NOVA
+    - SHOP_RELEASE=$(awk 'NR==1 {print; exit}' ${SHOPWARE_RELEASES_FILE})
+  - <<: *acceptance-test
+    env:
+    - GATEWAY=NOVA
+    - SHOP_RELEASE=$(awk 'NR==2 {print; exit}' ${SHOPWARE_RELEASES_FILE})
+  - <<: *acceptance-test
+    env:
+    - GATEWAY=NOVA
+    - SHOP_RELEASE=$(awk 'NR==3 {print; exit}' ${SHOPWARE_RELEASES_FILE})
+
 
 
 install:
