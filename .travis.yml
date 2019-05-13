@@ -30,29 +30,31 @@ matrix:
     - stage: acceptance-test
   include:
   - php: 5.6
-    if: type = cron
+    if: type != cron
   - php: 7.0
-    if: type = cron
+    if: type != cron
   - php: 7.1
-    if: type = cron
+    if: type != cron
   - php: 7.2
-    if: type = cron
+    if: type != cron
 
-#  - stage: get-shopware-versions
-#    if: type != cron
-#    php: 7.2
-#    install: skip
-#    before_script: skip
-#    script: bash .bin/get-shopware-versions.sh
-#    after_script: skip
-#    after_failure: skip
+# nigthly get latest shopware versions and store them in shop-releases.txt
+  - stage: get-shopware-versions
+    if: type = cron
+    php: 7.2
+    install: skip
+    before_script: skip
+    script: bash .bin/get-shopware-versions.sh
+    after_script: skip
+    after_failure: skip
+
   - &acceptance-test
     stage: acceptance-test
-    if: type != cron
+    if: type = cron
     php: 7.2
     env:
     - GATEWAY=API-TEST
-#    shopware latest version
+#    shopware version - fist line in SHOPWARE_RELEASES_FILE
     - SHOP_RELEASE=$(awk 'NR==1 {print; exit}' ${SHOPWARE_RELEASES_FILE})
     install:
     - echo "Testing with Shopware version ${SHOP_RELEASE}"
@@ -68,14 +70,16 @@ matrix:
     after_success: echo "Tests on ${SHOP_RELEASE} passed"
     after_failure:
     - echo "Tests on ${SHOP_RELEASE} failed"
-#    - bash .bin/send-notify.sh
+    - bash .bin/send-notify.sh
   - <<: *acceptance-test
     env:
     - GATEWAY=API-TEST
+#    shopware version - 2nd line in SHOPWARE_RELEASES_FILE
     - SHOP_RELEASE=$(awk 'NR==2 {print; exit}' ${SHOPWARE_RELEASES_FILE})
   - <<: *acceptance-test
     env:
     - GATEWAY=API-TEST
+#    shopware version - 3nd line in SHOPWARE_RELEASES_FILE
     - SHOP_RELEASE=$(awk 'NR==3 {print; exit}' ${SHOPWARE_RELEASES_FILE})
   - <<: *acceptance-test
     env:
@@ -89,7 +93,6 @@ matrix:
     env:
     - GATEWAY=NOVA
     - SHOP_RELEASE=$(awk 'NR==3 {print; exit}' ${SHOPWARE_RELEASES_FILE})
-
 
 
 install:
