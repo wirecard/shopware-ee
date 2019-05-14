@@ -21,6 +21,8 @@ env:
     - COMPOSER_ARGS="--no-interaction"
     - PLUGIN_NAME=WirecardElasticEngine
     - SHOPWARE_DIRECTORY=${HOME}/shopware
+    - SHOPWARE_RELEASES_FILE=${TRAVIS_BUILD_DIR}/.bin/shop-releases.txt
+
     - github_token:
         secure: "gH+IJRS0uQe2G/gg4nL0UgQxh4Tog16vQIBzWgQiFUjmQM/jMvUtw6kW4ixcusOPGR4rqKuLFCd8gbDg/I848VNDb7a+xg+wGm7KvognnbcxbnB0TcxNcPTGZUWXbSqGi3z8YhAaaa1LfrROM3qS4LeU3Bz+B7ZpdbA7xqzkmBRPgEdsv7OLmCwow2e6jreeGcCAqM34q84JavZkWcoHCQbLoknwyNCzilMKUN8fe+Ih46o1O0iuVOv9lAWIOLlAJJNcrX+kamv4RhrtDQwyVWsnDB2OO2Me4Lr4Bkqy9pN+diszgX8OzhOnkFl+ZXYTIUI5NxK3kAkd4lKOO3QgHIoveSmeoaS/mrC5kflNs6vN399Jm8X4gSmxUhkl01hEAfEqL+BiW2o22/Pq8WeMVVaQy3ONUwlSGGBkk/IkckbG/LzpJv5Jjztfi8Xfl9JF1jO/0BABsqodx/pEbDzIKKb3S/U/EHmCXV8zqmD67E/PIii3Y9kxeVaDNdWT5u4O69Pt9sR7csA8OL8YS8th/d825v4BTPswIFxn1vXB1sTKJZGwyO+fu53CE7qcZEMc/+NJnfLZBhIbV9SE1zVRsDPX1AiruPd/sXjYy01AR4SYdCO+RrdyVWoIE65hV/MOGgvu327jI13ZIpFE2PwE1fPj6JqTtrW5YugLCOQUGd0="
 
@@ -37,14 +39,28 @@ matrix:
   - php: 7.2
     if: type != cron
 
+# nigthly get latest shopware versions and store them in shop-releases.txt
+  - stage: get-shopware-versions
+    if: type = cron
+    php: 7.2
+    install: skip
+    before_script: skip
+    script: bash .bin/get-shopware-versions.sh
+    after_script: skip
+    after_failure: skip
+
   - &acceptance-test
     stage: acceptance-test
     if: type = cron
     php: 7.2
-    env: GATEWAY=API-TEST
+    env:
+    - GATEWAY=API-TEST
+#    shopware version - fist line in SHOPWARE_RELEASES_FILE
+    - SHOP_RELEASE=$(awk 'NR==1 {print; exit}' ${SHOPWARE_RELEASES_FILE})
     install:
+    - echo "Testing with Shopware version ${SHOP_RELEASE}"
     - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
-    - travis_retry composer install $COMPOSER_ARGS
+    - travis_retry composer install --no-dev $COMPOSER_ARGS
     - travis_retry npm install
     - npm list --depth=0
     - composer show
@@ -52,20 +68,43 @@ matrix:
     - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
     - npm run test:runner
     after_script: skip
+    after_success: echo "Tests on ${SHOP_RELEASE} passed"
     after_failure:
+    - echo "Tests on ${SHOP_RELEASE} failed"
     - bash .bin/send-notify.sh
   - <<: *acceptance-test
-    env: GATEWAY=NOVA
+    env:
+    - GATEWAY=API-TEST
+#    shopware version - 2nd line in SHOPWARE_RELEASES_FILE
+    - SHOP_RELEASE=$(awk 'NR==2 {print; exit}' ${SHOPWARE_RELEASES_FILE})
+  - <<: *acceptance-test
+    env:
+    - GATEWAY=API-TEST
+#    shopware version - 3nd line in SHOPWARE_RELEASES_FILE
+    - SHOP_RELEASE=$(awk 'NR==3 {print; exit}' ${SHOPWARE_RELEASES_FILE})
+  - <<: *acceptance-test
+    env:
+    - GATEWAY=NOVA
+    - SHOP_RELEASE=$(awk 'NR==1 {print; exit}' ${SHOPWARE_RELEASES_FILE})
+  - <<: *acceptance-test
+    env:
+    - GATEWAY=NOVA
+    - SHOP_RELEASE=$(awk 'NR==2 {print; exit}' ${SHOPWARE_RELEASES_FILE})
+  - <<: *acceptance-test
+    env:
+    - GATEWAY=NOVA
+    - SHOP_RELEASE=$(awk 'NR==3 {print; exit}' ${SHOPWARE_RELEASES_FILE})
+
 
 install:
-  - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
-  - travis_retry composer install $COMPOSER_ARGS
+  - travis_retry composer require --dev ${COMPOSER_ARGS} satooshi/php-coveralls:^1.0
+  - travis_retry composer install ${COMPOSER_ARGS}
   - travis_retry npm install
   - npm list --depth=0
   - composer show
 
 before_script:
-  # install apache
+#  install apache
   - sudo apt-get update
   - sudo apt-get install apache2 libapache2-mod-fastcgi
   - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
@@ -79,8 +118,9 @@ before_script:
   - sudo sed -e "s?%DOCUMENT_ROOT%?${SHOPWARE_DIRECTORY}?g" --in-place /etc/apache2/sites-available/000-default.conf
   - sudo service apache2 restart
 
-  # install shopware
-  - git clone https://github.com/shopware/shopware.git ${SHOPWARE_DIRECTORY} --branch 5.4
+#  install shopware
+#  for unit tests a fiex Shopware version 5.4 is used
+  - if [[ -z "${SHOP_RELEASE}" ]]; then export SHOP_RELEASE="5.4"; fi && git clone https://github.com/shopware/shopware.git ${SHOPWARE_DIRECTORY} --branch ${SHOP_RELEASE}
   - ant -f ${SHOPWARE_DIRECTORY}/build/build.xml -Dapp.host=localhost:8000 -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-unit
   - cp ${TRAVIS_BUILD_DIR}/build/travis-shopware-config.php ${SHOPWARE_DIRECTORY}/config.php
   - mv ${TRAVIS_BUILD_DIR} ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
@@ -91,6 +131,7 @@ before_script:
   - rm -rf ${SHOPWARE_DIRECTORY}/var/cache
   - cd  Tests/_data/ && php configure_payment_method_db.php creditcard
   - cd ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
+
 
 script:
   - composer cs-check
@@ -107,11 +148,11 @@ after_failure:
   - cat ${SHOPWARE_DIRECTORY}/var/log/*.log
 
 before_deploy:
-  - export REPO_NAME=`echo $TRAVIS_REPO_SLUG | awk -F'/' '{print $2}'`
+  - export REPO_NAME=`echo ${TRAVIS_REPO_SLUG} | awk -F'/' '{print $2}'`
   - export RELEASE_NOTES=$(composer make-release-notes)
   - bash .bin/generate-wiki-notes.sh
   - bash .bin/generate-readme-badge.sh
-  - bash .bin/generate-release-package.sh $TRAVIS_TAG
+  - bash .bin/generate-release-package.sh ${TRAVIS_TAG}
 
 deploy:
   provider: releases

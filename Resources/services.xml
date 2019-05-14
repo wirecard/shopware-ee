@@ -92,7 +92,7 @@
         <!-- Commands -->
         <service id="wirecard_elastic_engine.commands.payment_activate"
                  class="WirecardElasticEngine\Commands\PaymentActivate">
-            <tag name="console.command"/>
+            <tag name="console.command" command="wirecardelasticengine:payment:activate"/>
         </service>
     </services>
 </container>
