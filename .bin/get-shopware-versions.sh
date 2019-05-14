@@ -5,6 +5,6 @@ curl -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/repos/shop
 git config --global user.name "Travis CI"
 git config --global user.email "wirecard@travis-ci.org"
 
-git add .bin/shop-releases.txt
+git add  ${SHOPWARE_RELEASES_FILE}
 git commit -m "[skip ci] Update latest shop releases"
 git push --quiet https://${GITHUB_TOKEN}@github.com/${TRAVIS_REPO_SLUG} HEAD:TPWDCEE-3662
