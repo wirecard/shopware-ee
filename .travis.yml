@@ -31,17 +31,17 @@ matrix:
     - stage: acceptance-test
   include:
   - php: 5.6
-    if: type != cron
+    if: type = cron
   - php: 7.0
-    if: type != cron
+    if: type = cron
   - php: 7.1
-    if: type != cron
+    if: type = cron
   - php: 7.2
-    if: type != cron
+    if: type = cron
 
 # nigthly get latest shopware versions and store them in shop-releases.txt
   - stage: get-shopware-versions
-    if: type = cron
+    if: type != cron
     php: 7.2
     install: skip
     before_script: skip
@@ -51,7 +51,7 @@ matrix:
 
   - &acceptance-test
     stage: acceptance-test
-    if: type != cron
+    if: type = cron
     php: 7.2
     env:
     - GATEWAY=API-TEST
@@ -104,7 +104,7 @@ install:
   - composer show
 
 before_script:
-  # install apache
+#  install apache
   - sudo apt-get update
   - sudo apt-get install apache2 libapache2-mod-fastcgi
   - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
@@ -118,8 +118,9 @@ before_script:
   - sudo sed -e "s?%DOCUMENT_ROOT%?${SHOPWARE_DIRECTORY}?g" --in-place /etc/apache2/sites-available/000-default.conf
   - sudo service apache2 restart
 
-  # install shopware
-  - if [[ -z "${SHOP_RELEASE}" ]]; then export SHOP_RELEASE=$(awk 'NR==1 {print; exit}' ${SHOPWARE_RELEASES_FILE}); fi && git clone https://github.com/shopware/shopware.git ${SHOPWARE_DIRECTORY} --branch ${SHOP_RELEASE}
+#  install shopware
+#  for unit tests a fiex Shopware version 5.4 is used
+  - if [[ -z "${SHOP_RELEASE}" ]]; then export SHOP_RELEASE="5.4"; fi && git clone https://github.com/shopware/shopware.git ${SHOPWARE_DIRECTORY} --branch ${SHOP_RELEASE}
   - ant -f ${SHOPWARE_DIRECTORY}/build/build.xml -Dapp.host=localhost:8000 -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-unit
   - cp ${TRAVIS_BUILD_DIR}/build/travis-shopware-config.php ${SHOPWARE_DIRECTORY}/config.php
   - mv ${TRAVIS_BUILD_DIR} ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}

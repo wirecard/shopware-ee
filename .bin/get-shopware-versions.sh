@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #get last 3  releases
-curl --silent "https://api.github.com/repos/shopware/shopware/releases" | jq -r '.[] | .tag_name' | head -3 > ${SHOPWARE_RELEASES_FILE}
+curl -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/repos/shopware/shopware/releases | jq -r '.[] | .tag_name' | head -3 > ${SHOPWARE_RELEASES_FILE}
 git config --global user.name "Travis CI"
 git config --global user.email "wirecard@travis-ci.org"
 
