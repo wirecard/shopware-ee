@@ -136,6 +136,7 @@
   "ptrid": "Provider Transaction Reference ID",
   "ratepayinvoice": "Guaranteed Invoice",
   "ratepayinvoice_fields_error": "Minimum age to pay with Guaranteed Invoice: 18.",
+  "ratepayinvoice_tac": "I herewith confirm that I have read the <a href='https://www.wirecardbank.com/privacy-documents/datenschutzhinweise-fuer-die-wirecard-zahlarten/' target='_blank'>privacy notice</a> and <a href='https://www.wirecardbank.com/privacy-documents/zusatzliche-geschaftsbedingungen-fur-wirecard-zahlarten/' target='_blank'>additional terms and conditions</a> for Wirecard payment types and that I accept their validity.",
   "redirect_text": "You are being redirected. Please wait.",
   "requestId": "Request ID",
   "response_type": "Source",
