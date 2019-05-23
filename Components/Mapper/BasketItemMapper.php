@@ -34,6 +34,7 @@ class BasketItemMapper extends ArrayMapper
     const QUANTITY = 'quantity';
     const PRICE = 'price';
     const PRICE_NUMERIC = 'priceNumeric';
+    const AMOUNTNET_NUMERIC = 'amountnetNumeric';
 
     /**
      * @var Item
@@ -115,7 +116,7 @@ class BasketItemMapper extends ArrayMapper
      */
     public function getTaxRate()
     {
-        return $this->get(self::TAX_RATE);
+        return $this->isTaxFree() ? 0 : $this->get(self::TAX_RATE);
     }
 
     /**
@@ -160,12 +161,14 @@ class BasketItemMapper extends ArrayMapper
     {
         $price = floatval(str_replace(',', '.', $this->get(self::PRICE)));
 
-        $details = $this->getOptional(self::DETAILS);
-        if ($details) {
-            if (isset($details[self::DETAILS_PRICES]) && count($details[self::DETAILS_PRICES]) === 1) {
-                $prices = $details[self::DETAILS_PRICES];
-                if (isset($prices[0][self::DETAILS_PRICES_PRICE_NUMERIC])) {
-                    return $prices[0][self::DETAILS_PRICES_PRICE_NUMERIC];
+        if (!$this->isTaxFree()) {
+            $details = $this->getOptional(self::DETAILS);
+            if ($details) {
+                if (isset($details[self::DETAILS_PRICES]) && count($details[self::DETAILS_PRICES]) === 1) {
+                    $prices = $details[self::DETAILS_PRICES];
+                    if (isset($prices[0][self::DETAILS_PRICES_PRICE_NUMERIC])) {
+                        return $prices[0][self::DETAILS_PRICES_PRICE_NUMERIC];
+                    }
                 }
             }
         }
@@ -227,5 +230,18 @@ class BasketItemMapper extends ArrayMapper
         )) {
             throw new InvalidBasketItemException();
         }
+    }
+
+    /**
+     * Check if the order is sent taxfree or not
+     *
+     * @return bool
+     * @since 1.3.8
+     */
+    private function isTaxFree() {
+        $priceNumeric     = $this->getOptional(self::PRICE_NUMERIC);
+        $amountNetNumeric = $this->getOptional(self::AMOUNTNET_NUMERIC);
+        $isTaxFree = (! is_null($priceNumeric) && ! is_null($amountNetNumeric) && $priceNumeric == $amountNetNumeric);
+        return $isTaxFree;
     }
 }
