@@ -238,7 +238,8 @@ class BasketItemMapper extends ArrayMapper
      * @return bool
      * @since 1.3.8
      */
-    private function isTaxFree() {
+    private function isTaxFree()
+    {
         $priceNumeric     = $this->getOptional(self::PRICE_NUMERIC);
         $amountNetNumeric = $this->getOptional(self::AMOUNTNET_NUMERIC);
         $isTaxFree = (! is_null($priceNumeric) && ! is_null($amountNetNumeric) && $priceNumeric == $amountNetNumeric);
