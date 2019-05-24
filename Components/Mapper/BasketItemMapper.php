@@ -162,11 +162,7 @@ class BasketItemMapper extends ArrayMapper
         $priceFromDetailInfo = $this->getPriceFromDetailInfo();
         $priceFromCommonInfo = $this->getPriceFromCommonInfo();
 
-        if ($this->isTaxFree()) {
-            return $priceFromCommonInfo;
-        }
-
-        if (is_null($priceFromDetailInfo)) {
+        if ($this->isTaxFree() || is_null($priceFromDetailInfo)) {
             return $priceFromCommonInfo;
         }
 
