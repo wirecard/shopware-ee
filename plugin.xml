@@ -10,7 +10,7 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.3/engine/Shopware/Components/Plugin/schema/plugin.xsd">
     <label>Wirecard</label>
 
-    <version>1.3.7</version>
+    <version>1.3.8</version>
     <compatibility minVersion="5.5.0" />
 
     <author>Wirecard AG</author>

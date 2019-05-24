@@ -14,8 +14,10 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Shopware\Models\Shop\Locale;
 use Shopware\Models\Shop\Shop;
+use Shopware\Models\Shop\Currency;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\Config;
+use Wirecard\PaymentSdk\Config\CreditCardConfig;
 use Wirecard\PaymentSdk\Config\PaymentMethodConfig;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
@@ -49,7 +51,9 @@ class CreditCardPaymentTest extends PaymentTestCase
             [WirecardElasticEngine::NAME, 'wirecardElasticEngineCreditCardMerchantId', null, 'CCMAID'],
             [WirecardElasticEngine::NAME, 'wirecardElasticEngineCreditCardSecret', null, 'CCSecret'],
             [WirecardElasticEngine::NAME, 'wirecardElasticEngineCreditCardSslMaxLimit', null, '300'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineCreditCardSslMaxLimitCurrency', null, 1],
             [WirecardElasticEngine::NAME, 'wirecardElasticEngineCreditCardThreeDMinLimit', null, '100'],
+            [WirecardElasticEngine::NAME, 'wirecardElasticEngineCreditCardThreeDMinLimitCurrency', null, 'EUR'],
             [WirecardElasticEngine::NAME, 'wirecardElasticEngineCreditCardTransactionType', null, 'pay'],
             [WirecardElasticEngine::NAME, 'wirecardElasticEngineCreditCardEnableVault', null, true],
             [WirecardElasticEngine::NAME, 'wirecardElasticEngineCreditCardAllowAddressChanges', null, false],
@@ -110,7 +114,15 @@ class CreditCardPaymentTest extends PaymentTestCase
             ['shopware.release.version', '__SW_VERSION__'],
         ]);
 
-        $this->em->method('getRepository')->willReturn($this->createMock(EntityRepository::class));
+        /** @var \PHPUnit_Framework_MockObject_MockObject $currencyModelMock */
+        $currencyModelMock = $this->createMock(Currency::class);
+        $currencyModelMock->method('getCurrency')->willReturn('EUR');
+
+        /** @var \PHPUnit_Framework_MockObject_MockObject $repoMock */
+        $repoMock = $this->createMock(EntityRepository::class);
+        $repoMock->expects($this->once())->method('find')->with(1)->willReturn($currencyModelMock);
+
+        $this->em->method('getRepository')->willReturn($repoMock);
 
         $config = $this->payment->getTransactionConfig($shop, $parameters, 'EUR');
 
@@ -119,7 +131,9 @@ class CreditCardPaymentTest extends PaymentTestCase
         $this->assertNull($config->getHttpUser());
         $this->assertNull($config->getHttpPassword());
 
+        /** @var CreditCardConfig $paymentMethodConfig */
         $paymentMethodConfig = $config->get(CreditCardTransaction::NAME);
+
         $this->assertInstanceOf(PaymentMethodConfig::class, $paymentMethodConfig);
         $this->assertEquals('CCMAID', $paymentMethodConfig->getMerchantAccountId());
         $this->assertEquals('CCSecret', $paymentMethodConfig->getSecret());
@@ -132,6 +146,8 @@ class CreditCardPaymentTest extends PaymentTestCase
                 'plugin-version'      => '__PLUGIN_VERSION__',
             ],
         ], $config->getShopHeader());
+        $this->assertEquals(300, $paymentMethodConfig->getSslMaxLimit('EUR'));
+        $this->assertEquals(100, $paymentMethodConfig->getThreeDMinLimit('EUR'));
     }
 
     public function testGetTransactionTypeException()

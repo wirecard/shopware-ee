@@ -23,7 +23,7 @@ class WirecardElasticEngineTest extends TestCase
 {
     public function testPlugin()
     {
-        $plugin = new WirecardElasticEngine(true);
+        $plugin = new WirecardElasticEngine(true, 'ShopwarePlugins');
         $this->assertInstanceOf(Plugin::class, $plugin);
         $this->assertTrue($plugin->isActive());
     }
@@ -46,7 +46,7 @@ class WirecardElasticEngineTest extends TestCase
         $container = $this->createMock(ContainerInterface::class);
         $container->method('get')->willReturnMap($map);
 
-        $plugin = new WirecardElasticEngine(true);
+        $plugin = new WirecardElasticEngine(true, 'ShopwarePlugins');
         $plugin->setContainer($container);
         $this->assertInstanceOf(Plugin::class, $plugin);
         $payments = $plugin->getSupportedPayments();
