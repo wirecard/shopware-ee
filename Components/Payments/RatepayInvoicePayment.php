@@ -217,7 +217,7 @@ class RatepayInvoicePayment extends Payment implements
     {
         $accountHolderProperties = $accountHolder->mappedProperties();
 
-        // Date of bith is part of consumer data: check has already been done via checkDisplayRestrictions method
+        // Date of birth is part of consumer data: check has already been done via checkDisplayRestrictions method
         if (! empty($accountHolderProperties['date-of-birth'])) {
             return null;
         }
@@ -394,7 +394,7 @@ class RatepayInvoicePayment extends Payment implements
         $userMapper     = new UserMapper($userData, '', '');
         return [
             'method'   => $this->getName(),
-            'showForm' => ! $userMapper->getBirthday(),
+            'showBirthdayForm' => ! $userMapper->getBirthday(),
         ];
     }
 }

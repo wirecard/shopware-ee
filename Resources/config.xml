@@ -176,13 +176,14 @@ function (button) {
             <description lang="de">Ab diesem Betrag wird die Benutzung von 3-D Secure erzwungen. Tragen Sie "null" ein, um kein Non 3-D Secure Maximal Limit zu setzen.</description>
             <description lang="en">This amount forces 3-D Secure transactions. Enter "null" to disable the Non 3-D Secure Maximal Limit.</description>
         </element>
-        <element type="text" scope="shop">
+        <element type="combo" scope="shop">
             <name>wirecardElasticEngineCreditCardSslMaxLimitCurrency</name>
             <label lang="de">[Kreditkarte] Non 3-D Secure Maximal Limit Währung</label>
             <label lang="en">[Credit Card] Non 3-D Secure Max. Limit Currency</label>
             <value></value>
             <description lang="de">Leer lassen für Standard Shop Währung.</description>
             <description lang="en">Leave blank for default shop currency.</description>
+            <store>Shopware.apps.Base.store.Currency</store>
         </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineCreditCardThreeDMinLimit</name>
@@ -192,13 +193,14 @@ function (button) {
             <description lang="de">Ab diesem Betrag wird die Verwendung von 3-D Secure versucht. Tragen Sie "null" ein, um kein 3-D Secure Minimum Limit zu setzen.</description>
             <description lang="en">This amount attempts 3-D Secure transactions. Enter "null" to disable the 3-D Secure Min. Limit.</description>
         </element>
-        <element type="text" scope="shop">
+        <element type="combo" scope="shop">
             <name>wirecardElasticEngineCreditCardThreeDMinLimitCurrency</name>
             <label lang="de">[Kreditkarte] 3-D Secure Minimum Limit Währung</label>
             <label lang="en">[Credit Card] 3-D Secure Min. Limit Currency</label>
             <value></value>
             <description lang="de">Leer lassen für Standard Shop Währung.</description>
             <description lang="en">Leave blank for default shop currency.</description>
+            <store>Shopware.apps.Base.store.Currency</store>
         </element>
         <element type="boolean" scope="shop">
             <name>wirecardElasticEngineCreditCardEnableVault</name>

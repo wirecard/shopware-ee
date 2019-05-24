@@ -256,7 +256,6 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
     public function testProcessPaymentWithoutConsumerBirthday()
     {
         $this->assertInstanceOf(ProcessPaymentInterface::class, $this->payment);
-
         $orderSummary = $this->createMock(OrderSummary::class);
         $orderSummary->method('getAmount')->willReturn(new Amount(0.0, 'EUR'));
         $orderSummary->expects($this->atLeastOnce())->method('getPaymentUniqueId')->willReturn('123test');
@@ -359,7 +358,7 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
         $this->assertInstanceOf(AdditionalViewAssignmentsInterface::class, $this->payment);
         $this->assertEquals([
             'method'   => 'wirecard_elastic_engine_ratepay_invoice',
-            'showForm' => true,
+            'showBirthdayForm' => true,
         ], $this->payment->getAdditionalViewAssignments($sessionManager));
     }
 }
