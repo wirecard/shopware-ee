@@ -210,8 +210,8 @@ class BasketMapper extends ArrayMapper
             $shippingTaxValue = $shippingCosts - $shippingCostsNet;
             $shippingTaxRate  = $this->getOptional(self::SHIPPING_COSTS_TAX, 0.0);
 
-            $taxfreeShipping = !is_null($shippingCostsTotal) && ($shippingCostsTotal == $shippingCostsNet);
-            if ($taxfreeShipping) {
+            $taxFreeShipping = !is_null($shippingCostsTotal) && ($shippingCostsTotal == $shippingCostsNet);
+            if ($taxFreeShipping) {
                 $shippingAmount   = new Amount(self::numberFormat($shippingCostsTotal), $this->currency);
                 $shippingTaxValue = 0.0;
                 $shippingTaxRate  = 0.0;
