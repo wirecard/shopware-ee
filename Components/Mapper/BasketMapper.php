@@ -32,6 +32,7 @@ class BasketMapper extends ArrayMapper
     const SHIPPING_COSTS_WITH_TAX = 'sShippingcostsWithTax';
     const SHIPPING_COSTS_TAX = 'sShippingcostsTax';
     const SHIPPING_COSTS_NET = 'sShippingcostsNet';
+    const SHIPPING_COSTS_TOTAL = 'sShippingcosts';
     const ARTICLE_IS_AVAILABLE = 'isAvailable';
     const ARTICLE_LAST_STOCK = 'laststock';
     const ARTICLE_IN_STOCK = 'instock';
@@ -202,9 +203,19 @@ class BasketMapper extends ArrayMapper
 
         $shippingCosts = $this->getOptional(self::SHIPPING_COSTS_WITH_TAX);
         if ($shippingCosts) {
-            $shippingAmount = new Amount(self::numberFormat($shippingCosts), $this->currency);
+            $shippingCostsTotal = $this->getOptional(self::SHIPPING_COSTS_TOTAL);
+            $shippingCostsNet   = $this->getOptional(self::SHIPPING_COSTS_NET, 0.0);
 
-            $shippingTaxValue = $shippingCosts - $this->getOptional(self::SHIPPING_COSTS_NET, 0.0);
+            $shippingAmount   = new Amount(self::numberFormat($shippingCosts), $this->currency);
+            $shippingTaxValue = $shippingCosts - $shippingCostsNet;
+            $shippingTaxRate  = $this->getOptional(self::SHIPPING_COSTS_TAX, 0.0);
+
+            $taxFreeShipping = !is_null($shippingCostsTotal) && ($shippingCostsTotal == $shippingCostsNet);
+            if ($taxFreeShipping) {
+                $shippingAmount   = new Amount(self::numberFormat($shippingCostsTotal), $this->currency);
+                $shippingTaxValue = 0.0;
+                $shippingTaxRate  = 0.0;
+            }
 
             $shippingName = $this->snippetManager->getNamespace('backend/order/main')
                                                  ->get('overview/shipping/title', 'Shipping');
@@ -214,7 +225,7 @@ class BasketMapper extends ArrayMapper
             $basketItem->setDescription($description);
             $basketItem->setArticleNumber('shipping');
             $basketItem->setTaxAmount(new Amount(self::numberFormat($shippingTaxValue), $this->currency));
-            $basketItem->setTaxRate($this->getOptional(self::SHIPPING_COSTS_TAX, 0.0));
+            $basketItem->setTaxRate($shippingTaxRate);
 
             $basket->add($basketItem);
         }

@@ -34,6 +34,7 @@ class BasketItemMapper extends ArrayMapper
     const QUANTITY = 'quantity';
     const PRICE = 'price';
     const PRICE_NUMERIC = 'priceNumeric';
+    const AMOUNTNET_NUMERIC = 'amountnetNumeric';
 
     /**
      * @var Item
@@ -115,7 +116,7 @@ class BasketItemMapper extends ArrayMapper
      */
     public function getTaxRate()
     {
-        return $this->get(self::TAX_RATE);
+        return $this->isTaxFree() ? 0 : $this->get(self::TAX_RATE);
     }
 
     /**
@@ -158,24 +159,14 @@ class BasketItemMapper extends ArrayMapper
      */
     public function getPrice()
     {
-        $price = floatval(str_replace(',', '.', $this->get(self::PRICE)));
+        $priceFromDetailInfo = $this->getPriceFromDetailInfo();
+        $priceFromCommonInfo = $this->getPriceFromCommonInfo();
 
-        $details = $this->getOptional(self::DETAILS);
-        if ($details) {
-            if (isset($details[self::DETAILS_PRICES]) && count($details[self::DETAILS_PRICES]) === 1) {
-                $prices = $details[self::DETAILS_PRICES];
-                if (isset($prices[0][self::DETAILS_PRICES_PRICE_NUMERIC])) {
-                    return $prices[0][self::DETAILS_PRICES_PRICE_NUMERIC];
-                }
-            }
+        if ($this->isTaxFree() || is_null($priceFromDetailInfo)) {
+            return $priceFromCommonInfo;
         }
 
-        $priceNumeric = $this->getOptional(self::PRICE_NUMERIC);
-        if (!is_null($priceNumeric)) {
-            return $priceNumeric;
-        }
-
-        return $price;
+        return $priceFromDetailInfo;
     }
 
     /**
@@ -230,13 +221,71 @@ class BasketItemMapper extends ArrayMapper
     }
 
     /**
+     * Check if the order is sent taxfree or not
+     *
+     * @return bool
+     * @since 1.3.8
+     */
+    private function isTaxFree()
+    {
+        $priceNumeric     = $this->getOptional(self::PRICE_NUMERIC);
+        $amountNetNumeric = $this->getOptional(self::AMOUNTNET_NUMERIC);
+        $isTaxFree = (! is_null($priceNumeric) && ! is_null($amountNetNumeric) && $priceNumeric == $amountNetNumeric);
+        return $isTaxFree;
+    }
+
+    /**
+     * Fetch price information from basketitem DETAIL data
+     *
+     * If no detail data found or more than one detail price set
+     * null is returned.
+     *
+     * @return float|null price as stored in items details, or null
+     * @since 1.3.8
+     */
+    private function getPriceFromDetailInfo()
+    {
+        $details = $this->getOptional(self::DETAILS);
+        if ($details) {
+            if (isset($details[self::DETAILS_PRICES]) && count($details[self::DETAILS_PRICES]) === 1) {
+                $prices = $details[self::DETAILS_PRICES];
+                if (isset($prices[0][self::DETAILS_PRICES_PRICE_NUMERIC])) {
+                    return $prices[0][self::DETAILS_PRICES_PRICE_NUMERIC];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Fetch price information from basketitem COMMON data
+     *
+     * If available, use the numeric price. Otherwise, convert
+     * string into float.
+     *
+     * @return float price as stored in item
+     * @since 1.3.8
+     */
+    private function getPriceFromCommonInfo()
+    {
+        $priceNumeric = $this->getOptional(self::PRICE_NUMERIC);
+        if (!is_null($priceNumeric)) {
+            return $priceNumeric;
+        }
+
+        $price = floatval(str_replace(',', '.', $this->get(self::PRICE)));
+        return $price;
+    }
+
+    /**
      * filter some special UTF8 char ranges
      *
      * @see https://jrgraphix.net/research/unicode_blocks.php
      *
-     * @param $text
-     *
+     * @param string $text
      * @return string
+     * @since 1.3.8
      */
     protected function filterCharset($text)
     {
