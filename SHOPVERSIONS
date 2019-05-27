@@ -1,5 +1,17 @@
 [
     {
+         "release": "1.3.8",
+         "shopsystem": "Shopware",
+         "tested": "5.5.7",
+         "compatibility": "5.5.0",
+         "changelog": [
+             "terms & conditions checkbox for payment method \"Guaranteed Invoice by Wirecard\"",
+             "special filter to skip unsupported unicode characters before sending to gateway",
+             "credit card configuration: 3DS/SSL limit currency as dropdown",
+             "improve basket handling for taxfree delivery"
+         ]
+     },
+    {
         "release": "1.3.7",
         "shopsystem": "Shopware",
         "tested": "5.5.7",
