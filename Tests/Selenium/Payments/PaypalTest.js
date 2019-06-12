@@ -56,8 +56,7 @@ describe('PayPal test', () => {
             await driver.wait(until.elementLocated(By.id('btnNext')), 10000);
             console.log('wait for #email');
             await driver.wait(until.elementLocated(By.id('email')), 10000);
-            await driver.findElement(By.id('email')).sendKeys(formFields.email, Key.ENTER);
-
+            await driver.findElement(By.id('email')).sendKeys(Key.ENTER);
             await waitUntilOverlayIsNotVisible(driver, By.className('spinnerWithLockIcon'));
 
             console.log('wait for #btnLogin');
