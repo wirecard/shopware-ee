@@ -53,8 +53,9 @@ matrix:
     env:
     - GATEWAY=API-TEST
 #    shopware version - fist line in SHOPWARE_RELEASES_FILE
-    - SHOP_RELEASE=$(awk 'NR==1 {print; exit}' ${SHOPWARE_RELEASES_FILE})
+    - SHOP_RELEASE=1
     install:
+    - export SHOPWARE_VERSION=$(awk "NR==$SHOP_RELEASE {print; exit}" ${SHOPWARE_RELEASES_FILE})
     - echo "Testing with Shopware version ${SHOP_RELEASE}"
     - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
     - travis_retry composer install --no-dev $COMPOSER_ARGS
@@ -71,24 +72,24 @@ matrix:
     env:
     - GATEWAY=API-TEST
 #    shopware version - 2nd line in SHOPWARE_RELEASES_FILE
-    - SHOP_RELEASE=$(awk 'NR==2 {print; exit}' ${SHOPWARE_RELEASES_FILE})
+    - SHOP_RELEASE=2
   - <<: *acceptance-test
     env:
     - GATEWAY=API-TEST
 #    shopware version - 3nd line in SHOPWARE_RELEASES_FILE
-    - SHOP_RELEASE=$(awk 'NR==3 {print; exit}' ${SHOPWARE_RELEASES_FILE})
+    - SHOP_RELEASE=3
   - <<: *acceptance-test
     env:
     - GATEWAY=NOVA
-    - SHOP_RELEASE=$(awk 'NR==1 {print; exit}' ${SHOPWARE_RELEASES_FILE})
+    - SHOP_RELEASE=1
   - <<: *acceptance-test
     env:
     - GATEWAY=NOVA
-    - SHOP_RELEASE=$(awk 'NR==2 {print; exit}' ${SHOPWARE_RELEASES_FILE})
+    - SHOP_RELEASE=2
   - <<: *acceptance-test
     env:
     - GATEWAY=NOVA
-    - SHOP_RELEASE=$(awk 'NR==3 {print; exit}' ${SHOPWARE_RELEASES_FILE})
+    - SHOP_RELEASE=3
 
 
 install:
