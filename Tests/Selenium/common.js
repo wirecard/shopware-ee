@@ -8,7 +8,7 @@
 
 const { expect } = require('chai');
 const { Builder, By, until } = require('selenium-webdriver');
-const { config } = require('./config');
+const { config, browsers } = require('./config');
 
 exports.loginWithExampleAccount = async function (driver) {
     await driver.manage().deleteAllCookies();
@@ -128,12 +128,27 @@ exports.asyncForEach = async function (arr, cb) {
     }
 };
 
-exports.getDriver = () => {
+exports.getDriver = async (testCase = 'generic') => {
     if (global.driver) {
         return global.driver;
     }
 
-    return new Builder()
-        .forBrowser('chrome')
+    const browser = browsers[0];
+    const bsConfig = Object.assign({
+        'browserstack.user': process.env.BROWSERSTACK_USER,
+        'browserstack.key': process.env.BROWSERSTACK_KEY,
+        'browserstack.local': 'true',
+        'browserstack.localIdentifier': process.env.BROWSERSTACK_LOCAL_IDENTIFIER
+    }, browser);
+
+    let builder = await new Builder()
+        .usingServer('http://hub-cloud.browserstack.com/wd/hub')
+        .withCapabilities(Object.assign({
+            name: testCase,
+            build: process.env.TRAVIS ? `${process.env.TRAVIS_JOB_NUMBER}` : 'local',
+            project: 'Shopware:WirecardElasticEngine'
+        }, bsConfig))
         .build();
+
+    return builder;
 };

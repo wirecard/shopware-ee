@@ -18,7 +18,8 @@
     "test:sepa": "node_modules/.bin/mocha Tests/Selenium/Payments/SepaTest.js --timeout 60000",
     "test:sofort": "node_modules/.bin/mocha Tests/Selenium/Payments/SofortTest.js --timeout 60000",
     "test:upi": "node_modules/.bin/mocha Tests/Selenium/Payments/UpiTest.js --timeout 60000",
-    "test:runner": "node Tests/Selenium/runner.js"
+    "test:runner": "node Tests/Selenium/runner.js",
+    "test:payments": "node_modules/.bin/mocha $(if [ \"$GATEWAY\" = \"API-TEST\" ]; then find Tests/Selenium/Payments -name '*.js' -not -name 'MasterpassTest.js'; else find Tests/Selenium/Payments -name 'CreditCardThreeDTest.js'; fi) --timeout 6000000 --reporter mocha-multi-reporters --reporter-options configFile=./config.json"
   },
   "private": true,
   "license": "GPL-3.0",
@@ -34,6 +35,9 @@
     "eslint-plugin-promise": "^3.8.0",
     "eslint-plugin-standard": "^3.1.0",
     "mocha": "^5.2.0",
-    "selenium-webdriver": "^4.0.0-alpha.1"
+    "selenium-webdriver": "^4.0.0-alpha.1",
+    "mocha-junit-reporter": "^1.23.0",
+    "mocha-multi-reporters": "^1.1.7",
+    "mochawesome": "4.0.1"
   }
 }

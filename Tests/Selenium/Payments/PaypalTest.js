@@ -20,8 +20,12 @@ const {
     getDriver
 } = require('../common');
 
+let driver;
+
 describe('PayPal test', () => {
-    const driver = getDriver();
+    before(async () => {
+        driver = await getDriver('paypal');
+    });
 
     const paymentLabel = config.payments.paypal.label;
     const formFields = config.payments.paypal.fields;

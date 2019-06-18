@@ -18,8 +18,12 @@ const {
     getDriver
 } = require('../common');
 
+let driver;
+
 describe('Alipay Cross-border test', () => {
-    const driver = getDriver();
+    before(async () => {
+        driver = await getDriver('alipay');
+    });
 
     const paymentLabel = config.payments.alipay.label;
     // const formFields = config.payments.alipay.fields;

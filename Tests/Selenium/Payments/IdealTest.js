@@ -18,8 +18,12 @@ const {
     getDriver
 } = require('../common');
 
+let driver;
+
 describe('iDEAL test', () => {
-    const driver = getDriver();
+    before(async () => {
+        driver = await getDriver('ideal');
+    });
 
     const paymentLabel = config.payments.ideal.label;
     const idealBank = config.payments.ideal.fields.bank;

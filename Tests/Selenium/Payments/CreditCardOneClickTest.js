@@ -18,11 +18,15 @@ const {
     getDriver
 } = require('../common');
 
+let driver;
+
 /**
  * Credit Card One-click has to be enabled and a token must already exist (change config tokenId)
  */
 describe('Credit Card One-Click Checkout test (NOTE: has requirements)', () => {
-    const driver = getDriver();
+    before(async () => {
+        driver = await getDriver('credit card one click');
+    });
 
     const paymentLabel = config.payments.creditCardOneClick.label;
     const tokenId = config.payments.creditCardOneClick.tokenId;

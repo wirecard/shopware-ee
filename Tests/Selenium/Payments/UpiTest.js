@@ -19,8 +19,12 @@ const {
     asyncForEach
 } = require('../common');
 
+let driver;
+
 describe('UnionPay International test', () => {
-    const driver = getDriver();
+    before(async () => {
+        driver = await getDriver('upi');
+    });
 
     const paymentLabel = config.payments.upi.label;
     const formFields = config.payments.upi.fields;

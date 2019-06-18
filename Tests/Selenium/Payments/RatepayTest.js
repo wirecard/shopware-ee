@@ -19,8 +19,12 @@ const {
     getDriver
 } = require('../common');
 
+let driver;
+
 describe('Guaranteed Invoice by Wirecard test', () => {
-    const driver = getDriver();
+    before(async () => {
+        driver = await getDriver('ratepay');
+    });
 
     const paymentLabel = config.payments.ratepay.label;
 

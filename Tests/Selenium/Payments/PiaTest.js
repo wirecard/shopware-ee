@@ -19,8 +19,12 @@ const {
     getDriver
 } = require('../common');
 
+let driver;
+
 describe('Payment in Advance test', () => {
-    const driver = getDriver();
+    before(async () => {
+        driver = await getDriver('pia');
+    });
 
     const paymentLabel = config.payments.pia.label;
 

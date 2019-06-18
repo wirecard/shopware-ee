@@ -18,8 +18,12 @@ const {
     getDriver
 } = require('../common');
 
+let driver;
+
 describe('Masterpass test', () => {
-    const driver = getDriver();
+    before(async () => {
+        driver = await getDriver('masterpass');
+    });
 
     const paymentLabel = config.payments.masterpass.label;
     const formFields = config.payments.masterpass.fields;

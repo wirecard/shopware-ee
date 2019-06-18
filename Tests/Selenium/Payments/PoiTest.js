@@ -18,8 +18,12 @@ const {
     getDriver
 } = require('../common');
 
+let driver;
+
 describe('Payment on Invoice test', () => {
-    const driver = getDriver();
+    before(async () => {
+        driver = await getDriver('poi');
+    });
 
     const paymentLabel = config.payments.poi.label;
 

@@ -18,8 +18,12 @@ const {
     getDriver
 } = require('../common');
 
+let driver;
+
 describe('default test', () => {
-    const driver = getDriver();
+    before(async () => {
+        driver = await getDriver('default');
+    });
 
     const wirecardPaymentLabels = [
         'Wirecard Kreditkarte',

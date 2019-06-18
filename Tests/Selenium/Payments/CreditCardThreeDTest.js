@@ -20,8 +20,12 @@ const {
     waitForAlert
 } = require('../common');
 
+let driver;
+
 describe('Credit Card 3-D Secure test', () => {
-    const driver = getDriver();
+    before(async () => {
+        driver = await getDriver('credit card 3ds');
+    });
 
     const paymentLabel = config.payments.creditCardThreeD.label;
     const formFields = config.payments.creditCardThreeD.fields;
