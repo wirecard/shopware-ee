@@ -56,7 +56,7 @@ matrix:
     - SHOP_RELEASE=1
     install:
     - export SHOPWARE_VERSION=$(awk "NR==$SHOP_RELEASE {print; exit}" ${SHOPWARE_RELEASES_FILE})
-    - echo "Testing with Shopware version ${SHOP_RELEASE}"
+    - echo "Testing with Shopware version ${SHOPWARE_VERSION}"
     - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
     - travis_retry composer install --no-dev $COMPOSER_ARGS
     - travis_retry npm install
@@ -116,7 +116,7 @@ before_script:
 
 #  install shopware
 #  for unit tests a fiex Shopware version 5.4 is used
-  - if [[ -z "${SHOP_RELEASE}" ]]; then export SHOP_RELEASE="5.4"; fi && git clone https://github.com/shopware/shopware.git ${SHOPWARE_DIRECTORY} --branch ${SHOP_RELEASE}
+  - if [[ -z "${SHOPWARE_VERSION}" ]]; then export SHOPWARE_VERSION="5.4"; fi && git clone https://github.com/shopware/shopware.git ${SHOPWARE_DIRECTORY} --branch ${SHOPWARE_VERSION}
   - ant -f ${SHOPWARE_DIRECTORY}/build/build.xml -Dapp.host=localhost:8000 -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-unit
   - cp ${TRAVIS_BUILD_DIR}/build/travis-shopware-config.php ${SHOPWARE_DIRECTORY}/config.php
   - mv ${TRAVIS_BUILD_DIR} ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
