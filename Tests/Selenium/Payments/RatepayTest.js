@@ -47,6 +47,8 @@ describe('Guaranteed Invoice by Wirecard test', () => {
         // Select birthday
         console.log('select birthday 1/1/2000 option');
         await driver.findElement(By.css('.wirecardee--birthday-year option[value=\'2000\']')).click();
+        console.log('confirm terms');
+        await driver.findElement(By.id('wirecardee--tac')).click();
 
         // Confirm order
         console.log('click button confirm--form');
