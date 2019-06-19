@@ -1,12 +1,12 @@
 {
   "NOVA": {
     "base_url": "https://payments-test.wirecard.com",
-    "http_user": "NovaTeam",
-    "http_pass": "kCopTTMkpw",
+    "http_user": "ShopUser",
+    "http_pass": "pNUPurGGgL",
     "merchant_account_id": "fd83dbfa-8790-4492-8391-3f3938908b28",
     "secret": "38424ae8-2dc5-45be-af4c-6e0fee0fea3e",
-    "three_d_merchant_account_id": "fd83dbfa-8790-4492-8391-3f3938908b28",
-    "three_d_secret": "38424ae8-2dc5-45be-af4c-6e0fee0fea3e",
+    "three_d_merchant_account_id": "9bbd794c-c791-4bc8-9257-35f3f72d2b55",
+    "three_d_secret": "c6e2715e-4d2b-4ba9-b620-8d7b75eed4c1",
     "ssl_max_limit": 100,
     "three_d_min_limit": 50
   },
