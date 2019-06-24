@@ -17,7 +17,7 @@ git clone ${REPO_ADDRESS}
 #create folder with current date
 export TODAY=$(date +%Y-%m-%d)
 
-export SHOPWARE_CURRENT_VERSION=${SHOPWARE_VERSION}
+export SHOPWARE_CURRENT_VERSION=$(sed 's/[A-Za-z]*//g' <<<"$SHOPWARE_VERSION")
 export PROJECT_FOLDER="shopware-ee-${SHOPWARE_CURRENT_VERSION}"
 GATEWAY_FOLDER=${REPO_NAME}/${PROJECT_FOLDER}/${GATEWAY}
 DATE_FOLDER=${GATEWAY_FOLDER}/${TODAY}
