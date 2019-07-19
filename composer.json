@@ -29,5 +29,8 @@
     "js-fix": "eslint -c .eslintrc.json **/*.js **/*.js --ignore-path .eslintignore --fix",
     "test-coverage": "phpunit --colors=always --coverage-clover build/coverage.xml",
     "build-languages": "php .bin/language-helper.php"
+  },
+  "extra": {
+    "installer-name": "WirecardElasticEngine"
   }
 }
