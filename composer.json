@@ -18,6 +18,11 @@
     "symfony/yaml": "^3"
   },
   "type": "shopware-plugin",
+  "autoload": {
+    "psr-4": {
+      "WirecardElasticEngine\\": "/"
+    }
+  },
   "scripts": {
     "make-readme-badge": "@php .bin/version-helper.php -r",
     "make-wiki-notes": "@php .bin/version-helper.php -w",
