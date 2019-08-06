@@ -98,7 +98,7 @@ class CreditCardPaymentTest extends TestCase
         $this->assertEquals(100, $config->getThreeDMinLimit());
         $this->assertEmpty($config->getThreeDMinLimitCurrency());
         $this->assertEquals('508b8896-b37d-4614-845c-26bf8bf2c948', $config->getThreeDMAID());
-        $this->assertFalse($config->isVaultEnabled());
+        $this->assertTrue($config->isVaultEnabled());
         $this->assertFalse($config->allowAddressChanges());
         $this->assertTrue($config->useThreeDOnTokens());
     }
