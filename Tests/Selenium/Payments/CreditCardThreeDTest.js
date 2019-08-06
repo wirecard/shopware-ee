@@ -35,6 +35,10 @@ describe('Credit Card 3-D Secure test', () => {
         await addProductToCartAndGotoCheckout(driver, '/wohnwelten/moebel/68/kommode-shabby-chic');
         await selectPaymentMethod(driver, paymentLabel);
 
+        // Do not use saved card
+        console.log('click #wirecardee--token-no-card');
+        await driver.findElement(By.id('wirecardee--token-no-card')).click();
+
         // Confirm order
         console.log('click button confirm--form');
         await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
