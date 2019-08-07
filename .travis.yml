@@ -48,7 +48,7 @@ matrix:
 
   - &acceptance-test
     stage: acceptance-test
-    if: type != cron
+    if: type = cron
     php: 7.2
     env:
     - GATEWAY=API-TEST
@@ -66,8 +66,8 @@ matrix:
     - php ${SHOPWARE_DIRECTORY}/bin/console wirecardelasticengine:payment:activate
     - npm run test:payments
     after_script: skip
-#    after_success: bash .bin/upload-logs-and-notify.sh
-#    after_failure: bash .bin/upload-logs-and-notify.sh fail
+    after_success: bash .bin/upload-logs-and-notify.sh
+    after_failure: bash .bin/upload-logs-and-notify.sh fail
   - <<: *acceptance-test
     env:
     - GATEWAY=API-TEST
@@ -171,5 +171,5 @@ notifications:
       - "%{repository}#%{build_number} (%{branch} : %{author}): %{message}"
       - "Change view : %{compare_url}"
       - "Build details : %{build_url}"
-    on_success: never
-    on_failure: never
+    on_success: change
+    on_failure: change
