@@ -125,7 +125,7 @@ before_script:
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:plugin:activate ${PLUGIN_NAME}
   - php ${SHOPWARE_DIRECTORY}/bin/console sw:cache:clear
   - rm -rf ${SHOPWARE_DIRECTORY}/var/cache
-  - cd  Tests/_data/ && php configure_payment_method_db.php creditcard
+  - cd  Tests/_data/ && php configure_payment_method_db.php CreditCard
   - cd ${SHOPWARE_DIRECTORY}/custom/plugins/${PLUGIN_NAME}
 
 
