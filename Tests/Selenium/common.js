@@ -90,7 +90,8 @@ exports.checkConfirmationPage = async function (driver, paymentLabel) {
     expect(panelTitle).to.include('Vielen Dank');
     console.log('expect content .payment--content');
     const paymentContent = await driver.findElement(By.className('payment--content')).getText();
-    expect(paymentContent).to.include(paymentLabel);
+    expect(paymentContent).to.include('FAIL');
+   // expect(paymentContent).to.include(paymentLabel);
     console.log('done');
 };
 
