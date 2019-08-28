@@ -39,7 +39,7 @@ const run = async () => {
                 .withCapabilities(Object.assign({
                     name: testCase.file,
                     build: process.env.TRAVIS ? `${process.env.TRAVIS_JOB_NUMBER}` : 'local',
-                    project: 'Shopware:WirecardElasticEngine'
+                    project: `Shopware:WirecardElasticEngine-${gateway}-${process.env.SHOPWARE_VERSION}`
                 }, bsConfig))
                 .build();
 

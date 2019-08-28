@@ -80,6 +80,18 @@ matrix:
     - SHOP_RELEASE=3
   - <<: *acceptance-test
     env:
+    - GATEWAY=API-WDCEE-TEST
+    - SHOP_RELEASE=1
+  - <<: *acceptance-test
+    env:
+    - GATEWAY=API-WDCEE-TEST
+    - SHOP_RELEASE=2
+  - <<: *acceptance-test
+    env:
+    - GATEWAY=API-WDCEE-TEST
+    - SHOP_RELEASE=3
+  - <<: *acceptance-test
+    env:
     - GATEWAY=NOVA
     - SHOP_RELEASE=1
   - <<: *acceptance-test
