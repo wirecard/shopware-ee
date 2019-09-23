@@ -7,7 +7,7 @@
   "require": {
     "php": ">=5.6",
     "symfony/options-resolver": "^3",
-    "wirecard/payment-sdk-php": "3.6.1",
+    "wirecard/payment-sdk-php": "3.8.1",
     "php-http/guzzle5-adapter": ">=1.0.1",
     "guzzlehttp/psr7": ">=1.4.2",
     "monolog/monolog": "1.23.0"
@@ -30,5 +30,10 @@
     "js-fix": "eslint -c .eslintrc.json **/*.js **/*.js --ignore-path .eslintignore --fix",
     "test-coverage": "phpunit --colors=always --coverage-clover build/coverage.xml",
     "build-languages": "php .bin/language-helper.php"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "WirecardElasticEngine\\": "."
+    }
   }
 }
