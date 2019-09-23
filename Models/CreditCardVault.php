@@ -11,13 +11,14 @@ namespace WirecardElasticEngine\Models;
 
 use Shopware\Components\Model\ModelEntity;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Index;
 
 /**
  * @package WirecardElasticEngine\Models
  *
  * @ORM\Entity
  * @ORM\Table(name="wirecard_elastic_engine_credit_card_vault")
- *
+ * @ORM\HasLifecycleCallbacks
  * The credit card vault model holds credit card tokens for one-click checkout.
  *
  * @since   1.1.0
@@ -85,6 +86,12 @@ class CreditCardVault extends ModelEntity
      * @ORM\Column(name="additional_data", type="array", nullable=true)
      */
     private $additionalData;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(name="created", type="datetime", nullable=true)
+     */
+    private $created;
 
     /**
      * @since 1.1.0
@@ -285,6 +292,36 @@ class CreditCardVault extends ModelEntity
     }
 
     /**
+     * @return \DateTime
+     *
+     * @since 1.4.0
+     */
+    public function getCreated()
+    {
+        return $this->created;
+    }
+
+    /**
+     * @param \DateTime $created
+     *
+     * @since 1.4.0
+     */
+    public function setCreated(\DateTime $created)
+    {
+        $this->created = $created;
+    }
+
+    /**
+     *  @ORM\PrePersist
+     */
+    public function onPrePersist()
+    {
+        if ($this->getCreated() === null) {
+            $this->created = new \DateTime();
+        }
+    }
+
+    /**
      * @return array
      *
      * @since 1.1.0
@@ -297,6 +334,7 @@ class CreditCardVault extends ModelEntity
             'token'                   => $this->getToken(),
             'maskedAccountNumber'     => $this->getMaskedAccountNumber(),
             'lastUsed'                => $this->getLastUsed()->format(\DateTime::W3C),
+            'created'                 => $this->getCreated()->format(\DateTime::W3C),
             'bindBillingAddress'      => $this->getBindBillingAddress(),
             'bindBillingAddressHash'  => $this->getBindBillingAddressHash(),
             'bindShippingAddress'     => $this->getBindShippingAddress(),
