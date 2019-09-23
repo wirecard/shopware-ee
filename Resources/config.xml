@@ -160,6 +160,31 @@ function (button) {
                 </option>
             </store>
         </element>
+        <element type="select" scope="shop">
+            <name>wirecardElasticEngineCreditCardChallengeIndicator</name>
+            <label lang="de">[Kreditkarte] Challenge indicator</label>
+            <label lang="en">[Credit Card] Challenge indicator</label>
+            <value>01</value>
+            <description lang="de">Indicates whether a challenge is requested for this transaction.</description>
+            <description lang="en">Indicates whether a challenge is requested for this transaction.</description>
+            <store>
+                <option>
+                    <value>01</value>
+                    <label lang="de">No preference</label>
+                    <label lang="en">No preference</label>
+                </option>
+                <option>
+                    <value>02</value>
+                    <label lang="de">No challenge requested</label>
+                    <label lang="en">No challenge requested</label>
+                </option>
+                <option>
+                    <value>03</value>
+                    <label lang="de">Challenge requested</label>
+                    <label lang="en">Challenge requested</label>
+                </option>
+            </store>
+        </element>
         <element type="boolean" scope="shop">
             <name>wirecardElasticEngineCreditCardFraudPrevention</name>
             <label lang="de">[Kreditkarte] Zusätzliche Informationen mitsenden</label>
@@ -207,7 +232,7 @@ function (button) {
             <label lang="de">[Kreditkarte] One-Click-Checkout aktivieren</label>
             <label lang="en">[Credit Card] Enable One-Click Checkout</label>
             <value>false</value>
-            <description lang="de">Kreditkartendetails werden für die spätere Verwendung gespeichert. 
+            <description lang="de">Kreditkartendetails werden für die spätere Verwendung gespeichert.
 </description>
             <description lang="en">Credit Card details are saved for later use.</description>
         </element>
@@ -216,7 +241,7 @@ function (button) {
             <label lang="de">[Kreditkarte] Änderung der Lieferadresse zulassen</label>
             <label lang="en">[Credit Card] Allow Shipping Address Change</label>
             <value>false</value>
-            <description lang="de">Ist diese Option deaktiviert, muss der Konsument bei Änderung der Lieferadresse seine Kreditkartendaten erneut eingeben. 
+            <description lang="de">Ist diese Option deaktiviert, muss der Konsument bei Änderung der Lieferadresse seine Kreditkartendaten erneut eingeben.
 </description>
             <description lang="en">If disabled, consumer is required to re-enter credit card details if the shipping address has changed between two orders.</description>
         </element>
@@ -405,7 +430,7 @@ function (button) {
             <label lang="de">[Garantierter Kauf auf Rechnung] Erlaubte Währungen</label>
             <label lang="en">[Guaranteed Invoice] Allowed Currencies</label>
             <value>-</value>
-            <description lang="de">Garantierter Kauf auf Rechnung wird nur dann angezeigt, wenn die aktive Währung einer der hier gewählten Währungen entspricht. 
+            <description lang="de">Garantierter Kauf auf Rechnung wird nur dann angezeigt, wenn die aktive Währung einer der hier gewählten Währungen entspricht.
 </description>
             <description lang="en">Payment method Guaranteed Invoice is only displayed if the activated currency is one of the currencies selected here.</description>
             <store>Shopware.apps.Base.store.Currency</store>
