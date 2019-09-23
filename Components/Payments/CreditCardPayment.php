@@ -14,6 +14,7 @@ use Shopware\Models\Shop\Currency;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Wirecard\PaymentSdk\Config\CreditCardConfig;
+use Wirecard\PaymentSdk\Constant\IsoTransactionType;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
 use Wirecard\PaymentSdk\Transaction\CreditCardTransaction;
@@ -79,9 +80,10 @@ class CreditCardPayment extends Payment implements
      */
     public function getTransaction()
     {
-        if (! $this->transactionInstance) {
+        if (!$this->transactionInstance) {
             $this->transactionInstance = new CreditCardTransaction();
         }
+
         return $this->transactionInstance;
     }
 
@@ -134,9 +136,9 @@ class CreditCardPayment extends Payment implements
     }
 
     /**
-     * @param string       $selectedCurrency
+     * @param string $selectedCurrency
      * @param float|string $limitValue
-     * @param mixed        $limitCurrencyId
+     * @param mixed $limitCurrencyId
      *
      * @return Amount
      * @throws \Enlight_Event_Exception
@@ -145,7 +147,7 @@ class CreditCardPayment extends Payment implements
      */
     private function getLimit($selectedCurrency, $limitValue, $limitCurrencyId)
     {
-        $repo = $this->em->getRepository(Currency::class);
+        $repo          = $this->em->getRepository(Currency::class);
         $limitCurrency = $limitCurrencyId;
         if (is_numeric($limitCurrencyId)) {
             /** @var \Shopware\Models\Shop\Currency $limitCurrencyEntity */
@@ -155,7 +157,7 @@ class CreditCardPayment extends Payment implements
             }
         }
 
-        $limit  = new Amount($limitValue, strtoupper($limitCurrency));
+        $limit  = new Amount(floatval($limitValue), strtoupper($limitCurrency));
         $factor = $this->getCurrencyConversionFactor(strtoupper($selectedCurrency), $limit);
 
         $factor = Shopware()->Events()->filter(
@@ -193,7 +195,7 @@ class CreditCardPayment extends Payment implements
         $currency       = $repo->findOneBy(['currency' => $selectedCurrency]);
 
         // Get factor of the selected currency (if it is the default currency, use factor 1.0)
-        if ($currency && ! $currency->getDefault()) {
+        if ($currency && !$currency->getDefault()) {
             $selectedFactor = $currency->getFactor();
         }
 
@@ -201,16 +203,17 @@ class CreditCardPayment extends Payment implements
         if ($limit->getCurrency() && $limit->getCurrency() !== 'NULL') {
             // Get factor of the limit currency (if it is the default currency, use factor 1.0)
             $limitCurrency = $repo->findOneBy(['currency' => $limit->getCurrency()]);
-            if ($limitCurrency && ! $limitCurrency->getDefault()) {
+            if ($limitCurrency && !$limitCurrency->getDefault()) {
                 $limitFactor = $limitCurrency->getFactor();
             }
         }
-        if (! $selectedFactor) {
+        if (!$selectedFactor) {
             $selectedFactor = 1.0;
         }
-        if (! $limitFactor) {
+        if (!$limitFactor) {
             $limitFactor = 1.0;
         }
+
         return $selectedFactor / $limitFactor;
     }
 
@@ -261,12 +264,30 @@ class CreditCardPayment extends Payment implements
         $transaction = $this->getTransaction();
         $transaction->setTermUrl($redirect->getSuccessUrl());
 
+        // $tokenId is an empty string for a new token, non empty string for existing token,
+        // null for disabled one-click checkout
+        $tokenId = null;
         if ($this->getPaymentConfig()->isVaultEnabled()) {
             $paymentData = $orderSummary->getAdditionalPaymentData();
             $tokenId     = isset($paymentData['token']) ? $paymentData['token'] : null;
-            if ($tokenId) {
-                return $this->useToken($transaction, $tokenId, $orderSummary);
-            }
+        }
+
+        $accountInfoMapper = $orderSummary->getAccountInfoMapper();
+
+        $shippingAccount = $orderSummary->getUserMapper()->getWirecardShippingAccountHolder();
+        $accountHolder   = $orderSummary->getUserMapper()->getWirecardBillingAccountHolder();
+        $accountInfo     = $accountInfoMapper->getAccountInfo($tokenId);
+        $riskInfo        = $orderSummary->getRiskInfoMapper()->getRiskInfo();
+
+        $accountHolder->setAccountInfo($accountInfo);
+
+        $transaction->setAccountHolder($accountHolder);
+        $transaction->setRiskInfo($riskInfo);
+        $transaction->setShipping($shippingAccount);
+        $transaction->setIsoTransactionType(IsoTransactionType::GOODS_SERVICE_PURCHASE);
+
+        if (strlen($tokenId)) {
+            return $this->useToken($transaction, $tokenId, $orderSummary);
         }
 
         $requestData = $transactionService->getCreditCardUiWithData(
@@ -294,8 +315,8 @@ class CreditCardPayment extends Payment implements
 
     /**
      * @param CreditCardTransaction $transaction
-     * @param string                $tokenId
-     * @param OrderSummary          $orderSummary
+     * @param string $tokenId
+     * @param OrderSummary $orderSummary
      *
      * @return ErrorAction|null
      * @throws \WirecardElasticEngine\Exception\ArrayKeyNotFoundException
@@ -309,17 +330,17 @@ class CreditCardPayment extends Payment implements
             'id'     => $tokenId,
             'userId' => $userMapper->getUserId(),
         ];
-        if (! $this->getPaymentConfig()->allowAddressChanges()) {
+        if (!$this->getPaymentConfig()->allowAddressChanges()) {
             $conditions['bindBillingAddressHash']  = $this->createAddressHash($userMapper->getBillingAddress());
             $conditions['bindShippingAddressHash'] = $this->createAddressHash($userMapper->getShippingAddress());
         }
 
         $creditCardVault = $this->em->getRepository(CreditCardVault::class)->findOneBy($conditions);
-        if (! $creditCardVault) {
+        if (!$creditCardVault) {
             return new ErrorAction(ErrorAction::PROCESSING_FAILED, 'no valid credit card for token found');
         }
 
-        if (! $this->getPaymentConfig()->useThreeDOnTokens()) {
+        if (!$this->getPaymentConfig()->useThreeDOnTokens()) {
             $transaction->setThreeD(false);
         }
 
@@ -327,6 +348,7 @@ class CreditCardPayment extends Payment implements
         $this->em->flush();
 
         $transaction->setTokenId($creditCardVault->getToken());
+
         return null;
     }
 
@@ -363,6 +385,7 @@ class CreditCardPayment extends Payment implements
                 $hashAddress[$key] = $address[$key];
             }
         }
+
         return md5(serialize($hashAddress));
     }
 
@@ -380,7 +403,7 @@ class CreditCardPayment extends Payment implements
             $this->saveToken($transactionService, $sessionManager, $params);
         }
 
-        if (! empty($params['jsresponse'])) {
+        if (!empty($params['jsresponse'])) {
             return $transactionService->processJsResponse($request->getParams(), $this->router->assemble([
                 'action' => 'return',
                 'method' => CreditCardPayment::PAYMETHOD_IDENTIFIER,
@@ -392,8 +415,8 @@ class CreditCardPayment extends Payment implements
 
     /**
      * @param TransactionService $transactionService
-     * @param SessionManager     $sessionManager
-     * @param array              $params
+     * @param SessionManager $sessionManager
+     * @param array $params
      *
      * @since 1.1.0
      */
@@ -401,9 +424,9 @@ class CreditCardPayment extends Payment implements
     {
         $paymentData = $sessionManager->getPaymentData();
         if (empty($paymentData['saveToken'])
-            || ! isset($params['token_id'])
-            || ! isset($params['transaction_id'])
-            || ! isset($params['masked_account_number'])
+            || !isset($params['token_id'])
+            || !isset($params['transaction_id'])
+            || !isset($params['masked_account_number'])
         ) {
             return;
         }
@@ -428,7 +451,7 @@ class CreditCardPayment extends Payment implements
             'bindShippingAddressHash' => $shippingAddressHash,
         ]);
 
-        if (! $creditCardVault) {
+        if (!$creditCardVault) {
             $creditCardVault = new CreditCardVault();
             $creditCardVault->setToken($token);
             $creditCardVault->setMaskedAccountNumber($params['masked_account_number']);
@@ -464,7 +487,7 @@ class CreditCardPayment extends Payment implements
             'vaultEnabled' => $accountMode === Customer::ACCOUNT_MODE_CUSTOMER && $paymentConfig->isVaultEnabled(),
             'savedCards'   => [],
         ];
-        if (! $paymentConfig->isVaultEnabled()) {
+        if (!$paymentConfig->isVaultEnabled()) {
             return $formData;
         }
 
@@ -473,10 +496,10 @@ class CreditCardPayment extends Payment implements
 
         $builder = $this->em->createQueryBuilder();
         $builder->select('ccv')
-                ->from(CreditCardVault::class, 'ccv')
-                ->where('ccv.userId = :userId')
-                ->setParameter('userId', $sessionManager->getUserId())
-                ->orderBy('ccv.lastUsed', 'DESC');
+            ->from(CreditCardVault::class, 'ccv')
+            ->where('ccv.userId = :userId')
+            ->setParameter('userId', $sessionManager->getUserId())
+            ->orderBy('ccv.lastUsed', 'DESC');
         $savedCards = $builder->getQuery()->getResult();
 
         /** @var CreditCardVault $card */
