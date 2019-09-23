@@ -301,6 +301,6 @@ class BasketMapper extends ArrayMapper
      */
     public static function numberFormat($amount)
     {
-        return number_format($amount, 2, '.', '');
+        return (float)number_format($amount, 2, '.', '');
     }
 }
