@@ -20,6 +20,7 @@ use Shopware\Models\Order\Detail;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 use Shopware_Components_Config;
+use WirecardElasticEngine\Components\Mapper\BasketMapper;
 use WirecardElasticEngine\Models\CreditCardVault;
 use WirecardElasticEngine\WirecardElasticEngine;
 
@@ -218,7 +219,7 @@ class ThreedsHelper
      */
     public function hasReorderedItems($userId, array $basket)
     {
-        if (!isset($basket['content']) || !is_array($basket['content'])) {
+        if (!isset($basket[BasketMapper::CONTENT]) || !is_array($basket[BasketMapper::CONTENT])) {
             return false;
         }
 
