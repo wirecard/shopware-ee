@@ -70,8 +70,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $handler = $this->get('wirecard_elastic_engine.payment_handler');
         $payment = $this->getPaymentFactory()->create($this->getPaymentShortName());
 
-        //$cd = $this->getThreedsHelper()->getCardCreationDate(1,1);
-
         $shop = Shopware()->Shop();
         try {
             $currency     = $this->getCurrencyShortName();

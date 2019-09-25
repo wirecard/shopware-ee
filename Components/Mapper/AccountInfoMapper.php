@@ -121,11 +121,6 @@ class AccountInfoMapper extends ArrayMapper
             return $this->challengeIndicator;
         }
 
-        // guest
-        if (!$this->isCustomer()) {
-            return $this->challengeIndicator;
-        }
-
         // new token
         if ($this->isNewToken) {
             return ChallengeInd::CHALLENGE_MANDATE;

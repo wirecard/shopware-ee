@@ -480,7 +480,8 @@ class CreditCardPayment extends Payment implements
     {
         $paymentConfig = $this->getPaymentConfig();
         $userInfo      = $sessionManager->getUserInfo();
-        $accountMode   = isset($userInfo['accountmode']) ? intval($userInfo['accountmode']) : 0;
+        $accountMode   = isset($userInfo['accountmode']) ? intval($userInfo['accountmode'])
+            : Customer::ACCOUNT_MODE_FAST_LOGIN;
 
         $formData = [
             'method'       => $this->getName(),
