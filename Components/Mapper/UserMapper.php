@@ -341,15 +341,12 @@ class UserMapper extends ArrayMapper
 
     /**
      * @return string|null
-     * @throws ArrayKeyNotFoundException
      *
      * @since 1.4.0
      */
     public function getBillingAddressAdditional2()
     {
-        $address = $this->getBillingAddress();
-
-        return isset($address[self::ADDRESS_ADDITIONAL2]) ? $address[self::ADDRESS_ADDITIONAL2] : null;
+        return $this->getOptional([self::BILLING_ADDRESS, self::ADDRESS_ADDITIONAL2]);
     }
 
     /**
