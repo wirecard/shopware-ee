@@ -153,34 +153,39 @@ class AccountInfoMapper extends ArrayMapper
 
     public function getFirstLogin()
     {
-        $dateStr = $this->getOptional([UserMapper::ADDITIONAL, UserMapper::ADDITIONAL_USER, 'firstlogin']);
+        $dateStr = $this->getOptionalUserWrapper('firstlogin');
 
         return new DateTime($dateStr);
     }
 
     public function getLastLogin()
     {
-        $dateStr = $this->getOptional([UserMapper::ADDITIONAL, UserMapper::ADDITIONAL_USER, 'lastlogin']);
+        $dateStr = $this->getOptionalUserWrapper('lastlogin');
 
         return new DateTime($dateStr);
     }
 
     public function getChanged()
     {
-        $dateStr = $this->getOptional([UserMapper::ADDITIONAL, UserMapper::ADDITIONAL_USER, 'changed']);
+        $dateStr = $this->getOptionalUserWrapper('changed');
 
         return new DateTime($dateStr);
     }
 
     public function getAccountMode()
     {
-        return $this->get([UserMapper::ADDITIONAL, UserMapper::ADDITIONAL_USER, 'accountmode']);
+        return $this->getOptionalUserWrapper('accountmode');
     }
 
     public function getPasswordChangeDate()
     {
-        $dateStr = $this->getOptional([UserMapper::ADDITIONAL, UserMapper::ADDITIONAL_USER, 'password_change_date']);
+        $dateStr = $this->getOptionalUserWrapper('password_change_date');
 
         return is_null($dateStr) ? $dateStr : new DateTime($dateStr);
+    }
+
+    protected function getOptionalUserWrapper($param)
+    {
+        return $this->getOptional([UserMapper::ADDITIONAL, UserMapper::ADDITIONAL_USER, $param]);
     }
 }
