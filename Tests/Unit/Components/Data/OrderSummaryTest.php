@@ -15,7 +15,9 @@ use Wirecard\PaymentSdk\Entity\Device;
 use Wirecard\PaymentSdk\Transaction\Transaction;
 use WirecardElasticEngine\Components\Data\OrderSummary;
 use WirecardElasticEngine\Components\Data\PaymentConfig;
+use WirecardElasticEngine\Components\Mapper\AccountInfoMapper;
 use WirecardElasticEngine\Components\Mapper\BasketMapper;
+use WirecardElasticEngine\Components\Mapper\RiskInfoMapper;
 use WirecardElasticEngine\Components\Mapper\UserMapper;
 use WirecardElasticEngine\Components\Payments\PaymentInterface;
 
@@ -33,12 +35,19 @@ class OrderSummaryTest extends TestCase
         $basket  = $this->createMock(BasketMapper::class);
         $amount  = $this->createMock(Amount::class);
 
+        /** @var AccountInfoMapper|\PHPUnit_Framework_MockObject_MockObject $accountInfoMapper */
+        $accountInfoMapper = $this->createMock(AccountInfoMapper::class);
+        /** @var RiskInfoMapper|\PHPUnit_Framework_MockObject_MockObject $riskInfoMapper */
+        $riskInfoMapper = $this->createMock(RiskInfoMapper::class);
+
         $order = new OrderSummary(
             20001,
             $payment,
             $user,
             $basket,
             $amount,
+            $accountInfoMapper,
+            $riskInfoMapper,
             'device-fingerprint',
             ['foo' => 'bar']
         );
@@ -48,6 +57,8 @@ class OrderSummaryTest extends TestCase
         $this->assertSame($user, $order->getUserMapper());
         $this->assertSame($basket, $order->getBasketMapper());
         $this->assertSame($amount, $order->getAmount());
+        $this->assertSame($accountInfoMapper, $order->getAccountInfoMapper());
+        $this->assertSame($riskInfoMapper, $order->getRiskInfoMapper());
         $this->assertSame('device-fingerprint', $order->getDeviceFingerprintId());
         $device = $order->getWirecardDevice();
         $this->assertInstanceOf(Device::class, $device);
@@ -82,12 +93,20 @@ class OrderSummaryTest extends TestCase
         $amount = $this->createMock(Amount::class);
         $amount->method('mappedProperties')->willReturn(['amount']);
 
+        /** @var AccountInfoMapper|\PHPUnit_Framework_MockObject_MockObject $accountInfoMapper */
+        $accountInfoMapper = $this->createMock(AccountInfoMapper::class);
+
+        /** @var RiskInfoMapper|\PHPUnit_Framework_MockObject_MockObject $riskInfoMapper */
+        $riskInfoMapper = $this->createMock(RiskInfoMapper::class);
+
         $order = new OrderSummary(
             '1532083067-uniqueId',
             $payment,
             $user,
             $basket,
             $amount,
+            $accountInfoMapper,
+            $riskInfoMapper,
             'device-fingerprint'
         );
         $this->assertEquals([
