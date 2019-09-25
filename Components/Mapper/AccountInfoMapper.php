@@ -78,16 +78,6 @@ class AccountInfoMapper extends ArrayMapper
     }
 
     /**
-     * needed for testing only
-     *
-     * @param $isNew
-     */
-    public function setIsNewToken($isNew)
-    {
-        $this->isNewToken = $isNew;
-    }
-
-    /**
      * @param $tokenId
      *
      * @return AccountInfo
