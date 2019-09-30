@@ -225,7 +225,7 @@ class ThreedsHelper
 
         $articleIds = array_map(function ($basket) {
             return isset($basket[BasketMapper::ARTICLE_ID]) ? $basket[BasketMapper::ARTICLE_ID] : 0;
-        }, $basket['content']);
+        }, $basket[BasketMapper::CONTENT]);
 
         $builder = $this->models->createQueryBuilder();
         $builder->select('count(det.id)')
