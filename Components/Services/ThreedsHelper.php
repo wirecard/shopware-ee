@@ -224,7 +224,7 @@ class ThreedsHelper
         }
 
         $articleIds = array_map(function ($basket) {
-            return isset($basket['articleID']) ? $basket['articleID'] : 0;
+            return isset($basket[BasketMapper::ARTICLE_ID]) ? $basket[BasketMapper::ARTICLE_ID] : 0;
         }, $basket['content']);
 
         $builder = $this->models->createQueryBuilder();
