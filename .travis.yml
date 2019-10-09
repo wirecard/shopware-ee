@@ -48,7 +48,7 @@ matrix:
 
   - &acceptance-test
     stage: acceptance-test
-    if: type = cron
+    if: type != cron
     php: 7.2
     env:
     - GATEWAY=API-TEST
@@ -60,6 +60,9 @@ matrix:
     - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
     - travis_retry composer install --no-dev $COMPOSER_ARGS
     - travis_retry npm install
+    - travis_retry npm install mysql --save
+    - travis_retry npm install js-php-serialize
+    - travis_retry npm install chai
     - npm list --depth=0
     - composer show
     script:
