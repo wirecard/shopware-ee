@@ -20,7 +20,7 @@
     "test:upi": "node_modules/.bin/mocha Tests/Selenium/Payments/UpiTest.js --timeout 120000",
     "test:creditcard3dsauthorization": "node_modules/.bin/mocha Tests/Selenium/Payments/CreditCardThreeDAuthorizationTest.js --timeout 120000",
     "test:runner": "node Tests/Selenium/runner.js",
-    "test:payments": "node_modules/.bin/mocha $(if [ \"$GATEWAY\" = \"API-TEST\" ]; then find Tests/Selenium/Payments -name '*.js' -not -name 'MasterpassTest.js'; else find Tests/Selenium/Payments -name 'CreditCardThreeDTest.js'; fi) --timeout 6000000 --reporter mocha-multi-reporters --reporter-options configFile=./config.json"
+    "test:payments": "node_modules/.bin/mocha $(if [ \"$GATEWAY\" = \"API-TEST\" ]; then find Tests/Selenium/Payments -name '*.js' -not -name 'MasterpassTest.js'; elif [ \"$GATEWAY\" = \"API-WDCEE-TEST\" ]; then find Tests/Selenium/Payments -name CreditCardThreeDTest.js -o -name 'CreditCardThreeDAuthorizationTest.js'; else find Tests/Selenium/Payments -name 'CreditCardThreeDTest.js'; fi) --timeout 6000000 --reporter mocha-multi-reporters --reporter-options configFile=./config.json"
   },
   "private": true,
   "license": "GPL-3.0",
