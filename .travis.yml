@@ -60,6 +60,8 @@ matrix:
     - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
     - travis_retry composer install --no-dev $COMPOSER_ARGS
     - travis_retry npm install
+    - travis_retry npm install mysql --save
+    - travis_retry npm install js-php-serialize
     - npm list --depth=0
     - composer show
     script:

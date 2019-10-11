@@ -24,16 +24,16 @@ const {
 
 let driver;
 
-describe('Credit Card 3-D Secure test', () => {
+describe('Credit Card 3-D Secure Authorization test', () => {
     before(async () => {
-        driver = await getDriver('credit card 3ds');
+        driver = await getDriver('credit card 3ds authorization');
     });
 
     const paymentLabel = config.payments.creditCardThreeD.label;
     const formFields = config.payments.creditCardThreeD.fields;
 
-    it('should check the credit card 3ds payment process', async () => {
-        await updateDatabaseTransactionType('pay', 'wirecardElasticEngineCreditCardTransactionType');
+    it('should check the credit card 3ds authorization payment process', async () => {
+        await updateDatabaseTransactionType('reserve', 'wirecardElasticEngineCreditCardTransactionType');
         await loginWithExampleAccount(driver);
         await addProductToCartAndGotoCheckout(driver, '/wohnwelten/moebel/68/kommode-shabby-chic');
         await selectPaymentMethod(driver, paymentLabel);
@@ -109,7 +109,7 @@ describe('Credit Card 3-D Secure test', () => {
 
             await checkConfirmationPage(driver, paymentLabel);
         }
-        checkTransactionTypeInDatabase('purchase');
+        checkTransactionTypeInDatabase('authorization');
     });
 
     after(async () => driver.quit());
