@@ -164,22 +164,22 @@ function (button) {
             <name>wirecardElasticEngineCreditCardChallengeIndicator</name>
             <label lang="de">[Kreditkarte] Challenge indicator</label>
             <label lang="en">[Credit Card] Challenge indicator</label>
-            <value>01</value>
+            <value>1</value>
             <description lang="de">Indicates whether a challenge is requested for this transaction.</description>
             <description lang="en">Indicates whether a challenge is requested for this transaction.</description>
             <store>
                 <option>
-                    <value>01</value>
+                    <value>1</value>
                     <label lang="de">No preference</label>
                     <label lang="en">No preference</label>
                 </option>
                 <option>
-                    <value>02</value>
+                    <value>2</value>
                     <label lang="de">No challenge requested</label>
                     <label lang="en">No challenge requested</label>
                 </option>
                 <option>
-                    <value>03</value>
+                    <value>3</value>
                     <label lang="de">Challenge requested</label>
                     <label lang="en">Challenge requested</label>
                 </option>
