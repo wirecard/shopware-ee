@@ -291,8 +291,11 @@ class WirecardElasticEngine extends Plugin
             Shopware()->Db()->update('s_core_paymentmeans', ['description' => $description], 'id=' . $paymentId);
             return;
         }
-        /* get translationObject from container */
-        $translationObject = $this->container->has('translation') ? $this->container->get('translation') : new \Shopware_Components_Translation();
+
+        $translationObject = $this->container->has('translation')
+            ? $this->container->get('translation')
+            : new \Shopware_Components_Translation();
+        
         $translationObject->write($shopId, 'config_payment', $paymentId, ['description' => $description], true);
     }
 }
