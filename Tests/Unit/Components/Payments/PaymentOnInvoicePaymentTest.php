@@ -94,10 +94,8 @@ class PaymentOnInvoicePaymentTest extends PaymentTestCase
 
     public function testGetTransactionConfig()
     {
-        /** @var Shop|\PHPUnit_Framework_MockObject_MockObject $shop */
         /** @var ParameterBagInterface|\PHPUnit_Framework_MockObject_MockObject $parameters */
 
-        $shop       = $this->createMock(Shop::class);
         $parameters = $this->createMock(ParameterBagInterface::class);
         $parameters->method('get')->willReturnMap([
             ['kernel.name', 'Shopware'],

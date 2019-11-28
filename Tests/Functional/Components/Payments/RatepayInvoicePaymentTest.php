@@ -104,8 +104,6 @@ class RatepayInvoicePaymentTest extends TestCase
 
     public function testGetTransactionConfig()
     {
-        $shop = $this->container->get('models')->getRepository(Shop::class)->getActiveDefault();
-
         $config = $this->payment->getTransactionConfig($this->container->getParameterBag(), 'EUR');
 
         $this->assertInstanceOf(Config::class, $config);
