@@ -107,9 +107,9 @@ class SepaPayment extends Payment implements ProcessPaymentInterface, Additional
     /**
      * {@inheritdoc}
      */
-    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag, $selectedCurrency)
+    public function getTransactionConfig(ParameterBagInterface $parameterBag, $selectedCurrency)
     {
-        $config = parent::getTransactionConfig($shop, $parameterBag, $selectedCurrency);
+        $config = parent::getTransactionConfig($parameterBag, $selectedCurrency);
 
         $sepaDirectDebitConfig = new SepaConfig(
             SepaDirectDebitTransaction::NAME,

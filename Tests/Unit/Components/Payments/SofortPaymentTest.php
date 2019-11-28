@@ -141,7 +141,7 @@ class SofortPaymentTest extends PaymentTestCase
             ['shopware.release.version', '__SW_VERSION__'],
         ]);
 
-        $config = $this->payment->getTransactionConfig($shop, $parameters, 'EUR');
+        $config = $this->payment->getTransactionConfig($parameters, 'EUR');
 
         $this->assertInstanceOf(Config::class, $config);
         $this->assertNull($config->getBaseUrl());

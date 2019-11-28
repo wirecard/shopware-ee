@@ -98,7 +98,7 @@ class UnionpayInternationalPaymentTest extends PaymentTestCase
 
         $this->em->method('getRepository')->willReturn($this->createMock(EntityRepository::class));
 
-        $config = $this->payment->getTransactionConfig($shop, $parameters, 'EUR');
+        $config = $this->payment->getTransactionConfig($parameters, 'EUR');
 
         $this->assertInstanceOf(Config::class, $config);
         $this->assertNull($config->getBaseUrl());
