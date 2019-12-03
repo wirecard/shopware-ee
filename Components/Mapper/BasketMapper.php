@@ -301,6 +301,9 @@ class BasketMapper extends ArrayMapper
      */
     public static function numberFormat($amount)
     {
-        return number_format($amount, 2, '.', '');
+        if (gettype($amount) === "string") {
+            return number_format($amount, 2, '.', '');
+        }
+        return $amount;
     }
 }
