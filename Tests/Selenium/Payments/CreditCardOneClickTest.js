@@ -8,7 +8,7 @@
 
 /* eslint-env mocha */
 
-const { By,until } = require('selenium-webdriver');
+const { By, until } = require('selenium-webdriver');
 const { config } = require('../config');
 const {
     loginWithExampleAccount,
@@ -16,7 +16,7 @@ const {
     addProductToCartAndGotoCheckout,
     selectPaymentMethod,
     getDriver,
-    asyncForEach,
+    asyncForEach
 } = require('../common');
 
 let driver;
