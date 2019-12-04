@@ -37,9 +37,8 @@ describe('Credit Card test', () => {
         await addProductToCartAndGotoCheckout(driver, '/genusswelten/tees-und-zubeh/tee-zubehoer/24/glas-teekaennchen');
         await selectPaymentMethod(driver, paymentLabel);
 
-        // Save card
-        console.log('click #wirecardee--save-token');
-        await driver.findElement(By.id('wirecardee--save-token')).click();
+        console.log('click #wirecardee--token-no-card');
+        await driver.findElement(By.id('wirecardee--token-no-card')).click();
 
         // Confirm order
         console.log('click button confirm--form');
