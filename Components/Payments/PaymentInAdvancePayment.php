@@ -76,9 +76,9 @@ class PaymentInAdvancePayment extends Payment implements ProcessPaymentInterface
     /**
      * {@inheritdoc}
      */
-    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag, $selectedCurrency)
+    public function getTransactionConfig(ParameterBagInterface $parameterBag, $selectedCurrency)
     {
-        $config = parent::getTransactionConfig($shop, $parameterBag, $selectedCurrency);
+        $config = parent::getTransactionConfig($parameterBag, $selectedCurrency);
         $config->add(new PaymentMethodConfig(
             PoiPiaTransaction::NAME,
             $this->getPaymentConfig()->getTransactionMAID(),

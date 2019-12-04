@@ -142,14 +142,13 @@ class RatepayInvoicePaymentTest extends PaymentTestCase
 
     public function testGetTransactionConfig()
     {
-        $shop       = $this->createMock(Shop::class);
         $parameters = $this->createMock(ParameterBagInterface::class);
         $parameters->method('get')->willReturnMap([
             ['kernel.name', 'Shopware'],
             ['shopware.release.version', '__SW_VERSION__'],
         ]);
 
-        $config = $this->payment->getTransactionConfig($shop, $parameters, 'EUR');
+        $config = $this->payment->getTransactionConfig($parameters, 'EUR');
 
         $this->assertInstanceOf(Config::class, $config);
         $this->assertNull($config->getBaseUrl());

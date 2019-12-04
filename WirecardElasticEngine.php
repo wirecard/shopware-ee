@@ -292,7 +292,10 @@ class WirecardElasticEngine extends Plugin
             return;
         }
 
-        $translationObject = new \Shopware_Components_Translation();
+        $translationObject = $this->container->has('translation')
+            ? $this->container->get('translation')
+            : new \Shopware_Components_Translation();
+
         $translationObject->write($shopId, 'config_payment', $paymentId, ['description' => $description], true);
     }
 }
