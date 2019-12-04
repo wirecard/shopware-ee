@@ -32,6 +32,11 @@ exports.config = {
         },
         creditCardOneClick: {
             label: 'Wirecard Kreditkarte',
+            fields: {
+                last_name: 'Lastname',
+                account_number: '4012000300001003',
+                card_security_code: '003'
+            },
             tokenId: '1'
         },
         alipay: {
