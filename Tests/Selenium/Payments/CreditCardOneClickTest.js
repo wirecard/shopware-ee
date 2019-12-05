@@ -52,8 +52,6 @@ describe('Credit Card One-Click Checkout test', () => {
             console.log(`setting ${field} to ${formFields[field]}`);
             await driver.findElement(By.id(field)).sendKeys(formFields[field]);
         });
-        // await driver.findElement(By.css('#expiration_month_list > option[value=\'01\']')).click();
-        // await driver.findElement(By.css('#expiration_year_list > option[value=\'2030\']')).click();
 
         console.log('switch back from iframe to default content');
         await driver.switchTo().defaultContent();
