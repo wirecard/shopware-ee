@@ -184,6 +184,16 @@ class Transaction extends ModelEntity
      */
     public function __construct($type)
     {
+        $this->setType($type);
+    }
+
+    /**
+     * @param $type
+     *
+     * @since 1.0.0
+     */
+    public function setType($type)
+    {
         $this->type = $type;
         $this->setState(self::STATE_OPEN);
         $this->setCreatedAt(new \DateTime());
