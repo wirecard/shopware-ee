@@ -141,6 +141,20 @@ class TransactionManager
      */
     public function createNotify(Transaction $initialTransaction, Response $response, BackendService $backendService)
     {
+        $transactions = $this->em->getRepository(Transaction::class)
+            ->findBy(['paymentUniqueId' => $initialTransaction->getPaymentUniqueId()]);
+
+        foreach ($transactions as $transaction) {
+            // if backend transaction created, override with notification
+            if ($transaction->getType() === Transaction::TYPE_BACKEND) {
+                $transaction->setType(Transaction::TYPE_NOTIFY);
+                $transaction->setResponse($response);
+                $transaction->setState(Transaction::STATE_CLOSED);
+                $this->em->flush();
+                return $transaction;
+            }
+        }
+
         $transaction = $initialTransaction;
         $transaction->setType(Transaction::TYPE_NOTIFY);
         $transaction->setPaymentUniqueId($initialTransaction->getPaymentUniqueId());
@@ -233,10 +247,12 @@ class TransactionManager
         $totalAmount       = (float)$transaction->getAmount();
         $childTransactions = $this->em->getRepository(Transaction::class)->findBy([
             'parentTransactionId' => $transaction->getTransactionId(),
-            'type'                => Transaction::TYPE_BACKEND,
+            'transactionType'     => 'refund-purchase',
         ]);
         foreach ($childTransactions as $childTransaction) {
-            $totalAmount -= (float)$childTransaction->getAmount();
+            if ($childTransaction !== $transaction) {
+                $totalAmount -= (float)$childTransaction->getAmount();
+            }
         }
         return $totalAmount;
     }
