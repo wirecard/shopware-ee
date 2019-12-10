@@ -18,7 +18,9 @@ exports.config = {
             fields: {
                 last_name: 'Lastname',
                 account_number: '4012000300001003',
-                card_security_code: '003'
+                card_security_code: '003',
+                expiration_month_list: '01',
+                expiration_year_list: '2023'
             }
         },
         creditCardThreeD: {
@@ -26,12 +28,21 @@ exports.config = {
             fields: {
                 last_name: 'Lastname',
                 account_number: '4012000300001003',
-                card_security_code: '003'
+                card_security_code: '003',
+                expiration_month_list: '01',
+                expiration_year_list: '2023'
             },
             password: 'wirecard'
         },
         creditCardOneClick: {
             label: 'Wirecard Kreditkarte',
+            fields: {
+                last_name: 'Lastname',
+                account_number: '4012000300001003',
+                card_security_code: '003',
+                expiration_month_list: '01',
+                expiration_year_list: '2023'
+            },
             tokenId: '1'
         },
         alipay: {

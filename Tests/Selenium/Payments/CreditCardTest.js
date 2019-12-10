@@ -37,10 +37,6 @@ describe('Credit Card test', () => {
         await addProductToCartAndGotoCheckout(driver, '/genusswelten/tees-und-zubeh/tee-zubehoer/24/glas-teekaennchen');
         await selectPaymentMethod(driver, paymentLabel);
 
-        // Save card
-        console.log('click #wirecardee--save-token');
-        await driver.findElement(By.id('wirecardee--save-token')).click();
-
         // Confirm order
         console.log('click button confirm--form');
         await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
@@ -56,8 +52,6 @@ describe('Credit Card test', () => {
             console.log(`setting ${field} to ${formFields[field]}`);
             await driver.findElement(By.id(field)).sendKeys(formFields[field]);
         });
-        await driver.findElement(By.css('#expiration_month_list > option[value=\'01\']')).click();
-        await driver.findElement(By.css('#expiration_year_list > option[value=\'2030\']')).click();
 
         // Switch back from iframe and click Send button
         console.log('switch back from iframe to default content');
