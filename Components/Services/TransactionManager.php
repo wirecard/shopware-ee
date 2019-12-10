@@ -130,8 +130,11 @@ class TransactionManager
      */
     public function createNotify(Transaction $initialTransaction, Response $response, BackendService $backendService)
     {
-        // Update backend transaction with notification
-        $this->updateBackendOnNotify($initialTransaction, $response);
+        // Update backend transaction with notification - if exists
+        $backendTransaction = $this->updateBackendOnNotify($initialTransaction, $response);
+        if ($backendTransaction) {
+            return $backendTransaction;
+        }
 
         // Update initial notification
         $initialTransaction = $this->updateTransaction($initialTransaction, $response, Transaction::TYPE_NOTIFY);
@@ -304,15 +307,14 @@ class TransactionManager
     /**
      * @param $initialTransaction
      * @param $response
-     * @return mixed
+     * @return bool|Transaction
      */
     private function updateBackendOnNotify($initialTransaction, $response)
     {
         // Get all transactions with the same payment unique id
         $transactions = $this->getTransactions($initialTransaction);
-
         foreach ($transactions as $transaction) {
-            // if backend transaction created, override with notification
+            // Update if backend exists
             if ($transaction->getType() === Transaction::TYPE_BACKEND) {
                 $transaction->setState(Transaction::STATE_CLOSED);
                 $transaction->setType(Transaction::TYPE_NOTIFY);
@@ -321,6 +323,7 @@ class TransactionManager
                 return $transaction;
             }
         }
+        return false;
     }
 
     /**
