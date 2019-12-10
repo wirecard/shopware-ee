@@ -106,7 +106,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             ),
             new TransactionService(
                 $payment->getTransactionConfig(
-                    $shop,
                     $this->container->getParameterBag(),
                     $currency
                 ),
@@ -182,7 +181,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $response = $returnHandler->handleRequest(
                 $payment,
                 new TransactionService($payment->getTransactionConfig(
-                    Shopware()->Shop(),
                     $this->container->getParameterBag(),
                     $this->getCurrencyShortName()
                 ), $this->getLogger()),
@@ -345,7 +343,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         try {
             $backendService = new BackendService($payment->getTransactionConfig(
-                Shopware()->Shop(),
                 $this->container->getParameterBag(),
                 $this->getCurrencyShortName()
             ));
