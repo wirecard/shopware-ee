@@ -155,7 +155,7 @@ class CreditCardPayment extends Payment implements
             }
         }
 
-        $limit  = new Amount($limitValue, strtoupper($limitCurrency));
+        $limit  = new Amount(doubleval($limitValue), strtoupper($limitCurrency));
         $factor = $this->getCurrencyConversionFactor(strtoupper($selectedCurrency), $limit);
 
         $factor = Shopware()->Events()->filter(
