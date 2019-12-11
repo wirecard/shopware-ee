@@ -225,7 +225,7 @@ class TransactionManager
         $totalAmount       = (float)$transaction->getAmount();
         $childTransactions = $this->em->getRepository(Transaction::class)->findBy([
             'parentTransactionId' => $transaction->getTransactionId(),
-            'transactionType'     => 'refund-purchase',
+            'orderNumber'         => $transaction->getOrderNumber(),
         ]);
         foreach ($childTransactions as $childTransaction) {
             if ($childTransaction !== $transaction) {
