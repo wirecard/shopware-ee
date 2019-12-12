@@ -112,8 +112,8 @@ class CreditCardPayment extends Payment implements
             $creditCardConfig->addSslMaxLimit(
                 $this->getLimit(
                     $selectedCurrency,
-                    $paymentConfig->getSslMaxLimit(),
-                    $paymentConfig->getSslMaxLimitCurrency()
+                    floatval($paymentConfig->getSslMaxLimit()),
+                    floatval($paymentConfig->getSslMaxLimitCurrency())
                 )
             );
         }
@@ -121,8 +121,8 @@ class CreditCardPayment extends Payment implements
             $creditCardConfig->addThreeDMinLimit(
                 $this->getLimit(
                     $selectedCurrency,
-                    $paymentConfig->getThreeDMinLimit(),
-                    $paymentConfig->getThreeDMinLimitCurrency()
+                    floatval($paymentConfig->getThreeDMinLimit()),
+                    floatval($paymentConfig->getThreeDMinLimitCurrency())
                 )
             );
         }
@@ -155,7 +155,7 @@ class CreditCardPayment extends Payment implements
             }
         }
 
-        $limit  = new Amount(doubleval($limitValue), strtoupper($limitCurrency));
+        $limit  = new Amount($limitValue, strtoupper($limitCurrency));
         $factor = $this->getCurrencyConversionFactor(strtoupper($selectedCurrency), $limit);
 
         $factor = Shopware()->Events()->filter(
