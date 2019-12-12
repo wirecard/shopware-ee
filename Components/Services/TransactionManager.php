@@ -314,8 +314,8 @@ class TransactionManager
         // Get all transactions with the same payment unique id
         $transactions = $this->getTransactions($initialTransaction);
         foreach ($transactions as $transaction) {
-            // Update if backend exists
-            if ($transaction->getType() === Transaction::TYPE_BACKEND) {
+            // Update if is not initial transaction and backend already exists
+            if ($transaction !== $initialTransaction && $transaction->getType() === Transaction::TYPE_BACKEND) {
                 $transaction->setState(Transaction::STATE_CLOSED);
                 $transaction->setType(Transaction::TYPE_NOTIFY);
                 $transaction->setResponse($response);
