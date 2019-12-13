@@ -304,6 +304,6 @@ class BasketMapper extends ArrayMapper
         if (!is_numeric($amount)) {
             return floatval(number_format($amount, 2, '.', ''));
         }
-        return $amount;
+        return floatval($amount);
     }
 }
