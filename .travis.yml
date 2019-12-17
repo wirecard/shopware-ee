@@ -164,7 +164,6 @@ before_script:
   - sudo sed -e "s?%DOCUMENT_ROOT%?${SHOPWARE_DIRECTORY}?g" --in-place /etc/apache2/sites-available/000-default.conf
   - sudo service apache2 restart
 
-#  install shopware
 #  for unit tests a fix Shopware version 5.4 is used
   - if [[ -z "${SHOPWARE_VERSION}" ]]; then export SHOPWARE_VERSION="5.4"; fi && git clone https://github.com/shopware/shopware.git ${SHOPWARE_DIRECTORY} --branch ${SHOPWARE_VERSION}
   - ant -f ${SHOPWARE_DIRECTORY}/build/build.xml -Dapp.host=localhost:8000 -Ddb.user=travis -Ddb.host=127.0.0.1 -Ddb.name=shopware build-unit
