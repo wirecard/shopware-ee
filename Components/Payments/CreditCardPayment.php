@@ -113,7 +113,7 @@ class CreditCardPayment extends Payment implements
                 $this->getLimit(
                     $selectedCurrency,
                     floatval($paymentConfig->getSslMaxLimit()),
-                    floatval($paymentConfig->getSslMaxLimitCurrency())
+                    $paymentConfig->getSslMaxLimitCurrency()
                 )
             );
         }
@@ -122,7 +122,7 @@ class CreditCardPayment extends Payment implements
                 $this->getLimit(
                     $selectedCurrency,
                     floatval($paymentConfig->getThreeDMinLimit()),
-                    floatval($paymentConfig->getThreeDMinLimitCurrency())
+                    $paymentConfig->getThreeDMinLimitCurrency()
                 )
             );
         }
