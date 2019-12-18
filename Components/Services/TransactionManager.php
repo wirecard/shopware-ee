@@ -95,28 +95,16 @@ class TransactionManager
      */
     public function createReturn(Transaction $initialTransaction, Response $response, $statusMessage = null)
     {
-        $transactions = $this->getTransactions($initialTransaction);
-
-        foreach ($transactions as $transaction) {
-            if ($transaction->getId() !== $initialTransaction->getId()) {
-                $transaction->setOrderNumber($initialTransaction->getOrderNumber());
-                $this->em->flush();
-            }
-            // if already notified, ignore return, but update response
-            if ($transaction->getType() === Transaction::TYPE_NOTIFY) {
-                $transaction->setResponse($response);
-                $this->em->flush();
-                return $transaction;
-            }
+        if ($initialTransaction->getType() === Transaction::TYPE_NOTIFY) {
+            return $initialTransaction;
         }
 
-        $initialTransaction = $this->updateTransaction(
+        return $this->updateTransaction(
             $initialTransaction,
             $response,
             Transaction::TYPE_RETURN,
             $statusMessage
         );
-        return $initialTransaction;
     }
 
     /**
