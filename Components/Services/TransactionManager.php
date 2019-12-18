@@ -78,10 +78,10 @@ class TransactionManager
      */
     public function createInteraction($response)
     {
-        $parentTransaction = $this->em->getRepository(Transaction::class)
+        $initialTransaction = $this->em->getRepository(Transaction::class)
             ->findOneBy(['requestId' => $response->getRequestId()]);
 
-        return $this->updateTransaction($parentTransaction, $response, Transaction::TYPE_INTERACTION);
+        return $this->updateTransaction($initialTransaction, $response, Transaction::TYPE_INTERACTION);
     }
 
     /**
