@@ -154,6 +154,12 @@ class Transaction extends ModelEntity
     private $createdAt;
 
     /**
+     * @var \DateTime
+     * @ORM\Column(name="updated_at", type="datetime", nullable=false)
+     */
+    private $updatedAt;
+
+    /**
      * @var string
      * @ORM\Column(name="state", type="string")
      */
@@ -187,6 +193,7 @@ class Transaction extends ModelEntity
         $this->type = $type;
         $this->state = self::STATE_OPEN;
         $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
     }
 
     /**
@@ -492,6 +499,26 @@ class Transaction extends ModelEntity
     }
 
     /**
+     * @param \DateTime
+     *
+     * @since 1.0.0
+     */
+    public function setUpdatedAt(\DateTime $updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+    /**
+     * @return \DateTime
+     *
+     * @since 1.0.0
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
      * @return string
      *
      * @since 1.0.0
@@ -603,6 +630,7 @@ class Transaction extends ModelEntity
             'amount'                       => $this->getAmount(),
             'currency'                     => $this->getCurrency(),
             'createdAt'                    => $this->getCreatedAt()->format(\DateTime::W3C),
+            'updatedAt'                    => $this->getUpdatedAt()->format(\DateTime::W3C),
             'response'                     => $this->getResponse(),
             'request'                      => $this->getRequest(),
             'state'                        => $this->getState(),
