@@ -308,7 +308,7 @@ class TransactionManager
                 $transaction->setState(Transaction::STATE_CLOSED);
                 $transaction->setType(Transaction::TYPE_NOTIFY);
                 $transaction->setResponse($response);
-                $transaction->setCreatedAt(new \DateTime());
+                $transaction->setUpdatedAt(new \DateTime());
                 $this->em->flush();
                 return $transaction;
             }
