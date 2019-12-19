@@ -501,7 +501,7 @@ class Transaction extends ModelEntity
     /**
      * @param \DateTime
      *
-     * @since 1.0.0
+     * @since 1.4.0
      */
     public function setUpdatedAt(\DateTime $updatedAt)
     {
@@ -511,7 +511,7 @@ class Transaction extends ModelEntity
     /**
      * @return \DateTime
      *
-     * @since 1.0.0
+     * @since 1.4.0
      */
     public function getUpdatedAt()
     {
