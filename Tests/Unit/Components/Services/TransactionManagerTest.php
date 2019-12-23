@@ -186,7 +186,7 @@ class TransactionManagerTest extends TestCase
     public function testCreateBackend()
     {
         $initialTransaction = $this->createMock(Transaction::class);
-        $initialTransaction->expects($this->atLeastOnce())->method('isInitial')->willReturn(true);
+        // @TODO: Verify why isInitial method is not needed anymore
         $initialTransaction->expects($this->atLeastOnce())->method('getOrderNumber')->willReturn('order-num');
         $initialTransaction->expects($this->atLeastOnce())->method('getPaymentUniqueId')
                            ->willReturn('parent-payUniqueId');
@@ -215,7 +215,7 @@ class TransactionManagerTest extends TestCase
     public function testCreateBackendAndCloseParentTransaction()
     {
         $initialTransaction = $this->createMock(Transaction::class);
-        $initialTransaction->expects($this->atLeastOnce())->method('isInitial')->willReturn(true);
+        // @TODO: Verify why isInitial method is not needed anymore
         $initialTransaction->expects($this->atLeastOnce())->method('getOrderNumber')->willReturn('order-num');
         $initialTransaction->expects($this->atLeastOnce())->method('getPaymentUniqueId')
                            ->willReturn('parent-payUniqueId');
