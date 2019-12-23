@@ -105,7 +105,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function indexAction()
     {
-            $this->payment = $this->getPaymentFactory()->create($this->getPaymentShortName());
+        $this->payment = $this->getPaymentFactory()->create($this->getPaymentShortName());
         try {
             $this->currency     = $this->getCurrencyShortName();
             $this->userMapper   = $this->getUserMapper();
@@ -119,7 +119,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 'wirecard_elastic_engine_update_cart' => 'true',
             ]);
         }
-        $action = $this->getAction();
+        $action = $this->getIndexAction();
 
         return $this->handleAction($action);
     }
@@ -146,6 +146,139 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $action = $this->getErrorAction($e, self::RETURN_ERROR_MESSAGE);
         }
         return $this->handleAction($action);
+    }
+
+    /**
+     * This method is called by Wirecard servers to modify the state of an order. Notifications are generally the
+     * source of truth regarding orders, meaning the `NotificationHandler` will most likely overwrite things
+     * by the `ReturnHandler`.
+     *
+     * @throws UnknownPaymentException
+     *
+     * @since 1.0.0
+     */
+    public function notifyAction()
+    {
+        // Disable template rendering for incoming notifications
+        /** @var Enlight_Controller_Plugins_ViewRenderer_Bootstrap $viewRenderer */
+        $viewRenderer = $this->get('front')->Plugins()->get('ViewRenderer');
+        $viewRenderer->setNoRender();
+
+        /** @var PaymentFactory $paymentFactory */
+        /** @var NotificationHandler $notificationHandler */
+        $paymentFactory      = $this->get('wirecard_elastic_engine.payment_factory');
+        $notificationHandler = $this->get('wirecard_elastic_engine.notification_handler');
+        $request             = $this->Request();
+        $payment             = $paymentFactory->create($request->getParam(self::ROUTER_METHOD));
+
+        try {
+            $backendService = new BackendService($payment->getTransactionConfig(
+                $this->container->getParameterBag(),
+                $this->getCurrencyShortName()
+            ));
+            $notification   = $backendService->handleNotification($request->getRawBody());
+
+            $notifyTransaction = $notificationHandler->handleResponse(
+                $this->getModules()->Order(),
+                $notification,
+                $backendService
+            );
+            if ($notifyTransaction) {
+                $notificationMail = $this->get('wirecard_elastic_engine.mail.merchant_notification');
+                $notificationMail->send($notification, $notifyTransaction);
+            }
+        } catch (\Exception $e) {
+            $this->logException('Notification handling failed', $e);
+        }
+    }
+
+    private function getInitialTransaction($response)
+    {
+        $this->transactionManager = $this->getTransactionManager();
+        return $this->transactionManager->getInitialTransaction($response);
+    }
+
+    /**
+     * @param ReturnHandler $returnHandler
+     * @param SuccessResponse $response
+     *
+     * @return Action
+     * @throws CouldNotSaveOrderException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws Exception
+     */
+    private function createOrder(ReturnHandler $returnHandler, SuccessResponse $response)
+    {
+        $this->getSessionManager()->destroyDeviceFingerprintId();
+        $initialTransaction = $this->getInitialTransaction($response);
+        $orderStatus = Status::ORDER_STATE_OPEN;
+
+        $orderStatusComment = $this->verifyBasket($initialTransaction);
+        if ($orderStatusComment !== null) {
+            $orderStatus = Status::ORDER_STATE_CLARIFICATION_REQUIRED;
+        }
+
+        $paymentStatus = $this->getPaymentStatus($initialTransaction);
+        $orderNumber = $this->updateOrderNumber($response, $initialTransaction, $paymentStatus);
+        $this->sendStatusMailOnSaveOrder($orderNumber, $paymentStatus);
+
+        if ($orderStatus !== Status::ORDER_STATE_OPEN) {
+            $this->setOrderStatus($orderNumber, $orderStatus, $orderStatusComment);
+        }
+
+        // check again if payment status has been set by notification and try to update payment status
+        if (! $initialTransaction->getPaymentStatus()) {
+            $this->updatePaymentStatus($initialTransaction, $response);
+        }
+
+        return $returnHandler->handleSuccess($response, $initialTransaction, $orderStatusComment);
+    }
+
+    /**
+     * @param $initialTransaction
+     * @return bool|string
+     * @throws Exception
+     */
+    private function verifyBasket($initialTransaction)
+    {
+        try {
+            $orderBasket = $this->loadBasketFromSignature($initialTransaction->getBasketSignature());
+            $this->verifyBasketSignature($initialTransaction->getBasketSignature(), $orderBasket);
+            return null;
+        } catch (\RuntimeException $exception) {
+            $orderStatusComment = 'Basket verification failed: ' . $exception->getMessage();
+            $this->getLogger()->warning($orderStatusComment);
+            return $orderStatusComment;
+        }
+    }
+
+    /**
+     * @param $initialTransaction
+     * @param $response
+     * @throws \Doctrine\ORM\ORMException
+     */
+    private function updatePaymentStatus($initialTransaction, $response)
+    {
+        $modelManager = $this->getModelManager();
+        $modelManager->refresh($initialTransaction);
+        $paymentStatus = $initialTransaction->getPaymentStatus();
+
+        if (! $paymentStatus) {
+            $notifyTransaction = $this->transactionManager->findNotificationTransaction($initialTransaction);
+            if ($notifyTransaction && $notifyTransaction->getPaymentStatus()) {
+                $paymentStatus = $notifyTransaction->getPaymentStatus();
+            }
+        }
+        if ($paymentStatus) {
+            $this->getLogger()->debug('Payment status has changed to ' . $paymentStatus);
+            $this->savePaymentStatus(
+                $response->getTransactionId(),
+                $initialTransaction->getPaymentUniqueId(),
+                $paymentStatus,
+                NotificationHandler::shouldSendStatusMail($paymentStatus)
+            );
+        }
     }
 
     /**
@@ -310,7 +443,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * @return mixed
      * @throws Exception
      */
-    private function getAction()
+    private function getIndexAction()
     {
         return $this->getPaymentHandler()->execute(
             $this->getOrderSummary(),
@@ -399,66 +532,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     }
 
     /**
-     * @param ReturnHandler $returnHandler
-     * @param SuccessResponse $response
-     *
-     * @return Action
-     * @throws CouldNotSaveOrderException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WirecardElasticEngine\Exception\InitialTransactionNotFoundException
-     * @throws \Doctrine\ORM\ORMException
-     */
-    private function createOrder(ReturnHandler $returnHandler, SuccessResponse $response)
-    {
-        $this->transactionManager = $this->getTransactionManager();
-        $this->getSessionManager()->destroyDeviceFingerprintId();
-
-        $orderStatus = Status::ORDER_STATE_OPEN;
-        $orderStatusComment = null;
-
-        $initialTransaction = $this->transactionManager->getInitialTransaction($response);
-
-        try {
-            $orderBasket = $this->loadBasketFromSignature($initialTransaction->getBasketSignature());
-            $this->verifyBasketSignature($initialTransaction->getBasketSignature(), $orderBasket);
-        } catch (\RuntimeException $exception) {
-            $orderStatusComment = 'Basket verification failed: ' . $exception->getMessage();
-            $this->getLogger()->warning($orderStatusComment);
-            $orderStatus = Status::ORDER_STATE_CLARIFICATION_REQUIRED;
-        }
-        $paymentStatus = $this->getPaymentStatus($initialTransaction);
-        $orderNumber = $this->updateOrderNumber($response, $initialTransaction, $paymentStatus);
-        $this->sendStatusMailOnSaveOrder($orderNumber, $paymentStatus);
-
-        if ($orderStatus !== Status::ORDER_STATE_OPEN) {
-            $this->setOrderStatus($orderNumber, $orderStatus, $orderStatusComment);
-        }
-
-        // check again if payment status has been set by notification and try to update payment status
-        if (! $initialTransaction->getPaymentStatus()) {
-            $this->getModelManager()->refresh($initialTransaction);
-            $paymentStatus = $initialTransaction->getPaymentStatus();
-            if (! $paymentStatus) {
-                $notifyTransaction = $this->transactionManager->findNotificationTransaction($initialTransaction);
-                if ($notifyTransaction && $notifyTransaction->getPaymentStatus()) {
-                    $paymentStatus = $notifyTransaction->getPaymentStatus();
-                }
-            }
-            if ($paymentStatus) {
-                $this->getLogger()->debug('Payment status has changed to ' . $paymentStatus);
-                $this->savePaymentStatus(
-                    $response->getTransactionId(),
-                    $initialTransaction->getPaymentUniqueId(),
-                    $paymentStatus,
-                    NotificationHandler::shouldSendStatusMail($paymentStatus)
-                );
-            }
-        }
-
-        return $returnHandler->handleSuccess($response, $initialTransaction, $orderStatusComment);
-    }
-
-    /**
      * Mails should be send if either the final state is already returned by the return action or
      * if the state is open and the merchant wants to to send pending mails.
      *
@@ -487,50 +560,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $mail          = $shopwareOrder->createStatusMail($order->getId(), $paymentStatus);
         if ($mail) {
             $shopwareOrder->sendStatusMail($mail);
-        }
-    }
-
-    /**
-     * This method is called by Wirecard servers to modify the state of an order. Notifications are generally the
-     * source of truth regarding orders, meaning the `NotificationHandler` will most likely overwrite things
-     * by the `ReturnHandler`.
-     *
-     * @throws UnknownPaymentException
-     *
-     * @since 1.0.0
-     */
-    public function notifyAction()
-    {
-        // Disable template rendering for incoming notifications
-        /** @var Enlight_Controller_Plugins_ViewRenderer_Bootstrap $viewRenderer */
-        $viewRenderer = $this->get('front')->Plugins()->get('ViewRenderer');
-        $viewRenderer->setNoRender();
-
-        /** @var PaymentFactory $paymentFactory */
-        /** @var NotificationHandler $notificationHandler */
-        $paymentFactory      = $this->get('wirecard_elastic_engine.payment_factory');
-        $notificationHandler = $this->get('wirecard_elastic_engine.notification_handler');
-        $request             = $this->Request();
-        $payment             = $paymentFactory->create($request->getParam(self::ROUTER_METHOD));
-
-        try {
-            $backendService = new BackendService($payment->getTransactionConfig(
-                $this->container->getParameterBag(),
-                $this->getCurrencyShortName()
-            ));
-            $notification   = $backendService->handleNotification($request->getRawBody());
-
-            $notifyTransaction = $notificationHandler->handleResponse(
-                $this->getModules()->Order(),
-                $notification,
-                $backendService
-            );
-            if ($notifyTransaction) {
-                $notificationMail = $this->get('wirecard_elastic_engine.mail.merchant_notification');
-                $notificationMail->send($notification, $notifyTransaction);
-            }
-        } catch (\Exception $e) {
-            $this->logException('Notification handling failed', $e);
         }
     }
 
