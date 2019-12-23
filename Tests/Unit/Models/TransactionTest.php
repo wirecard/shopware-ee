@@ -69,6 +69,7 @@ class TransactionTest extends ModelTestCase
             'response'                     => null,
             'request'                      => null,
             'statusMessage'                => 'error',
+            'updatedAt'                    => $this->model->getUpdatedAt()->format(\DateTime::W3C)
         ], $this->model->toArray());
     }
 
@@ -166,6 +167,7 @@ class TransactionTest extends ModelTestCase
             'response'                     => [],
             'request'                      => null,
             'statusMessage'                => null,
+            'updatedAt'                    => $this->model->getUpdatedAt()->format(\DateTime::W3C)
         ], $transaction->toArray());
     }
 
@@ -224,6 +226,7 @@ class TransactionTest extends ModelTestCase
             ],
             'request'                      => null,
             'statusMessage'                => null,
+            'updatedAt'                    => $this->model->getUpdatedAt()->format(\DateTime::W3C)
         ], $transaction->toArray());
     }
 
@@ -276,6 +279,7 @@ class TransactionTest extends ModelTestCase
             ],
             'request'                      => null,
             'statusMessage'                => null,
+            'updatedAt'                    => $this->model->getUpdatedAt()->format(\DateTime::W3C)
         ], $transaction->toArray());
     }
 
@@ -319,6 +323,7 @@ class TransactionTest extends ModelTestCase
             'response'                     => [],
             'request'                      => null,
             'statusMessage'                => null,
+            'updatedAt'                    => $this->model->getUpdatedAt()->format(\DateTime::W3C)
         ], $transaction->toArray());
     }
 
@@ -359,6 +364,7 @@ class TransactionTest extends ModelTestCase
             'response'                     => null,
             'request'                      => $request,
             'statusMessage'                => null,
+            'updatedAt'                    => $this->model->getUpdatedAt()->format(\DateTime::W3C)
         ], $transaction->toArray());
     }
 }
