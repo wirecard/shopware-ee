@@ -86,71 +86,102 @@ class TransactionManagerTest extends TestCase
         $this->assertEquals(Transaction::STATE_OPEN, $transaction->getState());
     }
 
-    public function testCreateReturn()
+    public function testUpdateReturn()
     {
-        $initialTransaction = $this->createMock(Transaction::class);
-        $initialTransaction->expects($this->atLeastOnce())->method('getId')->willReturn(1);
-        $initialTransaction->expects($this->atLeastOnce())->method('getOrderNumber')->willReturn('order-num');
-        $initialTransaction->expects($this->atLeastOnce())->method('getPaymentUniqueId')
-                           ->willReturn('parent-payUniqueId');
-
-        $relatedTransaction = new Transaction(Transaction::TYPE_INTERACTION);
-        $this->assertNull($relatedTransaction->getOrderNumber());
-        $this->repo->expects($this->atLeastOnce())->method('findBy')->willReturn([
-            $initialTransaction,
-            $relatedTransaction,
-        ]);
+        $initialTransaction = new Transaction(Transaction::TYPE_INITIAL_REQUEST);
+        $initialTransaction->setOrderNumber('order-num');
+        $initialTransaction->setPaymentUniqueId('parent-payUniqueId');
+        $initialTransaction->setState(Transaction::STATE_OPEN);
 
         $response = $this->createMock(InteractionResponse::class);
         $response->method('getRequestId')->willReturn('req-id');
 
         $transaction = $this->manager->createReturn($initialTransaction, $response);
-        $this->assertInstanceOf(Transaction::class, $transaction);
+
         $this->assertEquals(Transaction::TYPE_RETURN, $transaction->getType());
-        $this->assertEquals('parent-payUniqueId', $transaction->getPaymentUniqueId());
-        $this->assertNull($transaction->getBasketSignature());
-        $this->assertEquals('req-id', $transaction->getRequestId());
-        $this->assertEquals('order-num', $transaction->getOrderNumber());
         $this->assertEquals(Transaction::STATE_OPEN, $transaction->getState());
-        $this->assertEquals('order-num', $relatedTransaction->getOrderNumber());
     }
 
-    public function testCreateNotify()
+    public function testReturnAfterNotify()
     {
-        $initialTransaction = $this->createMock(Transaction::class);
-        $initialTransaction->expects($this->atLeastOnce())->method('getOrderNumber')->willReturn('order-num');
-        $initialTransaction->expects($this->atLeastOnce())->method('getPaymentUniqueId')
-                           ->willReturn('parent-payUniqueId');
+        $initialTransaction = new Transaction(Transaction::TYPE_NOTIFY);
+        $initialTransaction->setState(Transaction::STATE_OPEN);
 
-        $parentTransaction = new Transaction(Transaction::TYPE_NOTIFY);
-        $this->repo->expects($this->atLeastOnce())->method('findOneBy')->willReturn($parentTransaction);
+        $response = $this->createMock(SuccessResponse::class);
+        $response->method('getRequestId')->willReturn('req-id');
 
-        $response = $this->createMock(InteractionResponse::class);
+        $transaction = $this->manager->createReturn($initialTransaction, $response);
+
+        $this->assertEquals($initialTransaction->getType(), $transaction->getType());
+        $this->assertEquals($initialTransaction->getState(), $transaction->getState());
+    }
+
+    public function testUpdatePaymentNotify()
+    {
+        $initialTransaction = new Transaction(Transaction::TYPE_RETURN);
+        $initialTransaction->setState(Transaction::STATE_OPEN);
+
+        $this->repo->expects($this->atLeastOnce())->method('findBy')->willReturn(null);
+        $this->repo->expects($this->atLeastOnce())->method('findOneBy')->willReturn(null);
+
+        $response = $this->createMock(SuccessResponse::class);
         $response->method('getRequestId')->willReturn('req-id');
 
         $backendService = $this->createMock(BackendService::class);
+
+        $transaction = $this->manager->createNotify($initialTransaction, $response, $backendService);
+
+        $this->assertEquals(Transaction::TYPE_NOTIFY, $transaction->getType());
+        $this->assertEquals(Transaction::STATE_OPEN, $transaction->getState());
+    }
+
+    public function testUpdateFinalBackendNotify()
+    {
+        $initialTransaction = new Transaction(Transaction::TYPE_NOTIFY);
+        $initialTransaction->setState(Transaction::STATE_OPEN);
+
+        $backendTransaction = new Transaction(Transaction::TYPE_BACKEND);
+        $backendTransaction->setState(Transaction::STATE_OPEN);
+        $transactions = array(
+            $backendTransaction
+        );
+        $this->repo->expects($this->atLeastOnce())->method('findBy')->willReturn($transactions);
+
+        $response = $this->createMock(SuccessResponse::class);
+        $response->method('getRequestId')->willReturn('req-id');
+
+        $backendService = $this->createMock(BackendService::class);
+        //@TODO: isFinal is currently ignored! State Close should only be set if transaction isFinal
         $backendService->method('isFinal')->willReturn(true);
 
         $transaction = $this->manager->createNotify($initialTransaction, $response, $backendService);
-        $this->assertInstanceOf(Transaction::class, $transaction);
+
         $this->assertEquals(Transaction::TYPE_NOTIFY, $transaction->getType());
-        $this->assertEquals('parent-payUniqueId', $transaction->getPaymentUniqueId());
-        $this->assertNull($transaction->getBasketSignature());
-        $this->assertEquals('req-id', $transaction->getRequestId());
-        $this->assertEquals('order-num', $transaction->getOrderNumber());
         $this->assertEquals(Transaction::STATE_CLOSED, $transaction->getState());
     }
 
-    public function testCreateNotifyOpenState()
+    public function testUpdateBackendNotify()
     {
-        $initialTransaction = $this->createMock(Transaction::class);
-        $parentTransaction  = new Transaction(Transaction::TYPE_NOTIFY);
-        $this->repo->expects($this->atLeastOnce())->method('findOneBy')->willReturn($parentTransaction);
-        $response       = $this->createMock(InteractionResponse::class);
+        $initialTransaction = new Transaction(Transaction::TYPE_NOTIFY);
+        $initialTransaction->setState(Transaction::STATE_OPEN);
+
+        $backendTransaction = new Transaction(Transaction::TYPE_BACKEND);
+        $backendTransaction->setState(Transaction::STATE_OPEN);
+        $transactions = array(
+            $backendTransaction
+        );
+        $this->repo->expects($this->atLeastOnce())->method('findBy')->willReturn($transactions);
+
+        $response = $this->createMock(SuccessResponse::class);
+        $response->method('getRequestId')->willReturn('req-id');
+
         $backendService = $this->createMock(BackendService::class);
+        //@TODO: isFinal is currently ignored! State Close should only be set if transaction isFinal
+        // isFinal will return false if it is e.g. Capture
         $backendService->method('isFinal')->willReturn(false);
 
         $transaction = $this->manager->createNotify($initialTransaction, $response, $backendService);
+
         $this->assertEquals(Transaction::TYPE_NOTIFY, $transaction->getType());
         $this->assertEquals(Transaction::STATE_OPEN, $transaction->getState());
     }

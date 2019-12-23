@@ -295,15 +295,16 @@ class BasketMapper extends ArrayMapper
      *
      * @param string|float $amount
      *
-     * @return string
+     * @return float
      *
      * @since 1.0.0
      */
     public static function numberFormat($amount)
     {
-        if (!is_numeric($amount)) {
-            return floatval(number_format($amount, 2, '.', ''));
+        $numericAmount = $amount;
+        if (is_string($amount)) {
+            $numericAmount = floatval($amount);
         }
-        return floatval($amount);
+        return floatval(number_format($numericAmount, 2, '.', ''));
     }
 }
