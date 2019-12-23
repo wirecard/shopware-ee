@@ -86,33 +86,34 @@ class TransactionManagerTest extends TestCase
         $this->assertEquals(Transaction::STATE_OPEN, $transaction->getState());
     }
 
-    public function testCreateReturn()
+    public function testUpdateReturn()
     {
-        $initialTransaction = $this->createMock(Transaction::class);
-        $initialTransaction->expects($this->atLeastOnce())->method('getId')->willReturn(1);
-        $initialTransaction->expects($this->atLeastOnce())->method('getOrderNumber')->willReturn('order-num');
-        $initialTransaction->expects($this->atLeastOnce())->method('getPaymentUniqueId')
-                           ->willReturn('parent-payUniqueId');
-
-        $relatedTransaction = new Transaction(Transaction::TYPE_INTERACTION);
-        $this->assertNull($relatedTransaction->getOrderNumber());
-        $this->repo->expects($this->atLeastOnce())->method('findBy')->willReturn([
-            $initialTransaction,
-            $relatedTransaction,
-        ]);
+        $initialTransaction = new Transaction(Transaction::TYPE_INITIAL_REQUEST);
+        $initialTransaction->setOrderNumber('order-num');
+        $initialTransaction->setPaymentUniqueId('parent-payUniqueId');
+        $initialTransaction->setState(Transaction::STATE_OPEN);
 
         $response = $this->createMock(InteractionResponse::class);
         $response->method('getRequestId')->willReturn('req-id');
 
         $transaction = $this->manager->createReturn($initialTransaction, $response);
-        $this->assertInstanceOf(Transaction::class, $transaction);
+
         $this->assertEquals(Transaction::TYPE_RETURN, $transaction->getType());
-        $this->assertEquals('parent-payUniqueId', $transaction->getPaymentUniqueId());
-        $this->assertNull($transaction->getBasketSignature());
-        $this->assertEquals('req-id', $transaction->getRequestId());
-        $this->assertEquals('order-num', $transaction->getOrderNumber());
         $this->assertEquals(Transaction::STATE_OPEN, $transaction->getState());
-        $this->assertEquals('order-num', $relatedTransaction->getOrderNumber());
+    }
+
+    public function testReturnAfterNotify()
+    {
+        $initialTransaction = new Transaction(Transaction::TYPE_NOTIFY);
+        $initialTransaction->setState(Transaction::STATE_OPEN);
+
+        $response = $this->createMock(SuccessResponse::class);
+        $response->method('getRequestId')->willReturn('req-id');
+
+        $transaction = $this->manager->createReturn($initialTransaction, $response);
+
+        $this->assertEquals($initialTransaction->getType(), $transaction->getType());
+        $this->assertEquals($initialTransaction->getState(), $transaction->getState());
     }
 
     public function testCreateNotify()
