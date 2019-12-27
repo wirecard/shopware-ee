@@ -110,10 +110,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     {
         $this->payment = $this->getPaymentFactory()->create($this->getPaymentShortName());
         try {
-            $this->currency = $this->getCurrencyShortName();
-            $this->userMapper = $this->createUserMapper();
-            $this->basketMapper = $this->createBasketMapper();
-            $this->amount = new Amount(BasketMapper::numberFormat($this->getAmount()), $this->currency);
+            $this->initMandatoryParameters();
         } catch (BasketException $e) {
             $this->getLogger()->notice($e->getMessage());
             return $this->redirect([
@@ -122,7 +119,17 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 'wirecard_elastic_engine_update_cart' => 'true',
             ]);
         }
-        $action = $this->getIndexAction();
+        $action = $this->getPaymentHandler()->execute(
+            $this->createOrderSummary(),
+            $this->createTransactionService(),
+            $this->getRedirect(),
+            $this->getRoute(
+                self::ROUTE_ACTION_NOTIFY,
+                $this->payment->getName()
+            ),
+            $this->Request(),
+            $this->getModules()->Order()
+        );
 
         return $this->handleAction($action);
     }
@@ -429,6 +436,21 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     }
 
     /**
+     * @throws ArrayKeyNotFoundException
+     * @throws \WirecardElasticEngine\Exception\InvalidBasketException
+     * @throws \WirecardElasticEngine\Exception\InvalidBasketItemException
+     * @throws \WirecardElasticEngine\Exception\NotAvailableBasketException
+     * @throws \WirecardElasticEngine\Exception\OutOfStockBasketException
+     */
+    private function initMandatoryParameters()
+    {
+        $this->currency = $this->getCurrencyShortName();
+        $this->userMapper = $this->createUserMapper();
+        $this->basketMapper = $this->createBasketMapper();
+        $this->amount = new Amount(BasketMapper::numberFormat($this->getAmount()), $this->currency);
+    }
+
+    /**
      * @return OrderSummary
      * @throws Exception
      */
@@ -519,22 +541,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $this->getRoute(self::ROUTE_ACTION_RETURN, $this->payment->getName()),
             $this->getRoute(self::ROUTE_ACTION_CANCEL, $this->payment->getName()),
             $this->getRoute(self::ROUTE_ACTION_FAILURE, $this->payment->getName())
-        );
-    }
-
-    /**
-     * @return mixed
-     * @throws Exception
-     */
-    private function getIndexAction()
-    {
-        return $this->getPaymentHandler()->execute(
-            $this->createOrderSummary(),
-            $this->createTransactionService(),
-            $this->getRedirect(),
-            $this->getRoute(self::ROUTE_ACTION_NOTIFY, $this->payment->getName()),
-            $this->Request(),
-            $this->getModules()->Order()
         );
     }
 
