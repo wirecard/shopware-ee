@@ -61,7 +61,7 @@ class TransactionManager
 
         // It is possible that the notification arrived before the initial transaction has been created
         $notify = $this->em->getRepository(Transaction::class)
-                           ->findOneBy(['requestId' => $response->getRequestId(), 'type' => Transaction::TYPE_NOTIFY]);
+            ->findOneBy(['requestId' => $response->getRequestId(), 'type' => Transaction::TYPE_NOTIFY]);
         if ($notify) {
             $transaction->setPaymentStatus($notify->getPaymentStatus());
         }
@@ -78,17 +78,10 @@ class TransactionManager
      */
     public function createInteraction($response)
     {
-        $parentTransaction = $this->em->getRepository(Transaction::class)
-                                      ->findOneBy(['requestId' => $response->getRequestId()]);
+        $initialTransaction = $this->em->getRepository(Transaction::class)
+            ->findOneBy(['requestId' => $response->getRequestId()]);
 
-        $transaction = new Transaction(Transaction::TYPE_INTERACTION);
-        if ($parentTransaction) {
-            $transaction->setPaymentUniqueId($parentTransaction->getPaymentUniqueId());
-            $transaction->setOrderNumber($parentTransaction->getOrderNumber());
-        }
-        $transaction->setResponse($response);
-
-        return $this->persist($transaction);
+        return $this->updateTransaction($initialTransaction, $response, Transaction::TYPE_INTERACTION);
     }
 
     /**
@@ -102,21 +95,16 @@ class TransactionManager
      */
     public function createReturn(Transaction $initialTransaction, Response $response, $statusMessage = null)
     {
-        $transactions = $this->em->getRepository(Transaction::class)
-                                 ->findBy(['paymentUniqueId' => $initialTransaction->getPaymentUniqueId()]);
-        foreach ($transactions as $transaction) {
-            if ($transaction->getId() !== $initialTransaction->getId()) {
-                $transaction->setOrderNumber($initialTransaction->getOrderNumber());
-            }
+        if ($initialTransaction->getType() === Transaction::TYPE_NOTIFY) {
+            return $initialTransaction;
         }
 
-        $transaction = new Transaction(Transaction::TYPE_RETURN);
-        $transaction->setPaymentUniqueId($initialTransaction->getPaymentUniqueId());
-        $transaction->setOrderNumber($initialTransaction->getOrderNumber());
-        $transaction->setResponse($response);
-        $transaction->setStatusMessage($statusMessage);
-
-        return $this->persist($transaction);
+        return $this->updateTransaction(
+            $initialTransaction,
+            $response,
+            Transaction::TYPE_RETURN,
+            $statusMessage
+        );
     }
 
     /**
@@ -130,35 +118,38 @@ class TransactionManager
      */
     public function createNotify(Transaction $initialTransaction, Response $response, BackendService $backendService)
     {
-        $transaction = new Transaction(Transaction::TYPE_NOTIFY);
-        $transaction->setPaymentUniqueId($initialTransaction->getPaymentUniqueId());
-        $transaction->setPaymentStatus($initialTransaction->getPaymentStatus());
-        $transaction->setOrderNumber($initialTransaction->getOrderNumber());
-        $transaction->setResponse($response);
+        // Update backend transaction with notification - if exists
+        $backendTransaction = $this->updateBackendOnNotify($initialTransaction, $response, $backendService);
+        if ($backendTransaction) {
+            return $backendTransaction;
+        }
+
+        // Update initial notification
+        $initialTransaction = $this->updateTransaction($initialTransaction, $response, Transaction::TYPE_NOTIFY);
 
         // POI/PIA: Set status message, if PTRID of initial transaction and notification transaction do not match
         $expectReference = $initialTransaction->getProviderTransactionReference();
-        $actualReference = $transaction->getProviderTransactionReference();
-        if ($transaction->getPaymentMethod() === PoiPiaTransaction::NAME && $expectReference !== $actualReference) {
-            $transaction->setStatusMessage(
+        $actualReference = $initialTransaction->getProviderTransactionReference();
+        if ($initialTransaction->getPaymentMethod() === PoiPiaTransaction::NAME &&
+            $expectReference !== $actualReference) {
+            $initialTransaction->setStatusMessage(
                 "Provider Transaction Reference ID mismatch: " .
                 ($expectReference ? ("Expected '$expectReference', got '$actualReference'") : "'$actualReference'")
             );
         }
-
-        $transaction = $this->persist($transaction);
+        $this->em->flush();
 
         $parentTransaction = $this->em->getRepository(Transaction::class)->findOneBy([
-            'transactionId' => $transaction->getParentTransactionId(),
+            'transactionId' => $initialTransaction->getParentTransactionId(),
             'type'          => Transaction::TYPE_NOTIFY,
         ]);
 
         if ($parentTransaction && $backendService->isFinal($response->getTransactionType())) {
-            $transaction->setState(Transaction::STATE_CLOSED);
+            $initialTransaction->setState(Transaction::STATE_CLOSED);
             $this->em->flush();
         }
 
-        return $transaction;
+        return $initialTransaction;
     }
 
     /**
@@ -222,10 +213,12 @@ class TransactionManager
         $totalAmount       = (float)$transaction->getAmount();
         $childTransactions = $this->em->getRepository(Transaction::class)->findBy([
             'parentTransactionId' => $transaction->getTransactionId(),
-            'type'                => Transaction::TYPE_BACKEND,
+            'orderNumber'         => $transaction->getOrderNumber(),
         ]);
         foreach ($childTransactions as $childTransaction) {
-            $totalAmount -= (float)$childTransaction->getAmount();
+            if ($childTransaction !== $transaction) {
+                $totalAmount -= (float)$childTransaction->getAmount();
+            }
         }
         return $totalAmount;
     }
@@ -271,6 +264,63 @@ class TransactionManager
     }
 
     /**
+     * @param Transaction $initialTransaction
+     * @return array
+     */
+    private function getTransactions(Transaction $initialTransaction)
+    {
+        return (array)$this->em->getRepository(Transaction::class)
+            ->findBy(['paymentUniqueId' => $initialTransaction->getPaymentUniqueId()]);
+    }
+
+    /**
+     * @param Transaction $transaction
+     * @param Response $response
+     * @param $type
+     * @param null $statusMessage
+     * @return Transaction
+     */
+    private function updateTransaction(Transaction $transaction, Response $response, $type, $statusMessage = null)
+    {
+        $transaction->setType($type);
+        $transaction->setResponse($response);
+        $transaction->setUpdatedAt(new \DateTime());
+        if ($statusMessage) {
+            $transaction->setStatusMessage($statusMessage);
+        }
+        $this->em->flush();
+
+        return $transaction;
+    }
+
+    /**
+     * @param $initialTransaction
+     * @param $response
+     * @param $backendService
+     * @return bool|Transaction
+     * @throws \Exception
+     */
+    private function updateBackendOnNotify($initialTransaction, $response, $backendService)
+    {
+        // Get all transactions with the same payment unique id
+        $transactions = $this->getTransactions($initialTransaction);
+        foreach ($transactions as $transaction) {
+            // Update if is not initial transaction and backend already exists
+            if ($transaction !== $initialTransaction && $transaction->getType() === Transaction::TYPE_BACKEND) {
+                if ($backendService->isFinal($response->getTransactionType())) {
+                    $transaction->setState(Transaction::STATE_CLOSED);
+                }
+                $transaction->setType(Transaction::TYPE_NOTIFY);
+                $transaction->setResponse($response);
+                $transaction->setUpdatedAt(new \DateTime());
+                $this->em->flush();
+                return $transaction;
+            }
+        }
+        return false;
+    }
+
+    /**
      * @param Transaction $transaction
      *
      * @return Transaction
@@ -296,10 +346,10 @@ class TransactionManager
     public function findNotificationTransaction(Transaction $initialTransaction)
     {
         return $this->em->getRepository(Transaction::class)
-                        ->findOneBy([
-                            'paymentUniqueId' => $initialTransaction->getPaymentUniqueId(),
-                            'type'            => Transaction::TYPE_NOTIFY,
-                        ]);
+            ->findOneBy([
+                'paymentUniqueId' => $initialTransaction->getPaymentUniqueId(),
+                'type'            => Transaction::TYPE_NOTIFY,
+            ]);
     }
 
     /**
@@ -325,9 +375,13 @@ class TransactionManager
 
         if ($paymentUniqueId) {
             $transaction = $this->findParentTransactionBy('paymentUniqueId', $paymentUniqueId);
-            if ($transaction && $transaction->isInitial()) {
+            if ($transaction) {
                 return $transaction;
             }
+        } else {
+            $transaction = $this->em->getRepository(Transaction::class)
+                ->findOneBy(['requestId' => $response->getRequestId()]);
+            return $transaction;
         }
 
         // still no initial transaction found: try to find it recursively via parent-transaction-id or requestId

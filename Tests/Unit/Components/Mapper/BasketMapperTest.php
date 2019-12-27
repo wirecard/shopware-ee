@@ -289,7 +289,7 @@ class BasketMapperTest extends TestCase
      */
     public function testNumberFormat($expected, $amount)
     {
-        $this->assertSame($expected, BasketMapper::numberFormat($amount));
+        $this->assertSame(floatval($expected), BasketMapper::numberFormat($amount));
     }
 
     public function numberFormatProvider()
