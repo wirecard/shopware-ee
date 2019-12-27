@@ -46,24 +46,24 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 {
     // @codingStandardsIgnoreEnd
 
-    private const ROUTER_CONTROLLER = 'controller';
-    private const ROUTER_ACTION = 'action';
-    private const ROUTER_METHOD = 'method';
-    private const ROUTER_FORCE_SECURE = 'forceSecure';
+    const ROUTER_CONTROLLER = 'controller';
+    const ROUTER_ACTION = 'action';
+    const ROUTER_METHOD = 'method';
+    const ROUTER_FORCE_SECURE = 'forceSecure';
 
-    private const SOURCE_PAYMENT_HANDLER = 'wirecard_elastic_engine.payment_handler';
-    private const SOURCE_RETURN_HANDLER = 'wirecard_elastic_engine.return_handler';
-    private const SOURCE_TRANSACTION_MANAGER = 'wirecard_elastic_engine.transaction_manager';
-    private const SOURCE_PAYMENT_FACTORY = 'wirecard_elastic_engine.payment_factory';
-    private const SOURCE_NOTIFICATION_HANDLER = 'wirecard_elastic_engine.notification_handler';
+    const SOURCE_PAYMENT_HANDLER = 'wirecard_elastic_engine.payment_handler';
+    const SOURCE_RETURN_HANDLER = 'wirecard_elastic_engine.return_handler';
+    const SOURCE_TRANSACTION_MANAGER = 'wirecard_elastic_engine.transaction_manager';
+    const SOURCE_PAYMENT_FACTORY = 'wirecard_elastic_engine.payment_factory';
+    const SOURCE_NOTIFICATION_HANDLER = 'wirecard_elastic_engine.notification_handler';
 
-    private const ROUTE_ACTION_RETURN = 'return';
-    private const ROUTE_ACTION_CANCEL = 'cancel';
-    private const ROUTE_ACTION_FAILURE = 'failure';
-    private const ROUTE_ACTION_NOTIFY = 'notify';
+    const ROUTE_ACTION_RETURN = 'return';
+    const ROUTE_ACTION_CANCEL = 'cancel';
+    const ROUTE_ACTION_FAILURE = 'failure';
+    const ROUTE_ACTION_NOTIFY = 'notify';
 
-    private const RETURN_ERROR_MESSAGE = 'Return processing failed';
-    private const NOTIFY_ERROR_MESSAGE = 'Notification handling failed';
+    const RETURN_ERROR_MESSAGE = 'Return processing failed';
+    const NOTIFY_ERROR_MESSAGE = 'Notification handling failed';
 
     /**
      * @var string
