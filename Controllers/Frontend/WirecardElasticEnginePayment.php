@@ -269,7 +269,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     private function createOrder(ReturnHandler $returnHandler, SuccessResponse $response)
     {
         $this->getSessionManager()->destroyDeviceFingerprintId();
-        $initialTransaction = $this->getInitialTransaction($response);
+        $this->transactionManager = $this->getTransactionManager();
+        $initialTransaction = $this->transactionManager->getInitialTransaction($response);
         $orderStatus = Status::ORDER_STATE_OPEN;
 
         $orderStatusComment = $this->verifyBasket($initialTransaction);
@@ -743,17 +744,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         if ($order) {
             $this->getModules()->Order()->setOrderStatus($order->getId(), $orderStatusId, false, $orderStatusComment);
         }
-    }
-
-    /**
-     * @param $response
-     * @return Transaction
-     * @throws \WirecardElasticEngine\Exception\InitialTransactionNotFoundException
-     */
-    private function getInitialTransaction($response)
-    {
-        $this->transactionManager = $this->getTransactionManager();
-        return $this->transactionManager->getInitialTransaction($response);
     }
 
     /**
