@@ -111,8 +111,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $this->payment = $this->getPaymentFactory()->create($this->getPaymentShortName());
         try {
             $this->currency = $this->getCurrencyShortName();
-            $this->userMapper = $this->getUserMapper();
-            $this->basketMapper = $this->getBasketMapper();
+            $this->userMapper = $this->createUserMapper();
+            $this->basketMapper = $this->createBasketMapper();
             $this->amount = new Amount(BasketMapper::numberFormat($this->getAmount()), $this->currency);
         } catch (BasketException $e) {
             $this->getLogger()->notice($e->getMessage());
@@ -168,7 +168,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         try {
             $payment = $this->getPaymentFactory()->create($request->getParam(self::ROUTER_METHOD));
-            $backendService = $this->getBackendService($payment);
+            $backendService = $this->createBackendService($payment);
             $notification = $this->getNotification($backendService, $request);
             $notifyTransaction = $this->getNotifyTransaction($notification, $backendService);
             if ($notifyTransaction) {
@@ -360,7 +360,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     {
         return $response = $this->getReturnHandler()->handleRequest(
             $this->payment,
-            $this->getTransactionService(),
+            $this->createTransactionService(),
             $this->request,
             $this->getSessionManager()
         );
@@ -396,7 +396,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     /**
      * @return UserMapper
      */
-    private function getUserMapper()
+    private function createUserMapper()
     {
         $shop = Shopware()->Shop();
         return new UserMapper(
@@ -415,7 +415,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * @throws \WirecardElasticEngine\Exception\NotAvailableBasketException
      * @throws \WirecardElasticEngine\Exception\OutOfStockBasketException
      */
-    private function getBasketMapper()
+    private function createBasketMapper()
     {
         return new BasketMapper(
             $this->getBasket(),
@@ -432,7 +432,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * @return OrderSummary
      * @throws Exception
      */
-    private function getOrderSummary()
+    private function createOrderSummary()
     {
         return new OrderSummary(
             $this->generatePaymentUniqueId(),
@@ -451,7 +451,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * @return TransactionService
      * @throws Exception
      */
-    private function getTransactionService()
+    private function createTransactionService()
     {
         return new TransactionService(
             $this->payment->getTransactionConfig(
@@ -466,7 +466,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      * @param $payment
      * @return BackendService
      */
-    private function getBackendService($payment)
+    private function createBackendService($payment)
     {
         return new BackendService($payment->getTransactionConfig(
             $this->container->getParameterBag(),
@@ -529,8 +529,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     private function getIndexAction()
     {
         return $this->getPaymentHandler()->execute(
-            $this->getOrderSummary(),
-            $this->getTransactionService(),
+            $this->createOrderSummary(),
+            $this->createTransactionService(),
             $this->getRedirect(),
             $this->getRoute(self::ROUTE_ACTION_NOTIFY, $this->payment->getName()),
             $this->Request(),
