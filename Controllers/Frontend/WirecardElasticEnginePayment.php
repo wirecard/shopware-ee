@@ -361,20 +361,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     }
 
     /**
-     * @return \Wirecard\PaymentSdk\Response\Response
-     * @throws Exception
-     */
-    private function getResponse()
-    {
-        return $response = $this->getReturnHandler()->handleRequest(
-            $this->payment,
-            $this->createTransactionService(),
-            $this->request,
-            $this->getSessionManager()
-        );
-    }
-
-    /**
      * @return mixed
      * @throws Exception
      */
@@ -555,7 +541,12 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     private function getReturnAction()
     {
         $returnHandler = $this->getReturnHandler();
-        $response = $this->getResponse();
+        $response = $this->getReturnHandler()->handleRequest(
+            $this->payment,
+            $this->createTransactionService(),
+            $this->request,
+            $this->getSessionManager()
+        );
         return $response instanceof SuccessResponse
             ? $this->createOrder($returnHandler, $response)
             : $returnHandler->handleResponse($response);
