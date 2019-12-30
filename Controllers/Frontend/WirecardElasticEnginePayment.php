@@ -147,7 +147,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function returnAction()
     {
-        $this->request = $this->Request();
         $this->payment = $this->getPaymentFactory()->create($this->request->getParam(self::ROUTER_METHOD));
 
         try {
@@ -171,12 +170,11 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     {
         // Disable template rendering for incoming notifications
         $this->disableTemplateRendering();
-        $request = $this->Request();
 
         try {
-            $payment = $this->getPaymentFactory()->create($request->getParam(self::ROUTER_METHOD));
+            $payment = $this->getPaymentFactory()->create($this->request->getParam(self::ROUTER_METHOD));
             $backendService = $this->createBackendService($payment);
-            $notification = $this->getNotification($backendService, $request);
+            $notification = $backendService->handleNotification($this->request->getRawBody());
             $notifyTransaction = $this->getNotifyTransaction($notification, $backendService);
             if ($notifyTransaction) {
                 $notificationMail = $this->get('wirecard_elastic_engine.mail.merchant_notification');
@@ -481,16 +479,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $this->container->getParameterBag(),
             $this->getCurrencyShortName()
         ));
-    }
-
-    /**
-     * @param $backendService
-     * @param $request
-     * @return mixed
-     */
-    private function getNotification($backendService, $request)
-    {
-        return $backendService->handleNotification($request->getRawBody());
     }
 
     /**
