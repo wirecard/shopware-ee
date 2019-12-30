@@ -168,6 +168,7 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
      */
     public function notifyAction()
     {
+        // @TODO: Analyse why template rendering has to be disabled especially for notifications
         // Disable template rendering for incoming notifications
         $this->disableTemplateRendering();
 
@@ -785,18 +786,13 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     }
 
     /**
-     * @return mixed
      * @throws Exception
+     * @since 1.4.0
      */
-    private function getViewRenderer()
-    {
-        /** @var Enlight_Controller_Plugins_ViewRenderer_Bootstrap $viewRenderer */
-        return $this->get('front')->Plugins()->get('ViewRenderer');
-    }
-
     private function disableTemplateRendering()
     {
-        $viewRenderer = $this->getViewRenderer();
+        /** @var Enlight_Controller_Plugins_ViewRenderer_Bootstrap $viewRenderer */
+        $viewRenderer = $this->get('front')->Plugins()->get('ViewRenderer');
         $viewRenderer->setNoRender();
     }
 }
