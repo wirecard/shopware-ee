@@ -146,10 +146,10 @@ class NotificationHandler extends Handler
      *
      * @since 1.0.0
      */
-    private function savePaymentStatus( \sOrder $shopwareOrder, Order $order, $paymentStatusId, $transactionType )
+    private function savePaymentStatus(\sOrder $shopwareOrder, Order $order, $paymentStatusId, $transactionType)
     {
         $sendEmailPaymentId = $paymentStatusId;
-        if($transactionType === 'capture-authorization'){
+        if ($transactionType === 'capture-authorization') {
             $sendEmailPaymentId = null;
         }
         $shopwareOrder->setPaymentStatus(
