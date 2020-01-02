@@ -164,8 +164,6 @@ class NotificationHandler extends Handler
      *
      * @param int $paymentStatusId
      *
-     * @param $transactionType
-     *
      * @return bool
      *
      * @since 1.0.0
