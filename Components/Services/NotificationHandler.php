@@ -76,7 +76,7 @@ class NotificationHandler extends Handler
         BackendService $backendService
     ) {
         $this->logger->info('Incoming success notification', $response->getData());
-
+        $transactionType = $response->getTransactionType();
         $paymentStatusId = $this->getPaymentStatusId($backendService, $response);
         try {
             $initialTransaction = $this->transactionManager->getInitialTransaction($response);
@@ -115,7 +115,7 @@ class NotificationHandler extends Handler
         // if we already have an order, we can update the payment status directly
         if ($order) {
             $this->logger->debug("Order {$order->getNumber()} already exists, update payment status $paymentStatusId");
-            $this->savePaymentStatus($shopwareOrder, $order, $paymentStatusId);
+            $this->savePaymentStatus($shopwareOrder, $order, $paymentStatusId, $transactionType);
             if (! $initialTransaction->getOrderNumber() && $order->getNumber()) {
                 $initialTransaction->setOrderNumber($order->getNumber());
             }
@@ -131,7 +131,7 @@ class NotificationHandler extends Handler
         ]);
         if ($order) {
             $this->logger->debug("Order {$order->getNumber()} found, update payment status $paymentStatusId");
-            $this->savePaymentStatus($shopwareOrder, $order, $paymentStatusId);
+            $this->savePaymentStatus($shopwareOrder, $order, $paymentStatusId, $transactionType);
         }
 
         return $initialTransaction;
@@ -139,17 +139,23 @@ class NotificationHandler extends Handler
 
     /**
      * @param \sOrder $shopwareOrder
-     * @param Order   $order
-     * @param int     $paymentStatusId
+     * @param Order $order
+     * @param int $paymentStatusId
+     *
+     * @param $transactionType
      *
      * @since 1.0.0
      */
-    private function savePaymentStatus(\sOrder $shopwareOrder, Order $order, $paymentStatusId)
+    private function savePaymentStatus( \sOrder $shopwareOrder, Order $order, $paymentStatusId, $transactionType )
     {
+        $sendEmailPaymentId = $paymentStatusId;
+        if($transactionType === 'capture-authorization'){
+            $sendEmailPaymentId = null;
+        }
         $shopwareOrder->setPaymentStatus(
             $order->getId(),
             $paymentStatusId,
-            self::shouldSendStatusMail($paymentStatusId)
+            self::shouldSendStatusMail($sendEmailPaymentId)
         );
     }
 
@@ -157,6 +163,8 @@ class NotificationHandler extends Handler
      * Status mails should be sent if the payment is finalized.
      *
      * @param int $paymentStatusId
+     *
+     * @param $transactionType
      *
      * @return bool
      *
