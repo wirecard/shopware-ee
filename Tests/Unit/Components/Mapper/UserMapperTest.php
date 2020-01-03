@@ -218,7 +218,6 @@ class UserMapperTest extends TestCase
         $this->assertInstanceOf(AccountHolder::class, $account);
         $this->assertEquals([
             'address' => [
-                'street1' => null,
                 'city'    => null,
                 'country' => null,
             ],
