@@ -122,7 +122,6 @@ class TransactionManagerTest extends TestCase
         $initialTransaction->setState(Transaction::STATE_OPEN);
 
         $this->repo->expects($this->atLeastOnce())->method('findBy')->willReturn(null);
-        $this->repo->expects($this->atLeastOnce())->method('findOneBy')->willReturn(null);
 
         $response = $this->createMock(SuccessResponse::class);
         $response->method('getRequestId')->willReturn('req-id');
@@ -151,7 +150,6 @@ class TransactionManagerTest extends TestCase
         $response->method('getRequestId')->willReturn('req-id');
 
         $backendService = $this->createMock(BackendService::class);
-        //@TODO: isFinal is currently ignored! State Close should only be set if transaction isFinal
         $backendService->method('isFinal')->willReturn(true);
 
         $transaction = $this->manager->createNotify($initialTransaction, $response, $backendService);
@@ -176,7 +174,6 @@ class TransactionManagerTest extends TestCase
         $response->method('getRequestId')->willReturn('req-id');
 
         $backendService = $this->createMock(BackendService::class);
-        //@TODO: isFinal is currently ignored! State Close should only be set if transaction isFinal
         // isFinal will return false if it is e.g. Capture
         $backendService->method('isFinal')->willReturn(false);
 
@@ -189,7 +186,6 @@ class TransactionManagerTest extends TestCase
     public function testCreateBackend()
     {
         $initialTransaction = $this->createMock(Transaction::class);
-        $initialTransaction->expects($this->atLeastOnce())->method('isInitial')->willReturn(true);
         $initialTransaction->expects($this->atLeastOnce())->method('getOrderNumber')->willReturn('order-num');
         $initialTransaction->expects($this->atLeastOnce())->method('getPaymentUniqueId')
                            ->willReturn('parent-payUniqueId');
@@ -218,7 +214,6 @@ class TransactionManagerTest extends TestCase
     public function testCreateBackendAndCloseParentTransaction()
     {
         $initialTransaction = $this->createMock(Transaction::class);
-        $initialTransaction->expects($this->atLeastOnce())->method('isInitial')->willReturn(true);
         $initialTransaction->expects($this->atLeastOnce())->method('getOrderNumber')->willReturn('order-num');
         $initialTransaction->expects($this->atLeastOnce())->method('getPaymentUniqueId')
                            ->willReturn('parent-payUniqueId');
