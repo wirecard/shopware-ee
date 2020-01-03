@@ -65,6 +65,8 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     const RETURN_ERROR_MESSAGE = 'Return processing failed';
     const NOTIFY_ERROR_MESSAGE = 'Notification handling failed';
 
+    const VALID_BASKET_SIGNATURE = null;
+
     /**
      * @var string
      */
@@ -270,21 +272,33 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         $this->getSessionManager()->destroyDeviceFingerprintId();
         $this->transactionManager = $this->getTransactionManager();
         $initialTransaction = $this->transactionManager->getInitialTransaction($response);
-        $orderStatus = Status::ORDER_STATE_OPEN;
 
-        $orderStatusComment = $this->verifyBasket($initialTransaction);
-        if ($orderStatusComment !== null) {
-            $orderStatus = Status::ORDER_STATE_CLARIFICATION_REQUIRED;
-        }
-
+        $orderStatusComment = $this->getOrderStatusCommentOnBasketVerification($initialTransaction);
+        // @TODO: Analyse double check for payment status
         $paymentStatus = $this->getPaymentStatus($initialTransaction);
-        $orderNumber = $this->fetchOrderNumber($response, $initialTransaction, $paymentStatus);
+        $orderNumber = $this->saveOrder(
+            $response->getTransactionId(),
+            $initialTransaction->getPaymentUniqueId(),
+            $paymentStatus,
+            NotificationHandler::shouldSendStatusMail($paymentStatus)
+        );
+        if (! $orderNumber) {
+            throw new CouldNotSaveOrderException(
+                $response->getTransactionId(),
+                $initialTransaction->getPaymentUniqueId(),
+                $paymentStatus
+            );
+        }
+        $this->getLogger()->debug("Saved order $orderNumber with payment status $paymentStatus");
+        $initialTransaction->setOrderNumber($orderNumber);
+        $this->getModelManager()->flush($initialTransaction);
+
+        // @TODO: Analyse duplicated order status mail
         $this->sendStatusMailOnSaveOrder($orderNumber, $paymentStatus);
 
-        if ($orderStatus !== Status::ORDER_STATE_OPEN) {
-            $this->setOrderStatus($orderNumber, $orderStatus, $orderStatusComment);
+        if ($orderStatusComment !== self::VALID_BASKET_SIGNATURE) {
+            $this->setOrderStatus($orderNumber, Status::ORDER_STATE_CLARIFICATION_REQUIRED, $orderStatusComment);
         }
-
         // check again if payment status has been set by notification and try to update payment status
         if (!$initialTransaction->getPaymentStatus()) {
             $this->updatePaymentStatus($initialTransaction, $response);
@@ -295,15 +309,15 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
     /**
      * @param $initialTransaction
-     * @return bool|string
+     * @return null|string
      * @throws Exception
      */
-    private function verifyBasket($initialTransaction)
+    private function getOrderStatusCommentOnBasketVerification($initialTransaction)
     {
         try {
             $orderBasket = $this->loadBasketFromSignature($initialTransaction->getBasketSignature());
             $this->verifyBasketSignature($initialTransaction->getBasketSignature(), $orderBasket);
-            return null;
+            return self::VALID_BASKET_SIGNATURE;
         } catch (\RuntimeException $exception) {
             $orderStatusComment = 'Basket verification failed: ' . $exception->getMessage();
             $this->getLogger()->warning($orderStatusComment);
@@ -569,36 +583,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             }
         }
         return Status::PAYMENT_STATE_OPEN;
-    }
-
-    /**
-     * @param $response
-     * @param $transaction
-     * @param $paymentStatus
-     * @return false|int
-     * @throws CouldNotSaveOrderException
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     */
-    private function fetchOrderNumber($response, $transaction, $paymentStatus)
-    {
-        $orderNumber = $this->saveOrder(
-            $response->getTransactionId(),
-            $transaction->getPaymentUniqueId(),
-            $paymentStatus,
-            NotificationHandler::shouldSendStatusMail($paymentStatus)
-        );
-        $this->getLogger()->debug("Saved order $orderNumber with payment status $paymentStatus");
-        if (! $orderNumber) {
-            throw new CouldNotSaveOrderException(
-                $response->getTransactionId(),
-                $transaction->getPaymentUniqueId(),
-                $paymentStatus
-            );
-        }
-        $transaction->setOrderNumber($orderNumber);
-        $this->getModelManager()->flush($transaction);
-        return $orderNumber;
     }
 
     /**
