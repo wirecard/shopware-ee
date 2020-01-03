@@ -139,16 +139,6 @@ class TransactionManager
         }
         $this->em->flush();
 
-        $parentTransaction = $this->em->getRepository(Transaction::class)->findOneBy([
-            'transactionId' => $initialTransaction->getParentTransactionId(),
-            'type'          => Transaction::TYPE_NOTIFY,
-        ]);
-
-        if ($parentTransaction && $backendService->isFinal($response->getTransactionType())) {
-            $initialTransaction->setState(Transaction::STATE_CLOSED);
-            $this->em->flush();
-        }
-
         return $initialTransaction;
     }
 
