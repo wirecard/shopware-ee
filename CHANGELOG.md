@@ -1,6 +1,6 @@
 # Changelog
 
-## v5.0.0
+## v6.0.0
 
 * Add additional translation files
 * Add P24 #54
@@ -12,7 +12,7 @@
 * Improve compatibility with custom and third party themes #72
 * Improve submission of order number for all payment methods
 
-| Overview | Shopware version | PHP 5.6 | PHP 7.0 | PHP 7.1 | PHP 7.2 | 
-|---|---|:---:|:---:|:---:|:---:| 
-| **Tested version(s)** | Shopware 5.0.0 | &#9989; | &#9989; | &#9989; | &#9989; | 
-| **Compatibility** | Shopware 3.3.8 - 4.0.0 | &#9989; | &#9989; | &#9989; | &#9989; | 
+|        Overview       |     Shopware version    | PHP 5.6 | PHP 7.0 | PHP 7.1 | PHP 7.2 | 
+|-----------------------|-------------------------|:-------:|:-------:|:-------:|:-------:| 
+| **Tested version(s)** |       Shopware 6.0.0    | &#9989; | &#9989; | &#9989; | &#9989; | 
+|   **Compatibility**   |  Shopware 3.3.8 - 4.0.0 | &#9989; | &#9989; | &#9989; | &#9989; | 
