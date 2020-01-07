@@ -402,6 +402,15 @@ class TransactionManager
         return $transaction ?: $repo->findOneBy([$criteria => $value]);
     }
 
+    /**
+     * @param Transaction      $transaction
+     * @param Transaction|null $previousTransaction
+     *
+     * @return Transaction|null
+     *
+     * @since 1.1.0 Added $previousTransaction
+     * @since 1.0.0
+     */
     private function returnInitialTransaction(Transaction $transaction, Transaction $previousTransaction = null)
     {
         if (! $transaction->getParentTransactionId() && $transaction->isInitial()) {
