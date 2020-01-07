@@ -231,6 +231,33 @@ class TransactionManager
     }
 
     /**
+     * Calculate remaining amount for payment state definition
+     *
+     * @param $amount
+     * @param $orderNumber
+     *
+     * @return float
+     *
+     * @since 1.4.0
+     */
+    public function getRemainingAmountPaymentState($amount,$orderNumber)
+    {
+        $childTransactions = $this->em->getRepository(Transaction::class)->findBy([
+            'orderNumber'     => $orderNumber,
+            'type'            => Transaction::TYPE_BACKEND,
+        ]);
+        foreach ($childTransactions as $childTransaction) {
+            if($childTransaction->getTransactionType() === Transaction::TYPE_REFUND_CAPTURE){
+                $amount += (float)$childTransaction->getAmount();
+            }
+            else {
+                $amount -= (float)$childTransaction->getAmount();
+            }
+        }
+        return $amount;
+    }
+
+    /**
      * Calculate remaining amount for backend operations
      *
      * @param Transaction $transaction
@@ -385,6 +412,10 @@ class TransactionManager
      * @since 1.1.0 Added $previousTransaction
      * @since 1.0.0
      */
+
+    public function getTransaction($response){
+        return $this->getInitialTransaction($response);
+    }
     private function returnInitialTransaction(Transaction $transaction, Transaction $previousTransaction = null)
     {
         if (! $transaction->getParentTransactionId() && $transaction->isInitial()) {
