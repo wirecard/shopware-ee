@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.0.0
+## v4.0.0
 
 * Add additional translation files
 * Add P24 #54
@@ -14,5 +14,5 @@
 
 |  Overview | Shopware version | PHP 5.6 | PHP 7.0 | PHP 7.1 | PHP 7.2 | 
 |---|---|:---:|:---:|:---:|:---:| 
-| **Tested version(s)** | Shopware 2.0.0 | &#9989; | &#9989; | &#9989; | &#9989; | 
-| **Compatibility** | Shopware 1.3.8 - 2.0.0 | &#9989; | &#9989; | &#9989; | &#9989; | 
+| **Tested version(s)** | Shopware 4.0.0 | &#9989; | &#9989; | &#9989; | &#9989; | 
+| **Compatibility** | Shopware 3.3.8 - 4.0.0 | &#9989; | &#9989; | &#9989; | &#9989; | 
