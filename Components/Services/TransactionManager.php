@@ -240,14 +240,14 @@ class TransactionManager
      *
      * @since 1.4.0
      */
-    public function getRemainingAmountPaymentState($amount,$orderNumber)
+    public function getRemainingAmountPaymentState($amount, $orderNumber)
     {
         $childTransactions = $this->em->getRepository(Transaction::class)->findBy([
             'orderNumber'     => $orderNumber,
             'type'            => Transaction::TYPE_BACKEND,
         ]);
         foreach ($childTransactions as $childTransaction) {
-            if($childTransaction->getTransactionType() === Transaction::TYPE_REFUND_CAPTURE){
+            if ($childTransaction->getTransactionType() === Transaction::TYPE_REFUND_CAPTURE) {
                 $amount += (float)$childTransaction->getAmount();
             }
             else {
@@ -403,19 +403,6 @@ class TransactionManager
         return $transaction ?: $repo->findOneBy([$criteria => $value]);
     }
 
-    /**
-     * @param Transaction      $transaction
-     * @param Transaction|null $previousTransaction
-     *
-     * @return Transaction|null
-     *
-     * @since 1.1.0 Added $previousTransaction
-     * @since 1.0.0
-     */
-
-    public function getTransaction($response){
-        return $this->getInitialTransaction($response);
-    }
     private function returnInitialTransaction(Transaction $transaction, Transaction $previousTransaction = null)
     {
         if (! $transaction->getParentTransactionId() && $transaction->isInitial()) {

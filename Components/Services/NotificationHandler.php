@@ -182,7 +182,8 @@ class NotificationHandler extends Handler
     {
         $transactionAmount = $response->getData()['parent-transaction-amount'];
         $transaction = $this->transactionManager->getInitialTransaction($response);
-        $transactionRemaining = $this->transactionManager->getRemainingAmountPaymentState($transactionAmount, $transaction->getOrderNumber());
+        $orderNr = $transaction->getOrderNumber();
+        $transactionRemaining = $this->transactionManager->getRemainingAmountPaymentState($transactionAmount, $orderNr);
         if ($response->getTransactionType() === 'check-payer-response') {
             return Status::PAYMENT_STATE_OPEN;
         }
@@ -192,7 +193,7 @@ class NotificationHandler extends Handler
             case BackendService::TYPE_CANCELLED:
                 return Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED;
             case BackendService::TYPE_PROCESSING:
-                if($transactionRemaining > 0) {
+                if ($transactionRemaining > 0) {
                     return Status::PAYMENT_STATE_PARTIALLY_PAID;
                 }
                 else {
