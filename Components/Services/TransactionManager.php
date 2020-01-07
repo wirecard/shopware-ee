@@ -249,8 +249,7 @@ class TransactionManager
         foreach ($childTransactions as $childTransaction) {
             if ($childTransaction->getTransactionType() === Transaction::TYPE_REFUND_CAPTURE) {
                 $amount += (float)$childTransaction->getAmount();
-            }
-            else {
+            } else {
                 $amount -= (float)$childTransaction->getAmount();
             }
         }

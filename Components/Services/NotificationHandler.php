@@ -195,8 +195,7 @@ class NotificationHandler extends Handler
             case BackendService::TYPE_PROCESSING:
                 if ($transactionRemaining > 0) {
                     return Status::PAYMENT_STATE_PARTIALLY_PAID;
-                }
-                else {
+                } else {
                     return Status::PAYMENT_STATE_COMPLETELY_PAID;
                 }
             case BackendService::TYPE_REFUNDED:
