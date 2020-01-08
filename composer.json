@@ -20,9 +20,6 @@
   },
   "type": "shopware-plugin",
   "scripts": {
-    "make-readme-badge": "@php .bin/version-helper.php -r",
-    "make-wiki-notes": "@php .bin/version-helper.php -w",
-    "make-release-notes": "@php .bin/version-helper.php",
     "upload-coverage": "codacycoverage clover build/coverage.xml",
     "cs-check": "phpcs --standard=phpcs.xml --ignore=*/vendor/*,*/Tests/*,*/node_modules/*,*/Resources/*,*/.bin/* -s ",
     "cs-fix": "phpcbf --standard=phpcs.xml",
