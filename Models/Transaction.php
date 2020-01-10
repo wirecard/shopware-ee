@@ -45,6 +45,7 @@ class Transaction extends ModelEntity
     const TYPE_NOTIFY = 'notify';
 
     const TYPE_REFUND_CAPTURE = 'refund-capture';
+    const TYPE_CHECK_PAYER_RESPONSE = 'check-payer-response';
 
     const STATE_OPEN = 'open';
     const STATE_CLOSED = 'closed';
