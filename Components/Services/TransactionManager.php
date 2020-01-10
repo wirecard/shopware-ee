@@ -252,13 +252,13 @@ class TransactionManager
             'type'        => Transaction::TYPE_BACKEND,
         ]);
         foreach ($childTransactions as $childTransaction) {
-            if($this->addToAmount($childTransaction->getTransactionType())) {
+            if ($this->addToAmount($childTransaction->getTransactionType())) {
                 $restAmount += (float) $childTransaction->getAmount();
             } else {
                 $restAmount -= (float) $childTransaction->getAmount();
             }
         }
-        if ( $restAmount > 0 ) {
+        if ($restAmount > 0) {
             $isRestAmount = true;
         }
         return $isRestAmount;
@@ -273,7 +273,8 @@ class TransactionManager
      *
      * @since 1.4.0
      */
-    private function addToAmount($transactionType) {
+    private function addToAmount($transactionType)
+    {
         switch ($transactionType) {
             case Transaction::TYPE_REFUND_CAPTURE:
                 return true;
