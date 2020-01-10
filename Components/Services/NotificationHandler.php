@@ -148,14 +148,10 @@ class NotificationHandler extends Handler
      */
     private function savePaymentStatus(\sOrder $shopwareOrder, Order $order, $paymentStatusId, $transactionType)
     {
-        $sendEmailPaymentId = $paymentStatusId;
-        if ($transactionType === 'capture-authorization') {
-            $sendEmailPaymentId = null;
-        }
         $shopwareOrder->setPaymentStatus(
             $order->getId(),
             $paymentStatusId,
-            self::shouldSendStatusMail($sendEmailPaymentId)
+            self::shouldSendStatusMail($paymentStatusId, $transactionType)
         );
     }
 
@@ -164,13 +160,19 @@ class NotificationHandler extends Handler
      *
      * @param int $paymentStatusId
      *
+     * @param string|null $transactionType
+     *
      * @return bool
      *
      * @since 1.0.0
      */
-    public static function shouldSendStatusMail($paymentStatusId)
+    public static function shouldSendStatusMail($paymentStatusId, $transactionType=null)
     {
-        return in_array($paymentStatusId, [
+        $sendEmailPaymentId = $paymentStatusId;
+        if ($transactionType === Transaction::TYPE_CAPTURE_AUTHORIZATION) {
+            $sendEmailPaymentId = null;
+        }
+        return in_array($sendEmailPaymentId, [
             Status::PAYMENT_STATE_COMPLETELY_PAID,
             Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
         ]);

@@ -44,6 +44,8 @@ class Transaction extends ModelEntity
     const TYPE_INTERACTION = 'interaction';
     const TYPE_NOTIFY = 'notify';
 
+    const TYPE_CAPTURE_AUTHORIZATION = 'capture-authorization';
+
     const STATE_OPEN = 'open';
     const STATE_CLOSED = 'closed';
 
