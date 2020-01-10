@@ -166,7 +166,7 @@ class NotificationHandler extends Handler
      *
      * @since 1.0.0
      */
-    public static function shouldSendStatusMail($paymentStatusId, $transactionType=null)
+    public static function shouldSendStatusMail($paymentStatusId, $transactionType = null)
     {
         $sendEmailPaymentId = $paymentStatusId;
         if ($transactionType === Transaction::TYPE_CAPTURE_AUTHORIZATION) {
