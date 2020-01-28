@@ -247,12 +247,13 @@ class TransactionManager
     public function isRestAmount($restAmount, $orderNumber)
     {
         $isRestAmount = false;
+        $transactionTypes = [Transaction::TYPE_REFUND_CAPTURE];
         $childTransactions = $this->em->getRepository(Transaction::class)->findBy([
             'orderNumber' => $orderNumber,
             'type'        => Transaction::TYPE_BACKEND,
         ]);
         foreach ($childTransactions as $childTransaction) {
-            if ($this->addToAmount($childTransaction->getTransactionType())) {
+            if (in_array($childTransaction->getTransactionType(), $transactionTypes)) {
                 $restAmount += (float) $childTransaction->getAmount();
             } else {
                 $restAmount -= (float) $childTransaction->getAmount();
@@ -262,27 +263,6 @@ class TransactionManager
             $isRestAmount = true;
         }
         return $isRestAmount;
-    }
-
-    /**
-     * Decide on adding or removing value to the rest amount
-     *
-     * @param string $transactionType
-     *
-     * @return boolean
-     *
-     * @since 1.4.0
-     */
-    private function addToAmount($transactionType)
-    {
-        switch ($transactionType) {
-            case Transaction::TYPE_REFUND_CAPTURE:
-                return true;
-                break;
-            default:
-                return false;
-                break;
-        }
     }
 
     /**
