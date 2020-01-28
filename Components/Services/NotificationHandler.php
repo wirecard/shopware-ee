@@ -168,14 +168,12 @@ class NotificationHandler extends Handler
      */
     public static function shouldSendStatusMail($paymentStatusId, $transactionType = null)
     {
-        $sendEmailPaymentId = $paymentStatusId;
-        if ($transactionType === Transaction::TYPE_CAPTURE_AUTHORIZATION) {
-            $sendEmailPaymentId = null;
-        }
-        return in_array($sendEmailPaymentId, [
+        $paymentStatuses = [
             Status::PAYMENT_STATE_COMPLETELY_PAID,
             Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
-        ]);
+        ];
+        $transactionTypes = [Transaction::TYPE_CAPTURE_AUTHORIZATION];
+        return (in_array($paymentStatusId, $paymentStatuses))&&(!in_array($transactionType, $transactionTypes)) ;
     }
 
     /**
