@@ -52,6 +52,8 @@ class Transaction extends ModelEntity
 
     const NOTIFY_PAYMENT_STATUS = 'notify-payment-status';
 
+    const TYPES_WITH_REST_AMOUNT = [self::TYPE_REFUND_CAPTURE];
+
     /**
      * @var int
      * @ORM\Column(name="id", type="integer", nullable=false)
