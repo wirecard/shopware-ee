@@ -39,6 +39,7 @@ class Transaction extends ModelEntity
     const TYPE_INITIAL_RESPONSE = 'initial-response';
     const TYPE_INITIAL_REQUEST = 'initial-request';
     const TYPES_INITIAL = ['initial-response', 'initial-request'];
+    const TYPES_EMAIL_BLOCK = [self::TYPE_CAPTURE_AUTHORIZATION];
     const TYPE_BACKEND = 'backend';
     const TYPE_RETURN = 'return';
     const TYPE_INTERACTION = 'interaction';

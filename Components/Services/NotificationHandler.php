@@ -172,8 +172,8 @@ class NotificationHandler extends Handler
             Status::PAYMENT_STATE_COMPLETELY_PAID,
             Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
         ];
-        $transactionTypes = [Transaction::TYPE_CAPTURE_AUTHORIZATION];
-        return (in_array($paymentStatusId, $paymentStatuses))&&(!in_array($transactionType, $transactionTypes)) ;
+        return (in_array($paymentStatusId, $paymentStatuses))&&
+               (!in_array($transactionType, Transaction::TYPES_EMAIL_BLOCK));
     }
 
     /**
