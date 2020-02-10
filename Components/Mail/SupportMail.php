@@ -287,9 +287,9 @@ class SupportMail
     private function getNonSecretPaymentConfigValues($paymentConfig)
     {
         $nonSecretData = [];
-        foreach ($paymentConfig as $key => $singlePaymentConfig) {
-            if (in_array($key, self::WHITELISTED_PAYMENT_CONFIG_VALUES, true)) {
-                $nonSecretData[ $key ] = $singlePaymentConfig;
+        foreach ($paymentConfig as $paymentOptionKey => $paymentOptionValue) {
+            if (in_array($paymentOptionKey, self::WHITELISTED_PAYMENT_CONFIG_VALUES, true)) {
+                $nonSecretData[$paymentOptionKey] = $paymentOptionValue;
             }
         }
         return $nonSecretData;
