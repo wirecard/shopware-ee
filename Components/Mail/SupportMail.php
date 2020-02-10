@@ -27,7 +27,7 @@ class SupportMail
 {
     const SUPPORT_MAIL = 'shop-systems-support@wirecard.com';
 
-    const WHITELISTED_PAYMENT_CONFIG_VALUES = array(
+    const WHITELISTED_PAYMENT_CONFIG_VALUES = [
         "active",
         "baseUrl",
         "transactionMAID",
@@ -51,7 +51,7 @@ class SupportMail
         "allowDifferentBillingShipping",
         "backendTransactionMaid",
         "showBic",
-    );
+    ];
 
     /**
      * @var \Enlight_Components_Mail
@@ -215,8 +215,8 @@ class SupportMail
     {
         $plugin         = $this->installerService->getPluginByName(WirecardElasticEngine::NAME);
         $payments       = $this->paymentFactory->getSupportedPayments();
-        $paymentConfigs = [];
-        $paymentNonSecretConfigs = [];
+        $paymentConfig = [];
+        $paymentNonSecretConfig = [];
 
         foreach ($payments as $payment) {
             $paymentModel = $this->em->getRepository(Payment::class)
@@ -226,20 +226,20 @@ class SupportMail
                 continue;
             }
 
-            $paymentConfigs[$payment->getName()] = array_merge(
+            $paymentConfig[$payment->getName()] = array_merge(
                 ['active' => $paymentModel->getActive()],
                 $payment->getPaymentConfig()->toArray()
             );
         }
 
-        foreach ($paymentConfigs as $key => $paymentConfig) {
-            $paymentNonSecretConfigs[$key] = $this->getNonSecretPaymentConfigValues($paymentConfig);
+        foreach ($paymentConfig as $key => $config) {
+            $paymentNonSecretConfig[$key] = $this->getNonSecretPaymentConfigValues($config);
         }
 
         return [
             'name'     => WirecardElasticEngine::NAME,
             'version'  => $plugin->getVersion(),
-            'payments' => $paymentNonSecretConfigs,
+            'payments' => $paymentNonSecretConfig,
         ];
     }
 
@@ -279,19 +279,19 @@ class SupportMail
     /**
      * Get array of not secret payment config fields
      *
-     * @param $payment_config_values
+     * @param $paymentConfig
      *
      * @return array
      * @since 3.1.0
      */
-    private function getNonSecretPaymentConfigValues($payment_config_values)
+    private function getNonSecretPaymentConfigValues($paymentConfig)
     {
-        $non_secret_data = array();
-        foreach ($payment_config_values as $key => $single_payment_config_value) {
+        $nonSecretData = array();
+        foreach ($paymentConfig as $key => $singlePaymentConfig) {
             if (in_array($key, self::WHITELISTED_PAYMENT_CONFIG_VALUES, true)) {
-                $non_secret_data[ $key ] = $single_payment_config_value;
+                $nonSecretData[ $key ] = $singlePaymentConfig;
             }
         }
-        return $non_secret_data;
+        return $nonSecretData;
     }
 }
