@@ -233,7 +233,7 @@ class SupportMail
         }
 
         foreach ($paymentConfig as $key => $config) {
-            $paymentNonSecretConfig[$key] = $this->getNonSecretPaymentConfigValues($config);
+            $paymentNonSecretConfig[$key] = $this->getNonSecretPaymentConfig($config);
         }
 
         return [
@@ -279,12 +279,12 @@ class SupportMail
     /**
      * Get array of not secret payment config fields
      *
-     * @param $paymentConfig
+     * @param array $paymentConfig
      *
      * @return array
      * @since 3.1.0
      */
-    private function getNonSecretPaymentConfigValues($paymentConfig)
+    private function getNonSecretPaymentConfig($paymentConfig)
     {
         $nonSecretData = [];
         foreach ($paymentConfig as $paymentOptionKey => $paymentOptionValue) {
