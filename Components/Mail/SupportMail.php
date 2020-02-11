@@ -216,7 +216,7 @@ class SupportMail
         $plugin         = $this->installerService->getPluginByName(WirecardElasticEngine::NAME);
         $payments       = $this->paymentFactory->getSupportedPayments();
         $paymentConfig = [];
-        $paymentNonSecretConfig = [];
+        $paymentAllowedConfig = [];
 
         foreach ($payments as $payment) {
             $paymentModel = $this->em->getRepository(Payment::class)
@@ -233,13 +233,13 @@ class SupportMail
         }
 
         foreach ($paymentConfig as $key => $config) {
-            $paymentNonSecretConfig[$key] = $this->getNonSecretPaymentConfig($config);
+            $paymentAllowedConfig[$key] = $this->getNonSecretPaymentConfig($config);
         }
 
         return [
             'name'     => WirecardElasticEngine::NAME,
             'version'  => $plugin->getVersion(),
-            'payments' => $paymentNonSecretConfig,
+            'payments' => $paymentAllowedConfig,
         ];
     }
 
