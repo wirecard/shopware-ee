@@ -53,16 +53,6 @@ jobs:
   - php: 7.2
     if: type != cron AND commit_message !~ env(SHOP_SYSTEM_UPDATE_COMMIT) AND commit_message !~ env(MANUAL_UITEST_TRIGGER_COMMIT)
 
-  # get latest shopware versions and store them in new-shop-releases.txt
-  - stage: get-latest-shop-release-versions
-    if: type = cron
-    php: 7.2
-    install: skip
-    before_script: skip
-    script: bash .bin/get-latest-shop-release-versions.sh
-    after_script: skip
-    after_failure: skip
-
   - &acceptance-test
     stage: acceptance-test
     # run this stage on pull request if head branch name contains one of these words (patch, major, minor)
