@@ -8,25 +8,25 @@
       ".eslintignore",
       ".eslintrc.json",
       ".travis.yml",
-      "CHANGELOG.md",
-      "composer.json",
-      "composer.lock",
-      "config.json",
-      "package.json",
-      "phpcs.xml",
-      "phpunit.xml",
-      "README.md",
-      "SHOPVERSIONS"
+      "WirecardElasticEngine/CHANGELOG.md",
+      "WirecardElasticEngine/composer.json",
+      "WirecardElasticEngine/composer.lock",
+      "WirecardElasticEngine/config.json",
+      "WirecardElasticEngine/package.json",
+      "WirecardElasticEngine/phpcs.xml",
+      "WirecardElasticEngine/phpunit.xml",
+      "WirecardElasticEngine/README.md",
+      "WirecardElasticEngine/SHOPVERSIONS"
     ],
     "folder-blacklist": [
       ".bin",
       ".git",
       ".github",
-      "build",
-      "Tests"
+      "WirecardElasticEngine/build",
+      "WirecardElasticEngine/Tests"
     ]
   },
   "composer": {
-    "execution-path": "/github/workspace"
+    "execution-path": "/github/workspace/WirecardElasticEngine"
   }
 }

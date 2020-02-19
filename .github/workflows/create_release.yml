@@ -32,6 +32,8 @@ jobs:
           release_title: shopware-ee ${{steps.tag_and_prepare_release.outputs.tag}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Prepare release files
+        run: bash .bin/prepare-release-files.sh
       - name: Create release package
         uses: wirecard/php-artifact-action@master
       - name: Upload release package
