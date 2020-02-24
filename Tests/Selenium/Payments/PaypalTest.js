@@ -45,7 +45,7 @@ describe('PayPal test', () => {
             await driver.findElement(By.id('email')).sendKeys(formFields.email);
             console.log('wait for #password');
             await driver.wait(until.elementLocated(By.id('password')), 10000);
-            await driver.findElement(By.id('password')).sendKeys(formFields.password, Key.ENTER);
+            await driver.findElement(By.id('password')).sendKeys(process.env.PAYPAL_PASSWORD, Key.ENTER);
             console.log('wait for #confirmButtonTop');
             await driver.wait(until.elementLocated(By.id('confirmButtonTop')));
             console.log('#confirmButtonTop located');
