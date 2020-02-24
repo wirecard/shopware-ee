@@ -72,8 +72,7 @@ exports.config = {
         paypal: {
             label: 'Wirecard PayPal',
             fields: {
-                email: 'paypal-shop-extensions-test@wirecard.com',
-                password: 'lkF.98TZU1_234'
+                email: 'paypal-shop-extensions-test@wirecard.com'
             }
         },
         pia: {
