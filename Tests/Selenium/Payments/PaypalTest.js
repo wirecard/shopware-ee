@@ -30,6 +30,13 @@ describe('PayPal test', () => {
     const paymentLabel = config.payments.paypal.label;
     const formFields = config.payments.paypal.fields;
 
+    const paypalConfig = Object.assign({
+        'paypal.password': process.env.PAYPAL_PASSWORD
+    });
+
+    console.log("paypalConfig");
+    console.log(paypalConfig);
+
     it('should check the paypal payment process', async () => {
         await loginWithExampleAccount(driver);
         await addProductToCartAndGotoCheckout(driver, '/genusswelten/tees-und-zubeh/tee-zubehoer/24/glas-teekaennchen');
@@ -41,15 +48,11 @@ describe('PayPal test', () => {
 
         try {
             console.log('wait for #email');
-            console.log(typeof formFields.password);
-            console.log("Escape");
-            console.log(escape(formFields.password));
-            console.log("from env: " + process.env.PAYPAL_PASSWORD);
             await driver.wait(until.elementLocated(By.id('email')), 10000);
             await driver.findElement(By.id('email')).sendKeys(formFields.email);
             console.log('wait for #password');
             await driver.wait(until.elementLocated(By.id('password')), 10000);
-            await driver.findElement(By.id('password')).sendKeys(formFields.password, Key.ENTER);
+            await driver.findElement(By.id('password')).sendKeys(paypalConfig['paypal.password'], Key.ENTER);
             console.log('wait for #confirmButtonTop');
             await driver.wait(until.elementLocated(By.id('confirmButtonTop')));
             console.log('#confirmButtonTop located');
