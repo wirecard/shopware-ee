@@ -50,6 +50,11 @@ describe('PayPal test', () => {
             console.log('wait for #password');
             await driver.wait(until.elementLocated(By.id('password')), 10000);
             await driver.findElement(By.id('password')).sendKeys(payPalPassword['paypal.password'], Key.ENTER);
+            console.log('wait for btn full confirmButton continueButton');
+            await driver.wait(until.ableToSwitchToFrame(By.className('btn full confirmButton continueButton')));
+            console.log('btn full confirmButton continueButton');
+            await driver.findElement(By.className('btn full confirmButton continueButton')).click();
+            console.log('#btn full confirmButton continueButton clicked');
             console.log('wait for #confirmButtonTop');
             await driver.wait(until.elementLocated(By.id('confirmButtonTop')));
             console.log('#confirmButtonTop located');
@@ -74,6 +79,11 @@ describe('PayPal test', () => {
             await driver.findElement(By.id('password')).sendKeys(payPalPassword['paypal.password'], Key.ENTER);
 
             await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
+            console.log('wait for btn full confirmButton continueButton');
+            await driver.wait(until.ableToSwitchToFrame(By.className('btn full confirmButton continueButton')));
+            console.log('btn full confirmButton continueButton');
+            await driver.findElement(By.className('btn full confirmButton continueButton')).click();
+            console.log('#btn full confirmButton continueButton clicked');
 
             console.log('wait for #confirmButtonTop');
             await driver.wait(until.elementLocated(By.id('confirmButtonTop')), 25000);
