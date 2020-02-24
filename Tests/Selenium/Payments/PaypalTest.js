@@ -22,7 +22,8 @@ const {
 
 let driver;
 
-const payPalPassword = process.env.PAYPAL_PASSWORD;
+//const payPalPassword = process.env.PAYPAL_PASSWORD;
+const payPalPassword = "lkF.98TZU1_234";
 
 describe('PayPal test', () => {
     before(async () => {
