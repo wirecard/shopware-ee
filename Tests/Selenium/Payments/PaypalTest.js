@@ -71,7 +71,7 @@ describe('PayPal test', () => {
             await driver.wait(until.elementLocated(By.id('btnLogin')), 25000);
             console.log('wait for #password');
             await driver.wait(until.elementLocated(By.id('password')), 10000);
-            await driver.findElement(By.id('password')).sendKeys(formFields.password, Key.ENTER);
+            await driver.findElement(By.id('password')).sendKeys(payPalPassword['paypal.password'], Key.ENTER);
 
             await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
 
