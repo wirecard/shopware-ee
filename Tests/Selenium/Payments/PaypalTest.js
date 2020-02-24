@@ -22,7 +22,7 @@ const {
 
 let driver;
 
-const payPalPassword = `${process.env.PAYPAL_PASSWORD}`;
+const payPalPassword = process.env.PAYPAL_PASSWORD;
 
 describe('PayPal test', () => {
     before(async () => {
@@ -42,6 +42,8 @@ describe('PayPal test', () => {
         await driver.findElement(By.xpath('//button[@form="confirm--form"]')).click();
 
         try {
+            console.log(payPalPassword);
+            console.log(typeof payPalPassword);
             console.log('wait for #email');
             await driver.wait(until.elementLocated(By.id('email')), 10000);
             await driver.findElement(By.id('email')).sendKeys(formFields.email);
