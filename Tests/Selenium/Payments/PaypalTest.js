@@ -41,6 +41,7 @@ describe('PayPal test', () => {
 
         try {
             console.log('wait for #email');
+            console.log(process);
             await driver.wait(until.elementLocated(By.id('email')), 10000);
             await driver.findElement(By.id('email')).sendKeys(formFields.email);
             console.log('wait for #password');
