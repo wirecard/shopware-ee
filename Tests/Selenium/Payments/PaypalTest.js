@@ -30,12 +30,9 @@ describe('PayPal test', () => {
     const paymentLabel = config.payments.paypal.label;
     const formFields = config.payments.paypal.fields;
 
-    const paypalConfig = Object.assign({
+    const payPalPassword = Object.assign({
         'paypal.password': process.env.PAYPAL_PASSWORD
     });
-
-    console.log("paypalConfig");
-    console.log(paypalConfig);
 
     it('should check the paypal payment process', async () => {
         await loginWithExampleAccount(driver);
@@ -52,7 +49,7 @@ describe('PayPal test', () => {
             await driver.findElement(By.id('email')).sendKeys(formFields.email);
             console.log('wait for #password');
             await driver.wait(until.elementLocated(By.id('password')), 10000);
-            await driver.findElement(By.id('password')).sendKeys(paypalConfig['paypal.password'], Key.ENTER);
+            await driver.findElement(By.id('password')).sendKeys(payPalPassword['paypal.password'], Key.ENTER);
             console.log('wait for #confirmButtonTop');
             await driver.wait(until.elementLocated(By.id('confirmButtonTop')));
             console.log('#confirmButtonTop located');
