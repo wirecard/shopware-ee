@@ -29,6 +29,7 @@ use WirecardElasticEngine\Exception\OutOfStockBasketException;
 class BasketMapper extends ArrayMapper
 {
     const CONTENT = 'content';
+    const ARTICLE_ID = 'articleID';
     const SHIPPING_COSTS_WITH_TAX = 'sShippingcostsWithTax';
     const SHIPPING_COSTS_TAX = 'sShippingcostsTax';
     const SHIPPING_COSTS_NET = 'sShippingcostsNet';
@@ -301,6 +302,6 @@ class BasketMapper extends ArrayMapper
      */
     public static function numberFormat($amount)
     {
-        return number_format($amount, 2, '.', '');
+        return (float)number_format($amount, 2, '.', '');
     }
 }
