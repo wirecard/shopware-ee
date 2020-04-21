@@ -136,6 +136,7 @@ class PaymentHandler extends Handler
         $transaction->setRedirect($redirect);
         $transaction->setAmount($orderSummary->getAmount());
         $transaction->setNotificationUrl($notificationUrl);
+        $transaction->setOrderNumber($orderSummary->getPaymentUniqueId());
 
         $customFields = new CustomFieldCollection();
         $customFields->add(new CustomField('payment-unique-id', $orderSummary->getPaymentUniqueId()));
@@ -146,7 +147,6 @@ class PaymentHandler extends Handler
         }
 
         if ($paymentConfig->hasFraudPrevention()) {
-            $transaction->setOrderNumber($orderSummary->getPaymentUniqueId());
             $transaction->setIpAddress($orderSummary->getUserMapper()->getClientIp());
             $transaction->setConsumerId($orderSummary->getUserMapper()->getCustomerNumber());
             $transaction->setAccountHolder($orderSummary->getUserMapper()->getWirecardBillingAccountHolder());
