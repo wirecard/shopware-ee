@@ -97,9 +97,10 @@ class PaymentHandler extends Handler
         if ($response instanceof FormInteractionResponse) {
             $this->transactionManager->createInitial($orderSummary, $response);
             return new ViewAction('payment_redirect.tpl', [
-                'method'     => $response->getMethod(),
-                'formFields' => $response->getFormFields(),
-                'url'        => $response->getUrl(),
+                'wirecardUrl' => $orderSummary->getPayment()->getPaymentConfig()->getBaseUrl(),
+                'method'      => $response->getMethod(),
+                'formFields'  => $response->getFormFields(),
+                'url'         => $response->getUrl(),
             ]);
         }
         if ($response instanceof SuccessResponse || $response instanceof InteractionResponse) {
