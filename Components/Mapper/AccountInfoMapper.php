@@ -141,7 +141,6 @@ class AccountInfoMapper extends ArrayMapper
         if ($this->isCustomer()) {
             $accountInfo->setCreationDate($this->getFirstLogin());
             $accountInfo->setUpdateDate($this->getChanged());
-            $accountInfo->setPassChangeDate($this->getPasswordChangeDate());
             $accountInfo->setShippingAddressFirstUse($this->shippingFirstUsed);
             $accountInfo->setCardCreationDate($this->cardCreationDate === null ?
                 new DateTime() : $this->cardCreationDate);
