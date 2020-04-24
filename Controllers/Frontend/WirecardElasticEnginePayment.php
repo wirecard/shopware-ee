@@ -571,7 +571,13 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         return $this->get('pluginlogger');
     }
 
-
+    /**
+     * Get supported iso code for locale
+     * @param $locale
+     * @return string
+     *
+     * @since 1.4.0
+     */
     protected function getSupportedLangCode($locale)
     {
         $converter = new WppVTwoConverter();
@@ -592,10 +598,11 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     /**
      * Removes the suffix of ISO codes after a certain cut off point.
      *
-     * @param string $isoCode
+     * @param $isoCode
      * @param string $cutOffPoint
      * @return string
-     * @since 2.2.2
+     *
+     * @since 1.4.0
      */
     protected function removeSuffix($isoCode, $cutOffPoint = '_')
     {
