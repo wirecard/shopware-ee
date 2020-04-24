@@ -11,6 +11,7 @@ use Shopware\Components\CSRFWhitelistAware;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 use Shopware\Models\Shop\Shop;
+use Wirecard\Converter\WppVTwoConverter;
 use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
@@ -72,8 +73,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $userMapper   = new UserMapper(
                 $this->getUser(),
                 $this->Request()->getClientIp(),
-                $shop->getLocale()
-                     ->getLocale()
+                $this->getSupportedLangCode(
+                    $shop->getLocale()
+                         ->getLocale()
+                )
             );
             $basketMapper = new BasketMapper(
                 $this->getBasket(),
@@ -566,5 +569,40 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     private function getLogger()
     {
         return $this->get('pluginlogger');
+    }
+
+
+    protected function getSupportedLangCode($locale)
+    {
+        $converter = new WppVTwoConverter();
+        $isoCode = $this->removeSuffix(
+            mb_strtolower($locale)
+        );
+
+        try {
+            $converter->init();
+            $language = $converter->convert($isoCode);
+        } catch (\Exception $exception) {
+            $language = 'en';
+        }
+
+        return $language;
+    }
+
+    /**
+     * Removes the suffix of ISO codes after a certain cut off point.
+     *
+     * @param string $isoCode
+     * @param string $cutOffPoint
+     * @return string
+     * @since 2.2.2
+     */
+    protected function removeSuffix($isoCode, $cutOffPoint = '_')
+    {
+        $trimmed = mb_substr($isoCode, 0, mb_strpos($isoCode, $cutOffPoint));
+
+        return mb_strlen($trimmed) > 0
+            ? $trimmed
+            : $isoCode;
     }
 }
