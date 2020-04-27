@@ -598,18 +598,18 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     /**
      * Removes the suffix of ISO codes after a certain cut off point.
      *
-     * @param $isoCode
+     * @param $langCode
      * @param string $cutOffPoint
      * @return string
      *
      * @since 1.4.0
      */
-    protected function removeSuffix($isoCode, $cutOffPoint = '_')
+    protected function removeSuffix($langCode, $cutOffPoint = '_')
     {
-        $trimmed = mb_substr($isoCode, 0, mb_strpos($isoCode, $cutOffPoint));
+        $trimmed = mb_substr($langCode, 0, mb_strpos($langCode, $cutOffPoint));
 
         return mb_strlen($trimmed) > 0
             ? $trimmed
-            : $isoCode;
+            : $langCode;
     }
 }
