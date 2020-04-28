@@ -161,9 +161,8 @@ class ThreedsHelper
             } else {
                 if ($orderTime) {
                     return date_create_from_format('Y-m-d H:i:s', $orderTime);
-                } else {
-                    return new \DateTime();
                 }
+                return new \DateTime();
             }
         } catch (\Exception $exception) {
             return new \DateTime();

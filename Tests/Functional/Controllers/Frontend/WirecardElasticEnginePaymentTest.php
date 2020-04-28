@@ -27,7 +27,7 @@ class WirecardElasticEnginePaymentTest extends \Enlight_Components_Test_Plugin_T
         $this->reset();
     }
 
-    public function disabled_testIndexAction()
+    public function disabledTestIndexAction()
     {
         $basketData = require __DIR__ . '/testdata/index-basket.php';
 
