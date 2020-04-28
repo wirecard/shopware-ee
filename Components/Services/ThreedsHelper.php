@@ -156,10 +156,10 @@ class ThreedsHelper
         try {
             list($current, $previous, $orderTime) = $this->getCurrentAndPreviousShippingAddress($addressId);
             $diff = array_diff_assoc($current, $previous);
-            if($diff) {
+            if ($diff) {
                 return new \DateTime();
             } else {
-                if($orderTime) {
+                if ($orderTime) {
                     return \DateTime::createFromFormat('Y-m-d H:i:s', $orderTime);
                 } else {
                     return new \DateTime();
@@ -230,22 +230,23 @@ class ThreedsHelper
                         current_additional_address_line2 = prev_additional_address_line2
                 ORDER BY s_order_shippingaddress.id
                 LIMIT 1',
-            [(int)$addressId], [\PDO::PARAM_INT]
+            [(int)$addressId],
+            [\PDO::PARAM_INT]
         );
 
         $stmt->execute();
         $all = $stmt->fetchAll();
-        if(!$all) {
+        if (!$all) {
             return [null, null, null];
         }
         $current = [];
         $previous = [];
         $all = $all[0];
         foreach ($all as $name => $value) {
-            if(0 === strpos($name, 'current_')) {
+            if (0 === strpos($name, 'current_')) {
                 $current[substr($name, strlen('current_'))] = $value ? $value : null;
             }
-            elseif(0 === strpos($name, 'prev_')) {
+            elseif (0 === strpos($name, 'prev_')) {
                 $previous[substr($name, strlen('prev_'))] = $value ? $value : null;
             }
         }

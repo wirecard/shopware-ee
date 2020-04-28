@@ -101,7 +101,8 @@ class AccountInfoMapper extends ArrayMapper
      */
     protected function isCustomer()
     {
-        return $this->sessionManager->getUserId() && intval($this->getAccountMode()) === Customer::ACCOUNT_MODE_CUSTOMER;
+        $accountMode = intval($this->getAccountMode());
+        return $this->sessionManager->getUserId() && $accountMode === Customer::ACCOUNT_MODE_CUSTOMER;
     }
 
     /**
