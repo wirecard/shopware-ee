@@ -333,4 +333,4 @@ class ThreedsHelper
             'wirecardElasticEngineCreditCardChallengeIndicator'
         ));
     }
-} 
+}
