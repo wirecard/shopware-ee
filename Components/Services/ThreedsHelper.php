@@ -243,8 +243,7 @@ class ThreedsHelper
         foreach ($all as $name => $value) {
             if (0 === strpos($name, 'current_')) {
                 $current[substr($name, strlen('current_'))] = $value ? $value : null;
-            }
-            elseif (0 === strpos($name, 'prev_')) {
+            } elseif (0 === strpos($name, 'prev_')) {
                 $previous[substr($name, strlen('prev_'))] = $value ? $value : null;
             }
         }
