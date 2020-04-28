@@ -151,25 +151,102 @@ class ThreedsHelper
     public function getShippingAddressFirstUsed($addressId)
     {
         if (!strlen($addressId)) {
-            new DateTime();
+            new \DateTime();
         }
-
-        $builder = $this->models->createQueryBuilder();
-        $builder->select('o')
-            ->from(Order::class, 'o')
-            ->innerJoin('o.shipping', 'sa')
-            ->where('sa.id = :addressId')
-            ->orderBy('o.id')
-            ->setMaxResults(1)
-            ->setParameter('addressId', $addressId);
-
-        /** @var Order $order */
-        $order = $builder->getQuery()->getOneOrNullResult();
-        if (is_null($order)) {
-            return new DateTime();
+        try {
+            list($current, $previous, $orderTime) = $this->getCurrentAndPreviousShippingAddress($addressId);
+            $diff = array_diff_assoc($current, $previous);
+            if($diff) {
+                return new \DateTime();
+            } else {
+                return \DateTime::createFromFormat('Y-m-d H:i:s', $orderTime);
+            }
+        } catch (\Exception $exception) {
+            return new \DateTime();
         }
+    }
 
-        return $order->getOrderTime();
+    /**
+     * @param $addressId
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     * @since 1.3.4
+     *
+     * There are multiple reasons why this is so complicated:
+     * - oldest shopware version which we support does not have a doctrine model for s_user_addresses
+     * - shopware duplicates the address, but does not keep track of the address id used originally to create the
+     *   address
+     * - even if it did, the user is able to rewrite history by editing an address; so we have to compare all fields 1:1
+     *   to decide if the address is really the same or was changed
+     */
+    private function getCurrentAndPreviousShippingAddress($addressId)
+    {
+        $stmt = $this->models->getConnection()->executeQuery(
+            'SELECT IFNULL(s_user_addresses.company, "") as current_company,
+                       IFNULL(s_user_addresses.department,"") as current_department,
+                       IFNULL(s_user_addresses.salutation,"") as current_salutation,
+                       IFNULL(s_user_addresses.firstname,"") as current_firstname,
+                       IFNULL(s_user_addresses.lastname,"") as current_lastname,
+                       IFNULL(s_user_addresses.street,"") as current_street,
+                       IFNULL(s_user_addresses.zipcode,"") as current_zipcode,
+                       IFNULL(s_user_addresses.country_id,"") as current_countryID,
+                       IFNULL(s_user_addresses.phone,"") as current_phone,
+                       IFNULL(s_user_addresses.additional_address_line1,"") as current_additional_address_line1,
+                       IFNULL(s_user_addresses.additional_address_line2,"") as current_additional_address_line2,
+                       s_order.id AS orderID, s_order.ordernumber,
+                       s_order.ordertime, s_order.changed,
+                       s_order_shippingaddress.id        AS shippedAddressId,
+                       s_order_shippingaddress.orderID   AS shippedOrderId,
+                       IFNULL(s_order_shippingaddress.company, "") AS prev_company,
+                       IFNULL(s_order_shippingaddress.department, "") AS prev_department,
+                       IFNULL(s_order_shippingaddress.salutation, "") AS prev_salutation,
+                       IFNULL(s_order_shippingaddress.firstname, "") AS prev_firstname,
+                       IFNULL(s_order_shippingaddress.lastname, "") AS prev_lastname,
+                       IFNULL(s_order_shippingaddress.street, "") AS prev_street,
+                       IFNULL(s_order_shippingaddress.zipcode, "") AS prev_zipcode,
+                       IFNULL(s_order_shippingaddress.phone, "") AS prev_phone,
+                       IFNULL(s_order_shippingaddress.countryID, "") AS prev_countryID,
+                       IFNULL(s_order_shippingaddress.additional_address_line1, "") AS prev_additional_address_line1,
+                       IFNULL(s_order_shippingaddress.additional_address_line2, "") AS prev_additional_address_line2
+                FROM s_user_addresses
+                         INNER JOIN s_order_shippingaddress ON s_order_shippingaddress.userID = s_user_addresses.user_id
+                         INNER JOIN s_order ON s_order.id = s_order_shippingaddress.orderID
+                WHERE s_user_addresses.id=?
+                HAVING
+                        current_company = prev_company AND
+                        current_department = prev_department AND
+                        current_salutation = prev_salutation AND
+                        current_firstname = prev_firstname AND
+                        current_lastname = prev_lastname AND
+                        current_street = prev_street AND
+                        current_zipcode = prev_zipcode AND
+                        current_phone = prev_phone AND
+                        current_countryID = prev_countryID AND
+                        current_additional_address_line1 = prev_additional_address_line1 AND
+                        current_additional_address_line2 = prev_additional_address_line2
+                ORDER BY s_order_shippingaddress.id
+                LIMIT 1',
+            [(int)$addressId], [\PDO::PARAM_INT]
+        );
+
+        $stmt->execute();
+        $all = $stmt->fetchAll();
+        if(!$all) {
+            return [null, null, null];
+        }
+        $current = [];
+        $previous = [];
+        $all = $all[0];
+        foreach ($all as $name => $value) {
+            if(0 === strpos($name, 'current_')) {
+                $current[substr($name, strlen('current_'))] = $value ? $value : null;
+            }
+            elseif(0 === strpos($name, 'prev_')) {
+                $previous[substr($name, strlen('prev_'))] = $value ? $value : null;
+            }
+        }
+        $orderTime = $all['ordertime'];
+        return [$current, $previous, $orderTime];
     }
 
     /**
