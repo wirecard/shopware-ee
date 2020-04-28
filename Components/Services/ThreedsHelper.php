@@ -160,7 +160,7 @@ class ThreedsHelper
                 return new \DateTime();
             } else {
                 if ($orderTime) {
-                    return \DateTime::createFromFormat('Y-m-d H:i:s', $orderTime);
+                    return date_create_from_format('Y-m-d H:i:s', $orderTime);
                 } else {
                     return new \DateTime();
                 }
