@@ -16,7 +16,9 @@ const {
     addProductToCartAndGotoCheckout,
     selectPaymentMethod,
     getDriver,
-    asyncForEach
+    asyncForEach,
+    updateDatabaseTransactionType,
+    checkTransactionTypeInDatabase
 } = require('../common');
 
 let driver;
@@ -30,13 +32,10 @@ describe('Credit Card test', () => {
     const formFields = config.payments.creditCard.fields;
 
     it('should check the credit card payment process', async () => {
+        await updateDatabaseTransactionType('pay', 'wirecardElasticEngineCreditCardTransactionType');
         await loginWithExampleAccount(driver);
         await addProductToCartAndGotoCheckout(driver, '/genusswelten/tees-und-zubeh/tee-zubehoer/24/glas-teekaennchen');
         await selectPaymentMethod(driver, paymentLabel);
-
-        // Save card
-        console.log('click #wirecardee--save-token');
-        await driver.findElement(By.id('wirecardee--save-token')).click();
 
         // Confirm order
         console.log('click button confirm--form');
@@ -53,8 +52,6 @@ describe('Credit Card test', () => {
             console.log(`setting ${field} to ${formFields[field]}`);
             await driver.findElement(By.id(field)).sendKeys(formFields[field]);
         });
-        await driver.findElement(By.css('#expiration_month_list > option[value=\'01\']')).click();
-        await driver.findElement(By.css('#expiration_year_list > option[value=\'2030\']')).click();
 
         // Switch back from iframe and click Send button
         console.log('switch back from iframe to default content');
@@ -65,6 +62,7 @@ describe('Credit Card test', () => {
         await driver.findElement(By.id('wirecardee-credit-card--form-submit')).click();
 
         await checkConfirmationPage(driver, paymentLabel);
+        checkTransactionTypeInDatabase('purchase');
     });
 
     after(async () => driver.quit());

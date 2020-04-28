@@ -14,39 +14,52 @@ sleep ${RANDOM_VALUE}s
 #clone the repository where the screenshot should be uploaded
 git clone ${REPO_ADDRESS}
 
-#create folder with current date
+# get current date to create a folder
 export TODAY=$(date +%Y-%m-%d)
 
 export SHOPWARE_CURRENT_VERSION=$(sed 's/[A-Za-z]*//g' <<<"$SHOPWARE_VERSION")
 export PROJECT_FOLDER="shopware-ee-${SHOPWARE_CURRENT_VERSION}"
-GATEWAY_FOLDER=${REPO_NAME}/${PROJECT_FOLDER}/${GATEWAY}
-DATE_FOLDER=${GATEWAY_FOLDER}/${TODAY}
 
-# -p means, if any of these folders in path doesn't exist, create one
-if [ ! -d "${GATEWAY_FOLDER}" ]; then
-mkdir -p ${GATEWAY_FOLDER}
+if [ ! -d "${REPO_NAME}/${PROJECT_FOLDER}/${GATEWAY}" ]; then
+mkdir -p ${REPO_NAME}/${PROJECT_FOLDER}/${GATEWAY}
 fi
 
-if [ ! -d "${DATE_FOLDER}" ]; then
-mkdir ${DATE_FOLDER}
+if [ ! -d "${REPO_NAME}/${PROJECT_FOLDER}/${GATEWAY}/${TODAY}" ]; then
+mkdir ${REPO_NAME}/${PROJECT_FOLDER}/${GATEWAY}/${TODAY}
 fi
 
-#copy report files
-cp -r ./report.xml ./mochawesome-report/report.html ./mochawesome-report/assets/ ${DATE_FOLDER}
+export BRANCH_FOLDER=${TRAVIS_BRANCH}
+
+# if tests triggered by PR, use different Travis variable to get branch name
+if [ ${TRAVIS_PULL_REQUEST} != "false" ]; then
+    export BRANCH_FOLDER="${TRAVIS_PULL_REQUEST_BRANCH}"
+# if we were testing latest released extension version
+elif [ "${LATEST_EXTENSION_RELEASE}" == "1" ]; then
+    export BRANCH_FOLDER="Release-${LATEST_RELEASED_SHOP_EXTENSION_VERSION}"
+fi
+
+export RELATIVE_REPORTS_LOCATION=${PROJECT_FOLDER}/${GATEWAY}/${TODAY}/${BRANCH_FOLDER}
+
+if [ ! -d "${REPO_NAME}/${RELATIVE_REPORTS_LOCATION}" ]; then
+    mkdir ${REPO_NAME}/${RELATIVE_REPORTS_LOCATION}
+fi
+
+# copy report files
+cp -r ./report.xml ./mochawesome-report/report.html ./mochawesome-report/assets/ ${REPO_NAME}/${RELATIVE_REPORTS_LOCATION}
 if [[ $1 == 'fail' ]]; then
-    cp -r ./report.xml ./mochawesome-report/report.html ./mochawesome-report/assets/ ${DATE_FOLDER}
+    cp -r ./report.xml ./mochawesome-report/report.html ./mochawesome-report/assets/ ${REPO_NAME}/${RELATIVE_REPORTS_LOCATION}
 fi
 
 cd ${REPO_NAME}
-#push report files to the repository
+# push report files to the repository
 git add ${PROJECT_FOLDER}/${GATEWAY}/${TODAY}/*
 git commit -m "Add failed test screenshots from ${TRAVIS_BUILD_WEB_URL}"
 git push -q https://${GITHUB_TOKEN}@github.com/wirecard/${REPO_NAME}.git master
 
-#save commit hash
+# save commit hash
 export SCREENSHOT_COMMIT_HASH=$(git rev-parse --verify HEAD)
 if [[ $1 == 'fail' ]]; then
     cd ..
-    #send slack notification
+    # send slack notification
     bash .bin/send-notify.sh
 fi

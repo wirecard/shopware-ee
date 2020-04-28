@@ -6,9 +6,34 @@
  * https://github.com/wirecard/shopware-ee/blob/master/LICENSE
  */
 
+let mysql = require('mysql');
+let php = require('js-php-serialize');
+
+const { exec } = require('child_process');
 const { expect } = require('chai');
 const { Builder, By, until } = require('selenium-webdriver');
 const { config, browsers } = require('./config');
+
+const createDatabaseConnection = () => {
+    return mysql.createConnection({
+        host: '127.0.0.1',
+        user: 'travis',
+        password: '',
+        database: 'shopware'
+    });
+};
+
+const runInShell = async function (cmd) {
+    return new Promise(function (resolve, reject) {
+        exec(cmd, (err, stdout, stderr) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve({ stdout, stderr });
+            }
+        });
+    });
+};
 
 exports.loginWithExampleAccount = async function (driver) {
     await driver.manage().deleteAllCookies();
@@ -63,6 +88,40 @@ exports.addProductToCartAndGotoCheckout = async function (driver, url) {
 
     console.log('wait for .btn--change-payment');
     await driver.wait(until.elementLocated(By.className('btn--change-payment')));
+};
+
+exports.updateDatabaseTransactionType = async function(databaseTransactionValue, databaseTansactionName) {
+    let con = createDatabaseConnection();
+    let sql = 'UPDATE s_core_config_elements SET value = ? WHERE name = ?';
+    let data = [php.serialize(databaseTransactionValue), databaseTansactionName];
+
+    con.query(sql, data, (error, results, fields) => {
+        if (error) {
+            return console.error(error.message);
+        }
+        console.log('database transaction type has been updated!');
+    });
+
+    con.end();
+
+    // eslint-disable-next-line no-template-curly-in-string
+    await runInShell('php ${SHOPWARE_DIRECTORY}/bin/console sw:cache:clear');
+    // eslint-disable-next-line no-template-curly-in-string
+    await runInShell('rm -rf ${SHOPWARE_DIRECTORY}/var/cache');
+};
+
+exports.checkTransactionTypeInDatabase = function(transactionType) {
+    let con = createDatabaseConnection();
+    con.query('SELECT transaction_type FROM wirecard_elastic_engine_transactions ORDER BY id DESC LIMIT 1', function (err, result, fields) {
+        if (err) throw err;
+        Object.keys(result).forEach(function(key) {
+            let row = result[key];
+            expect(row.transaction_type).to.equal(transactionType);
+            console.log('I can see ' + transactionType + ' in transaction table!');
+        });
+    });
+
+    con.end();
 };
 
 exports.selectPaymentMethod = async function (driver, paymentLabel) {

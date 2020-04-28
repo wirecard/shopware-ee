@@ -27,6 +27,32 @@ class SupportMail
 {
     const SUPPORT_MAIL = 'shop-systems-support@wirecard.com';
 
+    const WHITELISTED_PAYMENT_CONFIG_VALUES = [
+        "active",
+        "baseUrl",
+        "transactionMAID",
+        "transactionOperation",
+        "sendBasket",
+        "fraudPrevention",
+        "sendDescriptor",
+        "threeDMAID",
+        "threeDMinLimit",
+        "threeDMinLimitCurrency",
+        "sslMaxLimit",
+        "sslMaxLimitCurrency",
+        "vaultEnabled",
+        "allowAddressChanges",
+        "threeDUsageOnTokens",
+        "minAmount",
+        "maxAmount",
+        "acceptedCurrencies",
+        "shippingCountries",
+        "billingCountries",
+        "allowDifferentBillingShipping",
+        "backendTransactionMaid",
+        "showBic",
+    ];
+
     /**
      * @var \Enlight_Components_Mail
      */
@@ -189,7 +215,8 @@ class SupportMail
     {
         $plugin         = $this->installerService->getPluginByName(WirecardElasticEngine::NAME);
         $payments       = $this->paymentFactory->getSupportedPayments();
-        $paymentConfigs = [];
+        $paymentConfig = [];
+        $paymentAllowedConfig = [];
 
         foreach ($payments as $payment) {
             $paymentModel = $this->em->getRepository(Payment::class)
@@ -199,16 +226,20 @@ class SupportMail
                 continue;
             }
 
-            $paymentConfigs[$payment->getName()] = array_merge(
+            $paymentConfig[$payment->getName()] = array_merge(
                 ['active' => $paymentModel->getActive()],
                 $payment->getPaymentConfig()->toArray()
             );
         }
 
+        foreach ($paymentConfig as $key => $config) {
+            $paymentAllowedConfig[$key] = $this->getNonSecretPaymentConfig($config);
+        }
+
         return [
             'name'     => WirecardElasticEngine::NAME,
             'version'  => $plugin->getVersion(),
-            'payments' => $paymentConfigs,
+            'payments' => $paymentAllowedConfig,
         ];
     }
 
@@ -243,5 +274,24 @@ class SupportMail
         }
 
         return $rows;
+    }
+
+    /**
+     * Get array of not secret payment config fields
+     *
+     * @param array $paymentConfig
+     *
+     * @return array
+     * @since 3.1.0
+     */
+    private function getNonSecretPaymentConfig($paymentConfig)
+    {
+        $nonSecretData = [];
+        foreach ($paymentConfig as $paymentOptionKey => $paymentOptionValue) {
+            if (in_array($paymentOptionKey, self::WHITELISTED_PAYMENT_CONFIG_VALUES, true)) {
+                $nonSecretData[$paymentOptionKey] = $paymentOptionValue;
+            }
+        }
+        return $nonSecretData;
     }
 }

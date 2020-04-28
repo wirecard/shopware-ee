@@ -14,6 +14,6 @@
     <compatibility minVersion="5.5.0" />
 
     <author>Wirecard AG</author>
-    <link>https://www.wirecard.com/</link>
+    <link>https://shopware.wirecard.com/</link>
     <license>GPL-3.0</license>
 </plugin>

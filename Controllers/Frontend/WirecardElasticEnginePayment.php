@@ -11,6 +11,7 @@ use Shopware\Components\CSRFWhitelistAware;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 use Shopware\Models\Shop\Shop;
+use Wirecard\Converter\WppVTwoConverter;
 use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
@@ -76,7 +77,10 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $userMapper   = new UserMapper(
                 $this->getUser(),
                 $this->Request()->getClientIp(),
-                $shop->getLocale()->getLocale()
+                $this->getSupportedLangCode(
+                    $shop->getLocale()
+                         ->getLocale()
+                )
             );
 
             $basketMapper = new BasketMapper(
@@ -130,7 +134,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             ),
             new TransactionService(
                 $payment->getTransactionConfig(
-                    $shop,
                     $this->container->getParameterBag(),
                     $currency
                 ),
@@ -206,7 +209,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $response = $returnHandler->handleRequest(
                 $payment,
                 new TransactionService($payment->getTransactionConfig(
-                    Shopware()->Shop(),
                     $this->container->getParameterBag(),
                     $this->getCurrencyShortName()
                 ), $this->getLogger()),
@@ -369,7 +371,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         try {
             $backendService = new BackendService($payment->getTransactionConfig(
-                Shopware()->Shop(),
                 $this->container->getParameterBag(),
                 $this->getCurrencyShortName()
             ));
@@ -604,5 +605,47 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     private function getThreedsHelper()
     {
         return $this->get('wirecard_elastic_engine.threeds_helper');
+    }
+
+    /**
+     * Get supported iso code for locale
+     * @param $locale
+     * @return string
+     *
+     * @since 1.4.0
+     */
+    protected function getSupportedLangCode($locale)
+    {
+        $converter = new WppVTwoConverter();
+        $isoCode = $this->removeSuffix(
+            mb_strtolower($locale)
+        );
+
+        try {
+            $converter->init();
+            $language = $converter->convert($isoCode);
+        } catch (\Exception $exception) {
+            $language = 'en';
+        }
+
+        return $language;
+    }
+
+    /**
+     * Removes the suffix of ISO codes after a certain cut off point.
+     *
+     * @param $langCode
+     * @param string $cutOffPoint
+     * @return string
+     *
+     * @since 1.4.0
+     */
+    protected function removeSuffix($langCode, $cutOffPoint = '_')
+    {
+        $trimmed = mb_substr($langCode, 0, mb_strpos($langCode, $cutOffPoint));
+
+        return mb_strlen($trimmed) > 0
+            ? $trimmed
+            : $langCode;
     }
 }

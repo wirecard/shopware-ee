@@ -1,0 +1,32 @@
+{
+  "package": {
+    "type": "zip",
+    "execution-path": "/github/workspace",
+    "file-blacklist": [
+      ".editorconfig",
+      ".gitignore",
+      ".eslintignore",
+      ".eslintrc.json",
+      ".travis.yml",
+      "WirecardElasticEngine/CHANGELOG.md",
+      "WirecardElasticEngine/composer.json",
+      "WirecardElasticEngine/composer.lock",
+      "WirecardElasticEngine/config.json",
+      "WirecardElasticEngine/package.json",
+      "WirecardElasticEngine/phpcs.xml",
+      "WirecardElasticEngine/phpunit.xml",
+      "WirecardElasticEngine/README.md",
+      "WirecardElasticEngine/SHOPVERSIONS"
+    ],
+    "folder-blacklist": [
+      ".bin",
+      ".git",
+      ".github",
+      "WirecardElasticEngine/build",
+      "WirecardElasticEngine/Tests"
+    ]
+  },
+  "composer": {
+    "execution-path": "/github/workspace/WirecardElasticEngine"
+  }
+}
