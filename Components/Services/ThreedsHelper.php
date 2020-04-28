@@ -314,6 +314,7 @@ class ThreedsHelper
             ->innerJoin('det.order', 'o')
             ->where('o.customerId = :userId')
             ->andWhere('det.articleId IN (:articleIds)')
+            ->andWhere('o.number != 0')
             ->setParameter('userId', $userId)
             ->setParameter('articleIds', $articleIds);
 
