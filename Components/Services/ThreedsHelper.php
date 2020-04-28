@@ -159,7 +159,11 @@ class ThreedsHelper
             if($diff) {
                 return new \DateTime();
             } else {
-                return \DateTime::createFromFormat('Y-m-d H:i:s', $orderTime);
+                if($orderTime) {
+                    return \DateTime::createFromFormat('Y-m-d H:i:s', $orderTime);
+                } else {
+                    return new \DateTime();
+                }
             }
         } catch (\Exception $exception) {
             return new \DateTime();
