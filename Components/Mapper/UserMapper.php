@@ -97,7 +97,7 @@ class UserMapper extends ArrayMapper
     public function getWirecardBillingAccountHolder()
     {
         $billingAccountHolder = new AccountHolder();
-        $billingAccountHolder->setCrmId($this->getUserId());
+        $billingAccountHolder->setCrmId($this->getCustomerNumber());
         $billingAccountHolder->setFirstName($this->getFirstName());
         $billingAccountHolder->setLastName($this->getLastName());
         $billingAccountHolder->setEmail($this->getEmail());
