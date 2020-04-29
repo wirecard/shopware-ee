@@ -94,8 +94,8 @@ class ThreedsHelperTest extends TestCase
     public function testGetCardCreationDateNewToken()
     {
         $refDate = new \DateTime('2019-09-21 16:58:00');
-        $dt      = $this->helper->getCardCreationDate('uid', 'token');
-        $this->assertNotEquals($refDate, $dt);
+        $creationDate      = $this->helper->getCardCreationDate('uid', 'token');
+        $this->assertNotEquals($refDate, $creationDate);
     }
 
     public function testGetCardCreationDateNoCreationDate()
