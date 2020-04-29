@@ -254,8 +254,9 @@ class TransactionManager
         foreach ($childTransactions as $childTransaction) {
             if (in_array($childTransaction->getTransactionType(), Transaction::TYPES_WITH_REST_AMOUNT)) {
                 $restAmount += (float) $childTransaction->getAmount();
+            } else {
+                $restAmount -= (float) $childTransaction->getAmount();
             }
-            $restAmount -= (float) $childTransaction->getAmount();
         }
         if ($restAmount > 0) {
             $isRestAmount = true;
