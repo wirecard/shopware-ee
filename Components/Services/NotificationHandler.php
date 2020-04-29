@@ -76,7 +76,7 @@ class NotificationHandler extends Handler
         BackendService $backendService
     ) {
         $this->logger->info('Incoming success notification', $response->getData());
-
+        $transactionType = $response->getTransactionType();
         $paymentStatusId = $this->getPaymentStatusId($backendService, $response);
         try {
             $initialTransaction = $this->transactionManager->getInitialTransaction($response);
@@ -115,7 +115,7 @@ class NotificationHandler extends Handler
         // if we already have an order, we can update the payment status directly
         if ($order) {
             $this->logger->debug("Order {$order->getNumber()} already exists, update payment status $paymentStatusId");
-            $this->savePaymentStatus($shopwareOrder, $order, $paymentStatusId);
+            $this->savePaymentStatus($shopwareOrder, $order, $paymentStatusId, $transactionType);
             if (! $initialTransaction->getOrderNumber() && $order->getNumber()) {
                 $initialTransaction->setOrderNumber($order->getNumber());
             }
@@ -131,7 +131,7 @@ class NotificationHandler extends Handler
         ]);
         if ($order) {
             $this->logger->debug("Order {$order->getNumber()} found, update payment status $paymentStatusId");
-            $this->savePaymentStatus($shopwareOrder, $order, $paymentStatusId);
+            $this->savePaymentStatus($shopwareOrder, $order, $paymentStatusId, $transactionType);
         }
 
         return $initialTransaction;
@@ -139,17 +139,19 @@ class NotificationHandler extends Handler
 
     /**
      * @param \sOrder $shopwareOrder
-     * @param Order   $order
-     * @param int     $paymentStatusId
+     * @param Order $order
+     * @param int $paymentStatusId
+     *
+     * @param $transactionType
      *
      * @since 1.0.0
      */
-    private function savePaymentStatus(\sOrder $shopwareOrder, Order $order, $paymentStatusId)
+    private function savePaymentStatus(\sOrder $shopwareOrder, Order $order, $paymentStatusId, $transactionType)
     {
         $shopwareOrder->setPaymentStatus(
             $order->getId(),
             $paymentStatusId,
-            self::shouldSendStatusMail($paymentStatusId)
+            self::shouldSendStatusMail($paymentStatusId, $transactionType)
         );
     }
 
@@ -158,21 +160,25 @@ class NotificationHandler extends Handler
      *
      * @param int $paymentStatusId
      *
+     * @param string|null $transactionType
+     *
      * @return bool
      *
      * @since 1.0.0
      */
-    public static function shouldSendStatusMail($paymentStatusId)
+    public static function shouldSendStatusMail($paymentStatusId, $transactionType = null)
     {
-        return in_array($paymentStatusId, [
+        $paymentStatuses = [
             Status::PAYMENT_STATE_COMPLETELY_PAID,
             Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
-        ]);
+        ];
+        return (in_array($paymentStatusId, $paymentStatuses))&&
+               (!in_array($transactionType, Transaction::TYPES_EMAIL_BLOCK));
     }
 
     /**
      * @param BackendService $backendService
-     * @param Response       $response
+     * @param Response $response
      *
      * @return int
      *
@@ -180,7 +186,13 @@ class NotificationHandler extends Handler
      */
     private function getPaymentStatusId($backendService, $response)
     {
-        if ($response->getTransactionType() === 'check-payer-response') {
+        $transaction = $this->transactionManager->getInitialTransaction($response);
+        $transactionAmount = $transaction->getAmount();
+        $isRestAmount = $this->transactionManager->isRestAmount(
+            $transactionAmount,
+            $transaction->getOrderNumber()
+        );
+        if ($response->getTransactionType() === Transaction::TYPE_CHECK_PAYER_RESPONSE) {
             return Status::PAYMENT_STATE_OPEN;
         }
         switch ($backendService->getOrderState($response->getTransactionType())) {
@@ -189,7 +201,11 @@ class NotificationHandler extends Handler
             case BackendService::TYPE_CANCELLED:
                 return Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED;
             case BackendService::TYPE_PROCESSING:
-                return Status::PAYMENT_STATE_COMPLETELY_PAID;
+                if ($isRestAmount) {
+                    return Status::PAYMENT_STATE_PARTIALLY_PAID;
+                } else {
+                    return Status::PAYMENT_STATE_COMPLETELY_PAID;
+                }
             case BackendService::TYPE_REFUNDED:
                 return Status::PAYMENT_STATE_RE_CREDITING;
             default:

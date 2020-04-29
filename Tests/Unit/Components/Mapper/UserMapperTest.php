@@ -33,10 +33,10 @@ class UserMapperTest extends TestCase
             'country'         => [
                 'countryiso' => 'AT',
             ],
-            'state' => [
+            'state'           => [
                 'shortcode' => 'OR',
             ],
-            'stateShipping' => [
+            'stateShipping'   => [
                 'shortcode' => 'OR',
             ]
         ],
@@ -90,19 +90,20 @@ class UserMapperTest extends TestCase
         $account = $this->mapper->getWirecardBillingAccountHolder();
         $this->assertInstanceOf(AccountHolder::class, $account);
         $this->assertEquals([
-            'first-name'    => $this->mapper->getFirstName(),
-            'last-name'     => $this->mapper->getLastName(),
-            'email'         => $this->mapper->getEmail(),
-            'date-of-birth' => $this->mapper->getBirthday()->format('d-m-Y'),
-            'phone'         => $this->mapper->getPhone(),
-            'address'       => [
+            'first-name'      => $this->mapper->getFirstName(),
+            'last-name'       => $this->mapper->getLastName(),
+            'email'           => $this->mapper->getEmail(),
+            'date-of-birth'   => $this->mapper->getBirthday()->format('d-m-Y'),
+            'phone'           => $this->mapper->getPhone(),
+            'address'         => [
                 'street1'     => 'Barstreet',
                 'city'        => 'Footown',
                 'country'     => 'AT',
                 'postal-code' => 1337,
                 'street2'     => 'Hodor',
-                'state'       => 'OR',
+                'state'       => 'OR'
             ],
+            'merchant-crm-id' => '10001'
         ], $account->mappedProperties());
     }
 
@@ -111,6 +112,7 @@ class UserMapperTest extends TestCase
         $mapper  = new UserMapper([
             'additional'     => [
                 'user'    => [
+                    'id'        => '12',
                     'firstname' => 'First Name',
                     'lastname'  => 'Last Name',
                     'email'     => 'test@example.com',
@@ -118,7 +120,7 @@ class UserMapperTest extends TestCase
                 'country' => [
                     'countryiso' => 'AT',
                 ],
-                'state' => [
+                'state'   => [
                     'shortcode' => 'OR',
                 ],
             ],
@@ -130,10 +132,10 @@ class UserMapperTest extends TestCase
         $account = $mapper->getWirecardBillingAccountHolder();
         $this->assertInstanceOf(AccountHolder::class, $account);
         $this->assertEquals([
-            'first-name' => 'First Name',
-            'last-name'  => 'Last Name',
-            'email'      => 'test@example.com',
-            'address'    => [
+            'first-name'      => 'First Name',
+            'last-name'       => 'Last Name',
+            'email'           => 'test@example.com',
+            'address'         => [
                 'street1' => 'Barstreet',
                 'city'    => 'Footown',
                 'country' => 'AT',
@@ -186,7 +188,7 @@ class UserMapperTest extends TestCase
                 'countryShipping' => [
                     'countryiso' => 'DE',
                 ],
-                'stateShipping' => [
+                'stateShipping'   => [
                     'shortcode' => 'OR',
                 ],
             ],
@@ -218,7 +220,6 @@ class UserMapperTest extends TestCase
         $this->assertInstanceOf(AccountHolder::class, $account);
         $this->assertEquals([
             'address' => [
-                'street1' => null,
                 'city'    => null,
                 'country' => null,
             ],
@@ -322,29 +323,31 @@ class UserMapperTest extends TestCase
     public function testToArray()
     {
         $this->assertEquals([
-            'customerNumber'            => '10001',
-            'firstName'                 => 'First Name',
-            'lastName'                  => 'Last Name',
-            'email'                     => 'test@example.com',
-            'birthday'                  => new \DateTime('1990-01-01'),
-            'phone'                     => '+43123456789',
-            'countryIso'                => 'AT',
-            'stateIso'                  => 'OR',
-            'billingAddressCity'        => 'Footown',
-            'billingAddressStreet'      => 'Barstreet',
-            'billingAddressZip'         => 1337,
-            'billingAddressAdditional'  => 'Hodor',
-            'shippingFirstName'         => 'First Shipping',
-            'shippingLastName'          => 'Last Shipping',
-            'shippingPhone'             => '+43987654321',
-            'shippingCountryIso'        => 'DE',
-            'shippingStateIso'          => 'OR',
-            'shippingAddressCity'       => 'Shippingfootown',
-            'shippingAddressStreet'     => 'Shippingbarstreet',
-            'shippingAddressZip'        => 2710,
-            'shippingAddressAdditional' => 'Shodorpping',
-            'clientIp'                  => '127.0.0.1',
-            'locale'                    => 'de_DE',
+            'customerNumber'             => '10001',
+            'firstName'                  => 'First Name',
+            'lastName'                   => 'Last Name',
+            'email'                      => 'test@example.com',
+            'birthday'                   => new \DateTime('1990-01-01'),
+            'phone'                      => '+43123456789',
+            'countryIso'                 => 'AT',
+            'stateIso'                   => 'OR',
+            'billingAddressCity'         => 'Footown',
+            'billingAddressStreet'       => 'Barstreet',
+            'billingAddressZip'          => 1337,
+            'billingAddressAdditional'   => 'Hodor',
+            'billingAddressAdditional2'  => null,
+            'shippingFirstName'          => 'First Shipping',
+            'shippingLastName'           => 'Last Shipping',
+            'shippingPhone'              => '+43987654321',
+            'shippingCountryIso'         => 'DE',
+            'shippingStateIso'           => 'OR',
+            'shippingAddressCity'        => 'Shippingfootown',
+            'shippingAddressStreet'      => 'Shippingbarstreet',
+            'shippingAddressZip'         => 2710,
+            'shippingAddressAdditional'  => 'Shodorpping',
+            'shippingAddressAdditional2' => null,
+            'clientIp'                   => '127.0.0.1',
+            'locale'                     => 'de_DE',
         ], $this->mapper->toArray());
     }
 
