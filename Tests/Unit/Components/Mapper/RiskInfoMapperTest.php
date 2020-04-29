@@ -39,5 +39,4 @@ class RiskInfoMapperTest extends TestCase
             $mapped->mappedProperties()
         );
     }
-
 }
