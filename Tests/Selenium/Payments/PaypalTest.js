@@ -60,7 +60,7 @@ describe('PayPal test', () => {
             console.log('wait for #payment-submit-btn');
             await driver.wait(until.elementLocated(By.id('payment-submit-btn')));
             console.log('#payment-submit-btn located');
-            await driver.findElement(By.id('payment-submit-btn')).click();
+            await driver.wait(driver.findElement(By.id('payment-submit-btn')).click(), 60000);
             console.log('#payment-submit-btn clicked');
 
             await waitForAlert(driver, 25000);
@@ -91,7 +91,7 @@ describe('PayPal test', () => {
             await driver.wait(until.elementLocated(By.id('payment-submit-btn')), 25000);
             await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
             console.log('click #payment-submit-btn');
-            await driver.wait(driver.findElement(By.id('payment-submit-btn')).click(), 10000);
+            await driver.wait(driver.findElement(By.id('payment-submit-btn')).click(), 60000);
 
             await waitForAlert(driver, 25000);
 
