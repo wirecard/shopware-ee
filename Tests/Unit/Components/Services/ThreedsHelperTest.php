@@ -87,8 +87,8 @@ class ThreedsHelperTest extends TestCase
         $refDate = new \DateTime('2019-09-21 16:58:00');
         $this->vaultData->method('getCreated')->willReturn($refDate);
         $this->query->method('getOneOrNullResult')->willReturn($this->vaultData);
-        $dt = $this->helper->getCardCreationDate('uid', 'token');
-        $this->assertEquals($refDate, $dt);
+        $date = $this->helper->getCardCreationDate('uid', 'token');
+        $this->assertEquals($refDate, $date);
     }
 
     public function testGetCardCreationDateNewToken()
