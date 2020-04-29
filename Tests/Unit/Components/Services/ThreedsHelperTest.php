@@ -102,8 +102,8 @@ class ThreedsHelperTest extends TestCase
     {
         $refDate = new \DateTime('2019-09-21 16:58:00');
         $this->query->method('getOneOrNullResult')->willReturn($this->vaultData);
-        $dt = $this->helper->getCardCreationDate('uid', 'token');
-        $this->assertNotEquals($refDate, $dt);
+        $creationDate = $this->helper->getCardCreationDate('uid', 'token');
+        $this->assertNotEquals($refDate, $creationDate);
     }
 
     public function testGetSuccessfulOrdersLastSixMonths()
