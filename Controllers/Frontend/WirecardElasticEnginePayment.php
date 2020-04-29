@@ -11,6 +11,7 @@ use Shopware\Components\CSRFWhitelistAware;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 use Shopware\Models\Shop\Shop;
+use Wirecard\Converter\WppVTwoConverter;
 use Wirecard\PaymentSdk\BackendService;
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Redirect;
@@ -21,13 +22,16 @@ use WirecardElasticEngine\Components\Actions\ErrorAction;
 use WirecardElasticEngine\Components\Actions\RedirectAction;
 use WirecardElasticEngine\Components\Actions\ViewAction;
 use WirecardElasticEngine\Components\Data\OrderSummary;
+use WirecardElasticEngine\Components\Mapper\AccountInfoMapper;
 use WirecardElasticEngine\Components\Mapper\BasketMapper;
+use WirecardElasticEngine\Components\Mapper\RiskInfoMapper;
 use WirecardElasticEngine\Components\Mapper\UserMapper;
 use WirecardElasticEngine\Components\Services\NotificationHandler;
 use WirecardElasticEngine\Components\Services\PaymentFactory;
 use WirecardElasticEngine\Components\Services\PaymentHandler;
 use WirecardElasticEngine\Components\Services\ReturnHandler;
 use WirecardElasticEngine\Components\Services\SessionManager;
+use WirecardElasticEngine\Components\Services\ThreedsHelper;
 use WirecardElasticEngine\Components\Services\TransactionManager;
 use WirecardElasticEngine\Exception\ArrayKeyNotFoundException;
 use WirecardElasticEngine\Exception\BasketException;
@@ -66,15 +70,19 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
         /** @var PaymentHandler $handler */
         $handler = $this->get('wirecard_elastic_engine.payment_handler');
         $payment = $this->getPaymentFactory()->create($this->getPaymentShortName());
+
         $shop = Shopware()->Shop();
         try {
             $currency     = $this->getCurrencyShortName();
             $userMapper   = new UserMapper(
                 $this->getUser(),
                 $this->Request()->getClientIp(),
-                $shop->getLocale()
-                     ->getLocale()
+                $this->getSupportedLangCode(
+                    $shop->getLocale()
+                         ->getLocale()
+                )
             );
+
             $basketMapper = new BasketMapper(
                 $this->getBasket(),
                 $this->persistBasket(),
@@ -85,6 +93,24 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $this->getShippingMethod()
             );
             $amount       = new Amount(BasketMapper::numberFormat($this->getAmount()), $currency);
+
+            $paymentData = $this->getSessionManager()->getPaymentData();
+            $tokenId = $this->getThreedsHelper()->getTokenFromPaymentData($paymentData);
+
+            $accountInfoMapper = new AccountInfoMapper(
+                $this->getSessionManager(),
+                $this->getUser(),
+                $this->getThreedsHelper()->getChallengeIndicator(),
+                $this->getThreedsHelper()->isNewToken($userMapper->getUserId(), $paymentData),
+                $this->getThreedsHelper()->getShippingAddressFirstUsed($userMapper->getShippingAddressId()),
+                $this->getThreedsHelper()->getCardCreationDate($userMapper->getUserId(), $tokenId),
+                $this->getThreedsHelper()->getSuccessfulOrdersLastSixMonths($userMapper->getUserId())
+            );
+
+            $riskInfoMapper = new RiskInfoMapper(
+                $userMapper->getEmail(),
+                $this->getThreedsHelper()->hasReorderedItems($userMapper->getUserId(), $this->getBasket())
+            );
         } catch (BasketException $e) {
             $this->getLogger()->notice($e->getMessage());
             return $this->redirect([
@@ -101,12 +127,13 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
                 $userMapper,
                 $basketMapper,
                 $amount,
+                $accountInfoMapper,
+                $riskInfoMapper,
                 $this->getSessionManager()->getDeviceFingerprintId($payment->getPaymentConfig()->getTransactionMAID()),
                 $this->getSessionManager()->getPaymentData()
             ),
             new TransactionService(
                 $payment->getTransactionConfig(
-                    $shop,
                     $this->container->getParameterBag(),
                     $currency
                 ),
@@ -182,7 +209,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
             $response = $returnHandler->handleRequest(
                 $payment,
                 new TransactionService($payment->getTransactionConfig(
-                    Shopware()->Shop(),
                     $this->container->getParameterBag(),
                     $this->getCurrencyShortName()
                 ), $this->getLogger()),
@@ -345,7 +371,6 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
 
         try {
             $backendService = new BackendService($payment->getTransactionConfig(
-                Shopware()->Shop(),
                 $this->container->getParameterBag(),
                 $this->getCurrencyShortName()
             ));
@@ -569,5 +594,58 @@ class Shopware_Controllers_Frontend_WirecardElasticEnginePayment extends Shopwar
     private function getLogger()
     {
         return $this->get('pluginlogger');
+    }
+
+    /**
+     * @return ThreedsHelper
+     * @throws Exception
+     *
+     * @since 1.4.0
+     */
+    private function getThreedsHelper()
+    {
+        return $this->get('wirecard_elastic_engine.threeds_helper');
+    }
+
+    /**
+     * Get supported iso code for locale
+     * @param $locale
+     * @return string
+     *
+     * @since 1.4.0
+     */
+    protected function getSupportedLangCode($locale)
+    {
+        $converter = new WppVTwoConverter();
+        $isoCode = $this->removeSuffix(
+            mb_strtolower($locale)
+        );
+
+        try {
+            $converter->init();
+            $language = $converter->convert($isoCode);
+        } catch (\Exception $exception) {
+            $language = 'en';
+        }
+
+        return $language;
+    }
+
+    /**
+     * Removes the suffix of ISO codes after a certain cut off point.
+     *
+     * @param $langCode
+     * @param string $cutOffPoint
+     * @return string
+     *
+     * @since 1.4.0
+     */
+    protected function removeSuffix($langCode, $cutOffPoint = '_')
+    {
+        $trimmed = mb_substr($langCode, 0, mb_strpos($langCode, $cutOffPoint));
+
+        return mb_strlen($trimmed) > 0
+            ? $trimmed
+            : $langCode;
     }
 }

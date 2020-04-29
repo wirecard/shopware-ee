@@ -86,10 +86,8 @@ class UnionpayInternationalPaymentTest extends PaymentTestCase
 
     public function testGetTransactionConfig()
     {
-        /** @var Shop|\PHPUnit_Framework_MockObject_MockObject $shop */
         /** @var ParameterBagInterface|\PHPUnit_Framework_MockObject_MockObject $parameters */
 
-        $shop       = $this->createMock(Shop::class);
         $parameters = $this->createMock(ParameterBagInterface::class);
         $parameters->method('get')->willReturnMap([
             ['kernel.name', 'Shopware'],
@@ -98,7 +96,7 @@ class UnionpayInternationalPaymentTest extends PaymentTestCase
 
         $this->em->method('getRepository')->willReturn($this->createMock(EntityRepository::class));
 
-        $config = $this->payment->getTransactionConfig($shop, $parameters, 'EUR');
+        $config = $this->payment->getTransactionConfig($parameters, 'EUR');
 
         $this->assertInstanceOf(Config::class, $config);
         $this->assertNull($config->getBaseUrl());

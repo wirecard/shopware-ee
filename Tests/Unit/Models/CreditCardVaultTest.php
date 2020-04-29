@@ -36,6 +36,7 @@ class CreditCardVaultTest extends ModelTestCase
         $this->assertGetterAndSetter('token', 'FOOTOKEN123');
         $this->assertGetterAndSetter('maskedAccountNumber', '1111****9999');
         $this->assertGetterAndSetter('lastUsed', new \DateTime(), $this->model->getLastUsed());
+        $this->assertGetterAndSetter('created', new \DateTime(), $this->model->getCreated());
         $this->assertGetterAndSetter('bindBillingAddress', ['billingAddr']);
         $this->assertGetterAndSetter('bindBillingAddressHash', md5(serialize(['billingAddr'])));
         $this->assertGetterAndSetter('bindShippingAddress', ['shippingAddr']);
@@ -47,6 +48,7 @@ class CreditCardVaultTest extends ModelTestCase
             'token'                   => 'FOOTOKEN123',
             'maskedAccountNumber'     => '1111****9999',
             'lastUsed'                => $this->model->getLastUsed()->format(\DateTime::W3C),
+            'created'                 => $this->model->getCreated()->format(\DateTime::W3C),
             'bindBillingAddress'      => ['billingAddr'],
             'bindBillingAddressHash'  => md5(serialize(['billingAddr'])),
             'bindShippingAddress'     => ['shippingAddr'],

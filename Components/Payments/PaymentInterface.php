@@ -99,7 +99,7 @@ interface PaymentInterface
      *
      * @since 1.0.0
      */
-    public function getTransactionConfig(Shop $shop, ParameterBagInterface $parameterBag, $selectedCurrency);
+    public function getTransactionConfig(ParameterBagInterface $parameterBag, $selectedCurrency);
 
     /**
      * Returns payment specific configuration.

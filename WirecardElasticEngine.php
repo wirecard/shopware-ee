@@ -14,6 +14,7 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once(__DIR__ . '/vendor/autoload.php');
 }
 
+use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Config\Element;
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\ActivateContext;
@@ -112,6 +113,7 @@ class WirecardElasticEngine extends Plugin
      */
     protected function updateDatabase()
     {
+        /** @var ModelManager $entityManager */
         $entityManager = $this->container->get('models');
         $schemaTool    = new SchemaTool($entityManager);
 
@@ -122,6 +124,11 @@ class WirecardElasticEngine extends Plugin
             ],
             true
         );
+
+        // migrate vault data
+        $queryBuilder = $entityManager->createQueryBuilder();
+        $queryBuilder->update(CreditCardVault::class, 'v')->set('v.created', 'v.lastUsed')->where('v.created IS NULL');
+        $queryBuilder->getQuery()->execute();
     }
 
     /**
@@ -292,7 +299,10 @@ class WirecardElasticEngine extends Plugin
             return;
         }
 
-        $translationObject = new \Shopware_Components_Translation();
+        $translationObject = $this->container->has('translation')
+            ? $this->container->get('translation')
+            : new \Shopware_Components_Translation();
+
         $translationObject->write($shopId, 'config_payment', $paymentId, ['description' => $description], true);
     }
 }

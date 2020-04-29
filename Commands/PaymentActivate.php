@@ -35,7 +35,7 @@ class PaymentActivate extends ShopwareCommand
     protected function configure()
     {
         $this
-            ->setName('wirecardelasticengine:payment:activate')
+            ->setName(self::$defaultName)
             ->setDescription('Activate all Wirecard EE payment methods.');
     }
 

@@ -113,7 +113,6 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
         $transactionManager = $this->container->get('wirecard_elastic_engine.transaction_manager');
         $shop               = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
         $config             = $payment->getTransactionConfig(
-            $shop,
             $this->container->getParameterBag(),
             $shop->getCurrency()->getCurrency()
         );
@@ -211,7 +210,6 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
 
         $shop           = $this->getModelManager()->getRepository(Shop::class)->getActiveDefault();
         $config         = $payment->getTransactionConfig(
-            $shop,
             $this->container->getParameterBag(),
             $shop->getCurrency()->getCurrency()
         );
@@ -230,7 +228,7 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
             $mapper->setTransactionBasket($backendTransaction, $basket);
         }
         if (isset($details['amount'])) {
-            $backendTransaction->setAmount(new Amount($details['amount'], $transaction->getCurrency()));
+            $backendTransaction->setAmount(new Amount(floatval($details['amount']), $transaction->getCurrency()));
         }
 
         /** @var BackendOperationHandler $backendOperationHandler */

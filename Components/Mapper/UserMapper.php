@@ -30,6 +30,7 @@ class UserMapper extends ArrayMapper
     const BIRTHDAY = 'birthday';
     const PHONE = 'phone';
     const SHIPPING_ADDRESS = 'shippingaddress';
+    const SHIPPING_ADDRESS_ID = 'id';
     const BILLING_ADDRESS = 'billingaddress';
     const ADDRESS_FIRST_NAME = 'firstname';
     const ADDRESS_LAST_NAME = 'lastname';
@@ -37,6 +38,7 @@ class UserMapper extends ArrayMapper
     const ADDRESS_STREET = 'street';
     const ADDRESS_ZIP = 'zipcode';
     const ADDRESS_ADDITIONAL = 'additionalAddressLine1';
+    const ADDRESS_ADDITIONAL2 = 'additionalAddressLine2';
     const ADDRESS_COUNTRY_ID = 'countryId';
     const ADDRESS_STATE_ID = 'stateId';
     const ADDITIONAL = 'additional';
@@ -61,7 +63,7 @@ class UserMapper extends ArrayMapper
     protected $locale;
 
     /**
-     * @param array  $shopwareUser
+     * @param array $shopwareUser
      * @param string $clientIp
      * @param string $locale
      *
@@ -95,6 +97,7 @@ class UserMapper extends ArrayMapper
     public function getWirecardBillingAccountHolder()
     {
         $billingAccountHolder = new AccountHolder();
+        $billingAccountHolder->setCrmId($this->getCustomerNumber());
         $billingAccountHolder->setFirstName($this->getFirstName());
         $billingAccountHolder->setLastName($this->getLastName());
         $billingAccountHolder->setEmail($this->getEmail());
@@ -143,6 +146,7 @@ class UserMapper extends ArrayMapper
         );
         $billingAddress->setPostalCode($this->getBillingAddressZip());
         $billingAddress->setStreet2($this->getBillingAddressAdditional());
+        $billingAddress->setStreet3($this->getBillingAddressAdditional2());
 
         if (strlen($this->getStateIso())) {
             $billingAddress->setState($this->getStateIso());
@@ -167,6 +171,7 @@ class UserMapper extends ArrayMapper
         );
         $shippingAddress->setPostalCode($this->getShippingAddressZip());
         $shippingAddress->setStreet2($this->getShippingAddressAdditional());
+        $shippingAddress->setStreet3($this->getShippingAddressAdditional2());
 
         if (strlen($this->getShippingAddressStateIso())) {
             $shippingAddress->setState($this->getShippingAddressStateIso());
@@ -237,6 +242,7 @@ class UserMapper extends ArrayMapper
     public function getBirthday()
     {
         $birthday = $this->getOptional([self::ADDITIONAL, self::ADDITIONAL_USER, self::BIRTHDAY]);
+
         return $birthday ? new \DateTime($birthday) : null;
     }
 
@@ -290,6 +296,7 @@ class UserMapper extends ArrayMapper
     public function getBillingAddressCity()
     {
         $address = $this->getBillingAddress();
+
         return isset($address[self::ADDRESS_CITY]) ? $address[self::ADDRESS_CITY] : null;
     }
 
@@ -302,6 +309,7 @@ class UserMapper extends ArrayMapper
     public function getBillingAddressStreet()
     {
         $address = $this->getBillingAddress();
+
         return isset($address[self::ADDRESS_STREET]) ? $address[self::ADDRESS_STREET] : null;
     }
 
@@ -314,6 +322,7 @@ class UserMapper extends ArrayMapper
     public function getBillingAddressZip()
     {
         $address = $this->getBillingAddress();
+
         return isset($address[self::ADDRESS_ZIP]) ? $address[self::ADDRESS_ZIP] : null;
     }
 
@@ -326,7 +335,18 @@ class UserMapper extends ArrayMapper
     public function getBillingAddressAdditional()
     {
         $address = $this->getBillingAddress();
+
         return isset($address[self::ADDRESS_ADDITIONAL]) ? $address[self::ADDRESS_ADDITIONAL] : null;
+    }
+
+    /**
+     * @return string|null
+     *
+     * @since 1.4.0
+     */
+    public function getBillingAddressAdditional2()
+    {
+        return $this->getOptional([self::BILLING_ADDRESS, self::ADDRESS_ADDITIONAL2]);
     }
 
     /**
@@ -337,6 +357,16 @@ class UserMapper extends ArrayMapper
     public function getShippingAddress()
     {
         return $this->getOptional(self::SHIPPING_ADDRESS, []);
+    }
+
+    /**
+     * @return string|null
+     *
+     * @since 1.4.0
+     */
+    public function getShippingAddressId()
+    {
+        return $this->getOptional([self::SHIPPING_ADDRESS, self::SHIPPING_ADDRESS_ID]);
     }
 
     /**
@@ -438,6 +468,16 @@ class UserMapper extends ArrayMapper
     }
 
     /**
+     * @return string|null
+     *
+     * @since 1.4.0
+     */
+    public function getShippingAddressAdditional2()
+    {
+        return $this->getOptional([self::SHIPPING_ADDRESS, self::ADDRESS_ADDITIONAL2]);
+    }
+
+    /**
      * @return string
      *
      * @since 1.0.0
@@ -466,29 +506,31 @@ class UserMapper extends ArrayMapper
     public function toArray()
     {
         return [
-            'customerNumber'            => $this->getCustomerNumber(),
-            'firstName'                 => $this->getFirstName(),
-            'lastName'                  => $this->getLastName(),
-            'email'                     => $this->getEmail(),
-            'birthday'                  => $this->getBirthday(),
-            'phone'                     => $this->getPhone(),
-            'countryIso'                => $this->getCountryIso(),
-            'stateIso'                  => $this->getStateIso(),
-            'billingAddressCity'        => $this->getBillingAddressCity(),
-            'billingAddressStreet'      => $this->getBillingAddressStreet(),
-            'billingAddressZip'         => $this->getBillingAddressZip(),
-            'billingAddressAdditional'  => $this->getBillingAddressAdditional(),
-            'shippingFirstName'         => $this->getShippingFirstName(),
-            'shippingLastName'          => $this->getShippingLastName(),
-            'shippingPhone'             => $this->getShippingPhone(),
-            'shippingCountryIso'        => $this->getShippingAddressCountryIso(),
-            'shippingStateIso'          => $this->getShippingAddressStateIso(),
-            'shippingAddressCity'       => $this->getShippingAddressCity(),
-            'shippingAddressStreet'     => $this->getShippingAddressStreet(),
-            'shippingAddressZip'        => $this->getShippingAddressZip(),
-            'shippingAddressAdditional' => $this->getShippingAddressAdditional(),
-            'clientIp'                  => $this->getClientIp(),
-            'locale'                    => $this->getLocale(),
+            'customerNumber'             => $this->getCustomerNumber(),
+            'firstName'                  => $this->getFirstName(),
+            'lastName'                   => $this->getLastName(),
+            'email'                      => $this->getEmail(),
+            'birthday'                   => $this->getBirthday(),
+            'phone'                      => $this->getPhone(),
+            'countryIso'                 => $this->getCountryIso(),
+            'stateIso'                   => $this->getStateIso(),
+            'billingAddressCity'         => $this->getBillingAddressCity(),
+            'billingAddressStreet'       => $this->getBillingAddressStreet(),
+            'billingAddressZip'          => $this->getBillingAddressZip(),
+            'billingAddressAdditional'   => $this->getBillingAddressAdditional(),
+            'billingAddressAdditional2'  => $this->getBillingAddressAdditional2(),
+            'shippingFirstName'          => $this->getShippingFirstName(),
+            'shippingLastName'           => $this->getShippingLastName(),
+            'shippingPhone'              => $this->getShippingPhone(),
+            'shippingCountryIso'         => $this->getShippingAddressCountryIso(),
+            'shippingStateIso'           => $this->getShippingAddressStateIso(),
+            'shippingAddressCity'        => $this->getShippingAddressCity(),
+            'shippingAddressStreet'      => $this->getShippingAddressStreet(),
+            'shippingAddressZip'         => $this->getShippingAddressZip(),
+            'shippingAddressAdditional'  => $this->getShippingAddressAdditional(),
+            'shippingAddressAdditional2' => $this->getShippingAddressAdditional2(),
+            'clientIp'                   => $this->getClientIp(),
+            'locale'                     => $this->getLocale(),
         ];
     }
 }

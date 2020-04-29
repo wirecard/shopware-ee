@@ -17,7 +17,9 @@ const {
     selectPaymentMethod,
     getDriver,
     asyncForEach,
-    waitForAlert
+    waitForAlert,
+    updateDatabaseTransactionType,
+    checkTransactionTypeInDatabase
 } = require('../common');
 
 let driver;
@@ -31,6 +33,7 @@ describe('Credit Card 3-D Secure test', () => {
     const formFields = config.payments.creditCardThreeD.fields;
 
     it('should check the credit card 3ds payment process', async () => {
+        await updateDatabaseTransactionType('pay', 'wirecardElasticEngineCreditCardTransactionType');
         await loginWithExampleAccount(driver);
         await addProductToCartAndGotoCheckout(driver, '/wohnwelten/moebel/68/kommode-shabby-chic');
         await selectPaymentMethod(driver, paymentLabel);
@@ -54,8 +57,6 @@ describe('Credit Card 3-D Secure test', () => {
             await asyncForEach(Object.keys(formFields), async field => {
                 await driver.findElement(By.id(field)).sendKeys(formFields[field]);
             });
-            await driver.findElement(By.css('#expiration_month_list > option[value=\'01\']')).click();
-            await driver.findElement(By.css('#expiration_year_list > option[value=\'2023\']')).click();
 
             // Switch back from iframe and click Send button
             console.log('switch back from iframe to default content');
@@ -106,6 +107,7 @@ describe('Credit Card 3-D Secure test', () => {
 
             await checkConfirmationPage(driver, paymentLabel);
         }
+        checkTransactionTypeInDatabase('purchase');
     });
 
     after(async () => driver.quit());
