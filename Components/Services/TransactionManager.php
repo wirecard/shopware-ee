@@ -46,7 +46,7 @@ class TransactionManager
 
     /**
      * @param OrderSummary $orderSummary
-     * @param Response     $response
+     * @param Response $response
      *
      * @return Transaction|null
      *
@@ -61,7 +61,10 @@ class TransactionManager
 
         // It is possible that the notification arrived before the initial transaction has been created
         $notify = $this->em->getRepository(Transaction::class)
-                           ->findOneBy(['requestId' => $response->getRequestId(), 'type' => Transaction::TYPE_NOTIFY]);
+                           ->findOneBy([
+                               'requestId' => $response->getRequestId(),
+                               'type'      => Transaction::TYPE_NOTIFY
+                           ]);
         if ($notify) {
             $transaction->setPaymentStatus($notify->getPaymentStatus());
         }
@@ -93,8 +96,8 @@ class TransactionManager
 
     /**
      * @param Transaction $initialTransaction
-     * @param Response    $response
-     * @param string      $statusMessage
+     * @param Response $response
+     * @param string $statusMessage
      *
      * @return Transaction|null
      *
@@ -120,8 +123,8 @@ class TransactionManager
     }
 
     /**
-     * @param Transaction    $initialTransaction
-     * @param Response       $response
+     * @param Transaction $initialTransaction
+     * @param Response $response
      * @param BackendService $backendService
      *
      * @return Transaction
@@ -205,6 +208,7 @@ class TransactionManager
                 $this->em->flush();
             }
         }
+
         return $transaction;
     }
 
@@ -228,6 +232,36 @@ class TransactionManager
             $totalAmount -= (float)$childTransaction->getAmount();
         }
         return $totalAmount;
+    }
+
+    /**
+     * Decide if there is rest amount for payment state definition
+     *
+     * @param string $restAmount
+     * @param string|null $orderNumber
+     *
+     * @return boolean
+     *
+     * @since 1.4.0
+     */
+    public function isRestAmount($restAmount, $orderNumber)
+    {
+        $isRestAmount = false;
+        $childTransactions = $this->em->getRepository(Transaction::class)->findBy([
+            'orderNumber' => $orderNumber,
+            'type'        => Transaction::TYPE_BACKEND,
+        ]);
+        foreach ($childTransactions as $childTransaction) {
+            if (in_array($childTransaction->getTransactionType(), Transaction::TYPES_WITH_REST_AMOUNT)) {
+                $restAmount += (float) $childTransaction->getAmount();
+            } else {
+                $restAmount -= (float) $childTransaction->getAmount();
+            }
+        }
+        if ($restAmount > 0) {
+            $isRestAmount = true;
+        }
+        return $isRestAmount;
     }
 
     /**
