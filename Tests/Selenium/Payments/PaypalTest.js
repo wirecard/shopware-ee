@@ -51,6 +51,12 @@ describe('PayPal test', () => {
             await driver.wait(until.elementLocated(By.id('password')), 10000);
             await driver.findElement(By.id('password')).sendKeys(payPalPassword['paypal.password'], Key.ENTER);
 
+            console.log('wait for #acceptAllButton');
+            await driver.wait(until.elementLocated(By.id('acceptAllButton')));
+            console.log('#acceptAllButton located');
+            await driver.findElement(By.id('acceptAllButton')).click();
+            console.log('#acceptAllButton clicked');
+
             console.log('wait for #confirmButtonTop');
             await driver.wait(until.elementLocated(By.id('confirmButtonTop')));
             console.log('#confirmButtonTop located');
@@ -75,6 +81,11 @@ describe('PayPal test', () => {
             await driver.findElement(By.id('password')).sendKeys(payPalPassword['paypal.password'], Key.ENTER);
 
             await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
+            console.log('wait for #acceptAllButton');
+            await driver.wait(until.elementLocated(By.id('acceptAllButton')));
+            console.log('#acceptAllButton located');
+            await driver.findElement(By.id('acceptAllButton')).click();
+            console.log('#acceptAllButton clicked');
 
             console.log('wait for #confirmButtonTop');
             await driver.wait(until.elementLocated(By.id('confirmButtonTop')), 25000);
