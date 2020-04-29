@@ -106,27 +106,6 @@ class ThreedsHelperTest extends TestCase
         $this->assertNotEquals($refDate, $dt);
     }
 
-    public function testGetShippingAddressFirstUsed()
-    {
-        $refDate = new \DateTime('2019-09-21 16:58:00');
-        $order   = $this->createMock(Order::class);
-        $order->method('getOrderTime')->willReturn($refDate);
-        $this->query->method('getOneOrNullResult')->willReturn($order);
-        $this->assertEquals($refDate, $this->helper->getShippingAddressFirstUsed('1'));
-    }
-
-    public function testGetShippingAddressFirstUsedNoAddressId()
-    {
-        $refDate = new \DateTime('2019-09-21 16:58:00');
-        $this->assertNotEquals($refDate, $this->helper->getShippingAddressFirstUsed(''));
-    }
-
-    public function testGetShippingAddressFirstUsedNoData()
-    {
-        $refDate = new \DateTime('2019-09-21 16:58:00');
-        $this->assertNotEquals($refDate, $this->helper->getShippingAddressFirstUsed('1'));
-    }
-
     public function testGetSuccessfulOrdersLastSixMonths()
     {
         $this->query->method('getSingleScalarResult')->willReturn(10);
