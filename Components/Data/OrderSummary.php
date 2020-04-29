@@ -11,7 +11,9 @@ namespace WirecardElasticEngine\Components\Data;
 
 use Wirecard\PaymentSdk\Entity\Amount;
 use Wirecard\PaymentSdk\Entity\Device;
+use WirecardElasticEngine\Components\Mapper\AccountInfoMapper;
 use WirecardElasticEngine\Components\Mapper\BasketMapper;
+use WirecardElasticEngine\Components\Mapper\RiskInfoMapper;
 use WirecardElasticEngine\Components\Mapper\UserMapper;
 use WirecardElasticEngine\Components\Payments\Payment;
 use WirecardElasticEngine\Components\Payments\PaymentInterface;
@@ -52,6 +54,18 @@ class OrderSummary
     protected $userMapper;
 
     /**
+     * @var AccountInfoMapper
+     * @since 1.4.0
+     */
+    protected $accountInfoMapper;
+
+    /**
+     * @var RiskInfoMapper
+     * @since 1.4.0
+     */
+    protected $riskInfoMapper;
+
+    /**
      * @var string
      */
     protected $deviceFingerprintId;
@@ -62,13 +76,15 @@ class OrderSummary
     protected $additionalPaymentData;
 
     /**
-     * @param string           $paymentUniqueId
+     * @param string $paymentUniqueId
      * @param PaymentInterface $payment
-     * @param UserMapper       $userMapper
-     * @param BasketMapper     $basketMapper
-     * @param Amount           $amount
-     * @param string           $deviceFingerprintId
-     * @param array            $additionalPaymentData
+     * @param UserMapper $userMapper
+     * @param BasketMapper $basketMapper
+     * @param Amount $amount
+     * @param AccountInfoMapper $accountInfoMapper
+     * @param RiskInfoMapper $riskInfoMapper
+     * @param string $deviceFingerprintId
+     * @param array $additionalPaymentData
      *
      * @since 1.0.0
      */
@@ -78,6 +94,8 @@ class OrderSummary
         UserMapper $userMapper,
         BasketMapper $basketMapper,
         Amount $amount,
+        AccountInfoMapper $accountInfoMapper,
+        RiskInfoMapper $riskInfoMapper,
         $deviceFingerprintId,
         $additionalPaymentData = []
     ) {
@@ -86,6 +104,8 @@ class OrderSummary
         $this->userMapper            = $userMapper;
         $this->amount                = $amount;
         $this->basketMapper          = $basketMapper;
+        $this->accountInfoMapper     = $accountInfoMapper;
+        $this->riskInfoMapper        = $riskInfoMapper;
         $this->deviceFingerprintId   = $deviceFingerprintId;
         $this->additionalPaymentData = $additionalPaymentData;
     }
@@ -118,6 +138,26 @@ class OrderSummary
     public function getBasketMapper()
     {
         return $this->basketMapper;
+    }
+
+    /**
+     * @return AccountInfoMapper
+     *
+     * @since 1.4.0
+     */
+    public function getAccountInfoMapper()
+    {
+        return $this->accountInfoMapper;
+    }
+
+    /**
+     * @return RiskInfoMapper
+     *
+     * @since 1.4.0
+     */
+    public function getRiskInfoMapper()
+    {
+        return $this->riskInfoMapper;
     }
 
     /**
@@ -159,6 +199,7 @@ class OrderSummary
     {
         $device = new Device();
         $device->setFingerprint($this->getDeviceFingerprintId());
+
         return $device;
     }
 

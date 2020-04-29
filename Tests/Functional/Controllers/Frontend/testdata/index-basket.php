@@ -42,6 +42,7 @@ return [
     'sUserData' => [
         'additional'      => [
             'user'    => [
+                'id'        => '42',
                 'paymentID' => 7,
                 'firstname' => 'First Name',
                 'lastname'  => 'Last Name',

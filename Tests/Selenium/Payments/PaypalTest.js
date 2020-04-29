@@ -50,16 +50,21 @@ describe('PayPal test', () => {
             console.log('wait for #password');
             await driver.wait(until.elementLocated(By.id('password')), 10000);
             await driver.findElement(By.id('password')).sendKeys(payPalPassword['paypal.password'], Key.ENTER);
-            console.log('wait for btn full confirmButton continueButton');
-            await driver.wait(until.elementLocated(By.className('btn full confirmButton continueButton')));
-            console.log('btn full confirmButton continueButton located');
-            await driver.findElement(By.className('btn full confirmButton continueButton')).click();
-            console.log('#btn full confirmButton continueButton clicked');
-            console.log('wait for #confirmButtonTop');
-            await driver.wait(until.elementLocated(By.id('confirmButtonTop')));
-            console.log('#confirmButtonTop located');
-            await driver.findElement(By.id('confirmButtonTop')).click();
-            console.log('#confirmButtonTop clicked');
+
+            console.log('wait for #acceptAllButton');
+            await driver.wait(until.elementLocated(By.id('acceptAllButton')));
+            console.log('#acceptAllButton located');
+            await driver.findElement(By.id('acceptAllButton')).click();
+            console.log('#acceptAllButton clicked');
+
+            console.log('wait for #payment-submit-btn');
+            await driver.wait(until.elementLocated(By.id('payment-submit-btn')));
+            console.log('#payment-submit-btn located');
+            console.log('wait for #payment-submit-btn clickable');
+            await driver.sleep(10000);
+            console.log('click #payment-submit-btn');
+            await driver.findElement(By.id('payment-submit-btn')).click();
+            console.log('#payment-submit-btn clicked');
 
             await waitForAlert(driver, 25000);
 
@@ -79,17 +84,19 @@ describe('PayPal test', () => {
             await driver.findElement(By.id('password')).sendKeys(payPalPassword['paypal.password'], Key.ENTER);
 
             await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
-            console.log('wait for btn full confirmButton continueButton');
-            await driver.wait(until.elementLocated(By.className('btn full confirmButton continueButton')));
-            console.log('btn full confirmButton continueButton located');
-            await driver.findElement(By.className('btn full confirmButton continueButton')).click();
-            console.log('#btn full confirmButton continueButton clicked');
+            console.log('wait for #acceptAllButton');
+            await driver.wait(until.elementLocated(By.id('acceptAllButton')));
+            console.log('#acceptAllButton located');
+            await driver.findElement(By.id('acceptAllButton')).click();
+            console.log('#acceptAllButton clicked');
 
-            console.log('wait for #confirmButtonTop');
-            await driver.wait(until.elementLocated(By.id('confirmButtonTop')), 25000);
+            console.log('wait for #payment-submit-btn');
+            await driver.wait(until.elementLocated(By.id('payment-submit-btn')), 25000);
             await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
-            console.log('click #confirmButtonTop');
-            await driver.wait(driver.findElement(By.id('confirmButtonTop')).click(), 10000);
+            console.log('wait for #payment-submit-btn clickable');
+            await driver.sleep(10000);
+            console.log('click #payment-submit-btn');
+            await driver.wait(driver.findElement(By.id('payment-submit-btn')).click(), 10000);
 
             await waitForAlert(driver, 25000);
 
