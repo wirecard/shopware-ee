@@ -57,7 +57,6 @@ class AccountInfoMapperTest extends TestCase
                 'challenge-indicator'        => '01',
                 'creation-date'              => '2019-09-26',
                 'update-date'                => '2019-09-25',
-                'password-change-date'       => '2019-09-24',
                 'shipping-address-first-use' => '2019-08-09',
                 'card-creation-date'         => '2019-08-09',
                 'purchases-last-six-months'  => 0
@@ -97,7 +96,6 @@ class AccountInfoMapperTest extends TestCase
                 'challenge-indicator'        => '04',
                 'creation-date'              => '2019-09-26',
                 'update-date'                => '2019-09-25',
-                'password-change-date'       => '2019-09-24',
                 'shipping-address-first-use' => '2019-08-09',
                 'card-creation-date'         => '2019-08-09',
                 'purchases-last-six-months'  => 0
@@ -119,7 +117,6 @@ class AccountInfoMapperTest extends TestCase
                 'challenge-indicator'        => '02',
                 'creation-date'              => '2019-09-26',
                 'update-date'                => '2019-09-25',
-                'password-change-date'       => '2019-09-24',
                 'shipping-address-first-use' => '2019-08-09',
                 'card-creation-date'         => '2019-08-09',
                 'purchases-last-six-months'  => 0

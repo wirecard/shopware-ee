@@ -103,7 +103,7 @@ class UserMapperTest extends TestCase
                 'street2'     => 'Hodor',
                 'state'       => 'OR'
             ],
-            'merchant-crm-id' => '12'
+            'merchant-crm-id' => '10001'
         ], $account->mappedProperties());
     }
 
@@ -141,7 +141,6 @@ class UserMapperTest extends TestCase
                 'country' => 'AT',
                 'state'   => 'OR',
             ],
-            'merchant-crm-id' => '12'
         ], $account->mappedProperties());
     }
 
