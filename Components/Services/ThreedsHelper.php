@@ -28,6 +28,8 @@ use WirecardElasticEngine\WirecardElasticEngine;
  * @package WirecardElasticEngine\Components\Services
  *
  * @since   1.4.0
+ *
+ * @SuppressWarnings(PHPMD)
  */
 class ThreedsHelper
 {

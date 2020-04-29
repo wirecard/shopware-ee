@@ -252,16 +252,29 @@ class TransactionManager
             'type'        => Transaction::TYPE_BACKEND,
         ]);
         foreach ($childTransactions as $childTransaction) {
-            if (in_array($childTransaction->getTransactionType(), Transaction::TYPES_WITH_REST_AMOUNT)) {
-                $restAmount += (float) $childTransaction->getAmount();
-            } else {
-                $restAmount -= (float) $childTransaction->getAmount();
-            }
+            $restAmount += $this->getRestAmount($childTransaction);
         }
         if ($restAmount > 0) {
             $isRestAmount = true;
         }
         return $isRestAmount;
+    }
+
+    /**
+     * Get rest amount from transaction
+     *
+     * @param $transaction
+     * @return float
+     *
+     * @since 1.4.0
+     */
+    private function getRestAmount($transaction)
+    {
+        $amount = ((float)$transaction->getAmount()) * -1;
+        if (in_array($transaction->getTransactionType(), Transaction::TYPES_WITH_REST_AMOUNT)) {
+            $amount = (float)$transaction->getAmount();
+        }
+        return $amount;
     }
 
     /**
