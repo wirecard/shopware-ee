@@ -54,6 +54,11 @@
                  class="WirecardElasticEngine\Components\Services\SessionManager">
             <argument type="service" id="session"/>
         </service>
+        <service id="wirecard_elastic_engine.threeds_helper"
+                 class="WirecardElasticEngine\Components\Services\ThreedsHelper">
+            <argument type="service" id="models"/>
+            <argument type="service" id="config"/>
+        </service>
 
         <!-- Mails -->
         <service id="wirecard_elastic_engine.mail.support"

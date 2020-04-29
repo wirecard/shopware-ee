@@ -18,18 +18,18 @@ services:
 
 env:
   global:
-    - COMPOSER_ARGS="--no-interaction"
+    - COMPOSER_ARGS=--no-interaction
     - PLUGIN_NAME=WirecardElasticEngine
     - SHOPWARE_DIRECTORY=${HOME}/shopware
     - SHOPWARE_RELEASES_FILE=./.bin/compatible-shop-releases.txt
-    - SHOP_SYSTEM_UPDATE_COMMIT="Update latest shop releases"
-    - MANUAL_UITEST_TRIGGER_COMMIT="Test my build"
-    - PATCH_RELEASE="patch"
-    - MINOR_RELEASE="minor"
-    - MAJOR_RELEASE="major"
+    - SHOP_SYSTEM_UPDATE_COMMIT=UpdateLatestShopReleases
+    - MANUAL_UITEST_TRIGGER_COMMIT=TestMyBuild
+    - PATCH_RELEASE=patch
+    - MINOR_RELEASE=minor
+    - MAJOR_RELEASE=major
     - SHOPWARE_COMPATIBILITY_FILE=./.bin/new-shop-releases.txt
 
-matrix:
+jobs:
   allow_failures:
   - stage: acceptance-test
     env:
@@ -52,16 +52,6 @@ matrix:
     if: type != cron AND commit_message !~ env(SHOP_SYSTEM_UPDATE_COMMIT) AND commit_message !~ env(MANUAL_UITEST_TRIGGER_COMMIT)
   - php: 7.2
     if: type != cron AND commit_message !~ env(SHOP_SYSTEM_UPDATE_COMMIT) AND commit_message !~ env(MANUAL_UITEST_TRIGGER_COMMIT)
-
-  # get latest shopware versions and store them in new-shop-releases.txt
-  - stage: get-latest-shop-release-versions
-    if: type = cron
-    php: 7.2
-    install: skip
-    before_script: skip
-    script: bash .bin/get-latest-shop-release-versions.sh
-    after_script: skip
-    after_failure: skip
 
   - &acceptance-test
     stage: acceptance-test
@@ -96,7 +86,6 @@ matrix:
     after_script: skip
     after_success:
       - bash .bin/upload-logs-and-notify.sh
-      - bash .bin/update-shop-release-versions.sh
     after_failure: bash .bin/upload-logs-and-notify.sh fail
 
     # run this stage on pull request if head branch name contains major (on major release)
@@ -185,31 +174,11 @@ script:
 
 after_script:
   - travis_retry composer upload-coverage
-  - bash .bin/generate-tag.sh
 
 after_failure:
   - sudo cat /var/log/apache2/error.log
   - cat ${SHOPWARE_DIRECTORY}/composer.lock
   - cat ${SHOPWARE_DIRECTORY}/var/log/*.log
-
-before_deploy:
-  - export REPO_NAME=`echo ${TRAVIS_REPO_SLUG} | awk -F'/' '{print $2}'`
-  - export RELEASE_NOTES=$(composer make-release-notes)
-  - bash .bin/generate-wiki-notes.sh
-  - bash .bin/generate-readme-badge.sh
-  - bash .bin/generate-release-package.sh ${TRAVIS_TAG}
-
-deploy:
-  provider: releases
-  github_token: ${GITHUB_TOKEN}
-  api_key: ${GITHUB_TOKEN}
-  file: WirecardElasticEngine.zip
-  name: "${REPO_NAME} ${TRAVIS_TAG}"
-  body: "${RELEASE_NOTES}"
-  skip_cleanup: true
-  on:
-    repo: wirecard/shopware-ee
-    tags: true
 
 notifications:
   email: false

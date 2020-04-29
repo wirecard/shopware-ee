@@ -30,6 +30,10 @@ describe('PayPal test', () => {
     const paymentLabel = config.payments.paypal.label;
     const formFields = config.payments.paypal.fields;
 
+    const payPalPassword = Object.assign({
+        'paypal.password': process.env.PAYPAL_PASSWORD
+    });
+
     it('should check the paypal payment process', async () => {
         await loginWithExampleAccount(driver);
         await addProductToCartAndGotoCheckout(driver, '/genusswelten/tees-und-zubeh/tee-zubehoer/24/glas-teekaennchen');
@@ -45,12 +49,22 @@ describe('PayPal test', () => {
             await driver.findElement(By.id('email')).sendKeys(formFields.email);
             console.log('wait for #password');
             await driver.wait(until.elementLocated(By.id('password')), 10000);
-            await driver.findElement(By.id('password')).sendKeys(formFields.password, Key.ENTER);
-            console.log('wait for #confirmButtonTop');
-            await driver.wait(until.elementLocated(By.id('confirmButtonTop')));
-            console.log('#confirmButtonTop located');
-            await driver.findElement(By.id('confirmButtonTop')).click();
-            console.log('#confirmButtonTop clicked');
+            await driver.findElement(By.id('password')).sendKeys(payPalPassword['paypal.password'], Key.ENTER);
+
+            console.log('wait for #acceptAllButton');
+            await driver.wait(until.elementLocated(By.id('acceptAllButton')));
+            console.log('#acceptAllButton located');
+            await driver.findElement(By.id('acceptAllButton')).click();
+            console.log('#acceptAllButton clicked');
+
+            console.log('wait for #payment-submit-btn');
+            await driver.wait(until.elementLocated(By.id('payment-submit-btn')));
+            console.log('#payment-submit-btn located');
+            console.log('wait for #payment-submit-btn clickable');
+            await driver.sleep(10000);
+            console.log('click #payment-submit-btn');
+            await driver.findElement(By.id('payment-submit-btn')).click();
+            console.log('#payment-submit-btn clicked');
 
             await waitForAlert(driver, 25000);
 
@@ -67,15 +81,22 @@ describe('PayPal test', () => {
             await driver.wait(until.elementLocated(By.id('btnLogin')), 25000);
             console.log('wait for #password');
             await driver.wait(until.elementLocated(By.id('password')), 10000);
-            await driver.findElement(By.id('password')).sendKeys(formFields.password, Key.ENTER);
+            await driver.findElement(By.id('password')).sendKeys(payPalPassword['paypal.password'], Key.ENTER);
 
             await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
+            console.log('wait for #acceptAllButton');
+            await driver.wait(until.elementLocated(By.id('acceptAllButton')));
+            console.log('#acceptAllButton located');
+            await driver.findElement(By.id('acceptAllButton')).click();
+            console.log('#acceptAllButton clicked');
 
-            console.log('wait for #confirmButtonTop');
-            await driver.wait(until.elementLocated(By.id('confirmButtonTop')), 25000);
+            console.log('wait for #payment-submit-btn');
+            await driver.wait(until.elementLocated(By.id('payment-submit-btn')), 25000);
             await waitUntilOverlayIsNotVisible(driver, By.id('preloaderSpinner'));
-            console.log('click #confirmButtonTop');
-            await driver.wait(driver.findElement(By.id('confirmButtonTop')).click(), 10000);
+            console.log('wait for #payment-submit-btn clickable');
+            await driver.sleep(10000);
+            console.log('click #payment-submit-btn');
+            await driver.wait(driver.findElement(By.id('payment-submit-btn')).click(), 10000);
 
             await waitForAlert(driver, 25000);
 
