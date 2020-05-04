@@ -20,11 +20,6 @@
     "symfony/yaml": "^3"
   },
   "type": "shopware-plugin",
-  "autoload": {
-    "psr-4": {
-      "WirecardElasticEngine\\": "/"
-    }
-  },
   "scripts": {
     "upload-coverage": "codacycoverage clover build/coverage.xml",
     "cs-check": "phpcs --standard=phpcs.xml --ignore=*/vendor/*,*/Tests/*,*/node_modules/*,*/Resources/*,*/.bin/* -s ",
@@ -33,8 +28,5 @@
     "js-fix": "eslint -c .eslintrc.json **/*.js **/*.js --ignore-path .eslintignore --fix",
     "test-coverage": "phpunit --colors=always --coverage-clover build/coverage.xml",
     "build-languages": "php .bin/language-helper.php"
-  },
-  "extra": {
-    "installer-name": "WirecardElasticEngine"
   }
 }
