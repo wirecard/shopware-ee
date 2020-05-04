@@ -228,7 +228,7 @@ class Shopware_Controllers_Backend_WirecardElasticEngineTransactions extends Sho
             $mapper->setTransactionBasket($backendTransaction, $basket);
         }
         if (isset($details['amount'])) {
-            $backendTransaction->setAmount(new Amount($details['amount'], $transaction->getCurrency()));
+            $backendTransaction->setAmount(new Amount(floatval($details['amount']), $transaction->getCurrency()));
         }
 
         /** @var BackendOperationHandler $backendOperationHandler */
