@@ -71,7 +71,7 @@ jobs:
       # check from which file to take versions
       - if [[ ${COMPATIBILITY_CHECK}  == "0" ]]; then export SHOPWARE_VERSION=$(awk "NR==${SHOP_RELEASE} {print; exit}" ${SHOPWARE_RELEASES_FILE}); else export SHOPWARE_VERSION=$(awk "NR==${SHOP_RELEASE} {print; exit}" ${SHOPWARE_COMPATIBILITY_FILE}); fi
       - echo "Testing with Shopware ${SHOPWARE_VERSION} version."
-      - export LATEST_RELEASED_SHOP_EXTENSION_VERSION=`jq .[0].release ${TRAVIS_BUILD_DIR}/SHOPVERSIONS | tr -d '"'`
+      - export LATEST_RELEASED_SHOP_EXTENSION_VERSION=$(git describe --abbrev=0 --tags)
       - if [[ ${LATEST_EXTENSION_RELEASE}  == "1" ]]; then git checkout tags/${LATEST_RELEASED_SHOP_EXTENSION_VERSION};fi
       - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
       - travis_retry composer install --no-dev $COMPOSER_ARGS
