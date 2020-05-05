@@ -15,8 +15,7 @@
       "WirecardElasticEngine/package.json",
       "WirecardElasticEngine/phpcs.xml",
       "WirecardElasticEngine/phpunit.xml",
-      "WirecardElasticEngine/README.md",
-      "WirecardElasticEngine/SHOPVERSIONS"
+      "WirecardElasticEngine/README.md"
     ],
     "folder-blacklist": [
       ".bin",
