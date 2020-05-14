@@ -11,7 +11,7 @@
     <label>Wirecard</label>
 
     <version>1.4.0</version>
-    <compatibility minVersion="5.5.0" />
+    <compatibility minVersion="5.6.0" />
 
     <author>Wirecard AG</author>
     <link>https://shopware.wirecard.com/</link>
