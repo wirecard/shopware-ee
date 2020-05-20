@@ -22,12 +22,10 @@ env:
     - PLUGIN_NAME=WirecardElasticEngine
     - SHOPWARE_DIRECTORY=${HOME}/shopware
     - SHOPWARE_RELEASES_FILE=./.bin/compatible-shop-releases.txt
-    - SHOP_SYSTEM_UPDATE_COMMIT=UpdateLatestShopReleases
     - MANUAL_UITEST_TRIGGER_COMMIT=TestMyBuild
     - PATCH_RELEASE=patch
     - MINOR_RELEASE=minor
     - MAJOR_RELEASE=major
-    - SHOPWARE_COMPATIBILITY_FILE=./.bin/new-shop-releases.txt
 
 jobs:
   allow_failures:
@@ -36,16 +34,10 @@ jobs:
       - GATEWAY=API-TEST
       - SHOP_RELEASE=1
       - ALLOW_FAIL=1
-  - stage: acceptance-test
-    env:
-      - GATEWAY=API-TEST
-      - SHOP_RELEASE=1
-      - LATEST_EXTENSION_RELEASE=1
-      - ALLOW_FAIL=1
 
   include:
   - php: 7.2
-    if: type != cron AND commit_message !~ env(SHOP_SYSTEM_UPDATE_COMMIT) AND commit_message !~ env(MANUAL_UITEST_TRIGGER_COMMIT)
+    if: type != cron AND commit_message !~ env(MANUAL_UITEST_TRIGGER_COMMIT)
 
   - &acceptance-test
     stage: acceptance-test
@@ -60,13 +52,8 @@ jobs:
       #    shopware version - first line in SHOPWARE_RELEASES_FILE
       - SHOP_RELEASE=1
     install:
-      # check if files are same or not
-      - cmp --silent ${SHOPWARE_RELEASES_FILE} ${SHOPWARE_COMPATIBILITY_FILE} && export COMPATIBILITY_CHECK=0 || export COMPATIBILITY_CHECK=1
-      # check from which file to take versions
-      - if [[ ${COMPATIBILITY_CHECK}  == "0" ]]; then export SHOPWARE_VERSION=$(awk "NR==${SHOP_RELEASE} {print; exit}" ${SHOPWARE_RELEASES_FILE}); else export SHOPWARE_VERSION=$(awk "NR==${SHOP_RELEASE} {print; exit}" ${SHOPWARE_COMPATIBILITY_FILE}); fi
+      - export SHOPWARE_VERSION=$(awk "NR==${SHOP_RELEASE} {print; exit}" ${SHOPWARE_RELEASES_FILE})
       - echo "Testing with Shopware ${SHOPWARE_VERSION} version."
-      - export LATEST_RELEASED_SHOP_EXTENSION_VERSION=$(git describe --abbrev=0 --tags)
-      - if [[ ${LATEST_EXTENSION_RELEASE}  == "1" ]]; then git checkout tags/${LATEST_RELEASED_SHOP_EXTENSION_VERSION};fi
       - travis_retry composer require --dev $COMPOSER_ARGS satooshi/php-coveralls:^1.0
       - travis_retry composer install --no-dev $COMPOSER_ARGS
       - travis_retry npm install
@@ -81,49 +68,6 @@ jobs:
     after_success:
       - bash .bin/upload-logs-and-notify.sh
     after_failure: bash .bin/upload-logs-and-notify.sh fail
-
-    # run this stage on pull request if head branch name contains major (on major release)
-    # tests will use branch which originated pull request
-  - <<: *acceptance-test
-    if: type = pull_request AND head_branch =~ env(MAJOR_RELEASE)
-    env:
-      - GATEWAY=API-TEST
-      # shopware version - 2nd line in SHOPWARE_RELEASES_FILE
-      - SHOP_RELEASE=2
-
-  # run this stage on pull request if head branch name contains major (on major release)
-  # tests will use branch which originated pull request
-  - <<: *acceptance-test
-    if: type = pull_request AND head_branch =~ env(MAJOR_RELEASE)
-    env:
-      - GATEWAY=API-TEST
-      # shopware version - 3rd line in SHOPWARE_RELEASES_FILE
-      - SHOP_RELEASE=3
-
-  # run this stage when shop system updated with latest shop extension release version
-  # tests will use tip of master branch
-  - <<: *acceptance-test
-    # when commit message contains string "Update latest shop releases"
-    if: commit_message =~ env(SHOP_SYSTEM_UPDATE_COMMIT)
-    env:
-      - GATEWAY=API-TEST
-      # shopware version - 1st line in SHOPWARE_RELEASES_FILE
-      - SHOP_RELEASE=1
-      # if this stage fails, it will not fail the whole build
-      - ALLOW_FAIL=1
-
-    # run this stage when shop system updated with latest shop extension release version
-    # tests will use latest released extension version
-  - <<: *acceptance-test
-    # when commit message contains string "Update latest shop releases"
-    if: commit_message =~ env(SHOP_SYSTEM_UPDATE_COMMIT)
-    env:
-      - GATEWAY=API-TEST
-      # shopware version - 1st line in SHOPWARE_RELEASES_FILE
-      - SHOP_RELEASE=1
-      - LATEST_EXTENSION_RELEASE=1
-      # if this stage fails, it will not fail the whole build
-      - ALLOW_FAIL=1
 
 install:
   - travis_retry composer require --dev ${COMPOSER_ARGS} satooshi/php-coveralls:^1.0
