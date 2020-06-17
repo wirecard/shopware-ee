@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.4.1
+
+*   Add PSD2 hint in Credit Card configuration
+
+|        Overview       | Shopware version        | PHP 7.2 |          
+|-----------------------|-------------------------|:-------:|        
+| **Tested version(s)** |       Shopware 5.6.2    | &#9989; |        
+|   **Compatibility**   |  Shopware 5.6.0 - 5.6.2 | &#9989; | 
+
+
 ## v1.4.0
 
 *   Implement Credit Card 3D Secure 2 parameters  

@@ -60,6 +60,21 @@ function (button) {
                 </handler>
             </options>
         </element>
+        <element type="button" scope="shop">
+            <name>wirecardElasticEngineCreditCardPSDTwoHint</name>
+            @forlang
+            <label lang="{{ lang }}">{{ strings.config_PSD2_information_desc }}</label>
+            @endforlang
+            <options>
+                <handler>
+                    <![CDATA[
+                    function (button) {
+                    window.open('https://github.com/wirecard/shopware-ee/wiki/Shopware-Checkout','_blank');
+                    }
+                    ]]>
+                </handler>
+            </options>
+        </element>
         <element type="text" scope="shop">
             <name>wirecardElasticEngineNotifyMail</name>
             @forlang
@@ -177,6 +192,36 @@ function (button) {
                     <value>pay</value>
                     @forlang
                     <label lang="{{ lang }}">{{ strings.text_payment_action_pay }}</label>
+                    @endforlang
+                </option>
+            </store>
+        </element>
+        <element type="select" scope="shop">
+            <name>wirecardElasticEngineCreditCardChallengeIndicator</name>
+            @forlang
+            <label lang="{{ lang }}">[{{ strings.creditcard }}] {{ strings.config_challenge_indicator }}</label>
+            @endforlang
+            <value>1</value>
+            @forlang
+            <description lang="{{ lang }}">{{ strings.config_challenge_indicator_desc }}</description>
+            @endforlang
+            <store>
+                <option>
+                    <value>1</value>
+                    @forlang
+                    <label lang="{{ lang }}">{{ strings.config_challenge_indicator_no_preference }}</label>
+                    @endforlang
+                </option>
+                <option>
+                    <value>2</value>
+                    @forlang
+                    <label lang="{{ lang }}">{{ strings.config_challenge_indicator_no_challenge_requested }}</label>
+                    @endforlang
+                </option>
+                <option>
+                    <value>3</value>
+                    @forlang
+                    <label lang="{{ lang }}">{{ strings.config_challenge_indicator_challenge_requested }}</label>
                     @endforlang
                 </option>
             </store>
