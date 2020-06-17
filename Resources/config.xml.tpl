@@ -65,7 +65,7 @@ function (button) {
             @forlang
             <label lang="{{ lang }}">{{ strings.config_PSD2_information_desc }}</label>
             @endforlang
-            <options>
+            <options> 
                 <handler>
                     <![CDATA[
                     function (button) {
