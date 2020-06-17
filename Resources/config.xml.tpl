@@ -69,7 +69,7 @@ function (button) {
                 <handler>
                     <![CDATA[
                     function (button) {
-                    window.open('https://github.com/wirecard/shopware-ee/wiki/Credit-Card','_blank');
+                    window.open('https://github.com/wirecard/shopware-ee/wiki/Shopware-Checkout','_blank');
                     }
                     ]]>
                 </handler>
