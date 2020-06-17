@@ -209,19 +209,19 @@ function (button) {
                 <option>
                     <value>1</value>
                     @forlang
-                    <label lang="{{ lang }}">{{ strings.config_challenge_indicator_one }}</label>
+                    <label lang="{{ lang }}">{{ strings.config_challenge_indicator_no_preference }}</label>
                     @endforlang
                 </option>
                 <option>
                     <value>2</value>
                     @forlang
-                    <label lang="{{ lang }}">{{ strings.config_challenge_indicator_two }}</label>
+                    <label lang="{{ lang }}">{{ strings.config_challenge_indicator_no_challenge_requested }}</label>
                     @endforlang
                 </option>
                 <option>
                     <value>3</value>
                     @forlang
-                    <label lang="{{ lang }}">{{ strings.config_challenge_indicator_three }}</label>
+                    <label lang="{{ lang }}">{{ strings.config_challenge_indicator_challenge_requested }}</label>
                     @endforlang
                 </option>
             </store>
