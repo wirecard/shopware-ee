@@ -201,25 +201,25 @@ function (button) {
             @forlang
             <label lang="{{ lang }}">[{{ strings.creditcard }}] {{ strings.config_challenge_indicator }}</label>
             @endforlang
-            <value>1</value>
+            <value>one</value>
             @forlang
             <description lang="{{ lang }}">{{ strings.config_challenge_indicator_desc }}</description>
             @endforlang
             <store>
                 <option>
-                    <value>1</value>
+                    <value>one</value>
                     @forlang
                     <label lang="{{ lang }}">{{ strings.config_challenge_indicator_no_preference }}</label>
                     @endforlang
                 </option>
                 <option>
-                    <value>2</value>
+                    <value>two</value>
                     @forlang
                     <label lang="{{ lang }}">{{ strings.config_challenge_indicator_no_challenge_requested }}</label>
                     @endforlang
                 </option>
                 <option>
-                    <value>3</value>
+                    <value>three</value>
                     @forlang
                     <label lang="{{ lang }}">{{ strings.config_challenge_indicator_challenge_requested }}</label>
                     @endforlang

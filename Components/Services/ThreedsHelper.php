@@ -34,6 +34,17 @@ use WirecardElasticEngine\WirecardElasticEngine;
 class ThreedsHelper
 {
     /**
+     * Mapping of the ui value to expected api value
+     *
+     * @var array
+     */
+    const CHALLENGE_INDICATOR_MAPPING_MATRIX = [
+        'one' => '01',
+        'two' => '02',
+        'three' => '03'
+    ];
+
+    /**v
      * @var ModelManager
      */
     protected $models;
@@ -329,9 +340,9 @@ class ThreedsHelper
      */
     public function getChallengeIndicator()
     {
-        return sprintf('%02d', $this->shopwareConfig->getByNamespace(
+        return self::CHALLENGE_INDICATOR_MAPPING_MATRIX[sprintf('%s', $this->shopwareConfig->getByNamespace(
             WirecardElasticEngine::NAME,
             'wirecardElasticEngineCreditCardChallengeIndicator'
-        ));
+        ))];
     }
 }
