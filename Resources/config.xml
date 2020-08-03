@@ -35,30 +35,6 @@ function (button) {
             </options>
         </element>
         <element type="button" scope="shop">
-            <name>wirecardElasticEngineGeneralChat</name>
-            <label lang="de">LiveChat mit Support</label>
-            <label lang="en">LiveChat with support</label>
-            <options>
-                <handler>
-                    <![CDATA[
-function (button) {
-    var message = Ext.userLanguage == "de"
-        ? "Um diese Funktion zu verwenden muss das Plugin aktiviert und die Seite einmalig aktualisiert werden. Jetzt aktualisieren?"
-        : "To use this functionality the plugin must be activated and the page needs to be refreshed once. Refresh now?"
-
-    if (typeof wirecardeeChatOpen !== "undefined") {
-        wirecardeeChatOpen();
-    } else {
-        if (confirm(message)) {
-            window.location.reload();
-        }
-    }
-}
-                    ]]>
-                </handler>
-            </options>
-        </element>
-        <element type="button" scope="shop">
             <name>wirecardElasticEngineCreditCardPSDTwoHint</name>
             <label lang="de">PSD 2: Folgen Sie diesem Link für Informationen über die PSD 2 - spezifische Bestimungen für den Kundencheckoutprozess</label>
             <label lang="en">PSD 2: Click here to get more information on PSD 2 - specific requirements for the checkout process</label>

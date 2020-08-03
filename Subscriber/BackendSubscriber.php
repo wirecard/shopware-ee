@@ -53,7 +53,6 @@ class BackendSubscriber implements SubscriberInterface
     {
         $view = $args->getSubject()->View();
         $view->addTemplateDir($this->pluginDirectory . '/Resources/views/');
-        $view->extendsTemplate('backend/wirecard_elastic_engine_transactions/chat.tpl');
         $view->extendsTemplate('backend/wirecard_elastic_engine_transactions/test_credentials.tpl');
     }
 
