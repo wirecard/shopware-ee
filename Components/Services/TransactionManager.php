@@ -251,12 +251,16 @@ class TransactionManager
             'orderNumber' => $orderNumber,
             'type'        => Transaction::TYPE_BACKEND,
         ]);
-        foreach ($childTransactions as $childTransaction) {
-            $restAmount += $this->getRestAmount($childTransaction);
+
+        if (!empty($childTransactions)) {
+            foreach ($childTransactions as $childTransaction) {
+                $restAmount += $this->getRestAmount($childTransaction);
+            }
+            if ($restAmount > 0) {
+                $isRestAmount = true;
+            }
         }
-        if ($restAmount > 0) {
-            $isRestAmount = true;
-        }
+
         return $isRestAmount;
     }
 
