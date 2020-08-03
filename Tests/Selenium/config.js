@@ -62,13 +62,6 @@ exports.config = {
                 bank: 'INGBNL2A'
             }
         },
-        // masterpass: {
-        //     label: 'Wirecard Masterpass',
-        //     fields: {
-        //         email: 'masterpass@mailadresse.net',
-        //         password: 'WirecardPass42'
-        //     }
-        // },
         paypal: {
             label: 'Wirecard PayPal',
             fields: {
@@ -166,10 +159,6 @@ exports.apiTests = [
         file: 'Payments/IdealTest',
         timeout: 120000
     },
-    // {
-    //     file: 'Payments/MasterpassTest',
-    //     timeout: 120000
-    // },
     {
         file: 'Payments/PaypalTest',
         timeout: 180000

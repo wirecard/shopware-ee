@@ -11,7 +11,6 @@
     "test:alipay": "node_modules/.bin/mocha Tests/Selenium/Payments/AlipayTest.js --timeout 120000",
     "test:ratepay": "node_modules/.bin/mocha Tests/Selenium/Payments/RatepayTest.js --timeout 6000000",
     "test:ideal": "node_modules/.bin/mocha Tests/Selenium/Payments/IdealTest.js --timeout 120000",
-    "test:masterpass": "node_modules/.bin/mocha Tests/Selenium/Payments/MasterpassTest.js --timeout 120000",
     "test:paypal": "node_modules/.bin/mocha Tests/Selenium/Payments/PaypalTest.js --timeout 180000",
     "test:pia": "node_modules/.bin/mocha Tests/Selenium/Payments/PiaTest.js --timeout 120000",
     "test:poi": "node_modules/.bin/mocha Tests/Selenium/Payments/PoiTest.js --timeout 120000",
