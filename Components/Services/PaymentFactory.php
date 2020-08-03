@@ -24,7 +24,6 @@ use WirecardElasticEngine\Components\Payments\PaymentOnInvoicePayment;
 use WirecardElasticEngine\Components\Payments\RatepayInvoicePayment;
 use WirecardElasticEngine\Components\Payments\SepaPayment;
 use WirecardElasticEngine\Components\Payments\SofortPayment;
-use WirecardElasticEngine\Components\Payments\UnionpayInternationalPayment;
 use WirecardElasticEngine\Exception\UnknownPaymentException;
 use WirecardElasticEngine\WirecardElasticEngine;
 
@@ -149,8 +148,7 @@ class PaymentFactory
             PaymentInAdvancePayment::PAYMETHOD_IDENTIFIER      => PaymentInAdvancePayment::class,
             PaymentOnInvoicePayment::PAYMETHOD_IDENTIFIER      => PaymentOnInvoicePayment::class,
             SepaPayment::PAYMETHOD_IDENTIFIER                  => SepaPayment::class,
-            SofortPayment::PAYMETHOD_IDENTIFIER                => SofortPayment::class,
-            UnionpayInternationalPayment::PAYMETHOD_IDENTIFIER => UnionpayInternationalPayment::class,
+            SofortPayment::PAYMETHOD_IDENTIFIER                => SofortPayment::class
         ];
     }
 

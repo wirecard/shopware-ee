@@ -10,7 +10,6 @@ PaymentInAdvanceLogo = "/custom/plugins/WirecardElasticEngine/Resources/views/fr
 PaymentOnInvoiceLogo = "/custom/plugins/WirecardElasticEngine/Resources/views/frontend/_public/src/img/PaymentOnInvoice.png"
 SepaLogo = "/custom/plugins/WirecardElasticEngine/Resources/views/frontend/_public/src/img/SEPA.png"
 SofortLogo = "/custom/plugins/WirecardElasticEngine/Resources/views/frontend/_public/src/img/Sofort.png"
-UnionpayInternationalLogo = "/custom/plugins/WirecardElasticEngine/Resources/views/frontend/_public/src/img/UnionPay.png"
 
 WirecardCreditCard = "{{ strings.heading_title_creditcard }}"
 WirecardAlipayCrossborder = "{{ strings.heading_title_alipay_crossborder }}"
@@ -23,6 +22,5 @@ WirecardPaymentOnInvoice = "{{ strings.heading_title_poi }}"
 WirecardSEPADirectDebit = "{{ strings.heading_title_sepadd }}"
 WirecardSEPACreditTransfer = "{{ strings.heading_title_sepact }}"
 WirecardSofort = "{{ strings.heading_title_sofortbanking }}"
-WirecardUnionPayInternational = "{{ strings.heading_title_upi }}"
 
 @endforlang

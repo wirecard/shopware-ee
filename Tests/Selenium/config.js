@@ -91,13 +91,6 @@ exports.config = {
                 tan: '12345'
             }
         },
-        upi: {
-            label: 'Wirecard UnionPay International',
-            fields: {
-                last_name: 'Lastname',
-                account_number: '6210943123456786'
-            }
-        }
     }
 };
 
@@ -177,10 +170,6 @@ exports.apiTests = [
     },
     {
         file: 'Payments/SofortTest',
-        timeout: 120000
-    },
-    {
-        file: 'Payments/UpiTest',
         timeout: 120000
     }
 ];
