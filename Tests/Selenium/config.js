@@ -90,7 +90,7 @@ exports.config = {
                 password: 'passwd',
                 tan: '12345'
             }
-        },
+        }
     }
 };
 
