@@ -340,9 +340,15 @@ class ThreedsHelper
      */
     public function getChallengeIndicator()
     {
-        return self::CHALLENGE_INDICATOR_MAPPING_MATRIX[sprintf('%s', $this->shopwareConfig->getByNamespace(
+        $configuredChallengeIndicator = sprintf('%s', $this->shopwareConfig->getByNamespace(
             WirecardElasticEngine::NAME,
             'wirecardElasticEngineCreditCardChallengeIndicator'
-        ))];
+        ));
+
+        if (!array_key_exists($configuredChallengeIndicator, self::CHALLENGE_INDICATOR_MAPPING_MATRIX)) {
+            throw new \Exception("Challange indicator not in mapping matrix.");
+        }
+
+        return self::CHALLENGE_INDICATOR_MAPPING_MATRIX[$configuredChallengeIndicator];
     }
 }
