@@ -25,19 +25,6 @@
                     <class>sprite-money</class>
                 </entry>
                 <entry>
-                    <name>WirecardElasticEngineLiveChat</name>
-                    <label lang="de">LiveChat mit Support</label>
-                    <label lang="en">LiveChat with support</label>
-                    <controller>WirecardElasticEngineTransactions</controller>
-                    <action>livechat</action>
-                    <class>sprite-balloons-box</class>
-                    <onclick>
-                        <![CDATA[
-                            wirecardeeChatOpen();
-                        ]]>
-                    </onclick>
-                </entry>
-                <entry>
                     <name>WirecardElasticEngineEmailSupport</name>
                     <label lang="de">Wirecard Support</label>
                     <label lang="en">Wirecard Support</label>

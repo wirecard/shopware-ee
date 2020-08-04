@@ -36,31 +36,6 @@ function (button) {
             </options>
         </element>
         <element type="button" scope="shop">
-            <name>wirecardElasticEngineGeneralChat</name>
-            @forlang
-            <label lang="{{ lang }}">{{ strings.text_support_chat }}</label>
-            @endforlang
-            <options>
-                <handler>
-                    <![CDATA[
-function (button) {
-    var message = Ext.userLanguage == "de"
-        ? "{{ strings.plugin_activated_refresh_notice | de_DE }}"
-        : "{{ strings.plugin_activated_refresh_notice }}"
-
-    if (typeof wirecardeeChatOpen !== "undefined") {
-        wirecardeeChatOpen();
-    } else {
-        if (confirm(message)) {
-            window.location.reload();
-        }
-    }
-}
-                    ]]>
-                </handler>
-            </options>
-        </element>
-        <element type="button" scope="shop">
             <name>wirecardElasticEngineCreditCardPSDTwoHint</name>
             @forlang
             <label lang="{{ lang }}">{{ strings.config_PSD2_information_desc }}</label>

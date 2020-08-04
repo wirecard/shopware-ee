@@ -27,20 +27,6 @@
                     <class>sprite-money</class>
                 </entry>
                 <entry>
-                    <name>WirecardElasticEngineLiveChat</name>
-                    @forlang
-                    <label lang="{{ lang }}">{{ strings.text_support_chat }}</label>
-                    @endforlang
-                    <controller>WirecardElasticEngineTransactions</controller>
-                    <action>livechat</action>
-                    <class>sprite-balloons-box</class>
-                    <onclick>
-                        <![CDATA[
-                            wirecardeeChatOpen();
-                        ]]>
-                    </onclick>
-                </entry>
-                <entry>
                     <name>WirecardElasticEngineEmailSupport</name>
                     @forlang
                     <label lang="{{ lang }}">{{ strings.heading_title_support }}</label>
