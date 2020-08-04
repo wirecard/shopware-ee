@@ -19,13 +19,11 @@ use WirecardElasticEngine\Components\Payments\IdealPayment;
 use WirecardElasticEngine\Components\Payments\Payment;
 use WirecardElasticEngine\Components\Payments\PaymentInterface;
 use WirecardElasticEngine\Components\Payments\PaypalPayment;
-use WirecardElasticEngine\Components\Payments\MasterpassPayment;
 use WirecardElasticEngine\Components\Payments\PaymentInAdvancePayment;
 use WirecardElasticEngine\Components\Payments\PaymentOnInvoicePayment;
 use WirecardElasticEngine\Components\Payments\RatepayInvoicePayment;
 use WirecardElasticEngine\Components\Payments\SepaPayment;
 use WirecardElasticEngine\Components\Payments\SofortPayment;
-use WirecardElasticEngine\Components\Payments\UnionpayInternationalPayment;
 use WirecardElasticEngine\Exception\UnknownPaymentException;
 use WirecardElasticEngine\WirecardElasticEngine;
 
@@ -146,13 +144,11 @@ class PaymentFactory
             RatepayInvoicePayment::PAYMETHOD_IDENTIFIER        => RatepayInvoicePayment::class,
             IdealPayment::PAYMETHOD_IDENTIFIER                 => IdealPayment::class,
             EpsPayment::PAYMETHOD_IDENTIFIER                   => EpsPayment::class,
-            MasterpassPayment::PAYMETHOD_IDENTIFIER            => MasterpassPayment::class,
             PaypalPayment::PAYMETHOD_IDENTIFIER                => PaypalPayment::class,
             PaymentInAdvancePayment::PAYMETHOD_IDENTIFIER      => PaymentInAdvancePayment::class,
             PaymentOnInvoicePayment::PAYMETHOD_IDENTIFIER      => PaymentOnInvoicePayment::class,
             SepaPayment::PAYMETHOD_IDENTIFIER                  => SepaPayment::class,
-            SofortPayment::PAYMETHOD_IDENTIFIER                => SofortPayment::class,
-            UnionpayInternationalPayment::PAYMETHOD_IDENTIFIER => UnionpayInternationalPayment::class,
+            SofortPayment::PAYMETHOD_IDENTIFIER                => SofortPayment::class
         ];
     }
 

@@ -62,13 +62,6 @@ exports.config = {
                 bank: 'INGBNL2A'
             }
         },
-        // masterpass: {
-        //     label: 'Wirecard Masterpass',
-        //     fields: {
-        //         email: 'masterpass@mailadresse.net',
-        //         password: 'WirecardPass42'
-        //     }
-        // },
         paypal: {
             label: 'Wirecard PayPal',
             fields: {
@@ -96,13 +89,6 @@ exports.config = {
                 userId: '1234',
                 password: 'passwd',
                 tan: '12345'
-            }
-        },
-        upi: {
-            label: 'Wirecard UnionPay International',
-            fields: {
-                last_name: 'Lastname',
-                account_number: '6210943123456786'
             }
         }
     }
@@ -166,10 +152,6 @@ exports.apiTests = [
         file: 'Payments/IdealTest',
         timeout: 120000
     },
-    // {
-    //     file: 'Payments/MasterpassTest',
-    //     timeout: 120000
-    // },
     {
         file: 'Payments/PaypalTest',
         timeout: 180000
@@ -188,10 +170,6 @@ exports.apiTests = [
     },
     {
         file: 'Payments/SofortTest',
-        timeout: 120000
-    },
-    {
-        file: 'Payments/UpiTest',
         timeout: 120000
     }
 ];
