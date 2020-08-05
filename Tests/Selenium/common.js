@@ -35,21 +35,6 @@ const runInShell = async function (cmd) {
     });
 };
 
-// const clickWhenClickable = async function (driver, locator, timeout) {
-//     driver.wait(function(){
-//         return driver.findElement(locator).then(function(element){
-//             return element.click().then(function(){
-//                 return true;
-//             }, function(err){
-//                 return false;
-//             })
-//         }, function(err){
-//             return false;
-//         });
-//     }, timeout, 'Timeout waiting for ' + locator.value);
-// };
-
-
 exports.loginWithExampleAccount = async function (driver) {
     await driver.manage().deleteAllCookies();
 
@@ -92,7 +77,6 @@ exports.addProductToCartAndGotoCheckout = async function (driver, url) {
     // Go to a product and buy it
     console.log(`get ${config.url}${url}`);
     await driver.get(`${config.url}${url}`);
-    // await clickWhenClickable(driver, driver.findElement(By.className('buybox--button')), 10);
     await driver.findElement(By.className('cookie-permission--decline-button')).click();
     await driver.findElement(By.className('buybox--button')).click();
 
