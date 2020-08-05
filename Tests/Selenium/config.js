@@ -91,7 +91,7 @@ exports.config = {
                 tan: '12345'
             }
         }
-    }
+     }
 };
 
 /**
