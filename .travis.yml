@@ -38,6 +38,8 @@ jobs:
   include:
   - php: 7.2
     if: type != cron AND commit_message !~ env(MANUAL_UITEST_TRIGGER_COMMIT)
+  - php: 7.3
+    if: type != cron AND commit_message !~ env(MANUAL_UITEST_TRIGGER_COMMIT)
 
   - &acceptance-test
     stage: acceptance-test
