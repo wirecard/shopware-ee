@@ -36,31 +36,6 @@ function (button) {
             </options>
         </element>
         <element type="button" scope="shop">
-            <name>wirecardElasticEngineGeneralChat</name>
-            @forlang
-            <label lang="{{ lang }}">{{ strings.text_support_chat }}</label>
-            @endforlang
-            <options>
-                <handler>
-                    <![CDATA[
-function (button) {
-    var message = Ext.userLanguage == "de"
-        ? "{{ strings.plugin_activated_refresh_notice | de_DE }}"
-        : "{{ strings.plugin_activated_refresh_notice }}"
-
-    if (typeof wirecardeeChatOpen !== "undefined") {
-        wirecardeeChatOpen();
-    } else {
-        if (confirm(message)) {
-            window.location.reload();
-        }
-    }
-}
-                    ]]>
-                </handler>
-            </options>
-        </element>
-        <element type="button" scope="shop">
             <name>wirecardElasticEngineCreditCardPSDTwoHint</name>
             @forlang
             <label lang="{{ lang }}">{{ strings.config_PSD2_information_desc }}</label>
@@ -201,25 +176,25 @@ function (button) {
             @forlang
             <label lang="{{ lang }}">[{{ strings.creditcard }}] {{ strings.config_challenge_indicator }}</label>
             @endforlang
-            <value>1</value>
+            <value>one</value>
             @forlang
             <description lang="{{ lang }}">{{ strings.config_challenge_indicator_desc }}</description>
             @endforlang
             <store>
                 <option>
-                    <value>1</value>
+                    <value>one</value>
                     @forlang
                     <label lang="{{ lang }}">{{ strings.config_challenge_indicator_no_preference }}</label>
                     @endforlang
                 </option>
                 <option>
-                    <value>2</value>
+                    <value>two</value>
                     @forlang
                     <label lang="{{ lang }}">{{ strings.config_challenge_indicator_no_challenge_requested }}</label>
                     @endforlang
                 </option>
                 <option>
-                    <value>3</value>
+                    <value>three</value>
                     @forlang
                     <label lang="{{ lang }}">{{ strings.config_challenge_indicator_challenge_requested }}</label>
                     @endforlang
@@ -769,117 +744,6 @@ function (button) {
             </options>
         </element>
         <!-- eps-Überweisung End -->
-        <!-- Masterpass -->
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineMasterpassServer</name>
-            @forlang
-            <label lang="{{ lang }}">[{{ strings.masterpass }}] {{ strings.config_base_url }}</label>
-            @endforlang
-            <value>https://api-test.wirecard.com</value>
-            @forlang
-            <description lang="{{ lang }}">{{ strings.config_base_url_desc }}</description>
-            @endforlang
-        </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineMasterpassHttpUser</name>
-            @forlang
-            <label lang="{{ lang }}">[{{ strings.masterpass }}] {{ strings.config_http_user }}</label>
-            @endforlang
-            <value>70000-APITEST-AP</value>
-            @forlang
-            <description lang="{{ lang }}">{{ strings.config_http_user_desc }}</description>
-            @endforlang
-        </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineMasterpassHttpPassword</name>
-            @forlang
-            <label lang="{{ lang }}">[{{ strings.masterpass }}] {{ strings.config_http_password }}</label>
-            @endforlang
-            <value>qD2wzQ_hrc!8</value>
-            @forlang
-            <description lang="{{ lang }}">{{ strings.config_http_password_desc }}</description>
-            @endforlang
-        </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineMasterpassMerchantId</name>
-            @forlang
-            <label lang="{{ lang }}">[{{ strings.masterpass }}] {{ strings.config_merchant_account_id }}</label>
-            @endforlang
-            <value>8bc8ed6d-81a8-43be-bd7b-75b008f89fa6</value>
-            @forlang
-            <description lang="{{ lang }}">{{ strings.config_merchant_account_id_desc }}</description>
-            @endforlang
-        </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineMasterpassSecret</name>
-            @forlang
-            <label lang="{{ lang }}">[{{ strings.masterpass }}] {{ strings.config_merchant_secret }}</label>
-            @endforlang
-            <value>2d96596b-9d10-4c98-ac47-4d56e22fd878</value>
-            @forlang
-            <description lang="{{ lang }}">{{ strings.config_merchant_secret_desc }}</description>
-            @endforlang
-        </element>
-        <element type="select" scope="shop">
-            <name>wirecardElasticEngineMasterpassTransactionType</name>
-            @forlang
-            <label lang="{{ lang }}">[{{ strings.masterpass }}] {{ strings.config_payment_action }}</label>
-            @endforlang
-            <value>pay</value>
-            @forlang
-            <description lang="{{ lang }}">{{ strings.config_payment_action_desc }}</description>
-            @endforlang
-            <store>
-                <option>
-                    <value>reserve</value>
-                    @forlang
-                    <label lang="{{ lang }}">{{ strings.text_payment_action_reserve }}</label>
-                    @endforlang
-                </option>
-                <option>
-                    <value>pay</value>
-                    @forlang
-                    <label lang="{{ lang }}">{{ strings.text_payment_action_pay }}</label>
-                    @endforlang
-                </option>
-            </store>
-        </element>
-        <element type="boolean" scope="shop">
-            <name>wirecardElasticEngineMasterpassFraudPrevention</name>
-            @forlang
-            <label lang="{{ lang }}">[{{ strings.masterpass }}] {{ strings.config_additional_info }}</label>
-            @endforlang
-            <value>true</value>
-            @forlang
-            <description lang="{{ lang }}">{{ strings.config_additional_info_desc }}</description>
-            @endforlang
-        </element>
-        <element type="button" scope="shop">
-            <name>wirecardElasticEngineMasterpassTestApi</name>
-            @forlang
-            <label lang="{{ lang }}">[{{ strings.masterpass }}] {{ strings.test_config }}</label>
-            @endforlang
-            <options>
-                <handler>
-                    <![CDATA[
-function (button) {
-    var message = Ext.userLanguage == "de"
-        ? "{{ strings.plugin_activated_refresh_notice | de_DE }}"
-        : "{{ strings.plugin_activated_refresh_notice }}"
-
-    if (typeof wirecardeeTestPaymentCredentials !== "undefined") {
-        wirecardeeTestPaymentCredentials(button, 'Masterpass', 'Wirecard Masterpass Test');
-    } else {
-        if (confirm(message)) {
-            window.location.reload();
-        }
-    }
-}
-                    ]]>
-                </handler>
-            </options>
-        </element>
-        <!-- Masterpass End -->
         <!-- PayPal -->
         <element type="text" scope="shop">
             <name>wirecardElasticEnginePaypalServer</name>
@@ -1368,116 +1232,5 @@ function (button) {
             </options>
         </element>
         <!-- Sofort. End -->
-        <!-- UnionPay International -->
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineUnionpayInternationalServer</name>
-            @forlang
-            <label lang="{{ lang }}">[{{ strings.upi }}] {{ strings.config_base_url }}</label>
-            @endforlang
-            <value>https://api-test.wirecard.com</value>
-            @forlang
-            <description lang="{{ lang }}">{{ strings.config_base_url_desc }}</description>
-            @endforlang
-        </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineUnionpayInternationalHttpUser</name>
-            @forlang
-            <label lang="{{ lang }}">[{{ strings.upi }}] {{ strings.config_http_user }}</label>
-            @endforlang
-            <value>70000-APILUHN-CARD</value>
-            @forlang
-            <description lang="{{ lang }}">{{ strings.config_http_user_desc }}</description>
-            @endforlang
-        </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineUnionpayInternationalHttpPassword</name>
-            @forlang
-            <label lang="{{ lang }}">[{{ strings.upi }}] {{ strings.config_http_password }}</label>
-            @endforlang
-            <value>8mhwavKVb91T</value>
-            @forlang
-            <description lang="{{ lang }}">{{ strings.config_http_password_desc }}</description>
-            @endforlang
-        </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineUnionpayInternationalMerchantId</name>
-            @forlang
-            <label lang="{{ lang }}">[{{ strings.upi }}] {{ strings.config_merchant_account_id }}</label>
-            @endforlang
-            <value>c6e9331c-5c1f-4fc6-8a08-ef65ce09ddb0</value>
-            @forlang
-            <description lang="{{ lang }}">{{ strings.config_merchant_account_id_desc }}</description>
-            @endforlang
-        </element>
-        <element type="text" scope="shop">
-            <name>wirecardElasticEngineUnionpayInternationalSecret</name>
-            @forlang
-            <label lang="{{ lang }}">[{{ strings.upi }}] {{ strings.config_merchant_secret }}</label>
-            @endforlang
-            <value>16d85b73-79e2-4c33-932a-7da99fb04a9c</value>
-            @forlang
-            <description lang="{{ lang }}">{{ strings.config_merchant_secret_desc }}</description>
-            @endforlang
-        </element>
-        <element type="select" scope="shop">
-            <name>wirecardElasticEngineUnionpayInternationalTransactionType</name>
-            @forlang
-            <label lang="{{ lang }}">[{{ strings.upi }}] {{ strings.config_payment_action }}</label>
-            @endforlang
-            <value>pay</value>
-            @forlang
-            <description lang="{{ lang }}">{{ strings.config_payment_action_desc }}</description>
-            @endforlang
-            <store>
-                <option>
-                    <value>reserve</value>
-                    @forlang
-                    <label lang="{{ lang }}">{{ strings.text_payment_action_reserve }}</label>
-                    @endforlang
-                </option>
-                <option>
-                    <value>pay</value>
-                    @forlang
-                    <label lang="{{ lang }}">{{ strings.text_payment_action_pay }}</label>
-                    @endforlang
-                </option>
-            </store>
-        </element>
-        <element type="boolean" scope="shop">
-            <name>wirecardElasticEngineUnionpayInternationalFraudPrevention</name>
-            @forlang
-            <label lang="{{ lang }}">[{{ strings.upi }}] {{ strings.config_additional_info }}</label>
-            @endforlang
-            <value>true</value>
-            @forlang
-            <description lang="{{ lang }}">{{ strings.config_additional_info_desc }}</description>
-            @endforlang
-        </element>
-        <element type="button" scope="shop">
-            <name>wirecardElasticEngineUnionpayInternationalTestApi</name>
-            @forlang
-            <label lang="{{ lang }}">[{{ strings.upi }}] {{ strings.test_config }}</label>
-            @endforlang
-            <options>
-                <handler>
-                    <![CDATA[
-function (button) {
-    var message = Ext.userLanguage == "de"
-        ? "{{ strings.plugin_activated_refresh_notice | de_DE }}"
-        : "{{ strings.plugin_activated_refresh_notice }}"
-
-    if (typeof wirecardeeTestPaymentCredentials !== "undefined") {
-        wirecardeeTestPaymentCredentials(button, 'UnionpayInternational', 'Wirecard UnionPay International Test');
-    } else {
-        if (confirm(message)) {
-            window.location.reload();
-        }
-    }
-}
-                    ]]>
-                </handler>
-            </options>
-        </element>
-        <!-- UnionPay International End -->
     </elements>
 </config>

@@ -11,13 +11,11 @@
     "test:alipay": "node_modules/.bin/mocha Tests/Selenium/Payments/AlipayTest.js --timeout 120000",
     "test:ratepay": "node_modules/.bin/mocha Tests/Selenium/Payments/RatepayTest.js --timeout 6000000",
     "test:ideal": "node_modules/.bin/mocha Tests/Selenium/Payments/IdealTest.js --timeout 120000",
-    "test:masterpass": "node_modules/.bin/mocha Tests/Selenium/Payments/MasterpassTest.js --timeout 120000",
     "test:paypal": "node_modules/.bin/mocha Tests/Selenium/Payments/PaypalTest.js --timeout 180000",
     "test:pia": "node_modules/.bin/mocha Tests/Selenium/Payments/PiaTest.js --timeout 120000",
     "test:poi": "node_modules/.bin/mocha Tests/Selenium/Payments/PoiTest.js --timeout 120000",
     "test:sepa": "node_modules/.bin/mocha Tests/Selenium/Payments/SepaTest.js --timeout 120000",
     "test:sofort": "node_modules/.bin/mocha Tests/Selenium/Payments/SofortTest.js --timeout 120000",
-    "test:upi": "node_modules/.bin/mocha Tests/Selenium/Payments/UpiTest.js --timeout 120000",
     "test:creditcard3dsauthorization": "node_modules/.bin/mocha Tests/Selenium/Payments/CreditCardThreeDAuthorizationTest.js --timeout 120000",
     "test:runner": "node Tests/Selenium/runner.js",
     "test:payments": "node_modules/.bin/mocha $(if [ \"$GATEWAY\" = \"API-TEST\" ]; then find Tests/Selenium/Payments -name '*.js' -not -name 'MasterpassTest.js'; elif [ \"$GATEWAY\" = \"API-WDCEE-TEST\" ]; then find Tests/Selenium/Payments -name CreditCardThreeDTest.js -o -name 'CreditCardThreeDAuthorizationTest.js'; else find Tests/Selenium/Payments -name 'CreditCardThreeDTest.js'; fi) --timeout 6000000 --reporter mocha-multi-reporters --reporter-options configFile=./config.json"

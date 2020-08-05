@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.4.2
+
+*   Add Compatibility: Shopware 5.6.3 - 5.6.7
+*   Add Compatibility: PHP 7.3
+*   Fix Payment status for orders
+*   Remove Wirecard Live Chat
+*   Remove Masterpass + Union Pay International
+
+|        Overview       | Shopware version        | PHP 7.2 | PHP 7.3 |                    
+|-----------------------|-------------------------|:-------:|:-------:|                                    
+| **Tested version(s)** |       Shopware 5.6.7    | :x:     | &#9989; |                
+|   **Compatibility**   |  Shopware 5.6.0 - 5.6.7 | &#9989; | &#9989; |         
+
 ## v1.4.1
 
 *   Add PSD2 hint in Credit Card configuration

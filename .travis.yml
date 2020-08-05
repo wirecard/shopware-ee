@@ -38,6 +38,8 @@ jobs:
   include:
   - php: 7.2
     if: type != cron AND commit_message !~ env(MANUAL_UITEST_TRIGGER_COMMIT)
+  - php: 7.3
+    if: type != cron AND commit_message !~ env(MANUAL_UITEST_TRIGGER_COMMIT)
 
   - &acceptance-test
     stage: acceptance-test
@@ -46,7 +48,7 @@ jobs:
     # will use branch which originated pull request
     # or branch which was defined in ad-hoc trigger in Travis UI
     if: (type = pull_request AND (head_branch =~ env(PATCH_RELEASE) OR head_branch =~ env(MINOR_RELEASE) OR head_branch =~ env(MAJOR_RELEASE))) OR (commit_message =~ env(MANUAL_UITEST_TRIGGER_COMMIT))
-    php: 7.2
+    php: 7.3
     env:
       - GATEWAY=API-TEST
       #    shopware version - first line in SHOPWARE_RELEASES_FILE
