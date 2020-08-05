@@ -77,6 +77,7 @@ exports.addProductToCartAndGotoCheckout = async function (driver, url) {
     // Go to a product and buy it
     console.log(`get ${config.url}${url}`);
     await driver.get(`${config.url}${url}`);
+    await driver.findElement(By.className('cookie-permission--decline-button')).click();
     await driver.findElement(By.className('buybox--button')).click();
 
     // Wait for the cart to be shown
