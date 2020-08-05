@@ -35,7 +35,7 @@ const runInShell = async function (cmd) {
     });
 };
 
-exports.clickWhenClickable = async function (driver, locator, timeout) {
+const clickWhenClickable = async function (driver, locator, timeout) {
     driver.wait(function(){
         return driver.findElement(locator).then(function(element){
             return element.click().then(function(){
@@ -46,8 +46,8 @@ exports.clickWhenClickable = async function (driver, locator, timeout) {
         }, function(err){
             return false;
         });
-    }, timeout, 'Timeout waiting for ' + locator.value);    ;
-}
+    }, timeout, 'Timeout waiting for ' + locator.value);
+};
 
 
 exports.loginWithExampleAccount = async function (driver) {
